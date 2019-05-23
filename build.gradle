@@ -248,6 +248,14 @@ dependencies {
     testImplementation "org.mockito:mockito-core"
     testImplementation "org.hamcrest:hamcrest-library"
     testImplementation "com.h2database:h2"
+
+    // custom
+    implementation "com.github.binarywang:weixin-java-open:3.4.0"
+    implementation "com.github.binarywang:weixin-java-miniapp:3.4.0"
+    implementation "com.github.binarywang:weixin-java-mp:3.4.0"
+    implementation 'org.projectlombok:lombok:1.18.8'
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+
     //jhipster-needle-gradle-dependency - JHipster will add additional dependencies here
 }
 
