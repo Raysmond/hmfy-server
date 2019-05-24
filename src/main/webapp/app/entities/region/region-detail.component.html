@@ -1,0 +1,55 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div *ngIf="region">
+            <h2><span jhiTranslate="shieldApp.region.detail.title">Region</span> {{region.id}}</h2>
+            <hr>
+            <jhi-alert-error></jhi-alert-error>
+            <dl class="row-md jh-entity-details">
+                <dt><span jhiTranslate="shieldApp.region.name">Name</span></dt>
+                <dd>
+                    <span>{{region.name}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.region.quota">Quota</span></dt>
+                <dd>
+                    <span>{{region.quota}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.region.startTime">Start Time</span></dt>
+                <dd>
+                    <span>{{region.startTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.region.endTime">End Time</span></dt>
+                <dd>
+                    <span>{{region.endTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.region.days">Days</span></dt>
+                <dd>
+                    <span>{{region.days}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.region.open">Open</span></dt>
+                <dd>
+                    <span>{{region.open}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.region.createTime">Create Time</span></dt>
+                <dd>
+                    <span>{{region.createTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.region.updateTime">Update Time</span></dt>
+                <dd>
+                    <span>{{region.updateTime}}</span>
+                </dd>
+            </dl>
+
+            <button type="submit"
+                    (click)="previousState()"
+                    class="btn btn-info">
+                <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+            </button>
+
+            <button type="button"
+                    [routerLink]="['/region', region.id, 'edit']"
+                    class="btn btn-primary">
+                <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+            </button>
+        </div>
+    </div>
+</div>

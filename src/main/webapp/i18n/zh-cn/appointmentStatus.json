@@ -1,0 +1,12 @@
+{
+  "shieldApp": {
+    "AppointmentStatus": {
+      "null": "",
+      "CREATE": "新疆",
+      "WAIT": "排队中",
+      "START": "开启",
+      "ENTER": "进入",
+      "LEAVE": "离开"
+    }
+  }
+}

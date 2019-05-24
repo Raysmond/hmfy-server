@@ -1,0 +1,25 @@
+{
+  "shieldApp": {
+    "car": {
+      "home": {
+        "title": "车辆",
+        "createLabel": "创建新 车辆",
+        "createOrEditLabel": "创建或编辑 车辆"
+      },
+      "created": "车辆 {{ param }} 创建成功",
+      "updated": "车辆 {{ param }} 更新成功",
+      "deleted": "车辆 {{ param }} 删除成功",
+      "delete": {
+        "question": "你确定要删除 车辆 {{ id }} 吗？"
+      },
+      "detail": {
+        "title": "车辆"
+      },
+      "licensePlateNumber": "车牌号",
+      "driver": "司机",
+      "createTime": "创建时间",
+      "updateTime": "更新时间",
+      "user": "用户"
+    }
+  }
+}

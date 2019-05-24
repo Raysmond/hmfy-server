@@ -1,0 +1,12 @@
+{
+  "shieldApp": {
+    "AppointmentStatus": {
+      "null": "",
+      "CREATE": "CREATE",
+      "WAIT": "WAIT",
+      "START": "START",
+      "ENTER": "ENTER",
+      "LEAVE": "LEAVE"
+    }
+  }
+}

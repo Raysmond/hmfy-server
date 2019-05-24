@@ -1,0 +1,71 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+            <h2 id="jhi-car-heading" jhiTranslate="shieldApp.car.home.createOrEditLabel">Create or edit a Car</h2>
+            <div>
+                <jhi-alert-error></jhi-alert-error>
+                <div class="form-group" [hidden]="!car.id">
+                    <label for="id" jhiTranslate="global.field.id">ID</label>
+                    <input type="text" class="form-control" id="id" name="id" formControlName="id"
+                        readonly />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.car.licensePlateNumber" for="field_licensePlateNumber">License Plate Number</label>
+                    <input type="text" class="form-control" name="licensePlateNumber" id="field_licensePlateNumber"
+                           formControlName="licensePlateNumber"/>
+                    <div *ngIf="editForm.get('licensePlateNumber').invalid && (editForm.get('licensePlateNumber').dirty || editForm.get('licensePlateNumber').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('licensePlateNumber').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.car.driver" for="field_driver">Driver</label>
+                    <input type="text" class="form-control" name="driver" id="field_driver"
+                           formControlName="driver"/>
+                    <div *ngIf="editForm.get('driver').invalid && (editForm.get('driver').dirty || editForm.get('driver').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('driver').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.car.createTime" for="field_createTime">Create Time</label>
+                    <div class="d-flex">
+                        <input id="field_createTime" type="datetime-local" class="form-control" name="createTime" formControlName="createTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.car.updateTime" for="field_updateTime">Update Time</label>
+                    <div class="d-flex">
+                        <input id="field_updateTime" type="datetime-local" class="form-control" name="updateTime" formControlName="updateTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.car.user" for="field_user">User</label>
+                    <select class="form-control" id="field_user" name="user" formControlName="userId">
+                        <option *ngIf="!editForm.get('user').value" [ngValue]="null" selected></option>
+                        <option [ngValue]="userOption.id" *ngFor="let userOption of users; trackBy: trackUserById">{{userOption.login}}</option>
+                    </select>
+                </div>
+                <div *ngIf="editForm.get('user').invalid && (editForm.get('user').dirty || editForm.get('user').touched)">
+                    <small class="form-text text-danger"
+                           *ngIf="editForm.get('user').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                    </small>
+                </div>
+            </div>
+            <div>
+                <button type="button" id="cancel-save" class="btn btn-secondary"  (click)="previousState()">
+                    <fa-icon [icon]="'ban'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+                </button>
+                <button type="submit" id="save-entity" [disabled]="editForm.invalid || isSaving" class="btn btn-primary">
+                    <fa-icon [icon]="'save'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

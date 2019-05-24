@@ -1,0 +1,81 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div *ngIf="appointment">
+            <h2><span jhiTranslate="shieldApp.appointment.detail.title">Appointment</span> {{appointment.id}}</h2>
+            <hr>
+            <jhi-alert-error></jhi-alert-error>
+            <dl class="row-md jh-entity-details">
+                <dt><span jhiTranslate="shieldApp.appointment.licensePlateNumber">License Plate Number</span></dt>
+                <dd>
+                    <span>{{appointment.licensePlateNumber}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.appointment.driver">Driver</span></dt>
+                <dd>
+                    <span>{{appointment.driver}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.appointment.number">Number</span></dt>
+                <dd>
+                    <span>{{appointment.number}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.appointment.valid">Valid</span></dt>
+                <dd>
+                    <span>{{appointment.valid}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.appointment.status">Status</span></dt>
+                <dd>
+                    <span jhiTranslate="{{'shieldApp.AppointmentStatus.' + appointment.status}}">{{appointment.status}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.appointment.queueNumber">Queue Number</span></dt>
+                <dd>
+                    <span>{{appointment.queueNumber}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.appointment.vip">Vip</span></dt>
+                <dd>
+                    <span>{{appointment.vip}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.appointment.createTime">Create Time</span></dt>
+                <dd>
+                    <span>{{appointment.createTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.appointment.updateTime">Update Time</span></dt>
+                <dd>
+                    <span>{{appointment.updateTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.appointment.startTime">Start Time</span></dt>
+                <dd>
+                    <span>{{appointment.startTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.appointment.enterTime">Enter Time</span></dt>
+                <dd>
+                    <span>{{appointment.enterTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.appointment.leaveTime">Leave Time</span></dt>
+                <dd>
+                    <span>{{appointment.leaveTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.appointment.region">Region</span></dt>
+                <dd>
+                    <div *ngIf="appointment.regionId">
+                        <a [routerLink]="['/region', appointment.regionId, 'view']">{{appointment.regionId}}</a>
+                    </div>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.appointment.user">User</span></dt>
+                <dd>
+                    {{appointment.userLogin}}
+                </dd>
+            </dl>
+
+            <button type="submit"
+                    (click)="previousState()"
+                    class="btn btn-info">
+                <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+            </button>
+
+            <button type="button"
+                    [routerLink]="['/appointment', appointment.id, 'edit']"
+                    class="btn btn-primary">
+                <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+            </button>
+        </div>
+    </div>
+</div>
