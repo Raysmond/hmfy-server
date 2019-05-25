@@ -12,6 +12,7 @@ import org.mapstruct.*;
 public interface AppointmentMapper extends EntityMapper<AppointmentDTO, Appointment> {
 
     @Mapping(source = "region.id", target = "regionId")
+    @Mapping(source = "region.name", target = "regionName")
     @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "user.login", target = "userLogin")
     AppointmentDTO toDto(Appointment appointment);

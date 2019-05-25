@@ -22,12 +22,12 @@
             <th jhiSortBy="status"><span jhiTranslate="shieldApp.appointment.status">Status</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="queueNumber"><span jhiTranslate="shieldApp.appointment.queueNumber">Queue Number</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="vip"><span jhiTranslate="shieldApp.appointment.vip">Vip</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="createTime"><span jhiTranslate="shieldApp.appointment.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.appointment.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <!--<th jhiSortBy="createTime"><span jhiTranslate="shieldApp.appointment.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+            <!--<th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.appointment.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
             <th jhiSortBy="startTime"><span jhiTranslate="shieldApp.appointment.startTime">Start Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="enterTime"><span jhiTranslate="shieldApp.appointment.enterTime">Enter Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="leaveTime"><span jhiTranslate="shieldApp.appointment.leaveTime">Leave Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="regionId"><span jhiTranslate="shieldApp.appointment.region">Region</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="regionName"><span jhiTranslate="shieldApp.appointment.region">Region</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="userLogin"><span jhiTranslate="shieldApp.appointment.user">User</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th></th>
             </tr>
@@ -39,17 +39,23 @@
                 <td>{{appointment.driver}}</td>
                 <td>{{appointment.number}}</td>
                 <td>{{appointment.valid}}</td>
-                <td jhiTranslate="{{'shieldApp.AppointmentStatus.' + appointment.status}}">{{appointment.status}}</td>
+                <td>
+                    <span class="badge badge-info" *ngIf="appointment.status=='CREATE'" jhiTranslate="{{'shieldApp.AppointmentStatus.CREATE'}}">{{appointment.status}}</span>
+                    <span class="badge badge-warning" *ngIf="appointment.status=='WAIT'" jhiTranslate="{{'shieldApp.AppointmentStatus.WAIT'}}">{{appointment.status}}</span>
+                    <span class="badge badge-success" *ngIf="appointment.status=='START'" jhiTranslate="{{'shieldApp.AppointmentStatus.START'}}">{{appointment.status}}</span>
+                    <span class="badge badge-primary" *ngIf="appointment.status=='ENTER'" jhiTranslate="{{'shieldApp.AppointmentStatus.ENTER'}}">{{appointment.status}}</span>
+                    <span class="badge badge-secondary" *ngIf="appointment.status=='LEAVE'" jhiTranslate="{{'shieldApp.AppointmentStatus.LEAVE'}}">{{appointment.status}}</span>
+                </td>
                 <td>{{appointment.queueNumber}}</td>
                 <td>{{appointment.vip}}</td>
-                <td>{{appointment.createTime | date:'medium'}}</td>
-                <td>{{appointment.updateTime | date:'medium'}}</td>
-                <td>{{appointment.startTime | date:'medium'}}</td>
-                <td>{{appointment.enterTime | date:'medium'}}</td>
-                <td>{{appointment.leaveTime | date:'medium'}}</td>
+                <!--<td>{{appointment.createTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
+                <!--<td>{{appointment.updateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
+                <td>{{appointment.startTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                <td>{{appointment.enterTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                <td>{{appointment.leaveTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
                 <td>
                     <div *ngIf="appointment.regionId">
-                        <a [routerLink]="['../region', appointment.regionId , 'view' ]" >{{appointment.regionId}}</a>
+                        <a [routerLink]="['../region', appointment.regionId , 'view' ]" >{{appointment.regionName}}</a>
                     </div>
                 </td>
                 <td>

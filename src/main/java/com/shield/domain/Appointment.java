@@ -73,6 +73,7 @@ public class Appointment implements Serializable {
 
     @ManyToOne(optional = false)
     @NotNull
+    @JsonIgnoreProperties("appointments")
     private Region region;
 
     @ManyToOne(optional = false)

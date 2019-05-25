@@ -2,11 +2,11 @@
   "shieldApp": {
     "AppointmentStatus": {
       "null": "",
-      "CREATE": "新疆",
+      "CREATE": "新建",
       "WAIT": "排队中",
-      "START": "开启",
-      "ENTER": "进入",
-      "LEAVE": "离开"
+      "START": "预约成功",
+      "ENTER": "进厂",
+      "LEAVE": "离场"
     }
   }
 }

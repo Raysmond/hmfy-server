@@ -22,6 +22,7 @@ export interface IAppointment {
   startTime?: Moment;
   enterTime?: Moment;
   leaveTime?: Moment;
+  regionName?: string;
   regionId?: number;
   userLogin?: string;
   userId?: number;
@@ -42,6 +43,7 @@ export class Appointment implements IAppointment {
     public startTime?: Moment,
     public enterTime?: Moment,
     public leaveTime?: Moment,
+    public regionName?: string,
     public regionId?: number,
     public userLogin?: string,
     public userId?: number

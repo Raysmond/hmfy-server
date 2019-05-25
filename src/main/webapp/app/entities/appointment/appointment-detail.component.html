@@ -56,7 +56,7 @@
                 <dt><span jhiTranslate="shieldApp.appointment.region">Region</span></dt>
                 <dd>
                     <div *ngIf="appointment.regionId">
-                        <a [routerLink]="['/region', appointment.regionId, 'view']">{{appointment.regionId}}</a>
+                        <a [routerLink]="['/region', appointment.regionId, 'view']">{{appointment.regionName}}</a>
                     </div>
                 </dd>
                 <dt><span jhiTranslate="shieldApp.appointment.user">User</span></dt>

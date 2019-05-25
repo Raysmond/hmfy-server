@@ -45,6 +45,8 @@ public class AppointmentDTO implements Serializable {
 
     private Long regionId;
 
+    private String regionName;
+
     private Long userId;
 
     private String userLogin;
@@ -161,6 +163,14 @@ public class AppointmentDTO implements Serializable {
         this.regionId = regionId;
     }
 
+    public String getRegionName() {
+        return regionName;
+    }
+
+    public void setRegionName(String regionName) {
+        this.regionName = regionName;
+    }
+
     public Long getUserId() {
         return userId;
     }
@@ -215,6 +225,7 @@ public class AppointmentDTO implements Serializable {
             ", enterTime='" + getEnterTime() + "'" +
             ", leaveTime='" + getLeaveTime() + "'" +
             ", region=" + getRegionId() +
+            ", region='" + getRegionName() + "'" +
             ", user=" + getUserId() +
             ", user='" + getUserLogin() + "'" +
             "}";

@@ -40,7 +40,9 @@ export class AppointmentUpdateComponent implements OnInit {
     enterTime: [],
     leaveTime: [],
     regionId: [null, Validators.required],
-    userId: [null, Validators.required]
+    userId: [null, Validators.required],
+    region: {},
+    user: {}
   });
 
   constructor(

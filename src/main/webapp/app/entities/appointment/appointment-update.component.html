@@ -124,7 +124,7 @@
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.region" for="field_region">Region</label>
                     <select class="form-control" id="field_region" name="region" formControlName="regionId">
                         <option *ngIf="!editForm.get('region').value" [ngValue]="null" selected></option>
-                        <option [ngValue]="regionOption.id" *ngFor="let regionOption of regions; trackBy: trackRegionById">{{regionOption.id}}</option>
+                        <option [ngValue]="regionOption.id" *ngFor="let regionOption of regions; trackBy: trackRegionById">{{regionOption.name}}</option>
                     </select>
                 </div>
                 <div *ngIf="editForm.get('region').invalid && (editForm.get('region').dirty || editForm.get('region').touched)">

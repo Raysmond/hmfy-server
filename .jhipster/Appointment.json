@@ -9,7 +9,7 @@
             "relationshipValidateRules": [
                 "required"
             ],
-            "otherEntityField": "id"
+            "otherEntityField": "name"
         },
         {
             "relationshipName": "user",
