@@ -36,8 +36,7 @@ public class Appointment implements Serializable {
     @Column(name = "driver", nullable = false)
     private String driver;
 
-    @NotNull
-    @Column(name = "jhi_number", nullable = false)
+    @Column(name = "jhi_number")
     private Integer number;
 
     @NotNull

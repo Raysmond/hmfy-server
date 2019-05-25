@@ -43,4 +43,6 @@ public interface AppointmentService {
      * @param id the id of the entity.
      */
     void delete(Long id);
+
+    AppointmentDTO makeAppointment(Long regionId, AppointmentDTO appointmentDTO);
 }
