@@ -10,6 +10,7 @@
         "region": "Region",
         "car": "Car",
         "appointment": "Appointment",
+        "wxMaUser": "Wx Ma User",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },
       "account": {

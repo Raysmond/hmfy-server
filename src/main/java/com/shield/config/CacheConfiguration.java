@@ -46,6 +46,7 @@ public class CacheConfiguration {
             createCache(cm, com.shield.domain.Region.class.getName());
             createCache(cm, com.shield.domain.Car.class.getName());
             createCache(cm, com.shield.domain.Appointment.class.getName());
+            createCache(cm, com.shield.domain.WxMaUser.class.getName());
             // jhipster-needle-ehcache-add-entry
         };
     }

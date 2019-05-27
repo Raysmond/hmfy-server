@@ -10,6 +10,7 @@
         "region": "区域",
         "car": "车辆",
         "appointment": "预约",
+        "wxMaUser": "Wx Ma User",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },
       "account": {

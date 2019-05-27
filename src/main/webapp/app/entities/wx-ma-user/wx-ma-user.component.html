@@ -1,0 +1,90 @@
+<div>
+    <h2 id="page-heading">
+        <span jhiTranslate="shieldApp.wxMaUser.home.title">Wx Ma Users</span>
+        <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-wx-ma-user" [routerLink]="['/wx-ma-user/new']">
+            <fa-icon [icon]="'plus'"></fa-icon>
+            <span  jhiTranslate="shieldApp.wxMaUser.home.createLabel">
+            Create new Wx Ma User
+            </span>
+        </button>
+    </h2>
+    <jhi-alert></jhi-alert>
+    <br/>
+    <div class="table-responsive" *ngIf="wxMaUsers">
+        <table class="table table-striped">
+            <thead>
+            <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
+            <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="openId"><span jhiTranslate="shieldApp.wxMaUser.openId">Open Id</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="nickName"><span jhiTranslate="shieldApp.wxMaUser.nickName">Nick Name</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="gender"><span jhiTranslate="shieldApp.wxMaUser.gender">Gender</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="language"><span jhiTranslate="shieldApp.wxMaUser.language">Language</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="city"><span jhiTranslate="shieldApp.wxMaUser.city">City</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="province"><span jhiTranslate="shieldApp.wxMaUser.province">Province</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="country"><span jhiTranslate="shieldApp.wxMaUser.country">Country</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="avatarUrl"><span jhiTranslate="shieldApp.wxMaUser.avatarUrl">Avatar Url</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="unionId"><span jhiTranslate="shieldApp.wxMaUser.unionId">Union Id</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="watermark"><span jhiTranslate="shieldApp.wxMaUser.watermark">Watermark</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="createTime"><span jhiTranslate="shieldApp.wxMaUser.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.wxMaUser.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="phone"><span jhiTranslate="shieldApp.wxMaUser.phone">Phone</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="userLogin"><span jhiTranslate="shieldApp.wxMaUser.user">User</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let wxMaUser of wxMaUsers ;trackBy: trackId">
+                <td><a [routerLink]="['/wx-ma-user', wxMaUser.id, 'view' ]">{{wxMaUser.id}}</a></td>
+                <td>{{wxMaUser.openId}}</td>
+                <td>{{wxMaUser.nickName}}</td>
+                <td>{{wxMaUser.gender}}</td>
+                <td>{{wxMaUser.language}}</td>
+                <td>{{wxMaUser.city}}</td>
+                <td>{{wxMaUser.province}}</td>
+                <td>{{wxMaUser.country}}</td>
+                <td>{{wxMaUser.avatarUrl}}</td>
+                <td>{{wxMaUser.unionId}}</td>
+                <td>{{wxMaUser.watermark}}</td>
+                <td>{{wxMaUser.createTime | date:'medium'}}</td>
+                <td>{{wxMaUser.updateTime | date:'medium'}}</td>
+                <td>{{wxMaUser.phone}}</td>
+                <td>
+                    {{wxMaUser.userLogin}}
+                </td>
+                <td class="text-right">
+                    <div class="btn-group">
+                        <button type="submit"
+                                [routerLink]="['/wx-ma-user', wxMaUser.id, 'view' ]"
+                                class="btn btn-info btn-sm">
+                            <fa-icon [icon]="'eye'"></fa-icon>
+                            <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                        </button>
+                        <button type="submit"
+                                [routerLink]="['/wx-ma-user', wxMaUser.id, 'edit']"
+                                class="btn btn-primary btn-sm">
+                            <fa-icon [icon]="'pencil-alt'"></fa-icon>
+                            <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+                        </button>
+                        <button type="submit"
+                                [routerLink]="['/', 'wx-ma-user', { outlets: { popup: wxMaUser.id + '/delete'} }]"
+                                replaceUrl="true"
+                                queryParamsHandling="merge"
+                                class="btn btn-danger btn-sm">
+                            <fa-icon [icon]="'times'"></fa-icon>
+                            <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div *ngIf="wxMaUsers && wxMaUsers.length">
+        <div class="row justify-content-center">
+            <jhi-item-count [page]="page" [total]="totalItems" [maxSize]="5" [itemsPerPage]="itemsPerPage"></jhi-item-count>
+        </div>
+        <div class="row justify-content-center">
+            <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" (pageChange)="loadPage(page)"></ngb-pagination>
+        </div>
+    </div>
+</div>

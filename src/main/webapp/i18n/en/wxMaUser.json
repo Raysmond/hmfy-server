@@ -1,0 +1,34 @@
+{
+  "shieldApp": {
+    "wxMaUser": {
+      "home": {
+        "title": "Wx Ma Users",
+        "createLabel": "Create a new Wx Ma User",
+        "createOrEditLabel": "Create or edit a Wx Ma User"
+      },
+      "created": "A new Wx Ma User is created with identifier {{ param }}",
+      "updated": "A Wx Ma User is updated with identifier {{ param }}",
+      "deleted": "A Wx Ma User is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Wx Ma User {{ id }}?"
+      },
+      "detail": {
+        "title": "Wx Ma User"
+      },
+      "openId": "Open Id",
+      "nickName": "Nick Name",
+      "gender": "Gender",
+      "language": "Language",
+      "city": "City",
+      "province": "Province",
+      "country": "Country",
+      "avatarUrl": "Avatar Url",
+      "unionId": "Union Id",
+      "watermark": "Watermark",
+      "createTime": "Create Time",
+      "updateTime": "Update Time",
+      "phone": "Phone",
+      "user": "User"
+    }
+  }
+}

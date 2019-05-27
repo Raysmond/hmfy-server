@@ -39,6 +39,22 @@ import { RouterModule } from '@angular/router';
       {
         path: 'appointment',
         loadChildren: './appointment/appointment.module#ShieldAppointmentModule'
+      },
+      {
+        path: 'wx-ma-user',
+        loadChildren: './wx-ma-user/wx-ma-user.module#ShieldWxMaUserModule'
+      },
+      {
+        path: 'wx-ma-user',
+        loadChildren: './wx-ma-user/wx-ma-user.module#ShieldWxMaUserModule'
+      },
+      {
+        path: 'wx-ma-user',
+        loadChildren: './wx-ma-user/wx-ma-user.module#ShieldWxMaUserModule'
+      },
+      {
+        path: 'wx-ma-user',
+        loadChildren: './wx-ma-user/wx-ma-user.module#ShieldWxMaUserModule'
       }
       /* jhipster-needle-add-entity-route - JHipster will add entity modules routes here */
     ])
