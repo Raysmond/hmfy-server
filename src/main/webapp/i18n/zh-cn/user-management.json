@@ -25,6 +25,13 @@
     "createdBy": "创建人",
     "createdDate": "创建时间",
     "lastModifiedBy": "最近修改人",
-    "lastModifiedDate": "最近修改时间"
+    "lastModifiedDate": "最近修改时间",
+    "role": {
+      "ROLE_ADMIN": "系统管理员",
+      "ROLE_REGION_ADMIN": "区域管理员",
+      "ROLE_APPOINTMENT": "预约员",
+      "ROLE_USER": "普通用户",
+      "ROLE_ANONYMOUS": "匿名用户"
+    }
   }
 }
