@@ -23,6 +23,7 @@
             <th jhiSortBy="open"><span jhiTranslate="shieldApp.region.open">Open</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="createTime"><span jhiTranslate="shieldApp.region.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.region.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="validTime"><span jhiTranslate="shieldApp.region.validTime">Valid Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th></th>
             </tr>
             </thead>
@@ -37,6 +38,7 @@
                 <td>{{region.open}}</td>
                 <td>{{region.createTime | date:'medium'}}</td>
                 <td>{{region.updateTime | date:'medium'}}</td>
+                <td>{{region.validTime}}</td>
                 <td class="text-right">
                     <div class="btn-group">
                         <button type="submit"

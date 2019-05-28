@@ -22,7 +22,8 @@
       "days": "开启星期",
       "open": "开启状态",
       "createTime": "新建时间",
-      "updateTime": "更新时间"
+      "updateTime": "更新时间",
+      "validTime": "有效时间"
     }
   }
 }

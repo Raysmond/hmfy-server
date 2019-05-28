@@ -53,6 +53,8 @@ public class UserDTO {
 
     private Set<String> authorities;
 
+    private WxMaUserDTO userInfo;
+
     public UserDTO() {
         // Empty constructor needed for Jackson.
     }
@@ -73,6 +75,14 @@ public class UserDTO {
         this.authorities = user.getAuthorities().stream()
             .map(Authority::getName)
             .collect(Collectors.toSet());
+    }
+
+    public WxMaUserDTO getUserInfo() {
+        return userInfo;
+    }
+
+    public void setUserInfo(WxMaUserDTO userInfo) {
+        this.userInfo = userInfo;
     }
 
     public Long getId() {

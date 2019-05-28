@@ -25,10 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
@@ -36,6 +33,9 @@ import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import me.chanjar.weixin.common.error.WxErrorException;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -45,7 +45,7 @@ import java.util.Optional;
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
 @RestController
-@RequestMapping("/api/wx/user/{appid}")
+@RequestMapping("/api/wx/{appid}/user")
 public class WxMaUserController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -81,37 +81,52 @@ public class WxMaUserController {
         }
     }
 
+    @Data
+    static class LoginVm {
+        @NotBlank
+        String code;
+        WxMaUserInfo userInfo;
+        String login;
+        String password;
+    }
 
-    @GetMapping("/login")
-    public ResponseEntity<JWTToken> login(@PathVariable String appid, String code) {
-        if (StringUtils.isBlank(code)) {
-            return ResponseEntity.badRequest().body(new JWTToken(null, "wechat js code is empty."));
-        }
-
+    @PostMapping("/login")
+    public ResponseEntity<JWTToken> login(@PathVariable String appid, @Valid @RequestBody LoginVm loginVm) {
         final WxMaService wxService = WxMiniAppConfiguration.getMaService(appid);
 
         try {
-            WxMaJscode2SessionResult session = wxService.getUserService().getSessionInfo(code);
+            WxMaJscode2SessionResult session = wxService.getUserService().getSessionInfo(loginVm.code);
             logger.info("WeChat user openid: {} login, session_key: {}", session.getOpenid(), session.getSessionKey());
 
-            // TODO
-            User user = null;
             Optional<WxMaUserDTO> wxMaUser = wxMaUserService.findByOpenId(session.getOpenid());
+            User user;
+            Authentication authentication;
             if (wxMaUser.isPresent()) {
                 Long userId = wxMaUser.get().getUserId();
+                WxMaUserDTO wxMaUserDTO = wxMaUser.get();
                 user = userService.getUserWithAuthorities(userId).get();
-            } else {
-                user = userService.getUserWithAuthoritiesByLogin("admin").get();
+                wxMaUserDTO.setUpdateTime(ZonedDateTime.now());
+                wxMaUserDTO.updateWithWxUserInfo(loginVm.userInfo);
+                wxMaUserService.save(wxMaUserDTO);
+
+                UserDetails userDetails = userDetailsService.loadUserByUsername(user.getLogin());
+                authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            } else if (StringUtils.isNotBlank(loginVm.login) && StringUtils.isNotBlank(loginVm.password)) {
+                UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(loginVm.login, loginVm.password);
+                authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
                 WxMaUserDTO wxMaUserDTO = new WxMaUserDTO();
+                wxMaUserDTO.updateWithWxUserInfo(loginVm.userInfo);
                 wxMaUserDTO.setOpenId(session.getOpenid());
-                wxMaUserDTO.setUserId(user.getId());
+                wxMaUserDTO.setUnionId(session.getUnionid());
                 wxMaUserDTO.setCreateTime(ZonedDateTime.now());
                 wxMaUserDTO.setUpdateTime(ZonedDateTime.now());
+                wxMaUserDTO.setUserId(userService.getUserWithAuthoritiesByLogin(loginVm.login).get().getId());
                 wxMaUserService.save(wxMaUserDTO);
+            } else {
+                return new ResponseEntity<>(new JWTToken(null, "请先绑定预约员账号！"), HttpStatus.UNAUTHORIZED);
             }
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getLogin());
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = tokenProvider.createToken(authentication, false);
             HttpHeaders httpHeaders = new HttpHeaders();

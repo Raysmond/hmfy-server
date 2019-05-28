@@ -27,7 +27,7 @@ describe('Service Tests', () => {
       httpMock = injector.get(HttpTestingController);
       currentDate = moment();
 
-      elemDefault = new Region(0, 'AAAAAAA', 0, 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', false, currentDate, currentDate);
+      elemDefault = new Region(0, 'AAAAAAA', 0, 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', false, currentDate, currentDate, 0);
     });
 
     describe('Service methods', () => {
@@ -84,7 +84,8 @@ describe('Service Tests', () => {
             days: 'BBBBBB',
             open: true,
             createTime: currentDate.format(DATE_TIME_FORMAT),
-            updateTime: currentDate.format(DATE_TIME_FORMAT)
+            updateTime: currentDate.format(DATE_TIME_FORMAT),
+            validTime: 1
           },
           elemDefault
         );
@@ -115,7 +116,8 @@ describe('Service Tests', () => {
             days: 'BBBBBB',
             open: true,
             createTime: currentDate.format(DATE_TIME_FORMAT),
-            updateTime: currentDate.format(DATE_TIME_FORMAT)
+            updateTime: currentDate.format(DATE_TIME_FORMAT),
+            validTime: 1
           },
           elemDefault
         );

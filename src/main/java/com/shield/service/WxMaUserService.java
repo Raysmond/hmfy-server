@@ -18,6 +18,8 @@ public interface WxMaUserService {
 
     Optional<WxMaUserDTO> findByOpenId(String openId);
 
+    Optional<WxMaUserDTO> findByUserId(Long userId);
+
     /**
      * Save a wxMaUser.
      *

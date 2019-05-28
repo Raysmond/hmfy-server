@@ -68,6 +68,12 @@ public class WxMaUserServiceImpl implements WxMaUserService {
             .map(wxMaUserMapper::toDto);
     }
 
+    @Override
+    public Optional<WxMaUserDTO> findByUserId(Long userId) {
+        return wxMaUserRepository.findByUserId(userId)
+            .map(wxMaUserMapper::toDto);
+    }
+
     /**
      * Save a wxMaUser.
      *

@@ -1,4 +1,6 @@
 package com.shield.service.dto;
+import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
+
 import java.time.ZonedDateTime;
 import javax.validation.constraints.*;
 import java.io.Serializable;
@@ -44,6 +46,16 @@ public class WxMaUserDTO implements Serializable {
     private Long userId;
 
     private String userLogin;
+
+    public void updateWithWxUserInfo(WxMaUserInfo wxMaUserInfo) {
+        this.nickName = wxMaUserInfo.getNickName();
+        this.avatarUrl = wxMaUserInfo.getAvatarUrl();
+        this.province = wxMaUserInfo.getProvince();
+        this.city = wxMaUserInfo.getCity();
+        this.language = wxMaUserInfo.getLanguage();
+        this.gender = wxMaUserInfo.getGender();
+        this.country = wxMaUserInfo.getCountry();
+    }
 
     public Long getId() {
         return id;

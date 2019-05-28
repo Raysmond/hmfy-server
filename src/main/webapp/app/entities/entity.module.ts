@@ -55,6 +55,10 @@ import { RouterModule } from '@angular/router';
       {
         path: 'wx-ma-user',
         loadChildren: './wx-ma-user/wx-ma-user.module#ShieldWxMaUserModule'
+      },
+      {
+        path: 'region',
+        loadChildren: './region/region.module#ShieldRegionModule'
       }
       /* jhipster-needle-add-entity-route - JHipster will add entity modules routes here */
     ])

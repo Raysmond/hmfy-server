@@ -22,7 +22,8 @@
       "days": "Days",
       "open": "Open",
       "createTime": "Create Time",
-      "updateTime": "Update Time"
+      "updateTime": "Update Time",
+      "validTime": "Valid Time"
     }
   }
 }

@@ -1,5 +1,6 @@
 package com.shield.service;
 
+import com.shield.domain.Appointment;
 import com.shield.service.dto.AppointmentDTO;
 
 import org.springframework.data.domain.Page;
@@ -45,4 +46,5 @@ public interface AppointmentService {
     void delete(Long id);
 
     AppointmentDTO makeAppointment(Long regionId, AppointmentDTO appointmentDTO);
+
 }

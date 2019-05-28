@@ -1,11 +1,4 @@
-id;name;jhi_quota;start_time;end_time;days;jhi_open;create_time;update_time
-1;mobile Fish;77969;Savings Account Dam;Practical Fresh Pants;Metal deposit;false;2019-05-23T18:33:00;2019-05-24T00:29:59
-2;Implementation Electronics Officer;61748;Home Loan Account;web-readiness;Namibia;false;2019-05-24T14:28:47;2019-05-24T16:42:28
-3;Coordinator;23277;Licensed Savings Account;Cambridgeshire Mississippi;HDD;true;2019-05-24T13:44:06;2019-05-24T07:00:57
-4;Automotive;94220;South Dakota envisioneer Music;Nakfa;Bahamian Dollar Investment Account;true;2019-05-24T17:00:08;2019-05-24T13:40:01
-5;incentivize Tuna copy;42515;sky blue Georgia;Facilitator;Views e-enable Communications;true;2019-05-23T19:42:10;2019-05-24T09:59:27
-6;Georgia;52083;Tactics;scale interactive generating;Specialist Home Loan Account;false;2019-05-24T14:26:44;2019-05-24T10:43:02
-7;Car Industrial deliverables;39488;24 hour;overriding;monitor 1080p Checking Account;true;2019-05-24T09:13:28;2019-05-24T02:12:07
-8;Internal;85003;Highway Ergonomic;moratorium moratorium;New York tangible Mississippi;false;2019-05-24T14:57:27;2019-05-23T18:30:24
-9;synthesizing hard drive Robust;25606;Sleek Metal Table Small;Intelligent Outdoors;Harbor Montana;true;2019-05-23T20:02:47;2019-05-24T14:29:01
-10;Investment Account;53984;white Brand Money Market Account;Salad Web virtual;Refined Squares;false;2019-05-24T13:21:00;2019-05-24T07:49:53
+id;name;jhi_quota;valid_time;start_time;end_time;days;jhi_open;create_time;update_time
+1;本部;240;7200;08:00;18:00;1,2,3,4,5;false;2019-05-23T18:33:00;2019-05-24T00:29:59
+2;四期;180;7200;08:00;18:00;1,2,3,4,5;false;2019-05-23T18:33:00;2019-05-24T00:29:59
+3;五期;180;7200;08:00;18:00;1,2,3,4,5;false;2019-05-23T18:33:00;2019-05-24T00:29:59

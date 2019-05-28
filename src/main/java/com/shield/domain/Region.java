@@ -52,6 +52,10 @@ public class Region implements Serializable {
     @Column(name = "update_time")
     private ZonedDateTime updateTime;
 
+    @NotNull
+    @Column(name = "valid_time", nullable = false)
+    private Integer validTime;
+
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
         return id;
@@ -164,6 +168,19 @@ public class Region implements Serializable {
     public void setUpdateTime(ZonedDateTime updateTime) {
         this.updateTime = updateTime;
     }
+
+    public Integer getValidTime() {
+        return validTime;
+    }
+
+    public Region validTime(Integer validTime) {
+        this.validTime = validTime;
+        return this;
+    }
+
+    public void setValidTime(Integer validTime) {
+        this.validTime = validTime;
+    }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override
@@ -194,6 +211,7 @@ public class Region implements Serializable {
             ", open='" + isOpen() + "'" +
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
+            ", validTime=" + getValidTime() +
             "}";
     }
 }

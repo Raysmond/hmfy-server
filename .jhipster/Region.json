@@ -42,6 +42,13 @@
         {
             "fieldName": "updateTime",
             "fieldType": "ZonedDateTime"
+        },
+        {
+            "fieldName": "validTime",
+            "fieldType": "Integer",
+            "fieldValidateRules": [
+                "required"
+            ]
         }
     ],
     "changelogDate": "20190524165041",

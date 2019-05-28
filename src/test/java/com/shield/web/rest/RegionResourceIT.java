@@ -65,6 +65,9 @@ public class RegionResourceIT {
     private static final ZonedDateTime DEFAULT_UPDATE_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
     private static final ZonedDateTime UPDATED_UPDATE_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
 
+    private static final Integer DEFAULT_VALID_TIME = 1;
+    private static final Integer UPDATED_VALID_TIME = 2;
+
     @Autowired
     private RegionRepository regionRepository;
 
@@ -120,7 +123,8 @@ public class RegionResourceIT {
             .days(DEFAULT_DAYS)
             .open(DEFAULT_OPEN)
             .createTime(DEFAULT_CREATE_TIME)
-            .updateTime(DEFAULT_UPDATE_TIME);
+            .updateTime(DEFAULT_UPDATE_TIME)
+            .validTime(DEFAULT_VALID_TIME);
         return region;
     }
     /**
@@ -138,7 +142,8 @@ public class RegionResourceIT {
             .days(UPDATED_DAYS)
             .open(UPDATED_OPEN)
             .createTime(UPDATED_CREATE_TIME)
-            .updateTime(UPDATED_UPDATE_TIME);
+            .updateTime(UPDATED_UPDATE_TIME)
+            .validTime(UPDATED_VALID_TIME);
         return region;
     }
 
@@ -171,6 +176,7 @@ public class RegionResourceIT {
         assertThat(testRegion.isOpen()).isEqualTo(DEFAULT_OPEN);
         assertThat(testRegion.getCreateTime()).isEqualTo(DEFAULT_CREATE_TIME);
         assertThat(testRegion.getUpdateTime()).isEqualTo(DEFAULT_UPDATE_TIME);
+        assertThat(testRegion.getValidTime()).isEqualTo(DEFAULT_VALID_TIME);
     }
 
     @Test
@@ -234,6 +240,25 @@ public class RegionResourceIT {
 
     @Test
     @Transactional
+    public void checkValidTimeIsRequired() throws Exception {
+        int databaseSizeBeforeTest = regionRepository.findAll().size();
+        // set the field null
+        region.setValidTime(null);
+
+        // Create the Region, which fails.
+        RegionDTO regionDTO = regionMapper.toDto(region);
+
+        restRegionMockMvc.perform(post("/api/regions")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(regionDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<Region> regionList = regionRepository.findAll();
+        assertThat(regionList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
     public void getAllRegions() throws Exception {
         // Initialize the database
         regionRepository.saveAndFlush(region);
@@ -250,7 +275,8 @@ public class RegionResourceIT {
             .andExpect(jsonPath("$.[*].days").value(hasItem(DEFAULT_DAYS.toString())))
             .andExpect(jsonPath("$.[*].open").value(hasItem(DEFAULT_OPEN.booleanValue())))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
-            .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))));
+            .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
+            .andExpect(jsonPath("$.[*].validTime").value(hasItem(DEFAULT_VALID_TIME)));
     }
     
     @Test
@@ -271,7 +297,8 @@ public class RegionResourceIT {
             .andExpect(jsonPath("$.days").value(DEFAULT_DAYS.toString()))
             .andExpect(jsonPath("$.open").value(DEFAULT_OPEN.booleanValue()))
             .andExpect(jsonPath("$.createTime").value(sameInstant(DEFAULT_CREATE_TIME)))
-            .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)));
+            .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)))
+            .andExpect(jsonPath("$.validTime").value(DEFAULT_VALID_TIME));
     }
 
     @Test
@@ -302,7 +329,8 @@ public class RegionResourceIT {
             .days(UPDATED_DAYS)
             .open(UPDATED_OPEN)
             .createTime(UPDATED_CREATE_TIME)
-            .updateTime(UPDATED_UPDATE_TIME);
+            .updateTime(UPDATED_UPDATE_TIME)
+            .validTime(UPDATED_VALID_TIME);
         RegionDTO regionDTO = regionMapper.toDto(updatedRegion);
 
         restRegionMockMvc.perform(put("/api/regions")
@@ -322,6 +350,7 @@ public class RegionResourceIT {
         assertThat(testRegion.isOpen()).isEqualTo(UPDATED_OPEN);
         assertThat(testRegion.getCreateTime()).isEqualTo(UPDATED_CREATE_TIME);
         assertThat(testRegion.getUpdateTime()).isEqualTo(UPDATED_UPDATE_TIME);
+        assertThat(testRegion.getValidTime()).isEqualTo(UPDATED_VALID_TIME);
     }
 
     @Test

@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,10 +27,12 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Service Implementation for managing {@link Appointment}.
@@ -62,7 +65,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
 
     private static final Set<AppointmentStatus> ACTIVE_STATUS = Sets.newHashSet(
-        AppointmentStatus.WAIT,
         AppointmentStatus.START,
         AppointmentStatus.ENTER);
 
@@ -144,20 +146,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public AppointmentDTO makeAppointment(Long regionId, AppointmentDTO appointmentDTO) {
         Region region = regionRepository.getOne(regionId);
-        LocalDate today = LocalDate.now();
-        LocalTime time = LocalTime.MIN;
-        ZonedDateTime startTime = ZonedDateTime.of(today, time, ZoneId.systemDefault());
-        ZonedDateTime endTime = startTime.plusHours(24);
-        List<Appointment> appointments = appointmentRepository.findAllByRegionId(regionId, startTime, endTime);
-        int current = (int) appointments.stream().filter(it -> null != it.getStatus() && ACTIVE_STATUS.contains(it.getStatus())).count();
-        log.info("Region {}: [{}] status: {}/{}, WAIT: {}, START: {}, ENTER: {}, LEAVE: {}",
-            region.getId(), region.getName(), current, region.getQuota(),
-            appointments.stream().filter(it -> it.getStatus() == AppointmentStatus.WAIT).count(),
-            appointments.stream().filter(it -> it.getStatus() == AppointmentStatus.START).count(),
-            appointments.stream().filter(it -> it.getStatus() == AppointmentStatus.ENTER).count(),
-            appointments.stream().filter(it -> it.getStatus() == AppointmentStatus.LEAVE).count()
-        );
-
         Appointment appointment = new Appointment();
         appointment.setLicensePlateNumber(appointmentDTO.getLicensePlateNumber());
         appointment.setDriver(appointmentDTO.getDriver());
@@ -166,19 +154,68 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setRegion(region);
         appointment.setUser(userService.getUserWithAuthorities().get());
         appointment.setVip(false);
+        appointment.setValid(false);
+        appointment.setStatus(AppointmentStatus.CREATE);
+        appointmentRepository.save(appointment);
 
-        if (current < region.getQuota()) {
-            appointment.setValid(true);
-            appointment.setStatus(AppointmentStatus.START);
-            appointment.setStartTime(ZonedDateTime.now());
-            appointment.setNumber(generateAppointmentNumber(regionId));
-        } else {
-            appointment.setValid(false);
+        if (!tryMakeAppointment(appointment)) {
             appointment.setStatus(AppointmentStatus.WAIT);
             appointment.setQueueNumber(generateQueueNumber(regionId));
         }
-
-        appointmentRepository.save(appointment);
         return appointmentMapper.toDto(appointment);
+    }
+
+    private boolean tryMakeAppointment(Appointment appointment) {
+        synchronized (this) {
+            Region region = appointment.getRegion();
+            Long current = appointmentRepository.countAllValidByRegionId(region.getId());
+            log.debug("Region {}: [{}] status: {}/{}", region.getId(), region.getName(), current, region.getQuota());
+            if (current < region.getQuota()) {
+                appointment.setStatus(AppointmentStatus.START);
+                appointment.setValid(Boolean.TRUE);
+                appointment.setStartTime(ZonedDateTime.now());
+                appointment.setUpdateTime(ZonedDateTime.now());
+                appointment.setNumber(generateAppointmentNumber(region.getId()));
+                appointmentRepository.save(appointment);
+
+                log.info("Appointment [{}] made success at region ({}, {}), number: {}, licensePlateNumber: {}",
+                    appointment.getId(), region.getId(), region.getName(), appointment.getNumber(), appointment.getLicensePlateNumber());
+                return true;
+            }
+            return false;
+        }
+    }
+
+    private ZonedDateTime getTodayStartTime() {
+        LocalDate today = LocalDate.now();
+        LocalTime time = LocalTime.MIN;
+        return ZonedDateTime.of(today, time, ZoneId.systemDefault());
+    }
+
+    private static final long DEFAULT_VALID_TIME_SECONDS = 7200;
+
+    @Scheduled(fixedRate = 5000)
+    public void checkAppointments() {
+        ZonedDateTime startTime = ZonedDateTime.now().minusHours(24);
+        for (Region region : regionRepository.findAll()) {
+            Long validSeconds = region.getValidTime() != null ? region.getValidTime() : DEFAULT_VALID_TIME_SECONDS;
+            List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), startTime, AppointmentStatus.START, Boolean.TRUE);
+            for (Appointment appointment : appointments) {
+                if (appointment.getStartTime() == null || appointment.getStartTime().plusSeconds(validSeconds).isBefore(ZonedDateTime.now())) {
+                    log.info("Appointment [{}] invalid after {} seconds", appointment.getId(), validSeconds);
+                    appointment.setUpdateTime(ZonedDateTime.now());
+                    appointment.setValid(false);
+                    appointmentRepository.save(appointment);
+                }
+            }
+
+            List<Appointment> waitingList = appointmentRepository.findWaitingList(region.getId(), startTime);
+            waitingList.sort((Comparator.comparing(Appointment::getCreateTime)));
+            for (Appointment appointment : waitingList) {
+                if (!this.tryMakeAppointment(appointment)) {
+                    break;
+                }
+            }
+        }
     }
 }

@@ -48,6 +48,10 @@
                 <constraints nullable="true" />
             </column>
 
+            <column name="valid_time" type="integer">
+                <constraints nullable="false" />
+            </column>
+
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here, do not remove-->
         </createTable>
 
@@ -78,6 +82,7 @@
             <column name="jhi_open" type="boolean"/>
             <column name="create_time" type="date"/>
             <column name="update_time" type="date"/>
+            <column name="valid_time" type="numeric"/>
         </loadData>
     </changeSet>
 

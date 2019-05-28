@@ -25,7 +25,8 @@ export class RegionUpdateComponent implements OnInit {
     days: [],
     open: [],
     createTime: [],
-    updateTime: []
+    updateTime: [],
+    validTime: [null, [Validators.required]]
   });
 
   constructor(protected regionService: RegionService, protected activatedRoute: ActivatedRoute, private fb: FormBuilder) {}
@@ -48,7 +49,8 @@ export class RegionUpdateComponent implements OnInit {
       days: region.days,
       open: region.open,
       createTime: region.createTime != null ? region.createTime.format(DATE_TIME_FORMAT) : null,
-      updateTime: region.updateTime != null ? region.updateTime.format(DATE_TIME_FORMAT) : null
+      updateTime: region.updateTime != null ? region.updateTime.format(DATE_TIME_FORMAT) : null,
+      validTime: region.validTime
     });
   }
 
@@ -79,7 +81,8 @@ export class RegionUpdateComponent implements OnInit {
       createTime:
         this.editForm.get(['createTime']).value != null ? moment(this.editForm.get(['createTime']).value, DATE_TIME_FORMAT) : undefined,
       updateTime:
-        this.editForm.get(['updateTime']).value != null ? moment(this.editForm.get(['updateTime']).value, DATE_TIME_FORMAT) : undefined
+        this.editForm.get(['updateTime']).value != null ? moment(this.editForm.get(['updateTime']).value, DATE_TIME_FORMAT) : undefined,
+      validTime: this.editForm.get(['validTime']).value
     };
     return entity;
   }

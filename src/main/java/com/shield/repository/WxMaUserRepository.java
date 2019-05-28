@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.stream.DoubleStream;
 
 
 /**
@@ -16,4 +17,6 @@ public interface WxMaUserRepository extends JpaRepository<WxMaUser, Long>, JpaSp
     WxMaUser findOneByUserId(Long userId);
 
     Optional<WxMaUser> findByOpenId(String openId);
+
+    Optional<WxMaUser> findByUserId(Long userId);
 }

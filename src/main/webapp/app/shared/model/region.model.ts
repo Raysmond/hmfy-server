@@ -10,6 +10,7 @@ export interface IRegion {
   open?: boolean;
   createTime?: Moment;
   updateTime?: Moment;
+  validTime?: number;
 }
 
 export class Region implements IRegion {
@@ -22,7 +23,8 @@ export class Region implements IRegion {
     public days?: string,
     public open?: boolean,
     public createTime?: Moment,
-    public updateTime?: Moment
+    public updateTime?: Moment,
+    public validTime?: number
   ) {
     this.open = this.open || false;
   }

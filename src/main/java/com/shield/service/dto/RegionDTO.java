@@ -30,6 +30,9 @@ public class RegionDTO implements Serializable {
 
     private ZonedDateTime updateTime;
 
+    @NotNull
+    private Integer validTime;
+
 
     public Long getId() {
         return id;
@@ -103,6 +106,14 @@ public class RegionDTO implements Serializable {
         this.updateTime = updateTime;
     }
 
+    public Integer getValidTime() {
+        return validTime;
+    }
+
+    public void setValidTime(Integer validTime) {
+        this.validTime = validTime;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -136,6 +147,7 @@ public class RegionDTO implements Serializable {
             ", open='" + isOpen() + "'" +
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
+            ", validTime=" + getValidTime() +
             "}";
     }
 }
