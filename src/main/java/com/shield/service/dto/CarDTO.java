@@ -17,6 +17,8 @@ public class CarDTO implements Serializable {
     @NotNull
     private String driver;
 
+    private String phone;
+
     private ZonedDateTime createTime;
 
     private ZonedDateTime updateTime;
@@ -48,6 +50,14 @@ public class CarDTO implements Serializable {
 
     public void setDriver(String driver) {
         this.driver = driver;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public ZonedDateTime getCreateTime() {
@@ -109,6 +119,7 @@ public class CarDTO implements Serializable {
             "id=" + getId() +
             ", licensePlateNumber='" + getLicensePlateNumber() + "'" +
             ", driver='" + getDriver() + "'" +
+            ", phone='" + getPhone() + "'" +
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
             ", user=" + getUserId() +

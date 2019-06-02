@@ -24,6 +24,10 @@
                 <constraints nullable="false" />
             </column>
 
+            <column name="phone" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
             <column name="create_time" type="datetime">
                 <constraints nullable="true" />
             </column>
@@ -60,6 +64,7 @@
             <column name="id" type="numeric"/>
             <column name="license_plate_number" type="string"/>
             <column name="driver" type="string"/>
+            <column name="phone" type="string"/>
             <column name="create_time" type="date"/>
             <column name="update_time" type="date"/>
             <column name="user_id" type="numeric"/>

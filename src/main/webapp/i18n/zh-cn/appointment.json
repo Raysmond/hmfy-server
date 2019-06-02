@@ -28,6 +28,7 @@
       "enterTime": "进入时间",
       "leaveTime": "离开时间",
       "region": "区域",
+      "expireTime": "失效时间",
       "user": "用户"
     }
   }

@@ -64,6 +64,10 @@
                 <constraints nullable="true" />
             </column>
 
+            <column name="expire_time" type="datetime">
+                <constraints nullable="true" />
+            </column>
+
             <column name="region_id" type="bigint">
                 <constraints nullable="false" />
             </column>
@@ -80,6 +84,7 @@
         <dropDefaultValue tableName="appointment" columnName="start_time" columnDataType="datetime"/>
         <dropDefaultValue tableName="appointment" columnName="enter_time" columnDataType="datetime"/>
         <dropDefaultValue tableName="appointment" columnName="leave_time" columnDataType="datetime"/>
+        <dropDefaultValue tableName="appointment" columnName="expire_time" columnDataType="datetime"/>
     </changeSet>
 
     <!--
@@ -109,6 +114,7 @@
             <column name="start_time" type="date"/>
             <column name="enter_time" type="date"/>
             <column name="leave_time" type="date"/>
+            <column name="expire_time" type="date"/>
             <column name="region_id" type="numeric"/>
             <column name="user_id" type="numeric"/>
         </loadData>

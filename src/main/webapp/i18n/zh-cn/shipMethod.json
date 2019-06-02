@@ -1,0 +1,10 @@
+{
+  "shieldApp": {
+    "ShipMethod": {
+      "null": "",
+      "LAND": "陆运",
+      "AIR": "空运",
+      "WATER": "水运"
+    }
+  }
+}

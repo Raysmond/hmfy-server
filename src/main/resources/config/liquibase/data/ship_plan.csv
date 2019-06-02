@@ -1,0 +1,4 @@
+id;company;demanded_amount;finish_amount;remain_amount;available_amount;ship_methond;ship_number;end_time;create_time;update_time;license_plate_number;driver;phone;to_user_id
+1;上海龙罗实业有限公司;300;0;300;300;LAND;;2019-06-10T14:03:32;2019-06-01T16:08:07;2019-06-01T22:05:06;沪B59390;张三;18405938503;4
+2;上海龙罗实业有限公司;300;50;250;250;LAND;;2019-06-10T14:03:32;2019-06-01T16:08:07;2019-06-01T22:05:06;沪B59390;张三;18405938503;4
+3;上海龙罗实业有限公司;300;30;270;270;LAND;;2019-06-10T14:03:32;2019-06-01T16:08:07;2019-06-01T22:05:06;沪B59390;张三;18405938503;4

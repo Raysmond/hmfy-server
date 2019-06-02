@@ -25,6 +25,7 @@ export class CarUpdateComponent implements OnInit {
     id: [],
     licensePlateNumber: [null, [Validators.required]],
     driver: [null, [Validators.required]],
+    phone: [],
     createTime: [],
     updateTime: [],
     userId: [null, Validators.required]
@@ -58,6 +59,7 @@ export class CarUpdateComponent implements OnInit {
       id: car.id,
       licensePlateNumber: car.licensePlateNumber,
       driver: car.driver,
+      phone: car.phone,
       createTime: car.createTime != null ? car.createTime.format(DATE_TIME_FORMAT) : null,
       updateTime: car.updateTime != null ? car.updateTime.format(DATE_TIME_FORMAT) : null,
       userId: car.userId
@@ -84,6 +86,7 @@ export class CarUpdateComponent implements OnInit {
       id: this.editForm.get(['id']).value,
       licensePlateNumber: this.editForm.get(['licensePlateNumber']).value,
       driver: this.editForm.get(['driver']).value,
+      phone: this.editForm.get(['phone']).value,
       createTime:
         this.editForm.get(['createTime']).value != null ? moment(this.editForm.get(['createTime']).value, DATE_TIME_FORMAT) : undefined,
       updateTime:

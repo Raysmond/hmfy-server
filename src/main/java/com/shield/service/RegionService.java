@@ -2,6 +2,7 @@ package com.shield.service;
 
 import com.shield.service.dto.RegionDTO;
 
+import com.shield.web.rest.vm.RegionStatDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -11,6 +12,10 @@ import java.util.Optional;
  * Service Interface for managing {@link com.shield.domain.Region}.
  */
 public interface RegionService {
+
+    RegionStatDTO countRegionStat();
+
+    Boolean isRegionOpen(Long regionId);
 
     /**
      * Save a region.

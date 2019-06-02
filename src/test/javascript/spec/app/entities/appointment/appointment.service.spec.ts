@@ -40,6 +40,7 @@ describe('Service Tests', () => {
         currentDate,
         currentDate,
         currentDate,
+        currentDate,
         currentDate
       );
     });
@@ -52,7 +53,8 @@ describe('Service Tests', () => {
             updateTime: currentDate.format(DATE_TIME_FORMAT),
             startTime: currentDate.format(DATE_TIME_FORMAT),
             enterTime: currentDate.format(DATE_TIME_FORMAT),
-            leaveTime: currentDate.format(DATE_TIME_FORMAT)
+            leaveTime: currentDate.format(DATE_TIME_FORMAT),
+            expireTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
@@ -74,7 +76,8 @@ describe('Service Tests', () => {
             updateTime: currentDate.format(DATE_TIME_FORMAT),
             startTime: currentDate.format(DATE_TIME_FORMAT),
             enterTime: currentDate.format(DATE_TIME_FORMAT),
-            leaveTime: currentDate.format(DATE_TIME_FORMAT)
+            leaveTime: currentDate.format(DATE_TIME_FORMAT),
+            expireTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
@@ -84,7 +87,8 @@ describe('Service Tests', () => {
             updateTime: currentDate,
             startTime: currentDate,
             enterTime: currentDate,
-            leaveTime: currentDate
+            leaveTime: currentDate,
+            expireTime: currentDate
           },
           returnedFromService
         );
@@ -111,7 +115,8 @@ describe('Service Tests', () => {
             updateTime: currentDate.format(DATE_TIME_FORMAT),
             startTime: currentDate.format(DATE_TIME_FORMAT),
             enterTime: currentDate.format(DATE_TIME_FORMAT),
-            leaveTime: currentDate.format(DATE_TIME_FORMAT)
+            leaveTime: currentDate.format(DATE_TIME_FORMAT),
+            expireTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
@@ -122,7 +127,8 @@ describe('Service Tests', () => {
             updateTime: currentDate,
             startTime: currentDate,
             enterTime: currentDate,
-            leaveTime: currentDate
+            leaveTime: currentDate,
+            expireTime: currentDate
           },
           returnedFromService
         );
@@ -149,7 +155,8 @@ describe('Service Tests', () => {
             updateTime: currentDate.format(DATE_TIME_FORMAT),
             startTime: currentDate.format(DATE_TIME_FORMAT),
             enterTime: currentDate.format(DATE_TIME_FORMAT),
-            leaveTime: currentDate.format(DATE_TIME_FORMAT)
+            leaveTime: currentDate.format(DATE_TIME_FORMAT),
+            expireTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
@@ -159,7 +166,8 @@ describe('Service Tests', () => {
             updateTime: currentDate,
             startTime: currentDate,
             enterTime: currentDate,
-            leaveTime: currentDate
+            leaveTime: currentDate,
+            expireTime: currentDate
           },
           returnedFromService
         );

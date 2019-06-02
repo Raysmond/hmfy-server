@@ -70,6 +70,8 @@ public class AppointmentCriteria implements Serializable, Criteria {
 
     private ZonedDateTimeFilter leaveTime;
 
+    private ZonedDateTimeFilter expireTime;
+
     private LongFilter regionId;
 
     private LongFilter userId;
@@ -91,6 +93,7 @@ public class AppointmentCriteria implements Serializable, Criteria {
         this.startTime = other.startTime == null ? null : other.startTime.copy();
         this.enterTime = other.enterTime == null ? null : other.enterTime.copy();
         this.leaveTime = other.leaveTime == null ? null : other.leaveTime.copy();
+        this.expireTime = other.expireTime == null ? null : other.expireTime.copy();
         this.regionId = other.regionId == null ? null : other.regionId.copy();
         this.userId = other.userId == null ? null : other.userId.copy();
     }
@@ -204,6 +207,14 @@ public class AppointmentCriteria implements Serializable, Criteria {
         this.leaveTime = leaveTime;
     }
 
+    public ZonedDateTimeFilter getExpireTime() {
+        return expireTime;
+    }
+
+    public void setExpireTime(ZonedDateTimeFilter expireTime) {
+        this.expireTime = expireTime;
+    }
+
     public LongFilter getRegionId() {
         return regionId;
     }
@@ -244,6 +255,7 @@ public class AppointmentCriteria implements Serializable, Criteria {
             Objects.equals(startTime, that.startTime) &&
             Objects.equals(enterTime, that.enterTime) &&
             Objects.equals(leaveTime, that.leaveTime) &&
+            Objects.equals(expireTime, that.expireTime) &&
             Objects.equals(regionId, that.regionId) &&
             Objects.equals(userId, that.userId);
     }
@@ -264,6 +276,7 @@ public class AppointmentCriteria implements Serializable, Criteria {
         startTime,
         enterTime,
         leaveTime,
+        expireTime,
         regionId,
         userId
         );
@@ -285,6 +298,7 @@ public class AppointmentCriteria implements Serializable, Criteria {
                 (startTime != null ? "startTime=" + startTime + ", " : "") +
                 (enterTime != null ? "enterTime=" + enterTime + ", " : "") +
                 (leaveTime != null ? "leaveTime=" + leaveTime + ", " : "") +
+                (expireTime != null ? "expireTime=" + expireTime + ", " : "") +
                 (regionId != null ? "regionId=" + regionId + ", " : "") +
                 (userId != null ? "userId=" + userId + ", " : "") +
             "}";

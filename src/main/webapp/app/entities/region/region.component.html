@@ -17,13 +17,16 @@
             <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="name"><span jhiTranslate="shieldApp.region.name">Name</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="quota"><span jhiTranslate="shieldApp.region.quota">Quota</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="vipQuota"><span jhiTranslate="shieldApp.region.vipQuota">Vip Quota</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="startTime"><span jhiTranslate="shieldApp.region.startTime">Start Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="endTime"><span jhiTranslate="shieldApp.region.endTime">End Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="days"><span jhiTranslate="shieldApp.region.days">Days</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="open"><span jhiTranslate="shieldApp.region.open">Open</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="createTime"><span jhiTranslate="shieldApp.region.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.region.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="validTime"><span jhiTranslate="shieldApp.region.validTime">Valid Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="queueQuota"><span jhiTranslate="shieldApp.region.queueQuota">Queue Quota</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="queueValidTime"><span jhiTranslate="shieldApp.region.queueValidTime">Queue Valid Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <!--<th jhiSortBy="createTime"><span jhiTranslate="shieldApp.region.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+            <!--<th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.region.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
             <th></th>
             </tr>
             </thead>
@@ -32,13 +35,16 @@
                 <td><a [routerLink]="['/region', region.id, 'view' ]">{{region.id}}</a></td>
                 <td>{{region.name}}</td>
                 <td>{{region.quota}}</td>
+                <td>{{region.vipQuota}}</td>
                 <td>{{region.startTime}}</td>
                 <td>{{region.endTime}}</td>
                 <td>{{region.days}}</td>
                 <td>{{region.open}}</td>
-                <td>{{region.createTime | date:'medium'}}</td>
-                <td>{{region.updateTime | date:'medium'}}</td>
                 <td>{{region.validTime}}</td>
+                <td>{{region.queueQuota}}</td>
+                <td>{{region.queueValidTime}}</td>
+                <!--<td>{{region.createTime | date:'medium'}}</td>-->
+                <!--<td>{{region.updateTime | date:'medium'}}</td>-->
                 <td class="text-right">
                     <div class="btn-group">
                         <button type="submit"

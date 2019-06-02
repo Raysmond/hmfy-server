@@ -29,7 +29,7 @@ export class AppointmentUpdateComponent implements OnInit {
     id: [],
     licensePlateNumber: [null, [Validators.required]],
     driver: [null, [Validators.required]],
-    number: [null, [Validators.required]],
+    number: [],
     valid: [null, [Validators.required]],
     status: [null, [Validators.required]],
     queueNumber: [],
@@ -39,10 +39,9 @@ export class AppointmentUpdateComponent implements OnInit {
     startTime: [],
     enterTime: [],
     leaveTime: [],
+    expireTime: [],
     regionId: [null, Validators.required],
-    userId: [null, Validators.required],
-    region: {},
-    user: {}
+    userId: [null, Validators.required]
   });
 
   constructor(
@@ -91,6 +90,7 @@ export class AppointmentUpdateComponent implements OnInit {
       startTime: appointment.startTime != null ? appointment.startTime.format(DATE_TIME_FORMAT) : null,
       enterTime: appointment.enterTime != null ? appointment.enterTime.format(DATE_TIME_FORMAT) : null,
       leaveTime: appointment.leaveTime != null ? appointment.leaveTime.format(DATE_TIME_FORMAT) : null,
+      expireTime: appointment.expireTime != null ? appointment.expireTime.format(DATE_TIME_FORMAT) : null,
       regionId: appointment.regionId,
       userId: appointment.userId
     });
@@ -131,6 +131,8 @@ export class AppointmentUpdateComponent implements OnInit {
         this.editForm.get(['enterTime']).value != null ? moment(this.editForm.get(['enterTime']).value, DATE_TIME_FORMAT) : undefined,
       leaveTime:
         this.editForm.get(['leaveTime']).value != null ? moment(this.editForm.get(['leaveTime']).value, DATE_TIME_FORMAT) : undefined,
+      expireTime:
+        this.editForm.get(['expireTime']).value != null ? moment(this.editForm.get(['expireTime']).value, DATE_TIME_FORMAT) : undefined,
       regionId: this.editForm.get(['regionId']).value,
       userId: this.editForm.get(['userId']).value
     };

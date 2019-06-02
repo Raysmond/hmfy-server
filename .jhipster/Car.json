@@ -1,49 +1,53 @@
 {
-    "fluentMethods": true,
-    "clientRootFolder": "",
-    "relationships": [
-        {
-            "relationshipName": "user",
-            "otherEntityName": "user",
-            "relationshipType": "many-to-one",
-            "relationshipValidateRules": [
-                "required"
-            ],
-            "otherEntityField": "login",
-            "ownerSide": true,
-            "otherEntityRelationshipName": "car"
-        }
-    ],
-    "fields": [
-        {
-            "fieldName": "licensePlateNumber",
-            "fieldType": "String",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
-            "fieldName": "driver",
-            "fieldType": "String",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
-            "fieldName": "createTime",
-            "fieldType": "ZonedDateTime"
-        },
-        {
-            "fieldName": "updateTime",
-            "fieldType": "ZonedDateTime"
-        }
-    ],
-    "changelogDate": "20190524171913",
-    "dto": "mapstruct",
-    "searchEngine": false,
-    "service": "serviceImpl",
-    "entityTableName": "car",
-    "databaseType": "sql",
-    "jpaMetamodelFiltering": true,
-    "pagination": "pagination"
+  "fluentMethods": true,
+  "clientRootFolder": "",
+  "relationships": [
+    {
+      "relationshipName": "user",
+      "otherEntityName": "user",
+      "relationshipType": "many-to-one",
+      "relationshipValidateRules": [
+        "required"
+      ],
+      "otherEntityField": "login",
+      "ownerSide": true,
+      "otherEntityRelationshipName": "car"
+    }
+  ],
+  "fields": [
+    {
+      "fieldName": "licensePlateNumber",
+      "fieldType": "String",
+      "fieldValidateRules": [
+        "required"
+      ]
+    },
+    {
+      "fieldName": "driver",
+      "fieldType": "String",
+      "fieldValidateRules": [
+        "required"
+      ]
+    },
+    {
+      "fieldName": "phone",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "createTime",
+      "fieldType": "ZonedDateTime"
+    },
+    {
+      "fieldName": "updateTime",
+      "fieldType": "ZonedDateTime"
+    }
+  ],
+  "changelogDate": "20190524171913",
+  "dto": "mapstruct",
+  "searchEngine": false,
+  "service": "serviceImpl",
+  "entityTableName": "car",
+  "databaseType": "sql",
+  "jpaMetamodelFiltering": true,
+  "pagination": "pagination"
 }

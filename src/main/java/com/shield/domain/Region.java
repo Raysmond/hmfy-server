@@ -34,6 +34,11 @@ public class Region implements Serializable {
     @Column(name = "jhi_quota", nullable = false)
     private Integer quota;
 
+    @NotNull
+    @Min(value = 0)
+    @Column(name = "vip_quota", nullable = false)
+    private Integer vipQuota;
+
     @Column(name = "start_time")
     private String startTime;
 
@@ -46,15 +51,26 @@ public class Region implements Serializable {
     @Column(name = "jhi_open")
     private Boolean open;
 
+    @NotNull
+    @Min(value = 0)
+    @Column(name = "valid_time", nullable = false)
+    private Integer validTime;
+
+    @NotNull
+    @Min(value = 0)
+    @Column(name = "queue_quota", nullable = false)
+    private Integer queueQuota;
+
+    @NotNull
+    @Min(value = 0)
+    @Column(name = "queue_valid_time", nullable = false)
+    private Integer queueValidTime;
+
     @Column(name = "create_time")
     private ZonedDateTime createTime;
 
     @Column(name = "update_time")
     private ZonedDateTime updateTime;
-
-    @NotNull
-    @Column(name = "valid_time", nullable = false)
-    private Integer validTime;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -89,6 +105,19 @@ public class Region implements Serializable {
 
     public void setQuota(Integer quota) {
         this.quota = quota;
+    }
+
+    public Integer getVipQuota() {
+        return vipQuota;
+    }
+
+    public Region vipQuota(Integer vipQuota) {
+        this.vipQuota = vipQuota;
+        return this;
+    }
+
+    public void setVipQuota(Integer vipQuota) {
+        this.vipQuota = vipQuota;
     }
 
     public String getStartTime() {
@@ -143,6 +172,45 @@ public class Region implements Serializable {
         this.open = open;
     }
 
+    public Integer getValidTime() {
+        return validTime;
+    }
+
+    public Region validTime(Integer validTime) {
+        this.validTime = validTime;
+        return this;
+    }
+
+    public void setValidTime(Integer validTime) {
+        this.validTime = validTime;
+    }
+
+    public Integer getQueueQuota() {
+        return queueQuota;
+    }
+
+    public Region queueQuota(Integer queueQuota) {
+        this.queueQuota = queueQuota;
+        return this;
+    }
+
+    public void setQueueQuota(Integer queueQuota) {
+        this.queueQuota = queueQuota;
+    }
+
+    public Integer getQueueValidTime() {
+        return queueValidTime;
+    }
+
+    public Region queueValidTime(Integer queueValidTime) {
+        this.queueValidTime = queueValidTime;
+        return this;
+    }
+
+    public void setQueueValidTime(Integer queueValidTime) {
+        this.queueValidTime = queueValidTime;
+    }
+
     public ZonedDateTime getCreateTime() {
         return createTime;
     }
@@ -168,19 +236,6 @@ public class Region implements Serializable {
     public void setUpdateTime(ZonedDateTime updateTime) {
         this.updateTime = updateTime;
     }
-
-    public Integer getValidTime() {
-        return validTime;
-    }
-
-    public Region validTime(Integer validTime) {
-        this.validTime = validTime;
-        return this;
-    }
-
-    public void setValidTime(Integer validTime) {
-        this.validTime = validTime;
-    }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override
@@ -205,13 +260,16 @@ public class Region implements Serializable {
             "id=" + getId() +
             ", name='" + getName() + "'" +
             ", quota=" + getQuota() +
+            ", vipQuota=" + getVipQuota() +
             ", startTime='" + getStartTime() + "'" +
             ", endTime='" + getEndTime() + "'" +
             ", days='" + getDays() + "'" +
             ", open='" + isOpen() + "'" +
+            ", validTime=" + getValidTime() +
+            ", queueQuota=" + getQueueQuota() +
+            ", queueValidTime=" + getQueueValidTime() +
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
-            ", validTime=" + getValidTime() +
             "}";
     }
 }

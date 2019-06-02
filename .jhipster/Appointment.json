@@ -52,7 +52,7 @@
         {
             "fieldName": "status",
             "fieldType": "AppointmentStatus",
-            "fieldValues": "CREATE,WAIT,START,ENTER,LEAVE",
+            "fieldValues": "CREATE,WAIT,START,ENTER,LEAVE,EXPIRED",
             "fieldValidateRules": [
                 "required"
             ]
@@ -87,6 +87,10 @@
         {
             "fieldName": "leaveTime",
             "fieldType": "ZonedDateTime"
+        },
+        {
+          "fieldName": "expireTime",
+          "fieldType": "ZonedDateTime"
         }
     ],
     "changelogDate": "20190524173744",

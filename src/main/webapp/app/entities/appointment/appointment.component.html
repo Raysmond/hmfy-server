@@ -1,100 +1,199 @@
 <div>
     <h2 id="page-heading">
         <span jhiTranslate="shieldApp.appointment.home.title">Appointments</span>
-        <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-appointment" [routerLink]="['/appointment/new']">
+        <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-appointment"
+                [routerLink]="['/appointment/new']">
             <fa-icon [icon]="'plus'"></fa-icon>
-            <span  jhiTranslate="shieldApp.appointment.home.createLabel">
+            <span jhiTranslate="shieldApp.appointment.home.createLabel">
             Create new Appointment
             </span>
         </button>
     </h2>
     <jhi-alert></jhi-alert>
     <br/>
-    <div class="table-responsive" *ngIf="appointments">
-        <table class="table table-striped">
-            <thead>
-            <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
-            <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="licensePlateNumber"><span jhiTranslate="shieldApp.appointment.licensePlateNumber">License Plate Number</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="driver"><span jhiTranslate="shieldApp.appointment.driver">Driver</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="number"><span jhiTranslate="shieldApp.appointment.number">Number</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="valid"><span jhiTranslate="shieldApp.appointment.valid">Valid</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="status"><span jhiTranslate="shieldApp.appointment.status">Status</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="queueNumber"><span jhiTranslate="shieldApp.appointment.queueNumber">Queue Number</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="vip"><span jhiTranslate="shieldApp.appointment.vip">Vip</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <!--<th jhiSortBy="createTime"><span jhiTranslate="shieldApp.appointment.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-            <!--<th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.appointment.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-            <th jhiSortBy="startTime"><span jhiTranslate="shieldApp.appointment.startTime">Start Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="enterTime"><span jhiTranslate="shieldApp.appointment.enterTime">Enter Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="leaveTime"><span jhiTranslate="shieldApp.appointment.leaveTime">Leave Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="regionName"><span jhiTranslate="shieldApp.appointment.region">Region</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="userLogin"><span jhiTranslate="shieldApp.appointment.user">User</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngFor="let appointment of appointments ;trackBy: trackId">
-                <td><a [routerLink]="['/appointment', appointment.id, 'view' ]">{{appointment.id}}</a></td>
-                <td>{{appointment.licensePlateNumber}}</td>
-                <td>{{appointment.driver}}</td>
-                <td>{{appointment.number}}</td>
-                <td>{{appointment.valid}}</td>
-                <td>
-                    <span class="badge badge-info" *ngIf="appointment.status=='CREATE'" jhiTranslate="{{'shieldApp.AppointmentStatus.CREATE'}}">{{appointment.status}}</span>
-                    <span class="badge badge-warning" *ngIf="appointment.status=='WAIT'" jhiTranslate="{{'shieldApp.AppointmentStatus.WAIT'}}">{{appointment.status}}</span>
-                    <span class="badge badge-success" *ngIf="appointment.status=='START'" jhiTranslate="{{'shieldApp.AppointmentStatus.START'}}">{{appointment.status}}</span>
-                    <span class="badge badge-primary" *ngIf="appointment.status=='ENTER'" jhiTranslate="{{'shieldApp.AppointmentStatus.ENTER'}}">{{appointment.status}}</span>
-                    <span class="badge badge-secondary" *ngIf="appointment.status=='LEAVE'" jhiTranslate="{{'shieldApp.AppointmentStatus.LEAVE'}}">{{appointment.status}}</span>
-                </td>
-                <td>{{appointment.queueNumber}}</td>
-                <td>{{appointment.vip}}</td>
-                <!--<td>{{appointment.createTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
-                <!--<td>{{appointment.updateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
-                <td>{{appointment.startTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-                <td>{{appointment.enterTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-                <td>{{appointment.leaveTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-                <td>
-                    <div *ngIf="appointment.regionId">
-                        <a [routerLink]="['../region', appointment.regionId , 'view' ]" >{{appointment.regionName}}</a>
+    <div class="card card-default">
+        <div class="card-body">
+            <form name="searchForm" role="form" novalidate (ngSubmit)="search()" [formGroup]="searchForm">
+                <div class="form-row align-items-center">
+                    <div class="col-auto">
+                        <div class="form-select mb-2">
+                            <select class="form-control" id="field_region" name="region" formControlName="regionId">
+                                <option [ngValue]="null" selected>--区域--</option>
+                                <option [ngValue]="regionOption.id"
+                                        *ngFor="let regionOption of regions; trackBy: trackRegionById">{{regionOption.name}}</option>
+                            </select>
+                        </div>
                     </div>
-                </td>
-                <td>
-                    {{appointment.userLogin}}
-                </td>
-                <td class="text-right">
-                    <div class="btn-group">
-                        <button type="submit"
-                                [routerLink]="['/appointment', appointment.id, 'view' ]"
-                                class="btn btn-info btn-sm">
-                            <fa-icon [icon]="'eye'"></fa-icon>
-                            <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
-                        </button>
-                        <button type="submit"
-                                [routerLink]="['/appointment', appointment.id, 'edit']"
-                                class="btn btn-primary btn-sm">
-                            <fa-icon [icon]="'pencil-alt'"></fa-icon>
-                            <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
-                        </button>
-                        <button type="submit"
-                                [routerLink]="['/', 'appointment', { outlets: { popup: appointment.id + '/delete'} }]"
-                                replaceUrl="true"
-                                queryParamsHandling="merge"
-                                class="btn btn-danger btn-sm">
-                            <fa-icon [icon]="'times'"></fa-icon>
-                            <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
-                        </button>
+                    <div class="col-auto">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" id="autoSizingCheck"
+                                   name="valid" formControlName="valid"
+                                   type="checkbox">
+                            <label class="form-check-label"
+                                   for="autoSizingCheck">有效</label></div>
                     </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-    <div *ngIf="appointments && appointments.length">
-        <div class="row justify-content-center">
-            <jhi-item-count [page]="page" [total]="totalItems" [maxSize]="5" [itemsPerPage]="itemsPerPage"></jhi-item-count>
+                    <div class="col-auto">
+                        <div class="form-select mb-2">
+                            <select class="custom-select" name="status" formControlName="status">
+                                <option selected [ngValue]="null">--状态--</option>
+                                <option value="CREATE">{{'shieldApp.AppointmentStatus.CREATE' | translate}}</option>
+                                <option value="WAIT">{{'shieldApp.AppointmentStatus.WAIT' | translate}}</option>
+                                <option value="START">{{'shieldApp.AppointmentStatus.START' | translate}}</option>
+                                <option value="ENTER">{{'shieldApp.AppointmentStatus.ENTER' | translate}}</option>
+                                <option value="LEAVE">{{'shieldApp.AppointmentStatus.LEAVE' | translate}}</option>
+                                <option value="EXPIRED">{{'shieldApp.AppointmentStatus.EXPIRED' | translate}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <label class="sr-only" for="inlineFormInput">Name</label>
+                        <input class="form-control mb-2"
+                               id="inlineFormInput" type="text"
+                               name="query" formControlName="query"
+                               placeholder="搜索...">
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-primary mb-2" type="submit">搜索</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="table-responsive" *ngIf="appointments">
+                <table class="table table-striped">
+                    <thead>
+                    <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
+                        <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="licensePlateNumber"><span
+                            jhiTranslate="shieldApp.appointment.licensePlateNumber">License Plate Number</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="driver"><span jhiTranslate="shieldApp.appointment.driver">Driver</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="number"><span jhiTranslate="shieldApp.appointment.number">Number</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="queueNumber"><span
+                            jhiTranslate="shieldApp.appointment.queueNumber">Queue Number</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="valid"><span jhiTranslate="shieldApp.appointment.valid">Valid</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="status"><span jhiTranslate="shieldApp.appointment.status">Status</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+
+                        <th jhiSortBy="vip"><span jhiTranslate="shieldApp.appointment.vip">Vip</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <!--<th jhiSortBy="createTime"><span jhiTranslate="shieldApp.appointment.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+                        <!--<th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.appointment.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+                        <th jhiSortBy="startTime"><span jhiTranslate="shieldApp.appointment.startTime">Start Time</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="enterTime"><span jhiTranslate="shieldApp.appointment.enterTime">Enter Time</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="leaveTime"><span jhiTranslate="shieldApp.appointment.leaveTime">Leave Time</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="regionName"><span jhiTranslate="shieldApp.appointment.region">Region</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="userLogin"><span jhiTranslate="shieldApp.appointment.user">User</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let appointment of appointments ;trackBy: trackId">
+                        <td><a [routerLink]="['/appointment', appointment.id, 'view' ]">{{appointment.id}}</a></td>
+                        <td>{{appointment.licensePlateNumber}}</td>
+                        <td>{{appointment.driver}}</td>
+                        <td>{{appointment.number}}</td>
+                        <td>{{appointment.queueNumber}}</td>
+
+                        <td>
+                            <!--{{appointment.valid}}-->
+                            <span class="badge badge-success" *ngIf="appointment.valid">有效</span>
+                            <span class="badge badge-secondary" *ngIf="!appointment.valid">无效</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-info" *ngIf="appointment.status=='CREATE'"
+                                  jhiTranslate="{{'shieldApp.AppointmentStatus.CREATE'}}">{{appointment.status}}</span>
+                            <span class="badge badge-warning" *ngIf="appointment.status=='WAIT'"
+                                  jhiTranslate="{{'shieldApp.AppointmentStatus.WAIT'}}">{{appointment.status}}</span>
+                            <span class="badge badge-success" *ngIf="appointment.status=='START'"
+                                  jhiTranslate="{{'shieldApp.AppointmentStatus.START'}}">{{appointment.status}}</span>
+                            <span class="badge badge-primary" *ngIf="appointment.status=='ENTER'"
+                                  jhiTranslate="{{'shieldApp.AppointmentStatus.ENTER'}}">{{appointment.status}}</span>
+                            <span class="badge badge-secondary" *ngIf="appointment.status=='LEAVE'"
+                                  jhiTranslate="{{'shieldApp.AppointmentStatus.LEAVE'}}">{{appointment.status}}</span>
+                        </td>
+                        <td>
+                            <!--{{appointment.vip}}-->
+                            <span class="badge badge-success" *ngIf="appointment.vip">是</span>
+
+                        </td>
+                        <!--<td>{{appointment.createTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
+                        <!--<td>{{appointment.updateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
+                        <td>{{appointment.startTime | date:'yyyy-MM-dd HH:mm'}}</td>
+                        <td>{{appointment.enterTime | date:'yyyy-MM-dd HH:mm'}}</td>
+                        <td>{{appointment.leaveTime | date:'yyyy-MM-dd HH:mm'}}</td>
+                        <td>
+                            <div *ngIf="appointment.regionId">
+                                <a [routerLink]="['../region', appointment.regionId , 'view' ]">{{appointment.regionName}}</a>
+                            </div>
+                        </td>
+                        <td>
+                            {{appointment.userLogin}}
+                        </td>
+                        <td class="text-right">
+                            <div class="btn-group">
+                                <button type="submit"
+                                        [routerLink]="['/appointment', appointment.id, 'view' ]"
+                                        class="btn btn-info btn-sm">
+                                    <fa-icon [icon]="'eye'"></fa-icon>
+                                    <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                                </button>
+                                <button type="submit"
+                                        [routerLink]="['/appointment', appointment.id, 'edit']"
+                                        class="btn btn-primary btn-sm">
+                                    <fa-icon [icon]="'pencil-alt'"></fa-icon>
+                                    <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+                                </button>
+                                <button type="submit"
+                                        [routerLink]="['/', 'appointment', { outlets: { popup: appointment.id + '/delete'} }]"
+                                        replaceUrl="true"
+                                        queryParamsHandling="merge"
+                                        class="btn btn-danger btn-sm">
+                                    <fa-icon [icon]="'times'"></fa-icon>
+                                    <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div *ngIf="appointments && appointments.length">
+                <div class="row justify-content-center">
+                    <jhi-item-count [page]="page" [total]="totalItems" [maxSize]="5"
+                                    [itemsPerPage]="itemsPerPage"></jhi-item-count>
+                </div>
+                <div class="row justify-content-center">
+                    <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage"
+                                    [maxSize]="5"
+                                    [rotate]="true" [boundaryLinks]="true"
+                                    (pageChange)="loadPage(page)"></ngb-pagination>
+                </div>
+            </div>
         </div>
-        <div class="row justify-content-center">
-            <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" (pageChange)="loadPage(page)"></ngb-pagination>
-        </div>
-    </div>
+    </div><!-- END card-->
+
+
 </div>

@@ -95,6 +95,9 @@ public class CarQueryService extends QueryService<Car> {
             if (criteria.getDriver() != null) {
                 specification = specification.and(buildStringSpecification(criteria.getDriver(), Car_.driver));
             }
+            if (criteria.getPhone() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getPhone(), Car_.phone));
+            }
             if (criteria.getCreateTime() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getCreateTime(), Car_.createTime));
             }

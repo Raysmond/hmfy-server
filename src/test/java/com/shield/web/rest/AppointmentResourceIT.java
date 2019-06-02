@@ -82,6 +82,9 @@ public class AppointmentResourceIT {
     private static final ZonedDateTime DEFAULT_LEAVE_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
     private static final ZonedDateTime UPDATED_LEAVE_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
 
+    private static final ZonedDateTime DEFAULT_EXPIRE_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
+    private static final ZonedDateTime UPDATED_EXPIRE_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+
     @Autowired
     private AppointmentRepository appointmentRepository;
 
@@ -144,7 +147,8 @@ public class AppointmentResourceIT {
             .updateTime(DEFAULT_UPDATE_TIME)
             .startTime(DEFAULT_START_TIME)
             .enterTime(DEFAULT_ENTER_TIME)
-            .leaveTime(DEFAULT_LEAVE_TIME);
+            .leaveTime(DEFAULT_LEAVE_TIME)
+            .expireTime(DEFAULT_EXPIRE_TIME);
         // Add required entity
         Region region;
         if (TestUtil.findAll(em, Region.class).isEmpty()) {
@@ -181,7 +185,8 @@ public class AppointmentResourceIT {
             .updateTime(UPDATED_UPDATE_TIME)
             .startTime(UPDATED_START_TIME)
             .enterTime(UPDATED_ENTER_TIME)
-            .leaveTime(UPDATED_LEAVE_TIME);
+            .leaveTime(UPDATED_LEAVE_TIME)
+            .expireTime(UPDATED_EXPIRE_TIME);
         // Add required entity
         Region region;
         if (TestUtil.findAll(em, Region.class).isEmpty()) {
@@ -233,6 +238,7 @@ public class AppointmentResourceIT {
         assertThat(testAppointment.getStartTime()).isEqualTo(DEFAULT_START_TIME);
         assertThat(testAppointment.getEnterTime()).isEqualTo(DEFAULT_ENTER_TIME);
         assertThat(testAppointment.getLeaveTime()).isEqualTo(DEFAULT_LEAVE_TIME);
+        assertThat(testAppointment.getExpireTime()).isEqualTo(DEFAULT_EXPIRE_TIME);
     }
 
     @Test
@@ -281,25 +287,6 @@ public class AppointmentResourceIT {
         int databaseSizeBeforeTest = appointmentRepository.findAll().size();
         // set the field null
         appointment.setDriver(null);
-
-        // Create the Appointment, which fails.
-        AppointmentDTO appointmentDTO = appointmentMapper.toDto(appointment);
-
-        restAppointmentMockMvc.perform(post("/api/appointments")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(appointmentDTO)))
-            .andExpect(status().isBadRequest());
-
-        List<Appointment> appointmentList = appointmentRepository.findAll();
-        assertThat(appointmentList).hasSize(databaseSizeBeforeTest);
-    }
-
-    @Test
-    @Transactional
-    public void checkNumberIsRequired() throws Exception {
-        int databaseSizeBeforeTest = appointmentRepository.findAll().size();
-        // set the field null
-        appointment.setNumber(null);
 
         // Create the Appointment, which fails.
         AppointmentDTO appointmentDTO = appointmentMapper.toDto(appointment);
@@ -392,7 +379,8 @@ public class AppointmentResourceIT {
             .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
             .andExpect(jsonPath("$.[*].startTime").value(hasItem(sameInstant(DEFAULT_START_TIME))))
             .andExpect(jsonPath("$.[*].enterTime").value(hasItem(sameInstant(DEFAULT_ENTER_TIME))))
-            .andExpect(jsonPath("$.[*].leaveTime").value(hasItem(sameInstant(DEFAULT_LEAVE_TIME))));
+            .andExpect(jsonPath("$.[*].leaveTime").value(hasItem(sameInstant(DEFAULT_LEAVE_TIME))))
+            .andExpect(jsonPath("$.[*].expireTime").value(hasItem(sameInstant(DEFAULT_EXPIRE_TIME))));
     }
     
     @Test
@@ -417,7 +405,8 @@ public class AppointmentResourceIT {
             .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)))
             .andExpect(jsonPath("$.startTime").value(sameInstant(DEFAULT_START_TIME)))
             .andExpect(jsonPath("$.enterTime").value(sameInstant(DEFAULT_ENTER_TIME)))
-            .andExpect(jsonPath("$.leaveTime").value(sameInstant(DEFAULT_LEAVE_TIME)));
+            .andExpect(jsonPath("$.leaveTime").value(sameInstant(DEFAULT_LEAVE_TIME)))
+            .andExpect(jsonPath("$.expireTime").value(sameInstant(DEFAULT_EXPIRE_TIME)));
     }
 
     @Test
@@ -1079,6 +1068,72 @@ public class AppointmentResourceIT {
 
     @Test
     @Transactional
+    public void getAllAppointmentsByExpireTimeIsEqualToSomething() throws Exception {
+        // Initialize the database
+        appointmentRepository.saveAndFlush(appointment);
+
+        // Get all the appointmentList where expireTime equals to DEFAULT_EXPIRE_TIME
+        defaultAppointmentShouldBeFound("expireTime.equals=" + DEFAULT_EXPIRE_TIME);
+
+        // Get all the appointmentList where expireTime equals to UPDATED_EXPIRE_TIME
+        defaultAppointmentShouldNotBeFound("expireTime.equals=" + UPDATED_EXPIRE_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllAppointmentsByExpireTimeIsInShouldWork() throws Exception {
+        // Initialize the database
+        appointmentRepository.saveAndFlush(appointment);
+
+        // Get all the appointmentList where expireTime in DEFAULT_EXPIRE_TIME or UPDATED_EXPIRE_TIME
+        defaultAppointmentShouldBeFound("expireTime.in=" + DEFAULT_EXPIRE_TIME + "," + UPDATED_EXPIRE_TIME);
+
+        // Get all the appointmentList where expireTime equals to UPDATED_EXPIRE_TIME
+        defaultAppointmentShouldNotBeFound("expireTime.in=" + UPDATED_EXPIRE_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllAppointmentsByExpireTimeIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        appointmentRepository.saveAndFlush(appointment);
+
+        // Get all the appointmentList where expireTime is not null
+        defaultAppointmentShouldBeFound("expireTime.specified=true");
+
+        // Get all the appointmentList where expireTime is null
+        defaultAppointmentShouldNotBeFound("expireTime.specified=false");
+    }
+
+    @Test
+    @Transactional
+    public void getAllAppointmentsByExpireTimeIsGreaterThanOrEqualToSomething() throws Exception {
+        // Initialize the database
+        appointmentRepository.saveAndFlush(appointment);
+
+        // Get all the appointmentList where expireTime greater than or equals to DEFAULT_EXPIRE_TIME
+        defaultAppointmentShouldBeFound("expireTime.greaterOrEqualThan=" + DEFAULT_EXPIRE_TIME);
+
+        // Get all the appointmentList where expireTime greater than or equals to UPDATED_EXPIRE_TIME
+        defaultAppointmentShouldNotBeFound("expireTime.greaterOrEqualThan=" + UPDATED_EXPIRE_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllAppointmentsByExpireTimeIsLessThanSomething() throws Exception {
+        // Initialize the database
+        appointmentRepository.saveAndFlush(appointment);
+
+        // Get all the appointmentList where expireTime less than or equals to DEFAULT_EXPIRE_TIME
+        defaultAppointmentShouldNotBeFound("expireTime.lessThan=" + DEFAULT_EXPIRE_TIME);
+
+        // Get all the appointmentList where expireTime less than or equals to UPDATED_EXPIRE_TIME
+        defaultAppointmentShouldBeFound("expireTime.lessThan=" + UPDATED_EXPIRE_TIME);
+    }
+
+
+    @Test
+    @Transactional
     public void getAllAppointmentsByRegionIsEqualToSomething() throws Exception {
         // Get already existing entity
         Region region = appointment.getRegion();
@@ -1127,7 +1182,8 @@ public class AppointmentResourceIT {
             .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
             .andExpect(jsonPath("$.[*].startTime").value(hasItem(sameInstant(DEFAULT_START_TIME))))
             .andExpect(jsonPath("$.[*].enterTime").value(hasItem(sameInstant(DEFAULT_ENTER_TIME))))
-            .andExpect(jsonPath("$.[*].leaveTime").value(hasItem(sameInstant(DEFAULT_LEAVE_TIME))));
+            .andExpect(jsonPath("$.[*].leaveTime").value(hasItem(sameInstant(DEFAULT_LEAVE_TIME))))
+            .andExpect(jsonPath("$.[*].expireTime").value(hasItem(sameInstant(DEFAULT_EXPIRE_TIME))));
 
         // Check, that the count call also returns 1
         restAppointmentMockMvc.perform(get("/api/appointments/count?sort=id,desc&" + filter))
@@ -1186,7 +1242,8 @@ public class AppointmentResourceIT {
             .updateTime(UPDATED_UPDATE_TIME)
             .startTime(UPDATED_START_TIME)
             .enterTime(UPDATED_ENTER_TIME)
-            .leaveTime(UPDATED_LEAVE_TIME);
+            .leaveTime(UPDATED_LEAVE_TIME)
+            .expireTime(UPDATED_EXPIRE_TIME);
         AppointmentDTO appointmentDTO = appointmentMapper.toDto(updatedAppointment);
 
         restAppointmentMockMvc.perform(put("/api/appointments")
@@ -1210,6 +1267,7 @@ public class AppointmentResourceIT {
         assertThat(testAppointment.getStartTime()).isEqualTo(UPDATED_START_TIME);
         assertThat(testAppointment.getEnterTime()).isEqualTo(UPDATED_ENTER_TIME);
         assertThat(testAppointment.getLeaveTime()).isEqualTo(UPDATED_LEAVE_TIME);
+        assertThat(testAppointment.getExpireTime()).isEqualTo(UPDATED_EXPIRE_TIME);
     }
 
     @Test

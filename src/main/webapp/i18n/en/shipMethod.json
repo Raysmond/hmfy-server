@@ -1,0 +1,10 @@
+{
+  "shieldApp": {
+    "ShipMethod": {
+      "null": "",
+      "LAND": "LAND",
+      "AIR": "AIR",
+      "WATER": "WATER"
+    }
+  }
+}

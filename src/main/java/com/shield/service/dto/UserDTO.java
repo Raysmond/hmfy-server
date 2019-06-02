@@ -21,8 +21,8 @@ public class UserDTO {
     private Long id;
 
     @NotBlank
-    @Pattern(regexp = Constants.LOGIN_REGEX)
-    @Size(min = 1, max = 50)
+//    @Pattern(regexp = Constants.LOGIN_REGEX)
+    @Size(min = 2, max = 50)
     private String login;
 
     @Size(max = 50)
@@ -55,6 +55,10 @@ public class UserDTO {
 
     private WxMaUserDTO userInfo;
 
+    private Long regionId;
+
+    private String regionName;
+
     public UserDTO() {
         // Empty constructor needed for Jackson.
     }
@@ -75,6 +79,23 @@ public class UserDTO {
         this.authorities = user.getAuthorities().stream()
             .map(Authority::getName)
             .collect(Collectors.toSet());
+        if (null != user.getWxMaUser()) {
+            this.userInfo = new WxMaUserDTO();
+            this.userInfo.setOpenId(user.getWxMaUser().getOpenId());
+            this.userInfo.setUnionId(user.getWxMaUser().getUnionId());
+            this.userInfo.setNickName(user.getWxMaUser().getNickName());
+            this.userInfo.setCreateTime(user.getWxMaUser().getCreateTime());
+            this.userInfo.setGender(user.getWxMaUser().getGender());
+            this.userInfo.setAvatarUrl(user.getWxMaUser().getAvatarUrl());
+            this.userInfo.setLanguage(user.getWxMaUser().getLanguage());
+            this.userInfo.setCountry(user.getWxMaUser().getCountry());
+            this.userInfo.setProvince(user.getWxMaUser().getProvince());
+            this.userInfo.setCity(user.getWxMaUser().getCity());
+        }
+        if (null != user.getRegion()) {
+            this.regionId = user.getRegion().getId();
+            this.regionName = user.getRegion().getName();
+        }
     }
 
     public WxMaUserDTO getUserInfo() {
@@ -83,6 +104,22 @@ public class UserDTO {
 
     public void setUserInfo(WxMaUserDTO userInfo) {
         this.userInfo = userInfo;
+    }
+
+    public String getRegionName() {
+        return regionName;
+    }
+
+    public void setRegionName(String regionName) {
+        this.regionName = regionName;
+    }
+
+    public Long getRegionId() {
+        return regionId;
+    }
+
+    public void setRegionId(Long regionId) {
+        this.regionId = regionId;
     }
 
     public Long getId() {

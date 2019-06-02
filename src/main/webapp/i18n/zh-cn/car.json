@@ -17,6 +17,7 @@
       },
       "licensePlateNumber": "车牌号",
       "driver": "司机",
+      "phone": "联系电话",
       "createTime": "创建时间",
       "updateTime": "更新时间",
       "user": "用户"

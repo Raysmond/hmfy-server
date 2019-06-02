@@ -1,0 +1,83 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div *ngIf="shipPlan">
+            <h2><span jhiTranslate="shieldApp.shipPlan.detail.title">Ship Plan</span> {{shipPlan.id}}</h2>
+            <hr>
+            <jhi-alert-error></jhi-alert-error>
+            <dl class="row-md jh-entity-details">
+                <dt><span jhiTranslate="shieldApp.shipPlan.company">Company</span></dt>
+                <dd>
+                    <span>{{shipPlan.company}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.shipPlan.demandedAmount">Demanded Amount</span></dt>
+                <dd>
+                    <span>{{shipPlan.demandedAmount}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.shipPlan.finishAmount">Finish Amount</span></dt>
+                <dd>
+                    <span>{{shipPlan.finishAmount}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.shipPlan.remainAmount">Remain Amount</span></dt>
+                <dd>
+                    <span>{{shipPlan.remainAmount}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.shipPlan.availableAmount">Available Amount</span></dt>
+                <dd>
+                    <span>{{shipPlan.availableAmount}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.shipPlan.shipMethond">Ship Methond</span></dt>
+                <dd>
+                    <span jhiTranslate="{{'shieldApp.ShipMethod.' + shipPlan.shipMethond}}">{{shipPlan.shipMethond}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.shipPlan.shipNumber">Ship Number</span></dt>
+                <dd>
+                    <span>{{shipPlan.shipNumber}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.shipPlan.endTime">End Time</span></dt>
+                <dd>
+                    <span>{{shipPlan.endTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.shipPlan.createTime">Create Time</span></dt>
+                <dd>
+                    <span>{{shipPlan.createTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.shipPlan.updateTime">Update Time</span></dt>
+                <dd>
+                    <span>{{shipPlan.updateTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.shipPlan.licensePlateNumber">License Plate Number</span></dt>
+                <dd>
+                    <span>{{shipPlan.licensePlateNumber}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.shipPlan.driver">Driver</span></dt>
+                <dd>
+                    <span>{{shipPlan.driver}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.shipPlan.phone">Phone</span></dt>
+                <dd>
+                    <span>{{shipPlan.phone}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.shipPlan.user">User</span></dt>
+                <dd>
+                    {{shipPlan.userLogin}}
+                </dd>
+                <dt><span jhiTranslate="shieldApp.shipPlan.toUser">To User</span></dt>
+                <dd>
+                    {{shipPlan.toUserLogin}}
+                </dd>
+            </dl>
+
+            <button type="submit"
+                    (click)="previousState()"
+                    class="btn btn-info">
+                <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+            </button>
+
+            <button type="button"
+                    [routerLink]="['/ship-plan', shipPlan.id, 'edit']"
+                    class="btn btn-primary">
+                <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+            </button>
+        </div>
+    </div>
+</div>

@@ -20,13 +20,16 @@ export class RegionUpdateComponent implements OnInit {
     id: [],
     name: [null, [Validators.required]],
     quota: [null, [Validators.required, Validators.min(0)]],
+    vipQuota: [null, [Validators.required, Validators.min(0)]],
     startTime: [],
     endTime: [],
     days: [],
     open: [],
+    validTime: [null, [Validators.required, Validators.min(0)]],
+    queueQuota: [null, [Validators.required, Validators.min(0)]],
+    queueValidTime: [null, [Validators.required, Validators.min(0)]],
     createTime: [],
-    updateTime: [],
-    validTime: [null, [Validators.required]]
+    updateTime: []
   });
 
   constructor(protected regionService: RegionService, protected activatedRoute: ActivatedRoute, private fb: FormBuilder) {}
@@ -44,13 +47,16 @@ export class RegionUpdateComponent implements OnInit {
       id: region.id,
       name: region.name,
       quota: region.quota,
+      vipQuota: region.vipQuota,
       startTime: region.startTime,
       endTime: region.endTime,
       days: region.days,
       open: region.open,
+      validTime: region.validTime,
+      queueQuota: region.queueQuota,
+      queueValidTime: region.queueValidTime,
       createTime: region.createTime != null ? region.createTime.format(DATE_TIME_FORMAT) : null,
-      updateTime: region.updateTime != null ? region.updateTime.format(DATE_TIME_FORMAT) : null,
-      validTime: region.validTime
+      updateTime: region.updateTime != null ? region.updateTime.format(DATE_TIME_FORMAT) : null
     });
   }
 
@@ -74,15 +80,18 @@ export class RegionUpdateComponent implements OnInit {
       id: this.editForm.get(['id']).value,
       name: this.editForm.get(['name']).value,
       quota: this.editForm.get(['quota']).value,
+      vipQuota: this.editForm.get(['vipQuota']).value,
       startTime: this.editForm.get(['startTime']).value,
       endTime: this.editForm.get(['endTime']).value,
       days: this.editForm.get(['days']).value,
       open: this.editForm.get(['open']).value,
+      validTime: this.editForm.get(['validTime']).value,
+      queueQuota: this.editForm.get(['queueQuota']).value,
+      queueValidTime: this.editForm.get(['queueValidTime']).value,
       createTime:
         this.editForm.get(['createTime']).value != null ? moment(this.editForm.get(['createTime']).value, DATE_TIME_FORMAT) : undefined,
       updateTime:
-        this.editForm.get(['updateTime']).value != null ? moment(this.editForm.get(['updateTime']).value, DATE_TIME_FORMAT) : undefined,
-      validTime: this.editForm.get(['validTime']).value
+        this.editForm.get(['updateTime']).value != null ? moment(this.editForm.get(['updateTime']).value, DATE_TIME_FORMAT) : undefined
     };
     return entity;
   }

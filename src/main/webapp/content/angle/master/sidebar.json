@@ -1,0 +1,29 @@
+{
+  "sidebar": [
+    {
+      "text": "Menu Navigation",
+      "heading": "true",
+      "translate": "sidebar.heading.HEADER"
+    },
+    {
+      "text": "Single View",
+      "href": "singleview.html",
+      "icon": "far fa-file",
+      "translate": "sidebar.nav.SINGLEVIEW"
+    },
+    {
+      "text": "Menu",
+      "icon": "icon-speedometer",
+      "href": "#submenu",
+      "translate": "sidebar.nav.menu.MENU",
+      "label": { "value": 1, "color": "info" },
+      "submenu": [
+        {
+          "text": "Submenu",
+          "translate": "sidebar.nav.menu.SUBMENU",
+          "href": "submenu.html"
+        }
+      ]
+    }
+  ]
+}

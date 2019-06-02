@@ -1,0 +1,83 @@
+<nav class="sidebar" data-sidebar-anyclick-close="">
+    <!-- START sidebar nav-->
+    <ul class="sidebar-nav" [ngSwitch]="isAuthenticated()">
+        <!-- START user info-->
+        <li class="has-user-block">
+            <div class="collapse" id="user-block">
+                <div class="item user-block">
+                    <!-- User picture-->
+                    <div class="user-block-picture">
+                        <div class="user-block-status">
+                            <img class="img-thumbnail rounded-circle"
+                                 src="/content/angle/app/img/user/02.jpg" alt="Avatar" width="60"
+                                 height="60">
+                            <div class="circle bg-success circle-lg"></div>
+                        </div>
+                    </div><!-- Name and Job-->
+                    <div class="user-block-info"><span class="user-block-name">Hello, Mike</span><span
+                        class="user-block-role">Designer</span></div>
+                </div>
+            </div>
+        </li><!-- END user info-->
+        <!-- Iterates over all sidebar items-->
+        <li class="nav-heading "><span data-localize="sidebar.heading.HEADER">Menu Navigation</span></li>
+        <li class="active">
+            <a routerLink="/" title="Single View">
+                <em class="icon-speedometer"></em>
+                <span jhiTranslate="global.menu.home">Home</span>
+            </a>
+        </li>
+        <li>
+            <a  routerLink="region">
+                <em class="icon-home"></em>
+                <span jhiTranslate="global.menu.entities.region">Region</span>
+            </a>
+        </li>
+        <li>
+            <a  routerLink="appointment">
+                <em class="icon-grid"></em>
+                <span jhiTranslate="global.menu.entities.appointment">Appointment</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="ship-plan" >
+                <em class="icon-note"></em>
+                <span jhiTranslate="global.menu.entities.shipPlan">Ship Plan</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="car">
+                <em class="icon-grid"></em>
+                <span jhiTranslate="global.menu.entities.car">Car</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="admin/user-management" >
+                <!--<fa-icon icon="user" fixedWidth="true"></fa-icon>-->
+                <em class="icon-user"></em>
+                <span jhiTranslate="global.menu.admin.userManagement">User management</span>
+            </a>
+        </li>
+        <li>
+            <a  routerLink="admin/jhi-metrics" >
+                <em class="icon-cup"></em>
+                <span jhiTranslate="global.menu.admin.metrics">Metrics</span>
+            </a>
+        </li>
+
+        <!--<li>-->
+            <!--<a class="dropdown-item" routerLink="wx-ma-user" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="collapseNavbar()">-->
+                <!--<fa-icon icon="asterisk" fixedWidth="true"></fa-icon>-->
+                <!--<span jhiTranslate="global.menu.entities.wxMaUser">Wx Ma User</span>-->
+            <!--</a>-->
+        <!--</li>-->
+        <li class=" "><a href="#submenu" title="Menu" data-toggle="collapse"><em
+            class="icon-speedometer"></em><span data-localize="sidebar.nav.menu.MENU">Menu</span></a>
+            <ul class="sidebar-nav sidebar-subnav collapse" id="submenu">
+                <li class="sidebar-subnav-header">Menu</li>
+                <li class=" "><a href="submenu.html" title="Submenu"><span
+                    data-localize="sidebar.nav.menu.SUBMENU">Submenu</span></a></li>
+            </ul>
+        </li>
+    </ul><!-- END sidebar nav-->
+</nav>

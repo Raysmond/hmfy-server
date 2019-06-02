@@ -17,6 +17,7 @@
       },
       "licensePlateNumber": "License Plate Number",
       "driver": "Driver",
+      "phone": "Phone",
       "createTime": "Create Time",
       "updateTime": "Update Time",
       "user": "User"

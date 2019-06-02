@@ -2,6 +2,7 @@ package com.shield.service;
 
 import com.shield.config.Constants;
 import com.shield.domain.Authority;
+import com.shield.domain.Region;
 import com.shield.domain.User;
 import com.shield.repository.AuthorityRepository;
 import com.shield.repository.UserRepository;
@@ -123,9 +124,9 @@ public class UserService {
         return newUser;
     }
 
-    private boolean removeNonActivatedUser(User existingUser){
+    private boolean removeNonActivatedUser(User existingUser) {
         if (existingUser.getActivated()) {
-             return false;
+            return false;
         }
         userRepository.delete(existingUser);
         userRepository.flush();
@@ -207,6 +208,13 @@ public class UserService {
                 user.setImageUrl(userDTO.getImageUrl());
                 user.setActivated(userDTO.isActivated());
                 user.setLangKey(userDTO.getLangKey());
+                if (userDTO.getRegionId() != null) {
+                    Region region = new Region();
+                    region.setId(userDTO.getRegionId());
+                    user.setRegion(region);
+                } else {
+                    user.setRegion(null);
+                }
                 Set<Authority> managedAuthorities = user.getAuthorities();
                 managedAuthorities.clear();
                 userDTO.getAuthorities().stream()
@@ -282,6 +290,7 @@ public class UserService {
 
     /**
      * Gets a list of all the authorities.
+     *
      * @return a list of all the authorities.
      */
     public List<String> getAuthorities() {

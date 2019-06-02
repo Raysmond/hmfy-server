@@ -59,6 +59,30 @@ import { RouterModule } from '@angular/router';
       {
         path: 'region',
         loadChildren: './region/region.module#ShieldRegionModule'
+      },
+      {
+        path: 'ship-plan',
+        loadChildren: './ship-plan/ship-plan.module#ShieldShipPlanModule'
+      },
+      {
+        path: 'region',
+        loadChildren: './region/region.module#ShieldRegionModule'
+      },
+      {
+        path: 'appointment',
+        loadChildren: './appointment/appointment.module#ShieldAppointmentModule'
+      },
+      {
+        path: 'ship-plan',
+        loadChildren: './ship-plan/ship-plan.module#ShieldShipPlanModule'
+      },
+      {
+        path: 'car',
+        loadChildren: './car/car.module#ShieldCarModule'
+      },
+      {
+        path: 'car',
+        loadChildren: './car/car.module#ShieldCarModule'
       }
       /* jhipster-needle-add-entity-route - JHipster will add entity modules routes here */
     ])

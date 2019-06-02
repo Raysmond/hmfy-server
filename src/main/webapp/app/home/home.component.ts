@@ -2,7 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { JhiEventManager } from 'ng-jhipster';
 
+import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+import { SERVER_API_URL } from 'app/app.constants';
+
 import { LoginModalService, AccountService, Account } from 'app/core';
+import { HomeService } from './home.service';
+import { IRegionStat } from './home.model';
 
 @Component({
   selector: 'jhi-home',
@@ -13,10 +20,14 @@ export class HomeComponent implements OnInit {
   account: Account;
   modalRef: NgbModalRef;
 
+  public resourceUrl = SERVER_API_URL + 'api/admin-dashboard';
+
   constructor(
     private accountService: AccountService,
     private loginModalService: LoginModalService,
-    private eventManager: JhiEventManager
+    private eventManager: JhiEventManager,
+    private homeService: HomeService,
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
@@ -24,6 +35,15 @@ export class HomeComponent implements OnInit {
       this.account = account;
     });
     this.registerAuthenticationSuccess();
+
+    this.http.get(`${this.resourceUrl}/region-stats`).subscribe(
+      (res: HttpResponse<any>) => {
+        console.log(res);
+      },
+      (res: HttpErrorResponse) => {
+        console.log(res.message);
+      }
+    );
   }
 
   registerAuthenticationSuccess() {

@@ -70,6 +70,9 @@ public class Appointment implements Serializable {
     @Column(name = "leave_time")
     private ZonedDateTime leaveTime;
 
+    @Column(name = "expire_time")
+    private ZonedDateTime expireTime;
+
     @ManyToOne(optional = false)
     @NotNull
     @JsonIgnoreProperties("appointments")
@@ -245,6 +248,19 @@ public class Appointment implements Serializable {
         this.leaveTime = leaveTime;
     }
 
+    public ZonedDateTime getExpireTime() {
+        return expireTime;
+    }
+
+    public Appointment expireTime(ZonedDateTime expireTime) {
+        this.expireTime = expireTime;
+        return this;
+    }
+
+    public void setExpireTime(ZonedDateTime expireTime) {
+        this.expireTime = expireTime;
+    }
+
     public Region getRegion() {
         return region;
     }
@@ -304,6 +320,7 @@ public class Appointment implements Serializable {
             ", startTime='" + getStartTime() + "'" +
             ", enterTime='" + getEnterTime() + "'" +
             ", leaveTime='" + getLeaveTime() + "'" +
+            ", expireTime='" + getExpireTime() + "'" +
             "}";
     }
 }

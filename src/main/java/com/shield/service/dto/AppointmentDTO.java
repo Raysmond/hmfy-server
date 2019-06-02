@@ -18,7 +18,6 @@ public class AppointmentDTO implements Serializable {
     @NotNull
     private String driver;
 
-    @NotNull
     private Integer number;
 
     @NotNull
@@ -41,6 +40,8 @@ public class AppointmentDTO implements Serializable {
     private ZonedDateTime enterTime;
 
     private ZonedDateTime leaveTime;
+
+    private ZonedDateTime expireTime;
 
 
     private Long regionId;
@@ -155,6 +156,14 @@ public class AppointmentDTO implements Serializable {
         this.leaveTime = leaveTime;
     }
 
+    public ZonedDateTime getExpireTime() {
+        return expireTime;
+    }
+
+    public void setExpireTime(ZonedDateTime expireTime) {
+        this.expireTime = expireTime;
+    }
+
     public Long getRegionId() {
         return regionId;
     }
@@ -224,6 +233,7 @@ public class AppointmentDTO implements Serializable {
             ", startTime='" + getStartTime() + "'" +
             ", enterTime='" + getEnterTime() + "'" +
             ", leaveTime='" + getLeaveTime() + "'" +
+            ", expireTime='" + getExpireTime() + "'" +
             ", region=" + getRegionId() +
             ", region='" + getRegionName() + "'" +
             ", user=" + getUserId() +

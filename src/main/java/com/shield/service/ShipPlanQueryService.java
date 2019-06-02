@@ -1,0 +1,142 @@
+package com.shield.service;
+
+import java.util.List;
+
+import javax.persistence.criteria.JoinType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import io.github.jhipster.service.QueryService;
+
+import com.shield.domain.ShipPlan;
+import com.shield.domain.*; // for static metamodels
+import com.shield.repository.ShipPlanRepository;
+import com.shield.service.dto.ShipPlanCriteria;
+import com.shield.service.dto.ShipPlanDTO;
+import com.shield.service.mapper.ShipPlanMapper;
+
+/**
+ * Service for executing complex queries for {@link ShipPlan} entities in the database.
+ * The main input is a {@link ShipPlanCriteria} which gets converted to {@link Specification},
+ * in a way that all the filters must apply.
+ * It returns a {@link List} of {@link ShipPlanDTO} or a {@link Page} of {@link ShipPlanDTO} which fulfills the criteria.
+ */
+@Service
+@Transactional(readOnly = true)
+public class ShipPlanQueryService extends QueryService<ShipPlan> {
+
+    private final Logger log = LoggerFactory.getLogger(ShipPlanQueryService.class);
+
+    private final ShipPlanRepository shipPlanRepository;
+
+    private final ShipPlanMapper shipPlanMapper;
+
+    public ShipPlanQueryService(ShipPlanRepository shipPlanRepository, ShipPlanMapper shipPlanMapper) {
+        this.shipPlanRepository = shipPlanRepository;
+        this.shipPlanMapper = shipPlanMapper;
+    }
+
+    /**
+     * Return a {@link List} of {@link ShipPlanDTO} which matches the criteria from the database.
+     * @param criteria The object which holds all the filters, which the entities should match.
+     * @return the matching entities.
+     */
+    @Transactional(readOnly = true)
+    public List<ShipPlanDTO> findByCriteria(ShipPlanCriteria criteria) {
+        log.debug("find by criteria : {}", criteria);
+        final Specification<ShipPlan> specification = createSpecification(criteria);
+        return shipPlanMapper.toDto(shipPlanRepository.findAll(specification));
+    }
+
+    /**
+     * Return a {@link Page} of {@link ShipPlanDTO} which matches the criteria from the database.
+     * @param criteria The object which holds all the filters, which the entities should match.
+     * @param page The page, which should be returned.
+     * @return the matching entities.
+     */
+    @Transactional(readOnly = true)
+    public Page<ShipPlanDTO> findByCriteria(ShipPlanCriteria criteria, Pageable page) {
+        log.debug("find by criteria : {}, page: {}", criteria, page);
+        final Specification<ShipPlan> specification = createSpecification(criteria);
+        return shipPlanRepository.findAll(specification, page)
+            .map(shipPlanMapper::toDto);
+    }
+
+    /**
+     * Return the number of matching entities in the database.
+     * @param criteria The object which holds all the filters, which the entities should match.
+     * @return the number of matching entities.
+     */
+    @Transactional(readOnly = true)
+    public long countByCriteria(ShipPlanCriteria criteria) {
+        log.debug("count by criteria : {}", criteria);
+        final Specification<ShipPlan> specification = createSpecification(criteria);
+        return shipPlanRepository.count(specification);
+    }
+
+    /**
+     * Function to convert ShipPlanCriteria to a {@link Specification}.
+     */
+    private Specification<ShipPlan> createSpecification(ShipPlanCriteria criteria) {
+        Specification<ShipPlan> specification = Specification.where(null);
+        if (criteria != null) {
+            if (criteria.getId() != null) {
+                specification = specification.and(buildSpecification(criteria.getId(), ShipPlan_.id));
+            }
+            if (criteria.getCompany() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getCompany(), ShipPlan_.company));
+            }
+            if (criteria.getDemandedAmount() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getDemandedAmount(), ShipPlan_.demandedAmount));
+            }
+            if (criteria.getFinishAmount() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getFinishAmount(), ShipPlan_.finishAmount));
+            }
+            if (criteria.getRemainAmount() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getRemainAmount(), ShipPlan_.remainAmount));
+            }
+            if (criteria.getAvailableAmount() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getAvailableAmount(), ShipPlan_.availableAmount));
+            }
+            if (criteria.getShipMethond() != null) {
+                specification = specification.and(buildSpecification(criteria.getShipMethond(), ShipPlan_.shipMethond));
+            }
+            if (criteria.getShipNumber() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getShipNumber(), ShipPlan_.shipNumber));
+            }
+            if (criteria.getEndTime() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getEndTime(), ShipPlan_.endTime));
+            }
+            if (criteria.getCreateTime() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getCreateTime(), ShipPlan_.createTime));
+            }
+            if (criteria.getUpdateTime() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getUpdateTime(), ShipPlan_.updateTime));
+            }
+            if (criteria.getLicensePlateNumber() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getLicensePlateNumber(), ShipPlan_.licensePlateNumber));
+            }
+            if (criteria.getDriver() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getDriver(), ShipPlan_.driver));
+            }
+            if (criteria.getPhone() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getPhone(), ShipPlan_.phone));
+            }
+            if (criteria.getUserId() != null) {
+                specification = specification.and(buildSpecification(criteria.getUserId(),
+                    root -> root.join(ShipPlan_.user, JoinType.LEFT).get(User_.id)));
+            }
+            if (criteria.getToUserId() != null) {
+                specification = specification.and(buildSpecification(criteria.getToUserId(),
+                    root -> root.join(ShipPlan_.toUser, JoinType.LEFT).get(User_.id)));
+            }
+        }
+        return specification;
+    }
+}

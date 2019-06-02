@@ -15,9 +15,12 @@
     <include file="config/liquibase/changelog/20190524171913_added_entity_Car.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20190524173744_added_entity_Appointment.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20190527081813_added_entity_WxMaUser.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190601171803_added_entity_ShipPlan.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190602224721_changelog.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <include file="config/liquibase/changelog/20190524171913_added_entity_constraints_Car.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20190524173744_added_entity_constraints_Appointment.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20190527081813_added_entity_constraints_WxMaUser.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190601171803_added_entity_constraints_ShipPlan.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
 </databaseChangeLog>

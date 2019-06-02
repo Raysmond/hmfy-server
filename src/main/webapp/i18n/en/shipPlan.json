@@ -1,0 +1,35 @@
+{
+  "shieldApp": {
+    "shipPlan": {
+      "home": {
+        "title": "Ship Plans",
+        "createLabel": "Create a new Ship Plan",
+        "createOrEditLabel": "Create or edit a Ship Plan"
+      },
+      "created": "A new Ship Plan is created with identifier {{ param }}",
+      "updated": "A Ship Plan is updated with identifier {{ param }}",
+      "deleted": "A Ship Plan is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Ship Plan {{ id }}?"
+      },
+      "detail": {
+        "title": "Ship Plan"
+      },
+      "company": "Company",
+      "demandedAmount": "Demanded Amount",
+      "finishAmount": "Finish Amount",
+      "remainAmount": "Remain Amount",
+      "availableAmount": "Available Amount",
+      "shipMethond": "Ship Methond",
+      "shipNumber": "Ship Number",
+      "endTime": "End Time",
+      "createTime": "Create Time",
+      "updateTime": "Update Time",
+      "licensePlateNumber": "License Plate Number",
+      "driver": "Driver",
+      "phone": "Phone",
+      "user": "User",
+      "toUser": "To User"
+    }
+  }
+}

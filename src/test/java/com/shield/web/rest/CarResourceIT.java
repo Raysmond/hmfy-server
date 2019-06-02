@@ -50,6 +50,9 @@ public class CarResourceIT {
     private static final String DEFAULT_DRIVER = "AAAAAAAAAA";
     private static final String UPDATED_DRIVER = "BBBBBBBBBB";
 
+    private static final String DEFAULT_PHONE = "AAAAAAAAAA";
+    private static final String UPDATED_PHONE = "BBBBBBBBBB";
+
     private static final ZonedDateTime DEFAULT_CREATE_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
     private static final ZonedDateTime UPDATED_CREATE_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
 
@@ -109,6 +112,7 @@ public class CarResourceIT {
         Car car = new Car()
             .licensePlateNumber(DEFAULT_LICENSE_PLATE_NUMBER)
             .driver(DEFAULT_DRIVER)
+            .phone(DEFAULT_PHONE)
             .createTime(DEFAULT_CREATE_TIME)
             .updateTime(DEFAULT_UPDATE_TIME);
         // Add required entity
@@ -128,6 +132,7 @@ public class CarResourceIT {
         Car car = new Car()
             .licensePlateNumber(UPDATED_LICENSE_PLATE_NUMBER)
             .driver(UPDATED_DRIVER)
+            .phone(UPDATED_PHONE)
             .createTime(UPDATED_CREATE_TIME)
             .updateTime(UPDATED_UPDATE_TIME);
         // Add required entity
@@ -161,6 +166,7 @@ public class CarResourceIT {
         Car testCar = carList.get(carList.size() - 1);
         assertThat(testCar.getLicensePlateNumber()).isEqualTo(DEFAULT_LICENSE_PLATE_NUMBER);
         assertThat(testCar.getDriver()).isEqualTo(DEFAULT_DRIVER);
+        assertThat(testCar.getPhone()).isEqualTo(DEFAULT_PHONE);
         assertThat(testCar.getCreateTime()).isEqualTo(DEFAULT_CREATE_TIME);
         assertThat(testCar.getUpdateTime()).isEqualTo(DEFAULT_UPDATE_TIME);
     }
@@ -237,6 +243,7 @@ public class CarResourceIT {
             .andExpect(jsonPath("$.[*].id").value(hasItem(car.getId().intValue())))
             .andExpect(jsonPath("$.[*].licensePlateNumber").value(hasItem(DEFAULT_LICENSE_PLATE_NUMBER.toString())))
             .andExpect(jsonPath("$.[*].driver").value(hasItem(DEFAULT_DRIVER.toString())))
+            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE.toString())))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
             .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))));
     }
@@ -254,6 +261,7 @@ public class CarResourceIT {
             .andExpect(jsonPath("$.id").value(car.getId().intValue()))
             .andExpect(jsonPath("$.licensePlateNumber").value(DEFAULT_LICENSE_PLATE_NUMBER.toString()))
             .andExpect(jsonPath("$.driver").value(DEFAULT_DRIVER.toString()))
+            .andExpect(jsonPath("$.phone").value(DEFAULT_PHONE.toString()))
             .andExpect(jsonPath("$.createTime").value(sameInstant(DEFAULT_CREATE_TIME)))
             .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)));
     }
@@ -334,6 +342,45 @@ public class CarResourceIT {
 
         // Get all the carList where driver is null
         defaultCarShouldNotBeFound("driver.specified=false");
+    }
+
+    @Test
+    @Transactional
+    public void getAllCarsByPhoneIsEqualToSomething() throws Exception {
+        // Initialize the database
+        carRepository.saveAndFlush(car);
+
+        // Get all the carList where phone equals to DEFAULT_PHONE
+        defaultCarShouldBeFound("phone.equals=" + DEFAULT_PHONE);
+
+        // Get all the carList where phone equals to UPDATED_PHONE
+        defaultCarShouldNotBeFound("phone.equals=" + UPDATED_PHONE);
+    }
+
+    @Test
+    @Transactional
+    public void getAllCarsByPhoneIsInShouldWork() throws Exception {
+        // Initialize the database
+        carRepository.saveAndFlush(car);
+
+        // Get all the carList where phone in DEFAULT_PHONE or UPDATED_PHONE
+        defaultCarShouldBeFound("phone.in=" + DEFAULT_PHONE + "," + UPDATED_PHONE);
+
+        // Get all the carList where phone equals to UPDATED_PHONE
+        defaultCarShouldNotBeFound("phone.in=" + UPDATED_PHONE);
+    }
+
+    @Test
+    @Transactional
+    public void getAllCarsByPhoneIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        carRepository.saveAndFlush(car);
+
+        // Get all the carList where phone is not null
+        defaultCarShouldBeFound("phone.specified=true");
+
+        // Get all the carList where phone is null
+        defaultCarShouldNotBeFound("phone.specified=false");
     }
 
     @Test
@@ -493,6 +540,7 @@ public class CarResourceIT {
             .andExpect(jsonPath("$.[*].id").value(hasItem(car.getId().intValue())))
             .andExpect(jsonPath("$.[*].licensePlateNumber").value(hasItem(DEFAULT_LICENSE_PLATE_NUMBER)))
             .andExpect(jsonPath("$.[*].driver").value(hasItem(DEFAULT_DRIVER)))
+            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE)))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
             .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))));
 
@@ -544,6 +592,7 @@ public class CarResourceIT {
         updatedCar
             .licensePlateNumber(UPDATED_LICENSE_PLATE_NUMBER)
             .driver(UPDATED_DRIVER)
+            .phone(UPDATED_PHONE)
             .createTime(UPDATED_CREATE_TIME)
             .updateTime(UPDATED_UPDATE_TIME);
         CarDTO carDTO = carMapper.toDto(updatedCar);
@@ -559,6 +608,7 @@ public class CarResourceIT {
         Car testCar = carList.get(carList.size() - 1);
         assertThat(testCar.getLicensePlateNumber()).isEqualTo(UPDATED_LICENSE_PLATE_NUMBER);
         assertThat(testCar.getDriver()).isEqualTo(UPDATED_DRIVER);
+        assertThat(testCar.getPhone()).isEqualTo(UPDATED_PHONE);
         assertThat(testCar.getCreateTime()).isEqualTo(UPDATED_CREATE_TIME);
         assertThat(testCar.getUpdateTime()).isEqualTo(UPDATED_UPDATE_TIME);
     }

@@ -55,7 +55,8 @@ export class AppointmentService {
       updateTime: appointment.updateTime != null && appointment.updateTime.isValid() ? appointment.updateTime.toJSON() : null,
       startTime: appointment.startTime != null && appointment.startTime.isValid() ? appointment.startTime.toJSON() : null,
       enterTime: appointment.enterTime != null && appointment.enterTime.isValid() ? appointment.enterTime.toJSON() : null,
-      leaveTime: appointment.leaveTime != null && appointment.leaveTime.isValid() ? appointment.leaveTime.toJSON() : null
+      leaveTime: appointment.leaveTime != null && appointment.leaveTime.isValid() ? appointment.leaveTime.toJSON() : null,
+      expireTime: appointment.expireTime != null && appointment.expireTime.isValid() ? appointment.expireTime.toJSON() : null
     });
     return copy;
   }
@@ -67,6 +68,7 @@ export class AppointmentService {
       res.body.startTime = res.body.startTime != null ? moment(res.body.startTime) : null;
       res.body.enterTime = res.body.enterTime != null ? moment(res.body.enterTime) : null;
       res.body.leaveTime = res.body.leaveTime != null ? moment(res.body.leaveTime) : null;
+      res.body.expireTime = res.body.expireTime != null ? moment(res.body.expireTime) : null;
     }
     return res;
   }
@@ -79,6 +81,7 @@ export class AppointmentService {
         appointment.startTime = appointment.startTime != null ? moment(appointment.startTime) : null;
         appointment.enterTime = appointment.enterTime != null ? moment(appointment.enterTime) : null;
         appointment.leaveTime = appointment.leaveTime != null ? moment(appointment.leaveTime) : null;
+        appointment.expireTime = appointment.expireTime != null ? moment(appointment.expireTime) : null;
       });
     }
     return res;

@@ -1,5 +1,6 @@
 package com.shield.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.shield.config.Constants;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,8 +35,8 @@ public class User extends AbstractAuditingEntity implements Serializable {
     private Long id;
 
     @NotNull
-    @Pattern(regexp = Constants.LOGIN_REGEX)
-    @Size(min = 1, max = 50)
+//    @Pattern(regexp = Constants.LOGIN_REGEX)
+    @Size(min = 2, max = 50)
     @Column(length = 50, unique = true, nullable = false)
     private String login;
 
@@ -92,6 +93,28 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     @BatchSize(size = 20)
     private Set<Authority> authorities = new HashSet<>();
+
+    @OneToOne(mappedBy = "user")
+    private WxMaUser wxMaUser;
+
+    @ManyToOne(optional = true)
+    private Region region;
+
+    public Region getRegion() {
+        return region;
+    }
+
+    public void setRegion(Region region) {
+        this.region = region;
+    }
+
+    public WxMaUser getWxMaUser() {
+        return wxMaUser;
+    }
+
+    public void setWxMaUser(WxMaUser wxMaUser) {
+        this.wxMaUser = wxMaUser;
+    }
 
     public Long getId() {
         return id;

@@ -27,6 +27,7 @@
       "startTime": "Start Time",
       "enterTime": "Enter Time",
       "leaveTime": "Leave Time",
+      "expireTime": "Expire Time",
       "region": "Region",
       "user": "User"
     }

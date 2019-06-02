@@ -17,13 +17,16 @@
       },
       "name": "Name",
       "quota": "Quota",
+      "vipQuota": "Vip Quota",
       "startTime": "Start Time",
       "endTime": "End Time",
       "days": "Days",
       "open": "Open",
+      "validTime": "Valid Time",
+      "queueQuota": "Queue Quota",
+      "queueValidTime": "Queue Valid Time",
       "createTime": "Create Time",
-      "updateTime": "Update Time",
-      "validTime": "Valid Time"
+      "updateTime": "Update Time"
     }
   }
 }

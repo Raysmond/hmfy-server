@@ -5,7 +5,8 @@ export const enum AppointmentStatus {
   WAIT = 'WAIT',
   START = 'START',
   ENTER = 'ENTER',
-  LEAVE = 'LEAVE'
+  LEAVE = 'LEAVE',
+  EXPIRED = 'EXPIRED'
 }
 
 export interface IAppointment {
@@ -22,6 +23,7 @@ export interface IAppointment {
   startTime?: Moment;
   enterTime?: Moment;
   leaveTime?: Moment;
+  expireTime?: Moment;
   regionName?: string;
   regionId?: number;
   userLogin?: string;
@@ -43,6 +45,7 @@ export class Appointment implements IAppointment {
     public startTime?: Moment,
     public enterTime?: Moment,
     public leaveTime?: Moment,
+    public expireTime?: Moment,
     public regionName?: string,
     public regionId?: number,
     public userLogin?: string,

@@ -1,0 +1,35 @@
+{
+  "shieldApp": {
+    "shipPlan": {
+      "home": {
+        "title": "发运计划",
+        "createLabel": "创建新 发运计划",
+        "createOrEditLabel": "创建或编辑 发运计划"
+      },
+      "created": "发运计划 {{ param }} 创建成功",
+      "updated": "发运计划 {{ param }} 更新成功",
+      "deleted": "发运计划 {{ param }} 删除成功",
+      "delete": {
+        "question": "你确定要删除 发运计划 {{ id }} 吗？"
+      },
+      "detail": {
+        "title": "发运计划"
+      },
+      "company": "客户单位",
+      "demandedAmount": "提货量(吨)",
+      "finishAmount": "已完成(吨)",
+      "remainAmount": "剩余量(吨)",
+      "availableAmount": "可供分配量(吨)",
+      "shipMethond": "运输方式",
+      "shipNumber": "船号",
+      "endTime": "截止日期",
+      "createTime": "创建时间",
+      "updateTime": "更新时间",
+      "licensePlateNumber": "车牌号",
+      "driver": "驾驶员姓名",
+      "phone": "联系电话",
+      "user": "创建者",
+      "toUser": "预约员"
+    }
+  }
+}

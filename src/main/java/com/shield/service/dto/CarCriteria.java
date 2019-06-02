@@ -31,6 +31,8 @@ public class CarCriteria implements Serializable, Criteria {
 
     private StringFilter driver;
 
+    private StringFilter phone;
+
     private ZonedDateTimeFilter createTime;
 
     private ZonedDateTimeFilter updateTime;
@@ -44,6 +46,7 @@ public class CarCriteria implements Serializable, Criteria {
         this.id = other.id == null ? null : other.id.copy();
         this.licensePlateNumber = other.licensePlateNumber == null ? null : other.licensePlateNumber.copy();
         this.driver = other.driver == null ? null : other.driver.copy();
+        this.phone = other.phone == null ? null : other.phone.copy();
         this.createTime = other.createTime == null ? null : other.createTime.copy();
         this.updateTime = other.updateTime == null ? null : other.updateTime.copy();
         this.userId = other.userId == null ? null : other.userId.copy();
@@ -76,6 +79,14 @@ public class CarCriteria implements Serializable, Criteria {
 
     public void setDriver(StringFilter driver) {
         this.driver = driver;
+    }
+
+    public StringFilter getPhone() {
+        return phone;
+    }
+
+    public void setPhone(StringFilter phone) {
+        this.phone = phone;
     }
 
     public ZonedDateTimeFilter getCreateTime() {
@@ -116,6 +127,7 @@ public class CarCriteria implements Serializable, Criteria {
             Objects.equals(id, that.id) &&
             Objects.equals(licensePlateNumber, that.licensePlateNumber) &&
             Objects.equals(driver, that.driver) &&
+            Objects.equals(phone, that.phone) &&
             Objects.equals(createTime, that.createTime) &&
             Objects.equals(updateTime, that.updateTime) &&
             Objects.equals(userId, that.userId);
@@ -127,6 +139,7 @@ public class CarCriteria implements Serializable, Criteria {
         id,
         licensePlateNumber,
         driver,
+        phone,
         createTime,
         updateTime,
         userId
@@ -139,6 +152,7 @@ public class CarCriteria implements Serializable, Criteria {
                 (id != null ? "id=" + id + ", " : "") +
                 (licensePlateNumber != null ? "licensePlateNumber=" + licensePlateNumber + ", " : "") +
                 (driver != null ? "driver=" + driver + ", " : "") +
+                (phone != null ? "phone=" + phone + ", " : "") +
                 (createTime != null ? "createTime=" + createTime + ", " : "") +
                 (updateTime != null ? "updateTime=" + updateTime + ", " : "") +
                 (userId != null ? "userId=" + userId + ", " : "") +

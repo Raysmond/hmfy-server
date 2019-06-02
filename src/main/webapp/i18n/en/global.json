@@ -11,6 +11,7 @@
         "car": "Car",
         "appointment": "Appointment",
         "wxMaUser": "Wx Ma User",
+        "shipPlan": "Ship Plan",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },
       "account": {

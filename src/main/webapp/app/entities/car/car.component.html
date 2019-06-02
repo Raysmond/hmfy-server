@@ -17,6 +17,7 @@
             <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="licensePlateNumber"><span jhiTranslate="shieldApp.car.licensePlateNumber">License Plate Number</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="driver"><span jhiTranslate="shieldApp.car.driver">Driver</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="phone"><span jhiTranslate="shieldApp.car.phone">Phone</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="createTime"><span jhiTranslate="shieldApp.car.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.car.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="userLogin"><span jhiTranslate="shieldApp.car.user">User</span> <fa-icon [icon]="'sort'"></fa-icon></th>
@@ -28,6 +29,7 @@
                 <td><a [routerLink]="['/car', car.id, 'view' ]">{{car.id}}</a></td>
                 <td>{{car.licensePlateNumber}}</td>
                 <td>{{car.driver}}</td>
+                <td>{{car.phone}}</td>
                 <td>{{car.createTime | date:'medium'}}</td>
                 <td>{{car.updateTime | date:'medium'}}</td>
                 <td>

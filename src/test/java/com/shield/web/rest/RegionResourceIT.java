@@ -47,6 +47,9 @@ public class RegionResourceIT {
     private static final Integer DEFAULT_QUOTA = 0;
     private static final Integer UPDATED_QUOTA = 1;
 
+    private static final Integer DEFAULT_VIP_QUOTA = 0;
+    private static final Integer UPDATED_VIP_QUOTA = 1;
+
     private static final String DEFAULT_START_TIME = "AAAAAAAAAA";
     private static final String UPDATED_START_TIME = "BBBBBBBBBB";
 
@@ -59,14 +62,20 @@ public class RegionResourceIT {
     private static final Boolean DEFAULT_OPEN = false;
     private static final Boolean UPDATED_OPEN = true;
 
+    private static final Integer DEFAULT_VALID_TIME = 0;
+    private static final Integer UPDATED_VALID_TIME = 1;
+
+    private static final Integer DEFAULT_QUEUE_QUOTA = 0;
+    private static final Integer UPDATED_QUEUE_QUOTA = 1;
+
+    private static final Integer DEFAULT_QUEUE_VALID_TIME = 0;
+    private static final Integer UPDATED_QUEUE_VALID_TIME = 1;
+
     private static final ZonedDateTime DEFAULT_CREATE_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
     private static final ZonedDateTime UPDATED_CREATE_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
 
     private static final ZonedDateTime DEFAULT_UPDATE_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
     private static final ZonedDateTime UPDATED_UPDATE_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
-
-    private static final Integer DEFAULT_VALID_TIME = 1;
-    private static final Integer UPDATED_VALID_TIME = 2;
 
     @Autowired
     private RegionRepository regionRepository;
@@ -118,13 +127,16 @@ public class RegionResourceIT {
         Region region = new Region()
             .name(DEFAULT_NAME)
             .quota(DEFAULT_QUOTA)
+            .vipQuota(DEFAULT_VIP_QUOTA)
             .startTime(DEFAULT_START_TIME)
             .endTime(DEFAULT_END_TIME)
             .days(DEFAULT_DAYS)
             .open(DEFAULT_OPEN)
+            .validTime(DEFAULT_VALID_TIME)
+            .queueQuota(DEFAULT_QUEUE_QUOTA)
+            .queueValidTime(DEFAULT_QUEUE_VALID_TIME)
             .createTime(DEFAULT_CREATE_TIME)
-            .updateTime(DEFAULT_UPDATE_TIME)
-            .validTime(DEFAULT_VALID_TIME);
+            .updateTime(DEFAULT_UPDATE_TIME);
         return region;
     }
     /**
@@ -137,13 +149,16 @@ public class RegionResourceIT {
         Region region = new Region()
             .name(UPDATED_NAME)
             .quota(UPDATED_QUOTA)
+            .vipQuota(UPDATED_VIP_QUOTA)
             .startTime(UPDATED_START_TIME)
             .endTime(UPDATED_END_TIME)
             .days(UPDATED_DAYS)
             .open(UPDATED_OPEN)
+            .validTime(UPDATED_VALID_TIME)
+            .queueQuota(UPDATED_QUEUE_QUOTA)
+            .queueValidTime(UPDATED_QUEUE_VALID_TIME)
             .createTime(UPDATED_CREATE_TIME)
-            .updateTime(UPDATED_UPDATE_TIME)
-            .validTime(UPDATED_VALID_TIME);
+            .updateTime(UPDATED_UPDATE_TIME);
         return region;
     }
 
@@ -170,13 +185,16 @@ public class RegionResourceIT {
         Region testRegion = regionList.get(regionList.size() - 1);
         assertThat(testRegion.getName()).isEqualTo(DEFAULT_NAME);
         assertThat(testRegion.getQuota()).isEqualTo(DEFAULT_QUOTA);
+        assertThat(testRegion.getVipQuota()).isEqualTo(DEFAULT_VIP_QUOTA);
         assertThat(testRegion.getStartTime()).isEqualTo(DEFAULT_START_TIME);
         assertThat(testRegion.getEndTime()).isEqualTo(DEFAULT_END_TIME);
         assertThat(testRegion.getDays()).isEqualTo(DEFAULT_DAYS);
         assertThat(testRegion.isOpen()).isEqualTo(DEFAULT_OPEN);
+        assertThat(testRegion.getValidTime()).isEqualTo(DEFAULT_VALID_TIME);
+        assertThat(testRegion.getQueueQuota()).isEqualTo(DEFAULT_QUEUE_QUOTA);
+        assertThat(testRegion.getQueueValidTime()).isEqualTo(DEFAULT_QUEUE_VALID_TIME);
         assertThat(testRegion.getCreateTime()).isEqualTo(DEFAULT_CREATE_TIME);
         assertThat(testRegion.getUpdateTime()).isEqualTo(DEFAULT_UPDATE_TIME);
-        assertThat(testRegion.getValidTime()).isEqualTo(DEFAULT_VALID_TIME);
     }
 
     @Test
@@ -240,10 +258,67 @@ public class RegionResourceIT {
 
     @Test
     @Transactional
+    public void checkVipQuotaIsRequired() throws Exception {
+        int databaseSizeBeforeTest = regionRepository.findAll().size();
+        // set the field null
+        region.setVipQuota(null);
+
+        // Create the Region, which fails.
+        RegionDTO regionDTO = regionMapper.toDto(region);
+
+        restRegionMockMvc.perform(post("/api/regions")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(regionDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<Region> regionList = regionRepository.findAll();
+        assertThat(regionList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
     public void checkValidTimeIsRequired() throws Exception {
         int databaseSizeBeforeTest = regionRepository.findAll().size();
         // set the field null
         region.setValidTime(null);
+
+        // Create the Region, which fails.
+        RegionDTO regionDTO = regionMapper.toDto(region);
+
+        restRegionMockMvc.perform(post("/api/regions")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(regionDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<Region> regionList = regionRepository.findAll();
+        assertThat(regionList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
+    public void checkQueueQuotaIsRequired() throws Exception {
+        int databaseSizeBeforeTest = regionRepository.findAll().size();
+        // set the field null
+        region.setQueueQuota(null);
+
+        // Create the Region, which fails.
+        RegionDTO regionDTO = regionMapper.toDto(region);
+
+        restRegionMockMvc.perform(post("/api/regions")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(regionDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<Region> regionList = regionRepository.findAll();
+        assertThat(regionList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
+    public void checkQueueValidTimeIsRequired() throws Exception {
+        int databaseSizeBeforeTest = regionRepository.findAll().size();
+        // set the field null
+        region.setQueueValidTime(null);
 
         // Create the Region, which fails.
         RegionDTO regionDTO = regionMapper.toDto(region);
@@ -270,13 +345,16 @@ public class RegionResourceIT {
             .andExpect(jsonPath("$.[*].id").value(hasItem(region.getId().intValue())))
             .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
             .andExpect(jsonPath("$.[*].quota").value(hasItem(DEFAULT_QUOTA)))
+            .andExpect(jsonPath("$.[*].vipQuota").value(hasItem(DEFAULT_VIP_QUOTA)))
             .andExpect(jsonPath("$.[*].startTime").value(hasItem(DEFAULT_START_TIME.toString())))
             .andExpect(jsonPath("$.[*].endTime").value(hasItem(DEFAULT_END_TIME.toString())))
             .andExpect(jsonPath("$.[*].days").value(hasItem(DEFAULT_DAYS.toString())))
             .andExpect(jsonPath("$.[*].open").value(hasItem(DEFAULT_OPEN.booleanValue())))
+            .andExpect(jsonPath("$.[*].validTime").value(hasItem(DEFAULT_VALID_TIME)))
+            .andExpect(jsonPath("$.[*].queueQuota").value(hasItem(DEFAULT_QUEUE_QUOTA)))
+            .andExpect(jsonPath("$.[*].queueValidTime").value(hasItem(DEFAULT_QUEUE_VALID_TIME)))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
-            .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
-            .andExpect(jsonPath("$.[*].validTime").value(hasItem(DEFAULT_VALID_TIME)));
+            .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))));
     }
     
     @Test
@@ -292,13 +370,16 @@ public class RegionResourceIT {
             .andExpect(jsonPath("$.id").value(region.getId().intValue()))
             .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()))
             .andExpect(jsonPath("$.quota").value(DEFAULT_QUOTA))
+            .andExpect(jsonPath("$.vipQuota").value(DEFAULT_VIP_QUOTA))
             .andExpect(jsonPath("$.startTime").value(DEFAULT_START_TIME.toString()))
             .andExpect(jsonPath("$.endTime").value(DEFAULT_END_TIME.toString()))
             .andExpect(jsonPath("$.days").value(DEFAULT_DAYS.toString()))
             .andExpect(jsonPath("$.open").value(DEFAULT_OPEN.booleanValue()))
+            .andExpect(jsonPath("$.validTime").value(DEFAULT_VALID_TIME))
+            .andExpect(jsonPath("$.queueQuota").value(DEFAULT_QUEUE_QUOTA))
+            .andExpect(jsonPath("$.queueValidTime").value(DEFAULT_QUEUE_VALID_TIME))
             .andExpect(jsonPath("$.createTime").value(sameInstant(DEFAULT_CREATE_TIME)))
-            .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)))
-            .andExpect(jsonPath("$.validTime").value(DEFAULT_VALID_TIME));
+            .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)));
     }
 
     @Test
@@ -324,13 +405,16 @@ public class RegionResourceIT {
         updatedRegion
             .name(UPDATED_NAME)
             .quota(UPDATED_QUOTA)
+            .vipQuota(UPDATED_VIP_QUOTA)
             .startTime(UPDATED_START_TIME)
             .endTime(UPDATED_END_TIME)
             .days(UPDATED_DAYS)
             .open(UPDATED_OPEN)
+            .validTime(UPDATED_VALID_TIME)
+            .queueQuota(UPDATED_QUEUE_QUOTA)
+            .queueValidTime(UPDATED_QUEUE_VALID_TIME)
             .createTime(UPDATED_CREATE_TIME)
-            .updateTime(UPDATED_UPDATE_TIME)
-            .validTime(UPDATED_VALID_TIME);
+            .updateTime(UPDATED_UPDATE_TIME);
         RegionDTO regionDTO = regionMapper.toDto(updatedRegion);
 
         restRegionMockMvc.perform(put("/api/regions")
@@ -344,13 +428,16 @@ public class RegionResourceIT {
         Region testRegion = regionList.get(regionList.size() - 1);
         assertThat(testRegion.getName()).isEqualTo(UPDATED_NAME);
         assertThat(testRegion.getQuota()).isEqualTo(UPDATED_QUOTA);
+        assertThat(testRegion.getVipQuota()).isEqualTo(UPDATED_VIP_QUOTA);
         assertThat(testRegion.getStartTime()).isEqualTo(UPDATED_START_TIME);
         assertThat(testRegion.getEndTime()).isEqualTo(UPDATED_END_TIME);
         assertThat(testRegion.getDays()).isEqualTo(UPDATED_DAYS);
         assertThat(testRegion.isOpen()).isEqualTo(UPDATED_OPEN);
+        assertThat(testRegion.getValidTime()).isEqualTo(UPDATED_VALID_TIME);
+        assertThat(testRegion.getQueueQuota()).isEqualTo(UPDATED_QUEUE_QUOTA);
+        assertThat(testRegion.getQueueValidTime()).isEqualTo(UPDATED_QUEUE_VALID_TIME);
         assertThat(testRegion.getCreateTime()).isEqualTo(UPDATED_CREATE_TIME);
         assertThat(testRegion.getUpdateTime()).isEqualTo(UPDATED_UPDATE_TIME);
-        assertThat(testRegion.getValidTime()).isEqualTo(UPDATED_VALID_TIME);
     }
 
     @Test

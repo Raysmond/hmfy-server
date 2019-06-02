@@ -35,16 +35,6 @@
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.number" for="field_number">Number</label>
                     <input type="number" class="form-control" name="number" id="field_number"
                            formControlName="number"/>
-                    <div *ngIf="editForm.get('number').invalid && (editForm.get('number').dirty || editForm.get('number').touched)">
-                        <small class="form-text text-danger"
-                               *ngIf="editForm.get('number').errors.required" jhiTranslate="entity.validation.required">
-                        This field is required.
-                        </small>
-                        <small class="form-text text-danger"
-                            [hidden]="!editForm.get('number')?.errors?.number" jhiTranslate="entity.validation.number">
-                            This field should be a number.
-                        </small>
-                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.valid" for="field_valid">Valid</label>
@@ -65,6 +55,7 @@
                         <option value="START">{{'shieldApp.AppointmentStatus.START' | translate}}</option>
                         <option value="ENTER">{{'shieldApp.AppointmentStatus.ENTER' | translate}}</option>
                         <option value="LEAVE">{{'shieldApp.AppointmentStatus.LEAVE' | translate}}</option>
+                        <option value="EXPIRED">{{'shieldApp.AppointmentStatus.EXPIRED' | translate}}</option>
                     </select>
                     <div *ngIf="editForm.get('status').invalid && (editForm.get('status').dirty || editForm.get('status').touched)">
                         <small class="form-text text-danger"
@@ -119,30 +110,36 @@
                         <input id="field_leaveTime" type="datetime-local" class="form-control" name="leaveTime" formControlName="leaveTime" placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.appointment.expireTime" for="field_expireTime">Expire Time</label>
+                    <div class="d-flex">
+                        <input id="field_expireTime" type="datetime-local" class="form-control" name="expireTime" formControlName="expireTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                </div>
 
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.region" for="field_region">Region</label>
-                    <select class="form-control" id="field_region" name="region" formControlName="regionId">
-                        <option *ngIf="!editForm.get('region').value" [ngValue]="null" selected></option>
+                    <select class="form-control" id="field_region" name="regionId" formControlName="regionId">
+                        <option *ngIf="!editForm.get('regionId').value" [ngValue]="null" selected></option>
                         <option [ngValue]="regionOption.id" *ngFor="let regionOption of regions; trackBy: trackRegionById">{{regionOption.name}}</option>
                     </select>
                 </div>
-                <div *ngIf="editForm.get('region').invalid && (editForm.get('region').dirty || editForm.get('region').touched)">
+                <div *ngIf="editForm.get('regionId').invalid && (editForm.get('regionId').dirty || editForm.get('regionId').touched)">
                     <small class="form-text text-danger"
-                           *ngIf="editForm.get('region').errors.required" jhiTranslate="entity.validation.required">
+                           *ngIf="editForm.get('regionId').errors.required" jhiTranslate="entity.validation.required">
                         This field is required.
                     </small>
                 </div>
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.user" for="field_user">User</label>
-                    <select class="form-control" id="field_user" name="user" formControlName="userId">
-                        <option *ngIf="!editForm.get('user').value" [ngValue]="null" selected></option>
+                    <select class="form-control" id="field_user" name="userId" formControlName="userId">
+                        <option *ngIf="!editForm.get('userId').value" [ngValue]="null" selected></option>
                         <option [ngValue]="userOption.id" *ngFor="let userOption of users; trackBy: trackUserById">{{userOption.login}}</option>
                     </select>
                 </div>
-                <div *ngIf="editForm.get('user').invalid && (editForm.get('user').dirty || editForm.get('user').touched)">
+                <div *ngIf="editForm.get('userId').invalid && (editForm.get('userId').dirty || editForm.get('userId').touched)">
                     <small class="form-text text-danger"
-                           *ngIf="editForm.get('user').errors.required" jhiTranslate="entity.validation.required">
+                           *ngIf="editForm.get('userId').errors.required" jhiTranslate="entity.validation.required">
                         This field is required.
                     </small>
                 </div>

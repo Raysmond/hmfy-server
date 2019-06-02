@@ -7,10 +7,11 @@
       "jhipster-needle-menu-add-element": "JHipster will add additional menu entries here (do not translate!)",
       "entities": {
         "main": "数据",
-        "region": "区域",
+        "region": "区域管理",
         "car": "车辆",
-        "appointment": "预约",
+        "appointment": "发运预约",
         "wxMaUser": "Wx Ma User",
+        "shipPlan": "发运计划",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },
       "account": {

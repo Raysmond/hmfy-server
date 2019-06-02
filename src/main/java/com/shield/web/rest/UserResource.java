@@ -88,7 +88,7 @@ public class UserResource {
      *
      * @param userDTO the user to create.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new user, or with status {@code 400 (Bad Request)} if the login or email is already in use.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     * @throws URISyntaxException       if the Location URI syntax is incorrect.
      * @throws BadRequestAlertException {@code 400 (Bad Request)} if the login or email is already in use.
      */
     @PostMapping("/users")
@@ -107,7 +107,7 @@ public class UserResource {
             User newUser = userService.createUser(userDTO);
             mailService.sendCreationEmail(newUser);
             return ResponseEntity.created(new URI("/api/users/" + newUser.getLogin()))
-                .headers(HeaderUtil.createAlert(applicationName,  "userManagement.created", newUser.getLogin()))
+                .headers(HeaderUtil.createAlert(applicationName, "userManagement.created", newUser.getLogin()))
                 .body(newUser);
         }
     }
@@ -153,6 +153,7 @@ public class UserResource {
 
     /**
      * Gets a list of all roles.
+     *
      * @return a string list of all roles.
      */
     @GetMapping("/users/authorities")
@@ -167,7 +168,8 @@ public class UserResource {
      * @param login the login of the user to find.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the "login" user, or with status {@code 404 (Not Found)}.
      */
-    @GetMapping("/users/{login:" + Constants.LOGIN_REGEX + "}")
+//    @GetMapping("/users/{login:" + Constants.LOGIN_REGEX + "}")
+    @GetMapping("/users/{login}")
     public ResponseEntity<UserDTO> getUser(@PathVariable String login) {
         log.debug("REST request to get User : {}", login);
         return ResponseUtil.wrapOrNotFound(
@@ -186,6 +188,6 @@ public class UserResource {
     public ResponseEntity<Void> deleteUser(@PathVariable String login) {
         log.debug("REST request to delete User: {}", login);
         userService.deleteUser(login);
-        return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName,  "userManagement.deleted", login)).build();
+        return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName, "userManagement.deleted", login)).build();
     }
 }

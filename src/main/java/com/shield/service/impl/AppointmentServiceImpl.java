@@ -78,6 +78,10 @@ public class AppointmentServiceImpl implements AppointmentService {
     public AppointmentDTO save(AppointmentDTO appointmentDTO) {
         log.debug("Request to save Appointment : {}", appointmentDTO);
         Appointment appointment = appointmentMapper.toEntity(appointmentDTO);
+        if (appointment.getId() == null) {
+            appointment.setCreateTime(ZonedDateTime.now());
+        }
+        appointment.setUpdateTime(ZonedDateTime.now());
         appointment = appointmentRepository.save(appointment);
         return appointmentMapper.toDto(appointment);
     }
@@ -125,7 +129,8 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     public Integer generateAppointmentNumber(Long regionId) {
         String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
-        String key = String.format(APPOINTMENT_NUMBER_KEY, regionId, today);
+//        String key = String.format(APPOINTMENT_NUMBER_KEY, regionId, today);
+        String key = "unique_appointment_number";
         if (redisLongTemplate.hasKey(key) == Boolean.FALSE) {
             redisLongTemplate.opsForValue().increment(key, INITIAL_APPOINTMENT_NUMBER);
             redisLongTemplate.expire(key, 7L, TimeUnit.DAYS);
@@ -135,7 +140,8 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     public Integer generateQueueNumber(Long regionId) {
         String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
-        String key = String.format(QUEUE_NUMBER_KEY, regionId, today);
+//        String key = String.format(QUEUE_NUMBER_KEY, regionId, today);
+        String key = "unique_queue_number";
         if (redisLongTemplate.hasKey(key) == Boolean.FALSE) {
             redisLongTemplate.opsForValue().increment(key, INITIAL_QUEUE_NUMBER);
             redisLongTemplate.expire(key, 7L, TimeUnit.DAYS);
@@ -177,7 +183,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                 appointment.setUpdateTime(ZonedDateTime.now());
                 appointment.setNumber(generateAppointmentNumber(region.getId()));
                 appointmentRepository.save(appointment);
-
                 log.info("Appointment [{}] made success at region ({}, {}), number: {}, licensePlateNumber: {}",
                     appointment.getId(), region.getId(), region.getName(), appointment.getNumber(), appointment.getLicensePlateNumber());
                 return true;
@@ -196,23 +201,27 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Scheduled(fixedRate = 5000)
     public void checkAppointments() {
-        ZonedDateTime startTime = ZonedDateTime.now().minusHours(24);
         for (Region region : regionRepository.findAll()) {
             Long validSeconds = region.getValidTime() != null ? region.getValidTime() : DEFAULT_VALID_TIME_SECONDS;
-            List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), startTime, AppointmentStatus.START, Boolean.TRUE);
+            List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.START, Boolean.TRUE);
             for (Appointment appointment : appointments) {
                 if (appointment.getStartTime() == null || appointment.getStartTime().plusSeconds(validSeconds).isBefore(ZonedDateTime.now())) {
-                    log.info("Appointment [{}] invalid after {} seconds", appointment.getId(), validSeconds);
+                    log.info("Appointment [{}] expired after {} seconds", appointment.getId(), validSeconds);
                     appointment.setUpdateTime(ZonedDateTime.now());
                     appointment.setValid(false);
                     appointmentRepository.save(appointment);
                 }
             }
 
-            List<Appointment> waitingList = appointmentRepository.findWaitingList(region.getId(), startTime);
+            List<Appointment> waitingList = appointmentRepository.findWaitingList(region.getId());
             waitingList.sort((Comparator.comparing(Appointment::getCreateTime)));
             for (Appointment appointment : waitingList) {
-                if (!this.tryMakeAppointment(appointment)) {
+                if (region.getQueueValidTime() != null && appointment.getCreateTime().plusSeconds(region.getQueueValidTime()).isBefore(ZonedDateTime.now())) {
+                    log.info("Appointment [{}] queue expired after {} seconds", appointment.getId(), region.getQueueValidTime());
+                    appointment.setUpdateTime(ZonedDateTime.now());
+                    appointment.setValid(false);
+                    appointmentRepository.save(appointment);
+                } else if (!this.tryMakeAppointment(appointment)) {
                     break;
                 }
             }

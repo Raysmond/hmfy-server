@@ -40,6 +40,25 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.region.vipQuota" for="field_vipQuota">Vip Quota</label>
+                    <input type="number" class="form-control" name="vipQuota" id="field_vipQuota"
+                           formControlName="vipQuota"/>
+                    <div *ngIf="editForm.get('vipQuota').invalid && (editForm.get('vipQuota').dirty || editForm.get('vipQuota').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('vipQuota').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('vipQuota').errors.min" jhiTranslate="entity.validation.min" [translateValues]="{ min: 0 }">
+                            This field should be at least 0.
+                        </small>
+                        <small class="form-text text-danger"
+                            [hidden]="!editForm.get('vipQuota')?.errors?.number" jhiTranslate="entity.validation.number">
+                            This field should be a number.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.region.startTime" for="field_startTime">Start Time</label>
                     <input type="text" class="form-control" name="startTime" id="field_startTime"
                            formControlName="startTime"/>
@@ -60,18 +79,6 @@
                            formControlName="open"/>
                 </div>
                 <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.region.createTime" for="field_createTime">Create Time</label>
-                    <div class="d-flex">
-                        <input id="field_createTime" type="datetime-local" class="form-control" name="createTime" formControlName="createTime" placeholder="YYYY-MM-DD HH:mm"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.region.updateTime" for="field_updateTime">Update Time</label>
-                    <div class="d-flex">
-                        <input id="field_updateTime" type="datetime-local" class="form-control" name="updateTime" formControlName="updateTime" placeholder="YYYY-MM-DD HH:mm"/>
-                    </div>
-                </div>
-                <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.region.validTime" for="field_validTime">Valid Time</label>
                     <input type="number" class="form-control" name="validTime" id="field_validTime"
                            formControlName="validTime"/>
@@ -81,9 +88,63 @@
                         This field is required.
                         </small>
                         <small class="form-text text-danger"
+                               *ngIf="editForm.get('validTime').errors.min" jhiTranslate="entity.validation.min" [translateValues]="{ min: 0 }">
+                            This field should be at least 0.
+                        </small>
+                        <small class="form-text text-danger"
                             [hidden]="!editForm.get('validTime')?.errors?.number" jhiTranslate="entity.validation.number">
                             This field should be a number.
                         </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.region.queueQuota" for="field_queueQuota">Queue Quota</label>
+                    <input type="number" class="form-control" name="queueQuota" id="field_queueQuota"
+                           formControlName="queueQuota"/>
+                    <div *ngIf="editForm.get('queueQuota').invalid && (editForm.get('queueQuota').dirty || editForm.get('queueQuota').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('queueQuota').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('queueQuota').errors.min" jhiTranslate="entity.validation.min" [translateValues]="{ min: 0 }">
+                            This field should be at least 0.
+                        </small>
+                        <small class="form-text text-danger"
+                            [hidden]="!editForm.get('queueQuota')?.errors?.number" jhiTranslate="entity.validation.number">
+                            This field should be a number.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.region.queueValidTime" for="field_queueValidTime">Queue Valid Time</label>
+                    <input type="number" class="form-control" name="queueValidTime" id="field_queueValidTime"
+                           formControlName="queueValidTime"/>
+                    <div *ngIf="editForm.get('queueValidTime').invalid && (editForm.get('queueValidTime').dirty || editForm.get('queueValidTime').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('queueValidTime').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('queueValidTime').errors.min" jhiTranslate="entity.validation.min" [translateValues]="{ min: 0 }">
+                            This field should be at least 0.
+                        </small>
+                        <small class="form-text text-danger"
+                            [hidden]="!editForm.get('queueValidTime')?.errors?.number" jhiTranslate="entity.validation.number">
+                            This field should be a number.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.region.createTime" for="field_createTime">Create Time</label>
+                    <div class="d-flex">
+                        <input id="field_createTime" type="datetime-local" class="form-control" name="createTime" formControlName="createTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.region.updateTime" for="field_updateTime">Update Time</label>
+                    <div class="d-flex">
+                        <input id="field_updateTime" type="datetime-local" class="form-control" name="updateTime" formControlName="updateTime" placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
                 </div>
 

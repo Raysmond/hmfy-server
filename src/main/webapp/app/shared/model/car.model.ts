@@ -4,6 +4,7 @@ export interface ICar {
   id?: number;
   licensePlateNumber?: string;
   driver?: string;
+  phone?: string;
   createTime?: Moment;
   updateTime?: Moment;
   userLogin?: string;
@@ -15,6 +16,7 @@ export class Car implements ICar {
     public id?: number,
     public licensePlateNumber?: string,
     public driver?: string,
+    public phone?: string,
     public createTime?: Moment,
     public updateTime?: Moment,
     public userLogin?: string,

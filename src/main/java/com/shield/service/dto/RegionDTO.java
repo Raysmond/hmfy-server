@@ -18,6 +18,10 @@ public class RegionDTO implements Serializable {
     @Min(value = 0)
     private Integer quota;
 
+    @NotNull
+    @Min(value = 0)
+    private Integer vipQuota;
+
     private String startTime;
 
     private String endTime;
@@ -26,12 +30,21 @@ public class RegionDTO implements Serializable {
 
     private Boolean open;
 
+    @NotNull
+    @Min(value = 0)
+    private Integer validTime;
+
+    @NotNull
+    @Min(value = 0)
+    private Integer queueQuota;
+
+    @NotNull
+    @Min(value = 0)
+    private Integer queueValidTime;
+
     private ZonedDateTime createTime;
 
     private ZonedDateTime updateTime;
-
-    @NotNull
-    private Integer validTime;
 
 
     public Long getId() {
@@ -56,6 +69,14 @@ public class RegionDTO implements Serializable {
 
     public void setQuota(Integer quota) {
         this.quota = quota;
+    }
+
+    public Integer getVipQuota() {
+        return vipQuota;
+    }
+
+    public void setVipQuota(Integer vipQuota) {
+        this.vipQuota = vipQuota;
     }
 
     public String getStartTime() {
@@ -90,6 +111,30 @@ public class RegionDTO implements Serializable {
         this.open = open;
     }
 
+    public Integer getValidTime() {
+        return validTime;
+    }
+
+    public void setValidTime(Integer validTime) {
+        this.validTime = validTime;
+    }
+
+    public Integer getQueueQuota() {
+        return queueQuota;
+    }
+
+    public void setQueueQuota(Integer queueQuota) {
+        this.queueQuota = queueQuota;
+    }
+
+    public Integer getQueueValidTime() {
+        return queueValidTime;
+    }
+
+    public void setQueueValidTime(Integer queueValidTime) {
+        this.queueValidTime = queueValidTime;
+    }
+
     public ZonedDateTime getCreateTime() {
         return createTime;
     }
@@ -104,14 +149,6 @@ public class RegionDTO implements Serializable {
 
     public void setUpdateTime(ZonedDateTime updateTime) {
         this.updateTime = updateTime;
-    }
-
-    public Integer getValidTime() {
-        return validTime;
-    }
-
-    public void setValidTime(Integer validTime) {
-        this.validTime = validTime;
     }
 
     @Override
@@ -141,13 +178,16 @@ public class RegionDTO implements Serializable {
             "id=" + getId() +
             ", name='" + getName() + "'" +
             ", quota=" + getQuota() +
+            ", vipQuota=" + getVipQuota() +
             ", startTime='" + getStartTime() + "'" +
             ", endTime='" + getEndTime() + "'" +
             ", days='" + getDays() + "'" +
             ", open='" + isOpen() + "'" +
+            ", validTime=" + getValidTime() +
+            ", queueQuota=" + getQueueQuota() +
+            ", queueValidTime=" + getQueueValidTime() +
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
-            ", validTime=" + getValidTime() +
             "}";
     }
 }

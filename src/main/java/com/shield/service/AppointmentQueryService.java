@@ -125,6 +125,9 @@ public class AppointmentQueryService extends QueryService<Appointment> {
             if (criteria.getLeaveTime() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getLeaveTime(), Appointment_.leaveTime));
             }
+            if (criteria.getExpireTime() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getExpireTime(), Appointment_.expireTime));
+            }
             if (criteria.getRegionId() != null) {
                 specification = specification.and(buildSpecification(criteria.getRegionId(),
                     root -> root.join(Appointment_.region, JoinType.LEFT).get(Region_.id)));
