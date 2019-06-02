@@ -16,4 +16,5 @@ public interface CarRepository extends JpaRepository<Car, Long>, JpaSpecificatio
     @Query("select car from Car car where car.user.login = ?#{principal.username}")
     List<Car> findByUserIsCurrentUser();
 
+    List<Car> findByUserId(Long userId);
 }

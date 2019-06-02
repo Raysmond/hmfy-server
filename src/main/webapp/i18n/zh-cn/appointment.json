@@ -29,6 +29,7 @@
       "leaveTime": "离开时间",
       "region": "区域",
       "expireTime": "失效时间",
+      "phone": "手机号",
       "user": "用户"
     }
   }

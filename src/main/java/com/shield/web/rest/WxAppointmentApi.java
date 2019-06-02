@@ -5,11 +5,9 @@ import com.shield.config.WxMiniAppConfiguration;
 import com.shield.domain.User;
 import com.shield.security.AuthoritiesConstants;
 import com.shield.security.SecurityUtils;
-import com.shield.service.AppointmentQueryService;
-import com.shield.service.AppointmentService;
-import com.shield.service.RegionService;
-import com.shield.service.UserService;
+import com.shield.service.*;
 import com.shield.service.dto.AppointmentDTO;
+import com.shield.service.dto.CarDTO;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import com.shield.web.rest.vm.AppointmentRequestDTO;
 import org.slf4j.Logger;
@@ -21,9 +19,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/wx/{appid}/appointments")
+@RequestMapping("/api/wx/{appid}")
 public class WxAppointmentApi {
 
     private final Logger log = LoggerFactory.getLogger(WxAppointmentApi.class);
@@ -42,10 +41,13 @@ public class WxAppointmentApi {
     @Autowired
     private RegionService regionService;
 
+    @Autowired
+    private CarService carService;
+
     /**
      * 预约排队接口
      */
-    @PostMapping("")
+    @PostMapping("/appointments")
     public ResponseEntity<AppointmentDTO> makeAppointment(
         @PathVariable String appid,
         @Valid @RequestBody AppointmentRequestDTO appointment) throws URISyntaxException {
@@ -60,15 +62,25 @@ public class WxAppointmentApi {
             throw new BadRequestAlertException("不能预约未绑定的区域", ENTITY_NAME, "regionId");
         }
         if (!regionService.isRegionOpen(appointment.getRegionId())) {
-            throw new BadRequestAlertException(String.format("区域[%d]未开放预约服务", appointment.getRegionId()), "appointment", "regionId");
+            throw new BadRequestAlertException("该区域未开放预约服务", "appointment", "regionId");
         }
 
         AppointmentDTO appointmentDTO = new AppointmentDTO();
         appointmentDTO.setLicensePlateNumber(appointment.getLicensePlateNumber());
         appointmentDTO.setDriver(appointment.getDriver());
+        appointmentDTO.setPhone(appointment.getPhone());
         appointmentDTO.setRegionId(appointment.getRegionId());
         AppointmentDTO result = appointmentService.makeAppointment(appointment.getRegionId(), appointmentDTO);
-        return ResponseEntity.created(new URI(String.format("/api/wx/%s/appointments/%d", appid, result.getId()))).body(appointmentDTO);
+
+        carService.findOrCreateAppointmentCarInfo(result);
+
+        return ResponseEntity.created(new URI(String.format("/api/wx/%s/appointments/%d", appid, result.getId()))).body(result);
+    }
+
+    @GetMapping("/cars")
+    public ResponseEntity<List<CarDTO>> getUserCars(@PathVariable String appid) {
+        User user = userService.getUserWithAuthorities().get();
+        return ResponseEntity.ok(carService.getByUserId(user.getId()));
     }
 
 }

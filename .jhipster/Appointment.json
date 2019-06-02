@@ -39,8 +39,15 @@
             ]
         },
         {
+          "fieldName": "phone",
+          "fieldType": "String"
+        },
+        {
             "fieldName": "number",
-            "fieldType": "Integer"
+            "fieldType": "Integer",
+            "fieldValidateRules": [
+              "unique"
+            ]
         },
         {
             "fieldName": "valid",
@@ -52,7 +59,7 @@
         {
             "fieldName": "status",
             "fieldType": "AppointmentStatus",
-            "fieldValues": "CREATE,WAIT,START,ENTER,LEAVE,EXPIRED",
+            "fieldValues": "CREATE,WAIT,START,ENTER,LEAVE",
             "fieldValidateRules": [
                 "required"
             ]

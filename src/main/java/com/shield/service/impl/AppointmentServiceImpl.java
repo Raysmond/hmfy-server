@@ -133,7 +133,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         String key = "unique_appointment_number";
         if (redisLongTemplate.hasKey(key) == Boolean.FALSE) {
             redisLongTemplate.opsForValue().increment(key, INITIAL_APPOINTMENT_NUMBER);
-            redisLongTemplate.expire(key, 7L, TimeUnit.DAYS);
+//            redisLongTemplate.expire(key, 7L, TimeUnit.DAYS);
         }
         return redisLongTemplate.opsForValue().increment(key, 1L).intValue();
     }
@@ -144,7 +144,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         String key = "unique_queue_number";
         if (redisLongTemplate.hasKey(key) == Boolean.FALSE) {
             redisLongTemplate.opsForValue().increment(key, INITIAL_QUEUE_NUMBER);
-            redisLongTemplate.expire(key, 7L, TimeUnit.DAYS);
+//            redisLongTemplate.expire(key, 7L, TimeUnit.DAYS);
         }
         return redisLongTemplate.opsForValue().increment(key, 1L).intValue();
     }
@@ -155,6 +155,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment appointment = new Appointment();
         appointment.setLicensePlateNumber(appointmentDTO.getLicensePlateNumber());
         appointment.setDriver(appointmentDTO.getDriver());
+        appointment.setPhone(appointmentDTO.getPhone());
         appointment.setCreateTime(ZonedDateTime.now());
         appointment.setUpdateTime(ZonedDateTime.now());
         appointment.setRegion(region);

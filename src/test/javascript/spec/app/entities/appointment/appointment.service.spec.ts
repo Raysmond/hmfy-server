@@ -31,6 +31,7 @@ describe('Service Tests', () => {
         0,
         'AAAAAAA',
         'AAAAAAA',
+        'AAAAAAA',
         0,
         false,
         AppointmentStatus.CREATE,
@@ -106,6 +107,7 @@ describe('Service Tests', () => {
           {
             licensePlateNumber: 'BBBBBB',
             driver: 'BBBBBB',
+            phone: 'BBBBBB',
             number: 1,
             valid: true,
             status: 'BBBBBB',
@@ -146,6 +148,7 @@ describe('Service Tests', () => {
           {
             licensePlateNumber: 'BBBBBB',
             driver: 'BBBBBB',
+            phone: 'BBBBBB',
             number: 1,
             valid: true,
             status: 'BBBBBB',

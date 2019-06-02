@@ -6,8 +6,7 @@
       "WAIT": "WAIT",
       "START": "START",
       "ENTER": "ENTER",
-      "LEAVE": "LEAVE",
-      "EXPIRED": "EXPIRED"
+      "LEAVE": "LEAVE"
     }
   }
 }

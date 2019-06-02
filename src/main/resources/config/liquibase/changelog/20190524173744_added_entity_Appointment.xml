@@ -24,8 +24,12 @@
                 <constraints nullable="false" />
             </column>
 
-            <column name="jhi_number" type="integer">
+            <column name="phone" type="varchar(255)">
                 <constraints nullable="true" />
+            </column>
+
+            <column name="jhi_number" type="integer">
+                <constraints nullable="true" unique="true" uniqueConstraintName="ux_appointment_jhi_number" />
             </column>
 
             <column name="valid" type="boolean">
@@ -104,6 +108,7 @@
             <column name="id" type="numeric"/>
             <column name="license_plate_number" type="string"/>
             <column name="driver" type="string"/>
+            <column name="phone" type="string"/>
             <column name="jhi_number" type="numeric"/>
             <column name="valid" type="boolean"/>
             <column name="status" type="string"/>

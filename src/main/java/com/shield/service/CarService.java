@@ -1,16 +1,22 @@
 package com.shield.service;
 
+import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.dto.CarDTO;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
  * Service Interface for managing {@link com.shield.domain.Car}.
  */
 public interface CarService {
+
+    List<CarDTO> getByUserId(Long userId);
+
+    CarDTO findOrCreateAppointmentCarInfo(AppointmentDTO appointmentDTO);
 
     /**
      * Save a car.

@@ -17,6 +17,7 @@
       },
       "licensePlateNumber": "License Plate Number",
       "driver": "Driver",
+      "phone": "Phone",
       "number": "Number",
       "valid": "Valid",
       "status": "Status",

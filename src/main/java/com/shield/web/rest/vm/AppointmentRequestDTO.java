@@ -17,4 +17,7 @@ public class AppointmentRequestDTO implements Serializable {
     @NotNull
     private String driver;
 
+    @NotNull
+    private String phone;
+
 }

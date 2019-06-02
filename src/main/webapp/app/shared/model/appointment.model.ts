@@ -5,14 +5,14 @@ export const enum AppointmentStatus {
   WAIT = 'WAIT',
   START = 'START',
   ENTER = 'ENTER',
-  LEAVE = 'LEAVE',
-  EXPIRED = 'EXPIRED'
+  LEAVE = 'LEAVE'
 }
 
 export interface IAppointment {
   id?: number;
   licensePlateNumber?: string;
   driver?: string;
+  phone?: string;
   number?: number;
   valid?: boolean;
   status?: AppointmentStatus;
@@ -35,6 +35,7 @@ export class Appointment implements IAppointment {
     public id?: number,
     public licensePlateNumber?: string,
     public driver?: string,
+    public phone?: string,
     public number?: number,
     public valid?: boolean,
     public status?: AppointmentStatus,

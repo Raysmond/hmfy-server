@@ -1,8 +1,10 @@
 package com.shield.service.impl;
 
+import com.shield.domain.User;
 import com.shield.service.CarService;
 import com.shield.domain.Car;
 import com.shield.repository.CarRepository;
+import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.dto.CarDTO;
 import com.shield.service.mapper.CarMapper;
 import org.slf4j.Logger;
@@ -12,8 +14,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service Implementation for managing {@link Car}.
@@ -31,6 +37,39 @@ public class CarServiceImpl implements CarService {
     public CarServiceImpl(CarRepository carRepository, CarMapper carMapper) {
         this.carRepository = carRepository;
         this.carMapper = carMapper;
+    }
+
+    @Override
+    public List<CarDTO> getByUserId(Long userId) {
+        return this.carRepository.findByUserId(userId).stream().map(carMapper::toDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public CarDTO findOrCreateAppointmentCarInfo(AppointmentDTO appointmentDTO) {
+        if (appointmentDTO.getUserId() != null) {
+            List<Car> cars = this.carRepository.findByUserId(appointmentDTO.getUserId());
+            cars = cars.stream()
+                .filter(it -> it.getLicensePlateNumber() != null && it.getLicensePlateNumber().equals(appointmentDTO.getLicensePlateNumber())
+                    && it.getDriver() != null && it.getDriver().equals(appointmentDTO.getDriver())
+                    && it.getPhone() != null && it.getPhone().equals(appointmentDTO.getPhone())
+                ).collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(cars)) {
+                Car car = new Car();
+                User user = new User();
+                user.setId(appointmentDTO.getUserId());
+                car.setUser(user);
+                car.setLicensePlateNumber(appointmentDTO.getLicensePlateNumber());
+                car.setDriver(appointmentDTO.getDriver());
+                car.setPhone(appointmentDTO.getPhone());
+                car.setCreateTime(ZonedDateTime.now());
+                car.setUpdateTime(ZonedDateTime.now());
+                car = carRepository.save(car);
+                return this.carMapper.toDto(car);
+            } else {
+                return this.carMapper.toDto(cars.get(0));
+            }
+        }
+        return null;
     }
 
     /**

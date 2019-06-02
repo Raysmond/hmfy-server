@@ -36,7 +36,11 @@ public class Appointment implements Serializable {
     @Column(name = "driver", nullable = false)
     private String driver;
 
-    @Column(name = "jhi_number")
+    @Column(name = "phone")
+    private String phone;
+
+    
+    @Column(name = "jhi_number", unique = true)
     private Integer number;
 
     @NotNull
@@ -116,6 +120,19 @@ public class Appointment implements Serializable {
 
     public void setDriver(String driver) {
         this.driver = driver;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public Appointment phone(String phone) {
+        this.phone = phone;
+        return this;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public Integer getNumber() {
@@ -310,6 +327,7 @@ public class Appointment implements Serializable {
             "id=" + getId() +
             ", licensePlateNumber='" + getLicensePlateNumber() + "'" +
             ", driver='" + getDriver() + "'" +
+            ", phone='" + getPhone() + "'" +
             ", number=" + getNumber() +
             ", valid='" + isValid() + "'" +
             ", status='" + getStatus() + "'" +

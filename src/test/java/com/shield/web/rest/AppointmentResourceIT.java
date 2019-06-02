@@ -52,6 +52,9 @@ public class AppointmentResourceIT {
     private static final String DEFAULT_DRIVER = "AAAAAAAAAA";
     private static final String UPDATED_DRIVER = "BBBBBBBBBB";
 
+    private static final String DEFAULT_PHONE = "AAAAAAAAAA";
+    private static final String UPDATED_PHONE = "BBBBBBBBBB";
+
     private static final Integer DEFAULT_NUMBER = 1;
     private static final Integer UPDATED_NUMBER = 2;
 
@@ -138,6 +141,7 @@ public class AppointmentResourceIT {
         Appointment appointment = new Appointment()
             .licensePlateNumber(DEFAULT_LICENSE_PLATE_NUMBER)
             .driver(DEFAULT_DRIVER)
+            .phone(DEFAULT_PHONE)
             .number(DEFAULT_NUMBER)
             .valid(DEFAULT_VALID)
             .status(DEFAULT_STATUS)
@@ -176,6 +180,7 @@ public class AppointmentResourceIT {
         Appointment appointment = new Appointment()
             .licensePlateNumber(UPDATED_LICENSE_PLATE_NUMBER)
             .driver(UPDATED_DRIVER)
+            .phone(UPDATED_PHONE)
             .number(UPDATED_NUMBER)
             .valid(UPDATED_VALID)
             .status(UPDATED_STATUS)
@@ -228,6 +233,7 @@ public class AppointmentResourceIT {
         Appointment testAppointment = appointmentList.get(appointmentList.size() - 1);
         assertThat(testAppointment.getLicensePlateNumber()).isEqualTo(DEFAULT_LICENSE_PLATE_NUMBER);
         assertThat(testAppointment.getDriver()).isEqualTo(DEFAULT_DRIVER);
+        assertThat(testAppointment.getPhone()).isEqualTo(DEFAULT_PHONE);
         assertThat(testAppointment.getNumber()).isEqualTo(DEFAULT_NUMBER);
         assertThat(testAppointment.isValid()).isEqualTo(DEFAULT_VALID);
         assertThat(testAppointment.getStatus()).isEqualTo(DEFAULT_STATUS);
@@ -370,6 +376,7 @@ public class AppointmentResourceIT {
             .andExpect(jsonPath("$.[*].id").value(hasItem(appointment.getId().intValue())))
             .andExpect(jsonPath("$.[*].licensePlateNumber").value(hasItem(DEFAULT_LICENSE_PLATE_NUMBER.toString())))
             .andExpect(jsonPath("$.[*].driver").value(hasItem(DEFAULT_DRIVER.toString())))
+            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE.toString())))
             .andExpect(jsonPath("$.[*].number").value(hasItem(DEFAULT_NUMBER)))
             .andExpect(jsonPath("$.[*].valid").value(hasItem(DEFAULT_VALID.booleanValue())))
             .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
@@ -396,6 +403,7 @@ public class AppointmentResourceIT {
             .andExpect(jsonPath("$.id").value(appointment.getId().intValue()))
             .andExpect(jsonPath("$.licensePlateNumber").value(DEFAULT_LICENSE_PLATE_NUMBER.toString()))
             .andExpect(jsonPath("$.driver").value(DEFAULT_DRIVER.toString()))
+            .andExpect(jsonPath("$.phone").value(DEFAULT_PHONE.toString()))
             .andExpect(jsonPath("$.number").value(DEFAULT_NUMBER))
             .andExpect(jsonPath("$.valid").value(DEFAULT_VALID.booleanValue()))
             .andExpect(jsonPath("$.status").value(DEFAULT_STATUS.toString()))
@@ -485,6 +493,45 @@ public class AppointmentResourceIT {
 
         // Get all the appointmentList where driver is null
         defaultAppointmentShouldNotBeFound("driver.specified=false");
+    }
+
+    @Test
+    @Transactional
+    public void getAllAppointmentsByPhoneIsEqualToSomething() throws Exception {
+        // Initialize the database
+        appointmentRepository.saveAndFlush(appointment);
+
+        // Get all the appointmentList where phone equals to DEFAULT_PHONE
+        defaultAppointmentShouldBeFound("phone.equals=" + DEFAULT_PHONE);
+
+        // Get all the appointmentList where phone equals to UPDATED_PHONE
+        defaultAppointmentShouldNotBeFound("phone.equals=" + UPDATED_PHONE);
+    }
+
+    @Test
+    @Transactional
+    public void getAllAppointmentsByPhoneIsInShouldWork() throws Exception {
+        // Initialize the database
+        appointmentRepository.saveAndFlush(appointment);
+
+        // Get all the appointmentList where phone in DEFAULT_PHONE or UPDATED_PHONE
+        defaultAppointmentShouldBeFound("phone.in=" + DEFAULT_PHONE + "," + UPDATED_PHONE);
+
+        // Get all the appointmentList where phone equals to UPDATED_PHONE
+        defaultAppointmentShouldNotBeFound("phone.in=" + UPDATED_PHONE);
+    }
+
+    @Test
+    @Transactional
+    public void getAllAppointmentsByPhoneIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        appointmentRepository.saveAndFlush(appointment);
+
+        // Get all the appointmentList where phone is not null
+        defaultAppointmentShouldBeFound("phone.specified=true");
+
+        // Get all the appointmentList where phone is null
+        defaultAppointmentShouldNotBeFound("phone.specified=false");
     }
 
     @Test
@@ -1173,6 +1220,7 @@ public class AppointmentResourceIT {
             .andExpect(jsonPath("$.[*].id").value(hasItem(appointment.getId().intValue())))
             .andExpect(jsonPath("$.[*].licensePlateNumber").value(hasItem(DEFAULT_LICENSE_PLATE_NUMBER)))
             .andExpect(jsonPath("$.[*].driver").value(hasItem(DEFAULT_DRIVER)))
+            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE)))
             .andExpect(jsonPath("$.[*].number").value(hasItem(DEFAULT_NUMBER)))
             .andExpect(jsonPath("$.[*].valid").value(hasItem(DEFAULT_VALID.booleanValue())))
             .andExpect(jsonPath("$.[*].status").value(hasItem(DEFAULT_STATUS.toString())))
@@ -1233,6 +1281,7 @@ public class AppointmentResourceIT {
         updatedAppointment
             .licensePlateNumber(UPDATED_LICENSE_PLATE_NUMBER)
             .driver(UPDATED_DRIVER)
+            .phone(UPDATED_PHONE)
             .number(UPDATED_NUMBER)
             .valid(UPDATED_VALID)
             .status(UPDATED_STATUS)
@@ -1257,6 +1306,7 @@ public class AppointmentResourceIT {
         Appointment testAppointment = appointmentList.get(appointmentList.size() - 1);
         assertThat(testAppointment.getLicensePlateNumber()).isEqualTo(UPDATED_LICENSE_PLATE_NUMBER);
         assertThat(testAppointment.getDriver()).isEqualTo(UPDATED_DRIVER);
+        assertThat(testAppointment.getPhone()).isEqualTo(UPDATED_PHONE);
         assertThat(testAppointment.getNumber()).isEqualTo(UPDATED_NUMBER);
         assertThat(testAppointment.isValid()).isEqualTo(UPDATED_VALID);
         assertThat(testAppointment.getStatus()).isEqualTo(UPDATED_STATUS);

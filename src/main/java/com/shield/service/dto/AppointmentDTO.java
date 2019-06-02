@@ -1,8 +1,10 @@
 package com.shield.service.dto;
+
 import java.time.ZonedDateTime;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Objects;
+
 import com.shield.domain.enumeration.AppointmentStatus;
 
 /**
@@ -17,6 +19,8 @@ public class AppointmentDTO implements Serializable {
 
     @NotNull
     private String driver;
+
+    private String phone;
 
     private Integer number;
 
@@ -74,6 +78,14 @@ public class AppointmentDTO implements Serializable {
 
     public void setDriver(String driver) {
         this.driver = driver;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public Integer getNumber() {
@@ -223,6 +235,7 @@ public class AppointmentDTO implements Serializable {
             "id=" + getId() +
             ", licensePlateNumber='" + getLicensePlateNumber() + "'" +
             ", driver='" + getDriver() + "'" +
+            ", phone='" + getPhone() + "'" +
             ", number=" + getNumber() +
             ", valid='" + isValid() + "'" +
             ", status='" + getStatus() + "'" +
