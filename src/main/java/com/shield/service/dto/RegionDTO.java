@@ -1,4 +1,5 @@
 package com.shield.service.dto;
+
 import java.time.ZonedDateTime;
 import javax.validation.constraints.*;
 import java.io.Serializable;
@@ -46,6 +47,7 @@ public class RegionDTO implements Serializable {
 
     private ZonedDateTime updateTime;
 
+    private Integer drivers = 0;
 
     public Long getId() {
         return id;
@@ -149,6 +151,14 @@ public class RegionDTO implements Serializable {
 
     public void setUpdateTime(ZonedDateTime updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public Integer getDrivers() {
+        return drivers;
+    }
+
+    public void setDrivers(Integer drivers) {
+        this.drivers = drivers;
     }
 
     @Override

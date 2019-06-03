@@ -6,6 +6,7 @@ import com.shield.web.rest.vm.RegionStatDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -16,6 +17,8 @@ public interface RegionService {
     RegionStatDTO countRegionStat();
 
     Boolean isRegionOpen(Long regionId);
+
+    Map<Long, Long> countDriversByRegionId();
 
     /**
      * Save a region.

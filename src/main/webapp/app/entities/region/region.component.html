@@ -27,7 +27,8 @@
             <th jhiSortBy="queueValidTime"><span jhiTranslate="shieldApp.region.queueValidTime">Queue Valid Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <!--<th jhiSortBy="createTime"><span jhiTranslate="shieldApp.region.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
             <!--<th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.region.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-            <th></th>
+            <th>预约员</th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
@@ -39,10 +40,15 @@
                 <td>{{region.startTime}}</td>
                 <td>{{region.endTime}}</td>
                 <td>{{region.days}}</td>
-                <td>{{region.open}}</td>
-                <td>{{region.validTime}}</td>
+                <td>
+                    <!--{{region.open}}-->
+                    <span *ngIf="region.open" class="badge badge-success">开启</span>
+                    <span *ngIf="!region.open" class="badge badge-secondary">关闭</span>
+                </td>
+                <td>{{region.validTime}}s</td>
                 <td>{{region.queueQuota}}</td>
-                <td>{{region.queueValidTime}}</td>
+                <td>{{region.queueValidTime}}s</td>
+                <td>{{region.drivers}}</td>
                 <!--<td>{{region.createTime | date:'medium'}}</td>-->
                 <!--<td>{{region.updateTime | date:'medium'}}</td>-->
                 <td class="text-right">

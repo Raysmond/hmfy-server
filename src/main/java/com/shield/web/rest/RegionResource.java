@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -96,6 +97,13 @@ public class RegionResource {
     public ResponseEntity<List<RegionDTO>> getAllRegions(Pageable pageable, @RequestParam MultiValueMap<String, String> queryParams, UriComponentsBuilder uriBuilder) {
         log.debug("REST request to get a page of Regions");
         Page<RegionDTO> page = regionService.findAll(pageable);
+        Map<Long, Long> countDrivers = regionService.countDriversByRegionId();
+        page.map(it -> {
+            if (countDrivers.containsKey(it.getId())) {
+                it.setDrivers(countDrivers.get(it.getId()).intValue());
+            }
+            return it;
+        });
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(uriBuilder.queryParams(queryParams), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }

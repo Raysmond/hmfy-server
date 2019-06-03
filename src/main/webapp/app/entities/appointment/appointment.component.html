@@ -101,7 +101,7 @@
                         </th>
                         <!--<th jhiSortBy="leaveTime"><span jhiTranslate="shieldApp.appointment.leaveTime">Leave Time</span>-->
                             <!--<fa-icon [icon]="'sort'"></fa-icon>-->
-                        </th>
+                        <!--</th>-->
                         <th jhiSortBy="regionName"><span jhiTranslate="shieldApp.appointment.region">Region</span>
                             <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
@@ -169,14 +169,14 @@
                                     <fa-icon [icon]="'pencil-alt'"></fa-icon>
                                     <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
                                 </button>
-                                <!--<button type="submit"-->
-                                        <!--[routerLink]="['/', 'appointment', { outlets: { popup: appointment.id + '/delete'} }]"-->
-                                        <!--replaceUrl="true"-->
-                                        <!--queryParamsHandling="merge"-->
-                                        <!--class="btn btn-danger btn-sm">-->
-                                    <!--<fa-icon [icon]="'times'"></fa-icon>-->
-                                    <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>-->
-                                <!--</button>-->
+                                <button type="submit"
+                                        [routerLink]="['/', 'appointment', { outlets: { popup: appointment.id + '/delete'} }]"
+                                        replaceUrl="true"
+                                        queryParamsHandling="merge"
+                                        class="btn btn-danger btn-sm">
+                                    <fa-icon [icon]="'times'"></fa-icon>
+                                    <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
+                                </button>
                             </div>
                         </td>
                     </tr>

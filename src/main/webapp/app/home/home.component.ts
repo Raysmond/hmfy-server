@@ -10,6 +10,8 @@ import { SERVER_API_URL } from 'app/app.constants';
 import { LoginModalService, AccountService, Account } from 'app/core';
 import { HomeService } from './home.service';
 import { IRegionStat } from './home.model';
+import { AppointmentService } from 'app/entities/appointment';
+import { IAppointment } from 'app/shared/model/appointment.model';
 
 @Component({
   selector: 'jhi-home',
@@ -19,16 +21,36 @@ import { IRegionStat } from './home.model';
 export class HomeComponent implements OnInit {
   account: Account;
   modalRef: NgbModalRef;
+  appointments: IAppointment[];
 
   public resourceUrl = SERVER_API_URL + 'api/admin-dashboard';
 
   constructor(
     private accountService: AccountService,
     private loginModalService: LoginModalService,
+    protected appointmentService: AppointmentService,
     private eventManager: JhiEventManager,
     private homeService: HomeService,
     private http: HttpClient
   ) {}
+
+  loadLatestAppointments() {
+    const filterParams = {
+      page: 0,
+      size: 4,
+      sort: ['id,desc']
+    };
+
+    this.appointmentService.query(filterParams).subscribe(
+      (res: HttpResponse<IAppointment[]>) => {
+        // console.log(res.body);
+        this.appointments = res.body;
+      },
+      (res: HttpErrorResponse) => {
+        console.log(res.message);
+      }
+    );
+  }
 
   ngOnInit() {
     this.accountService.identity().then((account: Account) => {
@@ -44,6 +66,8 @@ export class HomeComponent implements OnInit {
         console.log(res.message);
       }
     );
+
+    this.loadLatestAppointments();
   }
 
   registerAuthenticationSuccess() {

@@ -1,10 +1,12 @@
 package com.shield.service.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.shield.service.RegionService;
 import com.shield.domain.Region;
 import com.shield.repository.RegionRepository;
+import com.shield.service.dto.CountDTO;
 import com.shield.service.dto.RegionDTO;
 import com.shield.service.dto.RegionStatCount;
 import com.shield.service.mapper.RegionMapper;
@@ -23,6 +25,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -90,6 +93,16 @@ public class RegionServiceImpl implements RegionService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public Map<Long, Long> countDriversByRegionId() {
+        List<CountDTO> countDTOS = regionRepository.countDriversByRegionId();
+        Map<Long, Long> result = Maps.newHashMap();
+        for (CountDTO count : countDTOS) {
+            result.put(count.getKey(), count.getCount());
+        }
+        return result;
     }
 
     /**
