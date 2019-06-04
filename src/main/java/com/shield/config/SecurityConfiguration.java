@@ -80,6 +80,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers("/api/admin-dashboard/**").permitAll()
             .antMatchers("/api/wx/**").authenticated()
             .antMatchers("/api/account", "/account/change-password").authenticated()
+            .antMatchers("/region-admin/api/**").hasAnyAuthority(AuthoritiesConstants.REGION_ADMIN, AuthoritiesConstants.ADMIN)
             .antMatchers("/api/**").hasAuthority(AuthoritiesConstants.ADMIN)
             .antMatchers("/management/health").permitAll()
             .antMatchers("/management/info").permitAll()

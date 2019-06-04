@@ -200,7 +200,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     private static final long DEFAULT_VALID_TIME_SECONDS = 7200;
 
-    @Scheduled(fixedRate = 5000)
+//    @Scheduled(fixedRate = 5000)
     public void checkAppointments() {
         for (Region region : regionRepository.findAll()) {
             Long validSeconds = region.getValidTime() != null ? region.getValidTime() : DEFAULT_VALID_TIME_SECONDS;

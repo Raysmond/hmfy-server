@@ -15,26 +15,23 @@
                     <fa-icon [icon]="'sort'"></fa-icon>
                 </th>
                 <th jhiSortBy="login"><span jhiTranslate="userManagement.login">Login</span>
-                    <fa-icon [icon]="'sort'"></fa-icon>
                 </th>
                 <th jhiSortBy="email"><span jhiTranslate="userManagement.email">Email</span>
-                    <fa-icon [icon]="'sort'"></fa-icon>
                 </th>
                 <th></th>
                 <th jhiSortBy="langKey"><span jhiTranslate="userManagement.langKey">Lang Key</span>
-                    <fa-icon [icon]="'sort'"></fa-icon>
                 </th>
                 <th><span jhiTranslate="userManagement.profiles">Profiles</span></th>
                 <th>绑定区域</th>
                 <th>绑定微信账号</th>
                 <th jhiSortBy="createdDate"><span jhiTranslate="userManagement.createdDate">Created Date</span>
-                    <fa-icon [icon]="'sort'"></fa-icon>
+                    <!--<fa-icon [icon]="'sort'"></fa-icon>-->
                 </th>
                 <!--<th jhiSortBy="lastModifiedBy"><span jhiTranslate="userManagement.lastModifiedBy">Last Modified By</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-                <th jhiSortBy="lastModifiedDate"><span
-                    jhiTranslate="userManagement.lastModifiedDate">Last Modified Date</span>
-                    <fa-icon [icon]="'sort'"></fa-icon>
-                </th>
+                <!--<th jhiSortBy="lastModifiedDate"><span-->
+                    <!--jhiTranslate="userManagement.lastModifiedDate">Last Modified Date</span>-->
+                    <!--<fa-icon [icon]="'sort'"></fa-icon>-->
+                <!--</th>-->
                 <th></th>
             </tr>
             </thead>
@@ -72,7 +69,7 @@
                 </td>
                 <td>{{user.createdDate | date:'yyyy-MM-dd HH:mm'}}</td>
                 <!--<td>{{user.lastModifiedBy}}</td>-->
-                <td>{{user.lastModifiedDate | date:'yyyy-MM-dd HH:mm'}}</td>
+                <!--<td>{{user.lastModifiedDate | date:'yyyy-MM-dd HH:mm'}}</td>-->
 
                 <td class="text-right">
                     <div class="btn-group">
@@ -80,20 +77,27 @@
                                 [routerLink]="['./', user.login, 'view']"
                                 class="btn btn-info btn-sm">
                             <fa-icon [icon]="'eye'"></fa-icon>
-                            <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                            <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>-->
                         </button>
-                        <button type="submit"
+                        <button *jhiHasAnyAuthority="'ROLE_ADMIN'" type="submit"
                                 [routerLink]="['./', user.login, 'edit']"
                                 queryParamsHandling="merge"
                                 class="btn btn-primary btn-sm">
                             <fa-icon [icon]="'pencil-alt'"></fa-icon>
-                            <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+                            <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>-->
                         </button>
-                        <button type="button" (click)="deleteUser(user)"
-                                class="btn btn-danger btn-sm" [disabled]="currentAccount.login === user.login">
-                            <fa-icon [icon]="'times'"></fa-icon>
-                            <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
+                        <button *ngIf="canRegionAdminEdit(user)" type="submit"
+                                [routerLink]="['./', user.login, 'edit']"
+                                queryParamsHandling="merge"
+                                class="btn btn-primary btn-sm">
+                            <fa-icon [icon]="'pencil-alt'"></fa-icon>
+                            <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>-->
                         </button>
+                        <!--<button type="button" (click)="deleteUser(user)"-->
+                                <!--class="btn btn-danger btn-sm" [disabled]="currentAccount.login === user.login">-->
+                            <!--<fa-icon [icon]="'times'"></fa-icon>-->
+                            <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>-->
+                        <!--</button>-->
                     </div>
                 </td>
             </tr>

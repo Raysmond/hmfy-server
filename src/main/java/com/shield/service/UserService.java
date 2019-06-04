@@ -146,7 +146,8 @@ public class UserService {
         } else {
             user.setLangKey(userDTO.getLangKey());
         }
-        String encryptedPassword = passwordEncoder.encode(RandomUtil.generatePassword());
+//        String encryptedPassword = passwordEncoder.encode(RandomUtil.generatePassword());
+        String encryptedPassword = passwordEncoder.encode("123");
         user.setPassword(encryptedPassword);
         user.setResetKey(RandomUtil.generateResetKey());
         user.setResetDate(Instant.now());
@@ -158,6 +159,11 @@ public class UserService {
                 .map(Optional::get)
                 .collect(Collectors.toSet());
             user.setAuthorities(authorities);
+        }
+        if (userDTO.getRegionId() != null) {
+            Region region = new Region();
+            region.setId(userDTO.getRegionId());
+            user.setRegion(region);
         }
         userRepository.save(user);
         this.clearUserCaches(user);
@@ -255,6 +261,11 @@ public class UserService {
     @Transactional(readOnly = true)
     public Page<UserDTO> getAllManagedUsers(Pageable pageable) {
         return userRepository.findAllByLoginNot(pageable, Constants.ANONYMOUS_USER).map(UserDTO::new);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UserDTO> getAllManagedUsersByRegionId(Pageable pageable, Long regionId) {
+        return userRepository.findAllByRegionId(pageable, regionId).map(UserDTO::new);
     }
 
     @Transactional(readOnly = true)

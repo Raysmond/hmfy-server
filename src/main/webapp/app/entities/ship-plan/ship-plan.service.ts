@@ -5,9 +5,10 @@ import * as moment from 'moment';
 import { DATE_FORMAT } from 'app/shared/constants/input.constants';
 import { map } from 'rxjs/operators';
 
-import { SERVER_API_URL } from 'app/app.constants';
+import { SERVER_API_REGION_ADMIN_URL, SERVER_API_URL } from 'app/app.constants';
 import { createRequestOption } from 'app/shared';
 import { IShipPlan } from 'app/shared/model/ship-plan.model';
+import { AccountService } from 'app/core';
 
 type EntityResponseType = HttpResponse<IShipPlan>;
 type EntityArrayResponseType = HttpResponse<IShipPlan[]>;
@@ -15,38 +16,47 @@ type EntityArrayResponseType = HttpResponse<IShipPlan[]>;
 @Injectable({ providedIn: 'root' })
 export class ShipPlanService {
   public resourceUrl = SERVER_API_URL + 'api/ship-plans';
+  public regionAdminResourceUrl = SERVER_API_REGION_ADMIN_URL + 'api/ship-plans';
 
-  constructor(protected http: HttpClient) {}
+  constructor(protected http: HttpClient, private accountService: AccountService) {}
+
+  getResourceUrl() {
+    if (this.accountService.hasAnyAuthority(['ROLE_ADMIN'])) {
+      return this.resourceUrl;
+    } else {
+      return this.regionAdminResourceUrl;
+    }
+  }
 
   create(shipPlan: IShipPlan): Observable<EntityResponseType> {
     const copy = this.convertDateFromClient(shipPlan);
     return this.http
-      .post<IShipPlan>(this.resourceUrl, copy, { observe: 'response' })
+      .post<IShipPlan>(this.getResourceUrl(), copy, { observe: 'response' })
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
   update(shipPlan: IShipPlan): Observable<EntityResponseType> {
     const copy = this.convertDateFromClient(shipPlan);
     return this.http
-      .put<IShipPlan>(this.resourceUrl, copy, { observe: 'response' })
+      .put<IShipPlan>(this.getResourceUrl(), copy, { observe: 'response' })
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
   find(id: number): Observable<EntityResponseType> {
     return this.http
-      .get<IShipPlan>(`${this.resourceUrl}/${id}`, { observe: 'response' })
+      .get<IShipPlan>(`${this.getResourceUrl()}/${id}`, { observe: 'response' })
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
   query(req?: any): Observable<EntityArrayResponseType> {
     const options = createRequestOption(req);
     return this.http
-      .get<IShipPlan[]>(this.resourceUrl, { params: options, observe: 'response' })
+      .get<IShipPlan[]>(this.getResourceUrl(), { params: options, observe: 'response' })
       .pipe(map((res: EntityArrayResponseType) => this.convertDateArrayFromServer(res)));
   }
 
   delete(id: number): Observable<HttpResponse<any>> {
-    return this.http.delete<any>(`${this.resourceUrl}/${id}`, { observe: 'response' });
+    return this.http.delete<any>(`${this.getResourceUrl()}/${id}`, { observe: 'response' });
   }
 
   protected convertDateFromClient(shipPlan: IShipPlan): IShipPlan {

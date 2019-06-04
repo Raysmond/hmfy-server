@@ -28,21 +28,28 @@
             </a>
         </li>
         <li>
-            <a  routerLink="region">
+            <a routerLink="region">
                 <em class="icon-home"></em>
                 <span jhiTranslate="global.menu.entities.region">Region</span>
             </a>
         </li>
         <li>
-            <a  routerLink="appointment">
+            <a routerLink="appointment">
                 <em class="icon-grid"></em>
                 <span jhiTranslate="global.menu.entities.appointment">Appointment</span>
             </a>
         </li>
         <li>
-            <a routerLink="ship-plan" >
+            <a routerLink="ship-plan">
                 <em class="icon-note"></em>
                 <span jhiTranslate="global.menu.entities.shipPlan">Ship Plan</span>
+            </a>
+        </li>
+        <li>
+            <a routerLink="admin/user-management">
+                <!--<fa-icon icon="user" fixedWidth="true"></fa-icon>-->
+                <em class="icon-user"></em>
+                <span jhiTranslate="global.menu.admin.userManagement">User management</span>
             </a>
         </li>
         <li>
@@ -51,33 +58,27 @@
                 <span jhiTranslate="global.menu.entities.car">Car</span>
             </a>
         </li>
-        <li>
-            <a routerLink="admin/user-management" >
-                <!--<fa-icon icon="user" fixedWidth="true"></fa-icon>-->
-                <em class="icon-user"></em>
-                <span jhiTranslate="global.menu.admin.userManagement">User management</span>
-            </a>
-        </li>
-        <li>
-            <a  routerLink="admin/jhi-metrics" >
+
+        <li *jhiHasAnyAuthority="'ROLE_ADMIN'">
+            <a routerLink="admin/jhi-metrics">
                 <em class="icon-cup"></em>
                 <span jhiTranslate="global.menu.admin.metrics">Metrics</span>
             </a>
         </li>
 
         <!--<li>-->
-            <!--<a class="dropdown-item" routerLink="wx-ma-user" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="collapseNavbar()">-->
-                <!--<fa-icon icon="asterisk" fixedWidth="true"></fa-icon>-->
-                <!--<span jhiTranslate="global.menu.entities.wxMaUser">Wx Ma User</span>-->
-            <!--</a>-->
+        <!--<a class="dropdown-item" routerLink="wx-ma-user" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="collapseNavbar()">-->
+        <!--<fa-icon icon="asterisk" fixedWidth="true"></fa-icon>-->
+        <!--<span jhiTranslate="global.menu.entities.wxMaUser">Wx Ma User</span>-->
+        <!--</a>-->
         <!--</li>-->
         <!--<li class=" "><a href="#submenu" title="Menu" data-toggle="collapse"><em-->
-            <!--class="icon-speedometer"></em><span data-localize="sidebar.nav.menu.MENU">Menu</span></a>-->
-            <!--<ul class="sidebar-nav sidebar-subnav collapse" id="submenu">-->
-                <!--<li class="sidebar-subnav-header">Menu</li>-->
-                <!--<li class=" "><a href="submenu.html" title="Submenu"><span-->
-                    <!--data-localize="sidebar.nav.menu.SUBMENU">Submenu</span></a></li>-->
-            <!--</ul>-->
+        <!--class="icon-speedometer"></em><span data-localize="sidebar.nav.menu.MENU">Menu</span></a>-->
+        <!--<ul class="sidebar-nav sidebar-subnav collapse" id="submenu">-->
+        <!--<li class="sidebar-subnav-header">Menu</li>-->
+        <!--<li class=" "><a href="submenu.html" title="Submenu"><span-->
+        <!--data-localize="sidebar.nav.menu.SUBMENU">Submenu</span></a></li>-->
+        <!--</ul>-->
         <!--</li>-->
     </ul><!-- END sidebar nav-->
 </nav>

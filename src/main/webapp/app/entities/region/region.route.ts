@@ -37,7 +37,7 @@ export const regionRoute: Routes = [
       pagingParams: JhiResolvePagingParams
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: ['ROLE_ADMIN', 'ROLE_REGION_ADMIN'],
       defaultSort: 'id,asc',
       pageTitle: 'shieldApp.region.home.title'
     },
@@ -50,7 +50,7 @@ export const regionRoute: Routes = [
       region: RegionResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: ['ROLE_ADMIN', 'ROLE_REGION_ADMIN'],
       pageTitle: 'shieldApp.region.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -62,7 +62,7 @@ export const regionRoute: Routes = [
       region: RegionResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: ['ROLE_ADMIN', 'ROLE_REGION_ADMIN'],
       pageTitle: 'shieldApp.region.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -74,7 +74,7 @@ export const regionRoute: Routes = [
       region: RegionResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: ['ROLE_ADMIN', 'ROLE_REGION_ADMIN'],
       pageTitle: 'shieldApp.region.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -89,7 +89,7 @@ export const regionPopupRoute: Routes = [
       region: RegionResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: ['ROLE_ADMIN', 'ROLE_REGION_ADMIN'],
       pageTitle: 'shieldApp.region.home.title'
     },
     canActivate: [UserRouteAccessService],

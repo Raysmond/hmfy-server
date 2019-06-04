@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -46,4 +48,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findOneWithAuthoritiesByEmail(String email);
 
     Page<User> findAllByLoginNot(Pageable pageable, String login);
+
+//    @Query(value = "select u.* from jhi_user u join jhi_user_authority ju on ju.user_id = u.id and ju.authority_name not in ('ROLE_ADMIN','ROLE_REGION_ADMIN') " +
+//        "where u.region_id = :regionId group by u.id", nativeQuery = true)
+//    Page<User> findAllByRegionId(Pageable pageable, @Param("regionId") Long regionId);
+
+    Page<User> findAllByRegionId(Pageable pageable, Long regionId);
+
 }

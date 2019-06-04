@@ -1,9 +1,10 @@
 <div>
     <h2 id="page-heading">
         <span jhiTranslate="shieldApp.shipPlan.home.title">Ship Plans</span>
-        <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-ship-plan" [routerLink]="['/ship-plan/new']">
+        <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-ship-plan"
+                [routerLink]="['/ship-plan/new']">
             <fa-icon [icon]="'plus'"></fa-icon>
-            <span  jhiTranslate="shieldApp.shipPlan.home.createLabel">
+            <span jhiTranslate="shieldApp.shipPlan.home.createLabel">
             Create new Ship Plan
             </span>
         </button>
@@ -14,23 +15,38 @@
         <table class="table table-striped">
             <thead>
             <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
-            <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="company"><span jhiTranslate="shieldApp.shipPlan.company">Company</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="demandedAmount"><span jhiTranslate="shieldApp.shipPlan.demandedAmount">Demanded Amount</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="finishAmount"><span jhiTranslate="shieldApp.shipPlan.finishAmount">Finish Amount</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="remainAmount"><span jhiTranslate="shieldApp.shipPlan.remainAmount">Remain Amount</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="availableAmount"><span jhiTranslate="shieldApp.shipPlan.availableAmount">Available Amount</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="shipMethond"><span jhiTranslate="shieldApp.shipPlan.shipMethond">Ship Methond</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <!--<th jhiSortBy="shipNumber"><span jhiTranslate="shieldApp.shipPlan.shipNumber">Ship Number</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-            <th jhiSortBy="endTime"><span jhiTranslate="shieldApp.shipPlan.endTime">End Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="createTime"><span jhiTranslate="shieldApp.shipPlan.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <!--<th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.shipPlan.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-            <th jhiSortBy="licensePlateNumber"><span jhiTranslate="shieldApp.shipPlan.licensePlateNumber">License Plate Number</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <!--<th jhiSortBy="driver"><span jhiTranslate="shieldApp.shipPlan.driver">Driver</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-            <!--<th jhiSortBy="phone"><span jhiTranslate="shieldApp.shipPlan.phone">Phone</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-            <!--<th jhiSortBy="userLogin"><span jhiTranslate="shieldApp.shipPlan.user">User</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-            <th jhiSortBy="toUserLogin"><span jhiTranslate="shieldApp.shipPlan.toUser">To User</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th></th>
+                <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span>
+                    <fa-icon [icon]="'sort'"></fa-icon>
+                </th>
+                <th jhiSortBy="company"><span jhiTranslate="shieldApp.shipPlan.company">Company</span>
+                    <!--<fa-icon [icon]="'sort'"></fa-icon>-->
+                </th>
+                <th jhiSortBy="demandedAmount"><span
+                    jhiTranslate="shieldApp.shipPlan.demandedAmount">Demanded Amount</span>
+                </th>
+                <th jhiSortBy="finishAmount"><span jhiTranslate="shieldApp.shipPlan.finishAmount">Finish Amount</span>
+                </th>
+                <th jhiSortBy="remainAmount"><span jhiTranslate="shieldApp.shipPlan.remainAmount">Remain Amount</span>
+                </th>
+                <th jhiSortBy="availableAmount"><span
+                    jhiTranslate="shieldApp.shipPlan.availableAmount">Available Amount</span>
+                </th>
+                <th jhiSortBy="shipMethond"><span jhiTranslate="shieldApp.shipPlan.shipMethond">Ship Methond</span>
+                </th>
+                <!--<th jhiSortBy="shipNumber"><span jhiTranslate="shieldApp.shipPlan.shipNumber">Ship Number</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+                <th jhiSortBy="endTime"><span jhiTranslate="shieldApp.shipPlan.endTime">End Time</span>
+                </th>
+                <!--<th jhiSortBy="createTime"><span jhiTranslate="shieldApp.shipPlan.createTime">Create Time</span>-->
+                </th>
+                <!--<th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.shipPlan.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+                <th jhiSortBy="licensePlateNumber"><span jhiTranslate="shieldApp.shipPlan.licensePlateNumber">License Plate Number</span>
+                </th>
+                <!--<th jhiSortBy="driver"><span jhiTranslate="shieldApp.shipPlan.driver">Driver</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+                <!--<th jhiSortBy="phone"><span jhiTranslate="shieldApp.shipPlan.phone">Phone</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+                <!--<th jhiSortBy="userLogin"><span jhiTranslate="shieldApp.shipPlan.user">User</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+                <th jhiSortBy="toUserLogin"><span jhiTranslate="shieldApp.shipPlan.toUser">To User</span>
+                </th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
@@ -44,13 +60,13 @@
                 <td jhiTranslate="{{'shieldApp.ShipMethod.' + shipPlan.shipMethond}}">{{shipPlan.shipMethond}}</td>
                 <!--<td>{{shipPlan.shipNumber}}</td>-->
                 <td>{{shipPlan.endTime | date:'yyyy-MM-dd'}}</td>
-                <td>{{shipPlan.createTime | date:'yyyy-MM-dd HH:mm'}}</td>
+                <!--<td>{{shipPlan.createTime | date:'yyyy-MM-dd HH:mm'}}</td>-->
                 <!--<td>{{shipPlan.updateTime | date:'medium'}}</td>-->
                 <td>{{shipPlan.licensePlateNumber}}</td>
                 <!--<td>{{shipPlan.driver}}</td>-->
                 <!--<td>{{shipPlan.phone}}</td>-->
                 <!--<td>-->
-                    <!--{{shipPlan.userLogin}}-->
+                <!--{{shipPlan.userLogin}}-->
                 <!--</td>-->
                 <td>
                     {{shipPlan.toUserLogin}}
@@ -61,22 +77,22 @@
                                 [routerLink]="['/ship-plan', shipPlan.id, 'view' ]"
                                 class="btn btn-info btn-sm">
                             <fa-icon [icon]="'eye'"></fa-icon>
-                            <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                            <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>-->
                         </button>
                         <button type="submit"
                                 [routerLink]="['/ship-plan', shipPlan.id, 'edit']"
                                 class="btn btn-primary btn-sm">
                             <fa-icon [icon]="'pencil-alt'"></fa-icon>
-                            <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+                            <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>-->
                         </button>
-                        <button type="submit"
-                                [routerLink]="['/', 'ship-plan', { outlets: { popup: shipPlan.id + '/delete'} }]"
-                                replaceUrl="true"
-                                queryParamsHandling="merge"
-                                class="btn btn-danger btn-sm">
-                            <fa-icon [icon]="'times'"></fa-icon>
-                            <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
-                        </button>
+                        <!--<button type="submit"-->
+                                <!--[routerLink]="['/', 'ship-plan', { outlets: { popup: shipPlan.id + '/delete'} }]"-->
+                                <!--replaceUrl="true"-->
+                                <!--queryParamsHandling="merge"-->
+                                <!--class="btn btn-danger btn-sm">-->
+                            <!--<fa-icon [icon]="'times'"></fa-icon>-->
+                            <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>-->
+                        <!--</button>-->
                     </div>
                 </td>
             </tr>
@@ -85,10 +101,12 @@
     </div>
     <div *ngIf="shipPlans && shipPlans.length">
         <div class="row justify-content-center">
-            <jhi-item-count [page]="page" [total]="totalItems" [maxSize]="5" [itemsPerPage]="itemsPerPage"></jhi-item-count>
+            <jhi-item-count [page]="page" [total]="totalItems" [maxSize]="5"
+                            [itemsPerPage]="itemsPerPage"></jhi-item-count>
         </div>
         <div class="row justify-content-center">
-            <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" (pageChange)="loadPage(page)"></ngb-pagination>
+            <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5"
+                            [rotate]="true" [boundaryLinks]="true" (pageChange)="loadPage(page)"></ngb-pagination>
         </div>
     </div>
 </div>

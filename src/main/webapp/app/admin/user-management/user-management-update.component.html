@@ -14,6 +14,9 @@
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="userManagement.login">Login</label>
                     <input type="text" class="form-control" name="login"
+                           *ngIf="user.id" readonly
+                           formControlName="login">
+                    <input *ngIf="!user.id" type="text" class="form-control" name="login"
                            formControlName="login">
 
                     <div *ngIf="editForm.get('login').invalid && (editForm.get('login').dirty || editForm.get('login').touched)">

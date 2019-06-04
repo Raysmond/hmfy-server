@@ -1,6 +1,7 @@
-package com.shield.web.rest;
+package com.shield.web.rest.admin.region;
 
 import com.shield.config.Constants;
+import com.shield.domain.Region;
 import com.shield.domain.User;
 import com.shield.repository.UserRepository;
 import com.shield.security.AuthoritiesConstants;
@@ -11,11 +12,9 @@ import com.shield.service.dto.UserDTO;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import com.shield.web.rest.errors.EmailAlreadyUsedException;
 import com.shield.web.rest.errors.LoginAlreadyUsedException;
-
 import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +31,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * REST controller for managing users.
@@ -59,10 +59,10 @@ import java.util.*;
  * Another option would be to have a specific JPA entity graph to handle this case.
  */
 @RestController
-@RequestMapping("/api")
-public class UserResource {
+@RequestMapping("/region-admin/api")
+public class RegionAdminUserResource extends RegionAdminBaseController {
 
-    private final Logger log = LoggerFactory.getLogger(UserResource.class);
+    private final Logger log = LoggerFactory.getLogger(RegionAdminUserResource.class);
 
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
@@ -73,12 +73,13 @@ public class UserResource {
 
     private final MailService mailService;
 
-    public UserResource(UserService userService, UserRepository userRepository, MailService mailService) {
+    public RegionAdminUserResource(UserService userService, UserRepository userRepository, MailService mailService) {
 
         this.userService = userService;
         this.userRepository = userRepository;
         this.mailService = mailService;
     }
+
 
     /**
      * {@code POST  /users}  : Creates a new user.
@@ -93,9 +94,10 @@ public class UserResource {
      * @throws BadRequestAlertException {@code 400 (Bad Request)} if the login or email is already in use.
      */
     @PostMapping("/users")
-    @PreAuthorize("hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<User> createUser(@Valid @RequestBody UserDTO userDTO) throws URISyntaxException {
         log.debug("REST request to save User : {}", userDTO);
+        Region region = requireGetManagerRegion(null);
+        userDTO.setRegionId(region.getId());
 
         if (userDTO.getId() != null) {
             throw new BadRequestAlertException("A new user cannot already have an ID", "userManagement", "idexists");
@@ -122,9 +124,14 @@ public class UserResource {
      * @throws LoginAlreadyUsedException {@code 400 (Bad Request)} if the login is already in use.
      */
     @PutMapping("/users")
-    @PreAuthorize("hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserDTO userDTO) {
         log.debug("REST request to update User : {}", userDTO);
+        Region region = requireGetManagerRegion(null);
+        if (userDTO.getRegionId() != null && !region.getId().equals(userDTO.getRegionId())) {
+            throw new BadRequestAlertException("只能指定您所管理的区域", "userManagement", null);
+        }
+        userDTO.setRegionId(region.getId());
+
         Optional<User> existingUser = userRepository.findOneByEmailIgnoreCase(userDTO.getEmail());
         if (existingUser.isPresent() && (!existingUser.get().getId().equals(userDTO.getId()))) {
             throw new EmailAlreadyUsedException();
@@ -147,17 +154,8 @@ public class UserResource {
      */
     @GetMapping("/users")
     public ResponseEntity<List<UserDTO>> getAllUsers(@RequestParam MultiValueMap<String, String> queryParams, UriComponentsBuilder uriBuilder, Pageable pageable) {
-        Page<UserDTO> page = Page.empty(pageable);
-
-        if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.ADMIN)) {
-            page = userService.getAllManagedUsers(pageable);
-        } else if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.REGION_ADMIN)) {
-            User user = userService.getUserWithAuthorities().get();
-            if (user.getRegion() != null) {
-                page = userService.getAllManagedUsersByRegionId(pageable, user.getRegion().getId());
-            }
-        }
-
+        Region region = this.requireGetManagerRegion(null);
+        Page<UserDTO> page = userService.getAllManagedUsersByRegionId(pageable, region.getId());
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(uriBuilder.queryParams(queryParams), page);
         return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
     }
@@ -168,9 +166,11 @@ public class UserResource {
      * @return a string list of all roles.
      */
     @GetMapping("/users/authorities")
-    @PreAuthorize("hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
     public List<String> getAuthorities() {
-        return userService.getAuthorities();
+        List<String> authorities = userService.getAuthorities();
+        authorities.remove(AuthoritiesConstants.ADMIN);
+        authorities.remove(AuthoritiesConstants.REGION_ADMIN);
+        return authorities;
     }
 
     /**
@@ -194,11 +194,11 @@ public class UserResource {
      * @param login the login of the user to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/users/{login:" + Constants.LOGIN_REGEX + "}")
-    @PreAuthorize("hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
-    public ResponseEntity<Void> deleteUser(@PathVariable String login) {
-        log.debug("REST request to delete User: {}", login);
-        userService.deleteUser(login);
-        return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName, "userManagement.deleted", login)).build();
-    }
+//    @DeleteMapping("/users/{login:" + Constants.LOGIN_REGEX + "}")
+//    @PreAuthorize("hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
+//    public ResponseEntity<Void> deleteUser(@PathVariable String login) {
+//        log.debug("REST request to delete User: {}", login);
+//        userService.deleteUser(login);
+//        return ResponseEntity.noContent().headers(HeaderUtil.createAlert(applicationName, "userManagement.deleted", login)).build();
+//    }
 }

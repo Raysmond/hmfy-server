@@ -1,13 +1,18 @@
-package com.shield.web.rest;
+package com.shield.web.rest.admin.region;
 
+import com.google.common.collect.Lists;
+import com.shield.domain.Region;
 import com.shield.service.RegionService;
+import com.shield.service.UserService;
 import com.shield.service.dto.RegionDTO;
+import com.shield.service.mapper.RegionMapper;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import io.github.jhipster.web.util.HeaderUtil;
+import io.github.jhipster.web.util.PageUtil;
 import io.github.jhipster.web.util.PaginationUtil;
-import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,20 +23,18 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.Valid;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * REST controller for managing {@link com.shield.domain.Region}.
  */
 @RestController
-@RequestMapping("/api")
-public class RegionResource {
+@RequestMapping("/region-admin/api")
+public class RegionAdminResource {
 
-    private final Logger log = LoggerFactory.getLogger(RegionResource.class);
+    private final Logger log = LoggerFactory.getLogger(RegionAdminResource.class);
 
     private static final String ENTITY_NAME = "region";
 
@@ -40,27 +43,14 @@ public class RegionResource {
 
     private final RegionService regionService;
 
-    public RegionResource(RegionService regionService) {
-        this.regionService = regionService;
-    }
+    @Autowired
+    private UserService userService;
 
-    /**
-     * {@code POST  /regions} : Create a new region.
-     *
-     * @param regionDTO the regionDTO to create.
-     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new regionDTO, or with status {@code 400 (Bad Request)} if the region has already an ID.
-     * @throws URISyntaxException if the Location URI syntax is incorrect.
-     */
-    @PostMapping("/regions")
-    public ResponseEntity<RegionDTO> createRegion(@Valid @RequestBody RegionDTO regionDTO) throws URISyntaxException {
-        log.debug("REST request to save Region : {}", regionDTO);
-        if (regionDTO.getId() != null) {
-            throw new BadRequestAlertException("A new region cannot already have an ID", ENTITY_NAME, "idexists");
-        }
-        RegionDTO result = regionService.save(regionDTO);
-        return ResponseEntity.created(new URI("/api/regions/" + result.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
-            .body(result);
+    @Autowired
+    private RegionMapper regionMapper;
+
+    public RegionAdminResource(RegionService regionService) {
+        this.regionService = regionService;
     }
 
     /**
@@ -78,6 +68,12 @@ public class RegionResource {
         if (regionDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
+
+        Region region = userService.getUserWithAuthorities().get().getRegion();
+        if (region == null || !region.getId().equals(regionDTO.getId())) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
         RegionDTO result = regionService.save(regionDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, regionDTO.getId().toString()))
@@ -93,14 +89,18 @@ public class RegionResource {
     @GetMapping({"/regions"})
     public ResponseEntity<List<RegionDTO>> getAllRegions(Pageable pageable, @RequestParam MultiValueMap<String, String> queryParams, UriComponentsBuilder uriBuilder) {
         log.debug("REST request to get a page of Regions");
-        Page<RegionDTO> page = regionService.findAll(pageable);
-        Map<Long, Long> countDrivers = regionService.countDriversByRegionId();
-        page.map(it -> {
-            if (countDrivers.containsKey(it.getId())) {
-                it.setDrivers(countDrivers.get(it.getId()).intValue());
-            }
-            return it;
-        });
+        Region region = userService.getUserWithAuthorities().get().getRegion();
+        Page<RegionDTO> page = Page.empty(pageable);
+        if (region != null) {
+            page = PageUtil.createPageFromList(Lists.newArrayList(regionMapper.toDto(region)), pageable);
+            Map<Long, Long> countDrivers = regionService.countDriversByRegionId();
+            page.map(it -> {
+                if (countDrivers.containsKey(it.getId())) {
+                    it.setDrivers(countDrivers.get(it.getId()).intValue());
+                }
+                return it;
+            });
+        }
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(uriBuilder.queryParams(queryParams), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -114,20 +114,12 @@ public class RegionResource {
     @GetMapping("/regions/{id}")
     public ResponseEntity<RegionDTO> getRegion(@PathVariable Long id) {
         log.debug("REST request to get Region : {}", id);
-        Optional<RegionDTO> regionDTO = regionService.findOne(id);
-        return ResponseUtil.wrapOrNotFound(regionDTO);
+        Region region = userService.getUserWithAuthorities().get().getRegion();
+        if (region == null || !region.getId().equals(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(regionMapper.toDto(region));
     }
 
-    /**
-     * {@code DELETE  /regions/:id} : delete the "id" region.
-     *
-     * @param id the id of the regionDTO to delete.
-     * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
-     */
-    @DeleteMapping("/regions/{id}")
-    public ResponseEntity<Void> deleteRegion(@PathVariable Long id) {
-        log.debug("REST request to delete Region : {}", id);
-        regionService.delete(id);
-        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString())).build();
-    }
 }

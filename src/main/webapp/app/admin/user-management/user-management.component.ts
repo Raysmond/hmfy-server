@@ -41,9 +41,21 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
     this.routeData = this.activatedRoute.data.subscribe(data => {
       this.page = data['pagingParams'].page;
       this.previousPage = data['pagingParams'].page;
-      this.reverse = data['pagingParams'].ascending;
+      this.reverse = data['pagingParams'].decending;
       this.predicate = data['pagingParams'].predicate;
     });
+  }
+
+  canRegionAdminEdit(user) {
+    if (this.accountService.hasAnyAuthority(['ROLE_ADMIN'])) {
+      return true;
+    }
+    if (this.accountService.hasAnyAuthority(['ROLE_REGION_ADMIN'])) {
+      if (user.authorities.includes('ROLE_ADMIN') || user.authorities.includes('ROLE_REGION_ADMIN')) {
+        return false;
+      }
+    }
+    return true;
   }
 
   ngOnInit() {

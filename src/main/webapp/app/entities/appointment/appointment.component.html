@@ -66,47 +66,36 @@
                         </th>
                         <th jhiSortBy="licensePlateNumber"><span
                             jhiTranslate="shieldApp.appointment.licensePlateNumber">License Plate Number</span>
-                            <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
                         <th jhiSortBy="driver"><span jhiTranslate="shieldApp.appointment.driver">Driver</span>
-                            <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
                         <th jhiSortBy="phone"><span jhiTranslate="shieldApp.appointment.phone">Phone</span>
-                            <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
                         <th jhiSortBy="number"><span jhiTranslate="shieldApp.appointment.number">Number</span>
-                            <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
                         <th jhiSortBy="queueNumber"><span
                             jhiTranslate="shieldApp.appointment.queueNumber">Queue Number</span>
-                            <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
                         <th jhiSortBy="valid"><span jhiTranslate="shieldApp.appointment.valid">Valid</span>
-                            <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
                         <th jhiSortBy="status"><span jhiTranslate="shieldApp.appointment.status">Status</span>
-                            <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
 
                         <th jhiSortBy="vip"><span jhiTranslate="shieldApp.appointment.vip">Vip</span>
-                            <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
                         <!--<th jhiSortBy="createTime"><span jhiTranslate="shieldApp.appointment.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
                         <!--<th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.appointment.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
                         <th jhiSortBy="startTime"><span jhiTranslate="shieldApp.appointment.startTime">Start Time</span>
-                            <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
-                        <th jhiSortBy="enterTime"><span jhiTranslate="shieldApp.appointment.enterTime">Enter Time</span>
-                            <fa-icon [icon]="'sort'"></fa-icon>
-                        </th>
+                        <!--<th jhiSortBy="enterTime"><span jhiTranslate="shieldApp.appointment.enterTime">Enter Time</span>-->
+                            <!--<fa-icon [icon]="'sort'"></fa-icon>-->
+                        <!--</th>-->
                         <!--<th jhiSortBy="leaveTime"><span jhiTranslate="shieldApp.appointment.leaveTime">Leave Time</span>-->
                             <!--<fa-icon [icon]="'sort'"></fa-icon>-->
                         <!--</th>-->
                         <th jhiSortBy="regionName"><span jhiTranslate="shieldApp.appointment.region">Region</span>
-                            <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
                         <th jhiSortBy="userLogin"><span jhiTranslate="shieldApp.appointment.user">User</span>
-                            <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
                         <th></th>
                     </tr>
@@ -119,7 +108,6 @@
                         <td>{{appointment.phone}}</td>
                         <td>{{appointment.number}}</td>
                         <td>{{appointment.queueNumber}}</td>
-
                         <td>
                             <!--{{appointment.valid}}-->
                             <span class="badge badge-success" *ngIf="appointment.valid">有效</span>
@@ -145,7 +133,7 @@
                         <!--<td>{{appointment.createTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
                         <!--<td>{{appointment.updateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
                         <td>{{appointment.startTime | date:'yyyy-MM-dd HH:mm'}}</td>
-                        <td>{{appointment.enterTime | date:'yyyy-MM-dd HH:mm'}}</td>
+                        <!--<td>{{appointment.enterTime | date:'yyyy-MM-dd HH:mm'}}</td>-->
                         <!--<td>{{appointment.leaveTime | date:'yyyy-MM-dd HH:mm'}}</td>-->
                         <td>
                             <div *ngIf="appointment.regionId">
@@ -161,22 +149,22 @@
                                         [routerLink]="['/appointment', appointment.id, 'view' ]"
                                         class="btn btn-info btn-sm">
                                     <fa-icon [icon]="'eye'"></fa-icon>
-                                    <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                                    <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>-->
                                 </button>
                                 <button type="submit"
                                         [routerLink]="['/appointment', appointment.id, 'edit']"
                                         class="btn btn-primary btn-sm">
                                     <fa-icon [icon]="'pencil-alt'"></fa-icon>
-                                    <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+                                    <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>-->
                                 </button>
-                                <button type="submit"
-                                        [routerLink]="['/', 'appointment', { outlets: { popup: appointment.id + '/delete'} }]"
-                                        replaceUrl="true"
-                                        queryParamsHandling="merge"
-                                        class="btn btn-danger btn-sm">
-                                    <fa-icon [icon]="'times'"></fa-icon>
-                                    <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
-                                </button>
+                                <!--<button type="submit"-->
+                                        <!--[routerLink]="['/', 'appointment', { outlets: { popup: appointment.id + '/delete'} }]"-->
+                                        <!--replaceUrl="true"-->
+                                        <!--queryParamsHandling="merge"-->
+                                        <!--class="btn btn-danger btn-sm">-->
+                                    <!--<fa-icon [icon]="'times'"></fa-icon>-->
+                                    <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>-->
+                                <!--</button>-->
                             </div>
                         </td>
                     </tr>

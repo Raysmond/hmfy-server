@@ -115,6 +115,7 @@ public class RegionServiceImpl implements RegionService {
     public RegionDTO save(RegionDTO regionDTO) {
         log.debug("Request to save Region : {}", regionDTO);
         Region region = regionMapper.toEntity(regionDTO);
+        region.setUpdateTime(ZonedDateTime.now());
         region = regionRepository.save(region);
         return regionMapper.toDto(region);
     }
