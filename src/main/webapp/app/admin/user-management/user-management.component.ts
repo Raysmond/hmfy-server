@@ -8,6 +8,7 @@ import { JhiEventManager, JhiParseLinks, JhiAlertService } from 'ng-jhipster';
 import { ITEMS_PER_PAGE } from 'app/shared';
 import { AccountService, UserService, User } from 'app/core';
 import { UserMgmtDeleteDialogComponent } from './user-management-delete-dialog.component';
+import { IRegion } from 'app/shared/model/region.model';
 
 @Component({
   selector: 'jhi-user-mgmt',
@@ -149,5 +150,9 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
 
   private onError(error) {
     this.alertService.error(error.error, error.message, null);
+  }
+
+  trackRegionById(index: number, item: IRegion) {
+    return item.id;
   }
 }

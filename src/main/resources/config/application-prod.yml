@@ -64,6 +64,9 @@ spring:
     password:
   thymeleaf:
     cache: true
+  redis:
+    host: 127.0.0.1
+    port: 6379
 
 # ===================================================================
 # To enable TLS in production, generate a certificate using:

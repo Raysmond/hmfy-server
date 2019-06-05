@@ -167,4 +167,8 @@ export class AppointmentComponent implements OnInit, OnDestroy {
   protected onError(errorMessage: string) {
     this.jhiAlertService.error(errorMessage, null, null);
   }
+
+  trackRegionById(index: number, item: IRegion) {
+    return item.id;
+  }
 }

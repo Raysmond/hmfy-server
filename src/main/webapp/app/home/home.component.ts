@@ -85,4 +85,8 @@ export class HomeComponent implements OnInit {
   login() {
     this.modalRef = this.loginModalService.open();
   }
+
+  trackId(index: number, item: IAppointment) {
+    return item.id;
+  }
 }
