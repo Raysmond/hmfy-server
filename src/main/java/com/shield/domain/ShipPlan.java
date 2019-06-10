@@ -12,8 +12,6 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
-import com.shield.domain.enumeration.ShipMethod;
-
 /**
  * A ShipPlan.
  */
@@ -32,44 +30,39 @@ public class ShipPlan implements Serializable {
     private String company;
 
     @NotNull
-    @Min(value = 0)
-    @Column(name = "demanded_amount", nullable = false)
-    private Integer demandedAmount;
+    @Column(name = "apply_id", nullable = false, unique = true)
+    private Integer applyId;
 
-    @Column(name = "finish_amount")
-    private Integer finishAmount;
-
-    @Column(name = "remain_amount")
-    private Integer remainAmount;
-
-    @Column(name = "available_amount")
-    private Integer availableAmount;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "ship_methond")
-    private ShipMethod shipMethond;
-
-    @Column(name = "ship_number")
-    private String shipNumber;
-
-    @Column(name = "end_time")
-    private ZonedDateTime endTime;
-
-    @Column(name = "create_time")
-    private ZonedDateTime createTime;
-
-    @Column(name = "update_time")
-    private ZonedDateTime updateTime;
+    @Column(name = "apply_number")
+    private String applyNumber;
 
     @NotNull
-    @Column(name = "license_plate_number", nullable = false)
-    private String licensePlateNumber;
+    @Column(name = "truck_number", nullable = false)
+    private String truckNumber;
 
-    @Column(name = "driver")
-    private String driver;
+    @NotNull
+    @Column(name = "audit_status", nullable = false)
+    private Integer auditStatus;
 
-    @Column(name = "phone")
-    private String phone;
+    @Column(name = "gate_time")
+    private ZonedDateTime gateTime;
+
+    @Column(name = "leave_time")
+    private ZonedDateTime leaveTime;
+
+    @Column(name = "deliver_time")
+    private ZonedDateTime deliverTime;
+
+    @Column(name = "allow_in_time")
+    private ZonedDateTime allowInTime;
+
+    @NotNull
+    @Column(name = "create_time", nullable = false)
+    private ZonedDateTime createTime;
+
+    @NotNull
+    @Column(name = "update_time", nullable = false)
+    private ZonedDateTime updateTime;
 
     @ManyToOne
     @JsonIgnoreProperties("shipPlans")
@@ -101,95 +94,108 @@ public class ShipPlan implements Serializable {
         this.company = company;
     }
 
-    public Integer getDemandedAmount() {
-        return demandedAmount;
+    public Integer getApplyId() {
+        return applyId;
     }
 
-    public ShipPlan demandedAmount(Integer demandedAmount) {
-        this.demandedAmount = demandedAmount;
+    public ShipPlan applyId(Integer applyId) {
+        this.applyId = applyId;
         return this;
     }
 
-    public void setDemandedAmount(Integer demandedAmount) {
-        this.demandedAmount = demandedAmount;
+    public void setApplyId(Integer applyId) {
+        this.applyId = applyId;
     }
 
-    public Integer getFinishAmount() {
-        return finishAmount;
+    public String getApplyNumber() {
+        return applyNumber;
     }
 
-    public ShipPlan finishAmount(Integer finishAmount) {
-        this.finishAmount = finishAmount;
+    public ShipPlan applyNumber(String applyNumber) {
+        this.applyNumber = applyNumber;
         return this;
     }
 
-    public void setFinishAmount(Integer finishAmount) {
-        this.finishAmount = finishAmount;
+    public void setApplyNumber(String applyNumber) {
+        this.applyNumber = applyNumber;
     }
 
-    public Integer getRemainAmount() {
-        return remainAmount;
+    public String getTruckNumber() {
+        return truckNumber;
     }
 
-    public ShipPlan remainAmount(Integer remainAmount) {
-        this.remainAmount = remainAmount;
+    public ShipPlan truckNumber(String truckNumber) {
+        this.truckNumber = truckNumber;
         return this;
     }
 
-    public void setRemainAmount(Integer remainAmount) {
-        this.remainAmount = remainAmount;
+    public void setTruckNumber(String truckNumber) {
+        this.truckNumber = truckNumber;
     }
 
-    public Integer getAvailableAmount() {
-        return availableAmount;
+    public Integer getAuditStatus() {
+        return auditStatus;
     }
 
-    public ShipPlan availableAmount(Integer availableAmount) {
-        this.availableAmount = availableAmount;
+    public ShipPlan auditStatus(Integer auditStatus) {
+        this.auditStatus = auditStatus;
         return this;
     }
 
-    public void setAvailableAmount(Integer availableAmount) {
-        this.availableAmount = availableAmount;
+    public void setAuditStatus(Integer auditStatus) {
+        this.auditStatus = auditStatus;
     }
 
-    public ShipMethod getShipMethond() {
-        return shipMethond;
+    public ZonedDateTime getGateTime() {
+        return gateTime;
     }
 
-    public ShipPlan shipMethond(ShipMethod shipMethond) {
-        this.shipMethond = shipMethond;
+    public ShipPlan gateTime(ZonedDateTime gateTime) {
+        this.gateTime = gateTime;
         return this;
     }
 
-    public void setShipMethond(ShipMethod shipMethond) {
-        this.shipMethond = shipMethond;
+    public void setGateTime(ZonedDateTime gateTime) {
+        this.gateTime = gateTime;
     }
 
-    public String getShipNumber() {
-        return shipNumber;
+    public ZonedDateTime getLeaveTime() {
+        return leaveTime;
     }
 
-    public ShipPlan shipNumber(String shipNumber) {
-        this.shipNumber = shipNumber;
+    public ShipPlan leaveTime(ZonedDateTime leaveTime) {
+        this.leaveTime = leaveTime;
         return this;
     }
 
-    public void setShipNumber(String shipNumber) {
-        this.shipNumber = shipNumber;
+    public void setLeaveTime(ZonedDateTime leaveTime) {
+        this.leaveTime = leaveTime;
     }
 
-    public ZonedDateTime getEndTime() {
-        return endTime;
+    public ZonedDateTime getDeliverTime() {
+        return deliverTime;
     }
 
-    public ShipPlan endTime(ZonedDateTime endTime) {
-        this.endTime = endTime;
+    public ShipPlan deliverTime(ZonedDateTime deliverTime) {
+        this.deliverTime = deliverTime;
         return this;
     }
 
-    public void setEndTime(ZonedDateTime endTime) {
-        this.endTime = endTime;
+    public void setDeliverTime(ZonedDateTime deliverTime) {
+        this.deliverTime = deliverTime;
+    }
+
+    public ZonedDateTime getAllowInTime() {
+        return allowInTime;
+    }
+
+    public ShipPlan allowInTime(ZonedDateTime allowInTime) {
+        this.allowInTime = allowInTime;
+        return this;
+    }
+
+    public void setAllowInTime(ZonedDateTime allowInTime) {
+        this.allowInTime = allowInTime;
     }
 
     public ZonedDateTime getCreateTime() {
@@ -216,45 +222,6 @@ public class ShipPlan implements Serializable {
 
     public void setUpdateTime(ZonedDateTime updateTime) {
         this.updateTime = updateTime;
-    }
-
-    public String getLicensePlateNumber() {
-        return licensePlateNumber;
-    }
-
-    public ShipPlan licensePlateNumber(String licensePlateNumber) {
-        this.licensePlateNumber = licensePlateNumber;
-        return this;
-    }
-
-    public void setLicensePlateNumber(String licensePlateNumber) {
-        this.licensePlateNumber = licensePlateNumber;
-    }
-
-    public String getDriver() {
-        return driver;
-    }
-
-    public ShipPlan driver(String driver) {
-        this.driver = driver;
-        return this;
-    }
-
-    public void setDriver(String driver) {
-        this.driver = driver;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public ShipPlan phone(String phone) {
-        this.phone = phone;
-        return this;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 
     public User getUser() {
@@ -305,18 +272,16 @@ public class ShipPlan implements Serializable {
         return "ShipPlan{" +
             "id=" + getId() +
             ", company='" + getCompany() + "'" +
-            ", demandedAmount=" + getDemandedAmount() +
-            ", finishAmount=" + getFinishAmount() +
-            ", remainAmount=" + getRemainAmount() +
-            ", availableAmount=" + getAvailableAmount() +
-            ", shipMethond='" + getShipMethond() + "'" +
-            ", shipNumber='" + getShipNumber() + "'" +
-            ", endTime='" + getEndTime() + "'" +
+            ", applyId=" + getApplyId() +
+            ", applyNumber='" + getApplyNumber() + "'" +
+            ", truckNumber='" + getTruckNumber() + "'" +
+            ", auditStatus=" + getAuditStatus() +
+            ", gateTime='" + getGateTime() + "'" +
+            ", leaveTime='" + getLeaveTime() + "'" +
+            ", deliverTime='" + getDeliverTime() + "'" +
+            ", allowInTime='" + getAllowInTime() + "'" +
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
-            ", licensePlateNumber='" + getLicensePlateNumber() + "'" +
-            ", driver='" + getDriver() + "'" +
-            ", phone='" + getPhone() + "'" +
             "}";
     }
 }

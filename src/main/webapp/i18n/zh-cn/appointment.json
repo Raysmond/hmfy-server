@@ -2,7 +2,7 @@
   "shieldApp": {
     "appointment": {
       "home": {
-        "title": "预约",
+        "title": "发运预约",
         "createLabel": "创建新 预约",
         "createOrEditLabel": "创建或编辑 预约"
       },

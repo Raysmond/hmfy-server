@@ -3,7 +3,6 @@ import java.time.ZonedDateTime;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Objects;
-import com.shield.domain.enumeration.ShipMethod;
 
 /**
  * A DTO for the {@link com.shield.domain.ShipPlan} entity.
@@ -15,31 +14,29 @@ public class ShipPlanDTO implements Serializable {
     private String company;
 
     @NotNull
-    @Min(value = 0)
-    private Integer demandedAmount;
+    private Integer applyId;
 
-    private Integer finishAmount;
-
-    private Integer remainAmount;
-
-    private Integer availableAmount;
-
-    private ShipMethod shipMethond;
-
-    private String shipNumber;
-
-    private ZonedDateTime endTime;
-
-    private ZonedDateTime createTime;
-
-    private ZonedDateTime updateTime;
+    private String applyNumber;
 
     @NotNull
-    private String licensePlateNumber;
+    private String truckNumber;
 
-    private String driver;
+    @NotNull
+    private Integer auditStatus;
 
-    private String phone;
+    private ZonedDateTime gateTime;
+
+    private ZonedDateTime leaveTime;
+
+    private ZonedDateTime deliverTime;
+
+    private ZonedDateTime allowInTime;
+
+    @NotNull
+    private ZonedDateTime createTime;
+
+    @NotNull
+    private ZonedDateTime updateTime;
 
 
     private Long userId;
@@ -66,60 +63,68 @@ public class ShipPlanDTO implements Serializable {
         this.company = company;
     }
 
-    public Integer getDemandedAmount() {
-        return demandedAmount;
+    public Integer getApplyId() {
+        return applyId;
     }
 
-    public void setDemandedAmount(Integer demandedAmount) {
-        this.demandedAmount = demandedAmount;
+    public void setApplyId(Integer applyId) {
+        this.applyId = applyId;
     }
 
-    public Integer getFinishAmount() {
-        return finishAmount;
+    public String getApplyNumber() {
+        return applyNumber;
     }
 
-    public void setFinishAmount(Integer finishAmount) {
-        this.finishAmount = finishAmount;
+    public void setApplyNumber(String applyNumber) {
+        this.applyNumber = applyNumber;
     }
 
-    public Integer getRemainAmount() {
-        return remainAmount;
+    public String getTruckNumber() {
+        return truckNumber;
     }
 
-    public void setRemainAmount(Integer remainAmount) {
-        this.remainAmount = remainAmount;
+    public void setTruckNumber(String truckNumber) {
+        this.truckNumber = truckNumber;
     }
 
-    public Integer getAvailableAmount() {
-        return availableAmount;
+    public Integer getAuditStatus() {
+        return auditStatus;
     }
 
-    public void setAvailableAmount(Integer availableAmount) {
-        this.availableAmount = availableAmount;
+    public void setAuditStatus(Integer auditStatus) {
+        this.auditStatus = auditStatus;
     }
 
-    public ShipMethod getShipMethond() {
-        return shipMethond;
+    public ZonedDateTime getGateTime() {
+        return gateTime;
     }
 
-    public void setShipMethond(ShipMethod shipMethond) {
-        this.shipMethond = shipMethond;
+    public void setGateTime(ZonedDateTime gateTime) {
+        this.gateTime = gateTime;
     }
 
-    public String getShipNumber() {
-        return shipNumber;
+    public ZonedDateTime getLeaveTime() {
+        return leaveTime;
     }
 
-    public void setShipNumber(String shipNumber) {
-        this.shipNumber = shipNumber;
+    public void setLeaveTime(ZonedDateTime leaveTime) {
+        this.leaveTime = leaveTime;
     }
 
-    public ZonedDateTime getEndTime() {
-        return endTime;
+    public ZonedDateTime getDeliverTime() {
+        return deliverTime;
     }
 
-    public void setEndTime(ZonedDateTime endTime) {
-        this.endTime = endTime;
+    public void setDeliverTime(ZonedDateTime deliverTime) {
+        this.deliverTime = deliverTime;
+    }
+
+    public ZonedDateTime getAllowInTime() {
+        return allowInTime;
+    }
+
+    public void setAllowInTime(ZonedDateTime allowInTime) {
+        this.allowInTime = allowInTime;
     }
 
     public ZonedDateTime getCreateTime() {
@@ -136,30 +141,6 @@ public class ShipPlanDTO implements Serializable {
 
     public void setUpdateTime(ZonedDateTime updateTime) {
         this.updateTime = updateTime;
-    }
-
-    public String getLicensePlateNumber() {
-        return licensePlateNumber;
-    }
-
-    public void setLicensePlateNumber(String licensePlateNumber) {
-        this.licensePlateNumber = licensePlateNumber;
-    }
-
-    public String getDriver() {
-        return driver;
-    }
-
-    public void setDriver(String driver) {
-        this.driver = driver;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 
     public Long getUserId() {
@@ -220,18 +201,16 @@ public class ShipPlanDTO implements Serializable {
         return "ShipPlanDTO{" +
             "id=" + getId() +
             ", company='" + getCompany() + "'" +
-            ", demandedAmount=" + getDemandedAmount() +
-            ", finishAmount=" + getFinishAmount() +
-            ", remainAmount=" + getRemainAmount() +
-            ", availableAmount=" + getAvailableAmount() +
-            ", shipMethond='" + getShipMethond() + "'" +
-            ", shipNumber='" + getShipNumber() + "'" +
-            ", endTime='" + getEndTime() + "'" +
+            ", applyId=" + getApplyId() +
+            ", applyNumber='" + getApplyNumber() + "'" +
+            ", truckNumber='" + getTruckNumber() + "'" +
+            ", auditStatus=" + getAuditStatus() +
+            ", gateTime='" + getGateTime() + "'" +
+            ", leaveTime='" + getLeaveTime() + "'" +
+            ", deliverTime='" + getDeliverTime() + "'" +
+            ", allowInTime='" + getAllowInTime() + "'" +
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
-            ", licensePlateNumber='" + getLicensePlateNumber() + "'" +
-            ", driver='" + getDriver() + "'" +
-            ", phone='" + getPhone() + "'" +
             ", user=" + getUserId() +
             ", user='" + getUserLogin() + "'" +
             ", toUser=" + getToUserId() +

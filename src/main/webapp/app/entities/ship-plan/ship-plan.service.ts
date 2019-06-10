@@ -5,10 +5,9 @@ import * as moment from 'moment';
 import { DATE_FORMAT } from 'app/shared/constants/input.constants';
 import { map } from 'rxjs/operators';
 
-import { SERVER_API_REGION_ADMIN_URL, SERVER_API_URL } from 'app/app.constants';
+import { SERVER_API_URL } from 'app/app.constants';
 import { createRequestOption } from 'app/shared';
 import { IShipPlan } from 'app/shared/model/ship-plan.model';
-import { AccountService } from 'app/core';
 
 type EntityResponseType = HttpResponse<IShipPlan>;
 type EntityArrayResponseType = HttpResponse<IShipPlan[]>;
@@ -16,52 +15,46 @@ type EntityArrayResponseType = HttpResponse<IShipPlan[]>;
 @Injectable({ providedIn: 'root' })
 export class ShipPlanService {
   public resourceUrl = SERVER_API_URL + 'api/ship-plans';
-  public regionAdminResourceUrl = SERVER_API_REGION_ADMIN_URL + 'api/ship-plans';
 
-  constructor(protected http: HttpClient, private accountService: AccountService) {}
-
-  getResourceUrl() {
-    if (this.accountService.hasAnyAuthority(['ROLE_ADMIN'])) {
-      return this.resourceUrl;
-    } else {
-      return this.regionAdminResourceUrl;
-    }
-  }
+  constructor(protected http: HttpClient) {}
 
   create(shipPlan: IShipPlan): Observable<EntityResponseType> {
     const copy = this.convertDateFromClient(shipPlan);
     return this.http
-      .post<IShipPlan>(this.getResourceUrl(), copy, { observe: 'response' })
+      .post<IShipPlan>(this.resourceUrl, copy, { observe: 'response' })
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
   update(shipPlan: IShipPlan): Observable<EntityResponseType> {
     const copy = this.convertDateFromClient(shipPlan);
     return this.http
-      .put<IShipPlan>(this.getResourceUrl(), copy, { observe: 'response' })
+      .put<IShipPlan>(this.resourceUrl, copy, { observe: 'response' })
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
   find(id: number): Observable<EntityResponseType> {
     return this.http
-      .get<IShipPlan>(`${this.getResourceUrl()}/${id}`, { observe: 'response' })
+      .get<IShipPlan>(`${this.resourceUrl}/${id}`, { observe: 'response' })
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
   query(req?: any): Observable<EntityArrayResponseType> {
     const options = createRequestOption(req);
     return this.http
-      .get<IShipPlan[]>(this.getResourceUrl(), { params: options, observe: 'response' })
+      .get<IShipPlan[]>(this.resourceUrl, { params: options, observe: 'response' })
       .pipe(map((res: EntityArrayResponseType) => this.convertDateArrayFromServer(res)));
   }
 
   delete(id: number): Observable<HttpResponse<any>> {
-    return this.http.delete<any>(`${this.getResourceUrl()}/${id}`, { observe: 'response' });
+    return this.http.delete<any>(`${this.resourceUrl}/${id}`, { observe: 'response' });
   }
 
   protected convertDateFromClient(shipPlan: IShipPlan): IShipPlan {
     const copy: IShipPlan = Object.assign({}, shipPlan, {
-      endTime: shipPlan.endTime != null && shipPlan.endTime.isValid() ? shipPlan.endTime.toJSON() : null,
+      gateTime: shipPlan.gateTime != null && shipPlan.gateTime.isValid() ? shipPlan.gateTime.toJSON() : null,
+      leaveTime: shipPlan.leaveTime != null && shipPlan.leaveTime.isValid() ? shipPlan.leaveTime.toJSON() : null,
+      deliverTime: shipPlan.deliverTime != null && shipPlan.deliverTime.isValid() ? shipPlan.deliverTime.toJSON() : null,
+      allowInTime: shipPlan.allowInTime != null && shipPlan.allowInTime.isValid() ? shipPlan.allowInTime.toJSON() : null,
       createTime: shipPlan.createTime != null && shipPlan.createTime.isValid() ? shipPlan.createTime.toJSON() : null,
       updateTime: shipPlan.updateTime != null && shipPlan.updateTime.isValid() ? shipPlan.updateTime.toJSON() : null
     });
@@ -70,7 +63,10 @@ export class ShipPlanService {
 
   protected convertDateFromServer(res: EntityResponseType): EntityResponseType {
     if (res.body) {
-      res.body.endTime = res.body.endTime != null ? moment(res.body.endTime) : null;
+      res.body.gateTime = res.body.gateTime != null ? moment(res.body.gateTime) : null;
+      res.body.leaveTime = res.body.leaveTime != null ? moment(res.body.leaveTime) : null;
+      res.body.deliverTime = res.body.deliverTime != null ? moment(res.body.deliverTime) : null;
+      res.body.allowInTime = res.body.allowInTime != null ? moment(res.body.allowInTime) : null;
       res.body.createTime = res.body.createTime != null ? moment(res.body.createTime) : null;
       res.body.updateTime = res.body.updateTime != null ? moment(res.body.updateTime) : null;
     }
@@ -80,7 +76,10 @@ export class ShipPlanService {
   protected convertDateArrayFromServer(res: EntityArrayResponseType): EntityArrayResponseType {
     if (res.body) {
       res.body.forEach((shipPlan: IShipPlan) => {
-        shipPlan.endTime = shipPlan.endTime != null ? moment(shipPlan.endTime) : null;
+        shipPlan.gateTime = shipPlan.gateTime != null ? moment(shipPlan.gateTime) : null;
+        shipPlan.leaveTime = shipPlan.leaveTime != null ? moment(shipPlan.leaveTime) : null;
+        shipPlan.deliverTime = shipPlan.deliverTime != null ? moment(shipPlan.deliverTime) : null;
+        shipPlan.allowInTime = shipPlan.allowInTime != null ? moment(shipPlan.allowInTime) : null;
         shipPlan.createTime = shipPlan.createTime != null ? moment(shipPlan.createTime) : null;
         shipPlan.updateTime = shipPlan.updateTime != null ? moment(shipPlan.updateTime) : null;
       });

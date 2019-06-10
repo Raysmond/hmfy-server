@@ -2,7 +2,7 @@
   "shieldApp": {
     "region": {
       "home": {
-        "title": "区域",
+        "title": "区域管理",
         "createLabel": "创建新 区域",
         "createOrEditLabel": "创建或编辑 区域"
       },

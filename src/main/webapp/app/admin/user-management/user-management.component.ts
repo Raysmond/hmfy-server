@@ -49,7 +49,7 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
 
   canRegionAdminEdit(user) {
     if (this.accountService.hasAnyAuthority(['ROLE_ADMIN'])) {
-      return true;
+      return false;
     }
     if (this.accountService.hasAnyAuthority(['ROLE_REGION_ADMIN'])) {
       if (user.authorities.includes('ROLE_ADMIN') || user.authorities.includes('ROLE_REGION_ADMIN')) {

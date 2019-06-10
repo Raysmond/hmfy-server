@@ -15,56 +15,73 @@
                            formControlName="company"/>
                 </div>
                 <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.demandedAmount" for="field_demandedAmount">Demanded Amount</label>
-                    <input type="number" class="form-control" name="demandedAmount" id="field_demandedAmount"
-                           formControlName="demandedAmount"/>
-                    <div *ngIf="editForm.get('demandedAmount').invalid && (editForm.get('demandedAmount').dirty || editForm.get('demandedAmount').touched)">
+                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.applyId" for="field_applyId">Apply Id</label>
+                    <input type="number" class="form-control" name="applyId" id="field_applyId"
+                           formControlName="applyId"/>
+                    <div *ngIf="editForm.get('applyId').invalid && (editForm.get('applyId').dirty || editForm.get('applyId').touched)">
                         <small class="form-text text-danger"
-                               *ngIf="editForm.get('demandedAmount').errors.required" jhiTranslate="entity.validation.required">
+                               *ngIf="editForm.get('applyId').errors.required" jhiTranslate="entity.validation.required">
                         This field is required.
                         </small>
                         <small class="form-text text-danger"
-                               *ngIf="editForm.get('demandedAmount').errors.min" jhiTranslate="entity.validation.min" [translateValues]="{ min: 0 }">
-                            This field should be at least 0.
-                        </small>
-                        <small class="form-text text-danger"
-                            [hidden]="!editForm.get('demandedAmount')?.errors?.number" jhiTranslate="entity.validation.number">
+                            [hidden]="!editForm.get('applyId')?.errors?.number" jhiTranslate="entity.validation.number">
                             This field should be a number.
                         </small>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.finishAmount" for="field_finishAmount">Finish Amount</label>
-                    <input type="number" class="form-control" name="finishAmount" id="field_finishAmount"
-                           formControlName="finishAmount"/>
+                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.applyNumber" for="field_applyNumber">Apply Number</label>
+                    <input type="text" class="form-control" name="applyNumber" id="field_applyNumber"
+                           formControlName="applyNumber"/>
                 </div>
                 <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.remainAmount" for="field_remainAmount">Remain Amount</label>
-                    <input type="number" class="form-control" name="remainAmount" id="field_remainAmount"
-                           formControlName="remainAmount"/>
+                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.truckNumber" for="field_truckNumber">Truck Number</label>
+                    <input type="text" class="form-control" name="truckNumber" id="field_truckNumber"
+                           formControlName="truckNumber"/>
+                    <div *ngIf="editForm.get('truckNumber').invalid && (editForm.get('truckNumber').dirty || editForm.get('truckNumber').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('truckNumber').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.availableAmount" for="field_availableAmount">Available Amount</label>
-                    <input type="number" class="form-control" name="availableAmount" id="field_availableAmount"
-                           formControlName="availableAmount"/>
+                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.auditStatus" for="field_auditStatus">Audit Status</label>
+                    <input type="number" class="form-control" name="auditStatus" id="field_auditStatus"
+                           formControlName="auditStatus"/>
+                    <div *ngIf="editForm.get('auditStatus').invalid && (editForm.get('auditStatus').dirty || editForm.get('auditStatus').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('auditStatus').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                            [hidden]="!editForm.get('auditStatus')?.errors?.number" jhiTranslate="entity.validation.number">
+                            This field should be a number.
+                        </small>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.shipMethond" for="field_shipMethond">Ship Methond</label>
-                    <select class="form-control" name="shipMethond" formControlName="shipMethond" id="field_shipMethond">
-                        <option value="LAND">{{'shieldApp.ShipMethod.LAND' | translate}}</option>
-                        <option value="AIR">{{'shieldApp.ShipMethod.AIR' | translate}}</option>
-                        <option value="WATER">{{'shieldApp.ShipMethod.WATER' | translate}}</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.shipNumber" for="field_shipNumber">Ship Number</label>
-                    <input type="text" class="form-control" name="shipNumber" id="field_shipNumber"
-                           formControlName="shipNumber"/>
-                </div>
-                <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.endTime" for="field_endTime">End Time</label>
+                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.gateTime" for="field_gateTime">Gate Time</label>
                     <div class="d-flex">
-                        <input id="field_endTime" type="datetime-local" class="form-control" name="endTime" formControlName="endTime" placeholder="YYYY-MM-DD HH:mm"/>
+                        <input id="field_gateTime" type="datetime-local" class="form-control" name="gateTime" formControlName="gateTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.leaveTime" for="field_leaveTime">Leave Time</label>
+                    <div class="d-flex">
+                        <input id="field_leaveTime" type="datetime-local" class="form-control" name="leaveTime" formControlName="leaveTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.deliverTime" for="field_deliverTime">Deliver Time</label>
+                    <div class="d-flex">
+                        <input id="field_deliverTime" type="datetime-local" class="form-control" name="deliverTime" formControlName="deliverTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.allowInTime" for="field_allowInTime">Allow In Time</label>
+                    <div class="d-flex">
+                        <input id="field_allowInTime" type="datetime-local" class="form-control" name="allowInTime" formControlName="allowInTime" placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
                 </div>
                 <div class="form-group">
@@ -72,33 +89,32 @@
                     <div class="d-flex">
                         <input id="field_createTime" type="datetime-local" class="form-control" name="createTime" formControlName="createTime" placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
+                    <div *ngIf="editForm.get('createTime').invalid && (editForm.get('createTime').dirty || editForm.get('createTime').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('createTime').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                            [hidden]="!editForm.get('createTime').errors?.ZonedDateTimelocal" jhiTranslate="entity.validation.ZonedDateTimelocal">
+                            This field should be a date and time.
+                        </small>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.updateTime" for="field_updateTime">Update Time</label>
                     <div class="d-flex">
                         <input id="field_updateTime" type="datetime-local" class="form-control" name="updateTime" formControlName="updateTime" placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.licensePlateNumber" for="field_licensePlateNumber">License Plate Number</label>
-                    <input type="text" class="form-control" name="licensePlateNumber" id="field_licensePlateNumber"
-                           formControlName="licensePlateNumber"/>
-                    <div *ngIf="editForm.get('licensePlateNumber').invalid && (editForm.get('licensePlateNumber').dirty || editForm.get('licensePlateNumber').touched)">
+                    <div *ngIf="editForm.get('updateTime').invalid && (editForm.get('updateTime').dirty || editForm.get('updateTime').touched)">
                         <small class="form-text text-danger"
-                               *ngIf="editForm.get('licensePlateNumber').errors.required" jhiTranslate="entity.validation.required">
+                               *ngIf="editForm.get('updateTime').errors.required" jhiTranslate="entity.validation.required">
                         This field is required.
                         </small>
+                        <small class="form-text text-danger"
+                            [hidden]="!editForm.get('updateTime').errors?.ZonedDateTimelocal" jhiTranslate="entity.validation.ZonedDateTimelocal">
+                            This field should be a date and time.
+                        </small>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.driver" for="field_driver">Driver</label>
-                    <input type="text" class="form-control" name="driver" id="field_driver"
-                           formControlName="driver"/>
-                </div>
-                <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.phone" for="field_phone">Phone</label>
-                    <input type="text" class="form-control" name="phone" id="field_phone"
-                           formControlName="phone"/>
                 </div>
 
                 <div class="form-group">

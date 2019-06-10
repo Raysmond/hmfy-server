@@ -92,41 +92,35 @@ public class ShipPlanQueryService extends QueryService<ShipPlan> {
             if (criteria.getCompany() != null) {
                 specification = specification.and(buildStringSpecification(criteria.getCompany(), ShipPlan_.company));
             }
-            if (criteria.getDemandedAmount() != null) {
-                specification = specification.and(buildRangeSpecification(criteria.getDemandedAmount(), ShipPlan_.demandedAmount));
+            if (criteria.getApplyId() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getApplyId(), ShipPlan_.applyId));
             }
-            if (criteria.getFinishAmount() != null) {
-                specification = specification.and(buildRangeSpecification(criteria.getFinishAmount(), ShipPlan_.finishAmount));
+            if (criteria.getApplyNumber() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getApplyNumber(), ShipPlan_.applyNumber));
             }
-            if (criteria.getRemainAmount() != null) {
-                specification = specification.and(buildRangeSpecification(criteria.getRemainAmount(), ShipPlan_.remainAmount));
+            if (criteria.getTruckNumber() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getTruckNumber(), ShipPlan_.truckNumber));
             }
-            if (criteria.getAvailableAmount() != null) {
-                specification = specification.and(buildRangeSpecification(criteria.getAvailableAmount(), ShipPlan_.availableAmount));
+            if (criteria.getAuditStatus() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getAuditStatus(), ShipPlan_.auditStatus));
             }
-            if (criteria.getShipMethond() != null) {
-                specification = specification.and(buildSpecification(criteria.getShipMethond(), ShipPlan_.shipMethond));
+            if (criteria.getGateTime() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getGateTime(), ShipPlan_.gateTime));
             }
-            if (criteria.getShipNumber() != null) {
-                specification = specification.and(buildStringSpecification(criteria.getShipNumber(), ShipPlan_.shipNumber));
+            if (criteria.getLeaveTime() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getLeaveTime(), ShipPlan_.leaveTime));
             }
-            if (criteria.getEndTime() != null) {
-                specification = specification.and(buildRangeSpecification(criteria.getEndTime(), ShipPlan_.endTime));
+            if (criteria.getDeliverTime() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getDeliverTime(), ShipPlan_.deliverTime));
+            }
+            if (criteria.getAllowInTime() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getAllowInTime(), ShipPlan_.allowInTime));
             }
             if (criteria.getCreateTime() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getCreateTime(), ShipPlan_.createTime));
             }
             if (criteria.getUpdateTime() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getUpdateTime(), ShipPlan_.updateTime));
-            }
-            if (criteria.getLicensePlateNumber() != null) {
-                specification = specification.and(buildStringSpecification(criteria.getLicensePlateNumber(), ShipPlan_.licensePlateNumber));
-            }
-            if (criteria.getDriver() != null) {
-                specification = specification.and(buildStringSpecification(criteria.getDriver(), ShipPlan_.driver));
-            }
-            if (criteria.getPhone() != null) {
-                specification = specification.and(buildStringSpecification(criteria.getPhone(), ShipPlan_.phone));
             }
             if (criteria.getUserId() != null) {
                 specification = specification.and(buildSpecification(criteria.getUserId(),

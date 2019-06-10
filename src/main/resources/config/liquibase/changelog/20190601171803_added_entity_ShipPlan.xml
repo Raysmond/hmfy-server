@@ -20,52 +20,44 @@
                 <constraints nullable="true" />
             </column>
 
-            <column name="demanded_amount" type="integer">
+            <column name="apply_id" type="integer">
+                <constraints nullable="false" unique="true" uniqueConstraintName="ux_ship_plan_apply_id" />
+            </column>
+
+            <column name="apply_number" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="truck_number" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
 
-            <column name="finish_amount" type="integer">
+            <column name="audit_status" type="integer">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="gate_time" type="datetime">
                 <constraints nullable="true" />
             </column>
 
-            <column name="remain_amount" type="integer">
+            <column name="leave_time" type="datetime">
                 <constraints nullable="true" />
             </column>
 
-            <column name="available_amount" type="integer">
+            <column name="deliver_time" type="datetime">
                 <constraints nullable="true" />
             </column>
 
-            <column name="ship_methond" type="varchar(255)">
-                <constraints nullable="true" />
-            </column>
-
-            <column name="ship_number" type="varchar(255)">
-                <constraints nullable="true" />
-            </column>
-
-            <column name="end_time" type="datetime">
+            <column name="allow_in_time" type="datetime">
                 <constraints nullable="true" />
             </column>
 
             <column name="create_time" type="datetime">
-                <constraints nullable="true" />
-            </column>
-
-            <column name="update_time" type="datetime">
-                <constraints nullable="true" />
-            </column>
-
-            <column name="license_plate_number" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
 
-            <column name="driver" type="varchar(255)">
-                <constraints nullable="true" />
-            </column>
-
-            <column name="phone" type="varchar(255)">
-                <constraints nullable="true" />
+            <column name="update_time" type="datetime">
+                <constraints nullable="false" />
             </column>
 
             <column name="user_id" type="bigint">
@@ -79,7 +71,10 @@
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here, do not remove-->
         </createTable>
 
-        <dropDefaultValue tableName="ship_plan" columnName="end_time" columnDataType="datetime"/>
+        <dropDefaultValue tableName="ship_plan" columnName="gate_time" columnDataType="datetime"/>
+        <dropDefaultValue tableName="ship_plan" columnName="leave_time" columnDataType="datetime"/>
+        <dropDefaultValue tableName="ship_plan" columnName="deliver_time" columnDataType="datetime"/>
+        <dropDefaultValue tableName="ship_plan" columnName="allow_in_time" columnDataType="datetime"/>
         <dropDefaultValue tableName="ship_plan" columnName="create_time" columnDataType="datetime"/>
         <dropDefaultValue tableName="ship_plan" columnName="update_time" columnDataType="datetime"/>
     </changeSet>
@@ -100,18 +95,16 @@
                   context="dev">
             <column name="id" type="numeric"/>
             <column name="company" type="string"/>
-            <column name="demanded_amount" type="numeric"/>
-            <column name="finish_amount" type="numeric"/>
-            <column name="remain_amount" type="numeric"/>
-            <column name="available_amount" type="numeric"/>
-            <column name="ship_methond" type="string"/>
-            <column name="ship_number" type="string"/>
-            <column name="end_time" type="date"/>
+            <column name="apply_id" type="numeric"/>
+            <column name="apply_number" type="string"/>
+            <column name="truck_number" type="string"/>
+            <column name="audit_status" type="numeric"/>
+            <column name="gate_time" type="date"/>
+            <column name="leave_time" type="date"/>
+            <column name="deliver_time" type="date"/>
+            <column name="allow_in_time" type="date"/>
             <column name="create_time" type="date"/>
             <column name="update_time" type="date"/>
-            <column name="license_plate_number" type="string"/>
-            <column name="driver" type="string"/>
-            <column name="phone" type="string"/>
         </loadData>
     </changeSet>
 

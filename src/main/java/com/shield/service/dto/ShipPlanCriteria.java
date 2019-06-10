@@ -3,7 +3,6 @@ package com.shield.service.dto;
 import java.io.Serializable;
 import java.util.Objects;
 import io.github.jhipster.service.Criteria;
-import com.shield.domain.enumeration.ShipMethod;
 import io.github.jhipster.service.filter.BooleanFilter;
 import io.github.jhipster.service.filter.DoubleFilter;
 import io.github.jhipster.service.filter.Filter;
@@ -23,24 +22,6 @@ import io.github.jhipster.service.filter.ZonedDateTimeFilter;
  * fix type specific filters.
  */
 public class ShipPlanCriteria implements Serializable, Criteria {
-    /**
-     * Class for filtering ShipMethod
-     */
-    public static class ShipMethodFilter extends Filter<ShipMethod> {
-
-        public ShipMethodFilter() {
-        }
-
-        public ShipMethodFilter(ShipMethodFilter filter) {
-            super(filter);
-        }
-
-        @Override
-        public ShipMethodFilter copy() {
-            return new ShipMethodFilter(this);
-        }
-
-    }
 
     private static final long serialVersionUID = 1L;
 
@@ -48,29 +29,25 @@ public class ShipPlanCriteria implements Serializable, Criteria {
 
     private StringFilter company;
 
-    private IntegerFilter demandedAmount;
+    private IntegerFilter applyId;
 
-    private IntegerFilter finishAmount;
+    private StringFilter applyNumber;
 
-    private IntegerFilter remainAmount;
+    private StringFilter truckNumber;
 
-    private IntegerFilter availableAmount;
+    private IntegerFilter auditStatus;
 
-    private ShipMethodFilter shipMethond;
+    private ZonedDateTimeFilter gateTime;
 
-    private StringFilter shipNumber;
+    private ZonedDateTimeFilter leaveTime;
 
-    private ZonedDateTimeFilter endTime;
+    private ZonedDateTimeFilter deliverTime;
+
+    private ZonedDateTimeFilter allowInTime;
 
     private ZonedDateTimeFilter createTime;
 
     private ZonedDateTimeFilter updateTime;
-
-    private StringFilter licensePlateNumber;
-
-    private StringFilter driver;
-
-    private StringFilter phone;
 
     private LongFilter userId;
 
@@ -82,18 +59,16 @@ public class ShipPlanCriteria implements Serializable, Criteria {
     public ShipPlanCriteria(ShipPlanCriteria other){
         this.id = other.id == null ? null : other.id.copy();
         this.company = other.company == null ? null : other.company.copy();
-        this.demandedAmount = other.demandedAmount == null ? null : other.demandedAmount.copy();
-        this.finishAmount = other.finishAmount == null ? null : other.finishAmount.copy();
-        this.remainAmount = other.remainAmount == null ? null : other.remainAmount.copy();
-        this.availableAmount = other.availableAmount == null ? null : other.availableAmount.copy();
-        this.shipMethond = other.shipMethond == null ? null : other.shipMethond.copy();
-        this.shipNumber = other.shipNumber == null ? null : other.shipNumber.copy();
-        this.endTime = other.endTime == null ? null : other.endTime.copy();
+        this.applyId = other.applyId == null ? null : other.applyId.copy();
+        this.applyNumber = other.applyNumber == null ? null : other.applyNumber.copy();
+        this.truckNumber = other.truckNumber == null ? null : other.truckNumber.copy();
+        this.auditStatus = other.auditStatus == null ? null : other.auditStatus.copy();
+        this.gateTime = other.gateTime == null ? null : other.gateTime.copy();
+        this.leaveTime = other.leaveTime == null ? null : other.leaveTime.copy();
+        this.deliverTime = other.deliverTime == null ? null : other.deliverTime.copy();
+        this.allowInTime = other.allowInTime == null ? null : other.allowInTime.copy();
         this.createTime = other.createTime == null ? null : other.createTime.copy();
         this.updateTime = other.updateTime == null ? null : other.updateTime.copy();
-        this.licensePlateNumber = other.licensePlateNumber == null ? null : other.licensePlateNumber.copy();
-        this.driver = other.driver == null ? null : other.driver.copy();
-        this.phone = other.phone == null ? null : other.phone.copy();
         this.userId = other.userId == null ? null : other.userId.copy();
         this.toUserId = other.toUserId == null ? null : other.toUserId.copy();
     }
@@ -119,60 +94,68 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.company = company;
     }
 
-    public IntegerFilter getDemandedAmount() {
-        return demandedAmount;
+    public IntegerFilter getApplyId() {
+        return applyId;
     }
 
-    public void setDemandedAmount(IntegerFilter demandedAmount) {
-        this.demandedAmount = demandedAmount;
+    public void setApplyId(IntegerFilter applyId) {
+        this.applyId = applyId;
     }
 
-    public IntegerFilter getFinishAmount() {
-        return finishAmount;
+    public StringFilter getApplyNumber() {
+        return applyNumber;
     }
 
-    public void setFinishAmount(IntegerFilter finishAmount) {
-        this.finishAmount = finishAmount;
+    public void setApplyNumber(StringFilter applyNumber) {
+        this.applyNumber = applyNumber;
     }
 
-    public IntegerFilter getRemainAmount() {
-        return remainAmount;
+    public StringFilter getTruckNumber() {
+        return truckNumber;
     }
 
-    public void setRemainAmount(IntegerFilter remainAmount) {
-        this.remainAmount = remainAmount;
+    public void setTruckNumber(StringFilter truckNumber) {
+        this.truckNumber = truckNumber;
     }
 
-    public IntegerFilter getAvailableAmount() {
-        return availableAmount;
+    public IntegerFilter getAuditStatus() {
+        return auditStatus;
     }
 
-    public void setAvailableAmount(IntegerFilter availableAmount) {
-        this.availableAmount = availableAmount;
+    public void setAuditStatus(IntegerFilter auditStatus) {
+        this.auditStatus = auditStatus;
     }
 
-    public ShipMethodFilter getShipMethond() {
-        return shipMethond;
+    public ZonedDateTimeFilter getGateTime() {
+        return gateTime;
     }
 
-    public void setShipMethond(ShipMethodFilter shipMethond) {
-        this.shipMethond = shipMethond;
+    public void setGateTime(ZonedDateTimeFilter gateTime) {
+        this.gateTime = gateTime;
     }
 
-    public StringFilter getShipNumber() {
-        return shipNumber;
+    public ZonedDateTimeFilter getLeaveTime() {
+        return leaveTime;
     }
 
-    public void setShipNumber(StringFilter shipNumber) {
-        this.shipNumber = shipNumber;
+    public void setLeaveTime(ZonedDateTimeFilter leaveTime) {
+        this.leaveTime = leaveTime;
     }
 
-    public ZonedDateTimeFilter getEndTime() {
-        return endTime;
+    public ZonedDateTimeFilter getDeliverTime() {
+        return deliverTime;
     }
 
-    public void setEndTime(ZonedDateTimeFilter endTime) {
-        this.endTime = endTime;
+    public void setDeliverTime(ZonedDateTimeFilter deliverTime) {
+        this.deliverTime = deliverTime;
+    }
+
+    public ZonedDateTimeFilter getAllowInTime() {
+        return allowInTime;
+    }
+
+    public void setAllowInTime(ZonedDateTimeFilter allowInTime) {
+        this.allowInTime = allowInTime;
     }
 
     public ZonedDateTimeFilter getCreateTime() {
@@ -189,30 +172,6 @@ public class ShipPlanCriteria implements Serializable, Criteria {
 
     public void setUpdateTime(ZonedDateTimeFilter updateTime) {
         this.updateTime = updateTime;
-    }
-
-    public StringFilter getLicensePlateNumber() {
-        return licensePlateNumber;
-    }
-
-    public void setLicensePlateNumber(StringFilter licensePlateNumber) {
-        this.licensePlateNumber = licensePlateNumber;
-    }
-
-    public StringFilter getDriver() {
-        return driver;
-    }
-
-    public void setDriver(StringFilter driver) {
-        this.driver = driver;
-    }
-
-    public StringFilter getPhone() {
-        return phone;
-    }
-
-    public void setPhone(StringFilter phone) {
-        this.phone = phone;
     }
 
     public LongFilter getUserId() {
@@ -244,18 +203,16 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         return
             Objects.equals(id, that.id) &&
             Objects.equals(company, that.company) &&
-            Objects.equals(demandedAmount, that.demandedAmount) &&
-            Objects.equals(finishAmount, that.finishAmount) &&
-            Objects.equals(remainAmount, that.remainAmount) &&
-            Objects.equals(availableAmount, that.availableAmount) &&
-            Objects.equals(shipMethond, that.shipMethond) &&
-            Objects.equals(shipNumber, that.shipNumber) &&
-            Objects.equals(endTime, that.endTime) &&
+            Objects.equals(applyId, that.applyId) &&
+            Objects.equals(applyNumber, that.applyNumber) &&
+            Objects.equals(truckNumber, that.truckNumber) &&
+            Objects.equals(auditStatus, that.auditStatus) &&
+            Objects.equals(gateTime, that.gateTime) &&
+            Objects.equals(leaveTime, that.leaveTime) &&
+            Objects.equals(deliverTime, that.deliverTime) &&
+            Objects.equals(allowInTime, that.allowInTime) &&
             Objects.equals(createTime, that.createTime) &&
             Objects.equals(updateTime, that.updateTime) &&
-            Objects.equals(licensePlateNumber, that.licensePlateNumber) &&
-            Objects.equals(driver, that.driver) &&
-            Objects.equals(phone, that.phone) &&
             Objects.equals(userId, that.userId) &&
             Objects.equals(toUserId, that.toUserId);
     }
@@ -265,18 +222,16 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         return Objects.hash(
         id,
         company,
-        demandedAmount,
-        finishAmount,
-        remainAmount,
-        availableAmount,
-        shipMethond,
-        shipNumber,
-        endTime,
+        applyId,
+        applyNumber,
+        truckNumber,
+        auditStatus,
+        gateTime,
+        leaveTime,
+        deliverTime,
+        allowInTime,
         createTime,
         updateTime,
-        licensePlateNumber,
-        driver,
-        phone,
         userId,
         toUserId
         );
@@ -287,18 +242,16 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         return "ShipPlanCriteria{" +
                 (id != null ? "id=" + id + ", " : "") +
                 (company != null ? "company=" + company + ", " : "") +
-                (demandedAmount != null ? "demandedAmount=" + demandedAmount + ", " : "") +
-                (finishAmount != null ? "finishAmount=" + finishAmount + ", " : "") +
-                (remainAmount != null ? "remainAmount=" + remainAmount + ", " : "") +
-                (availableAmount != null ? "availableAmount=" + availableAmount + ", " : "") +
-                (shipMethond != null ? "shipMethond=" + shipMethond + ", " : "") +
-                (shipNumber != null ? "shipNumber=" + shipNumber + ", " : "") +
-                (endTime != null ? "endTime=" + endTime + ", " : "") +
+                (applyId != null ? "applyId=" + applyId + ", " : "") +
+                (applyNumber != null ? "applyNumber=" + applyNumber + ", " : "") +
+                (truckNumber != null ? "truckNumber=" + truckNumber + ", " : "") +
+                (auditStatus != null ? "auditStatus=" + auditStatus + ", " : "") +
+                (gateTime != null ? "gateTime=" + gateTime + ", " : "") +
+                (leaveTime != null ? "leaveTime=" + leaveTime + ", " : "") +
+                (deliverTime != null ? "deliverTime=" + deliverTime + ", " : "") +
+                (allowInTime != null ? "allowInTime=" + allowInTime + ", " : "") +
                 (createTime != null ? "createTime=" + createTime + ", " : "") +
                 (updateTime != null ? "updateTime=" + updateTime + ", " : "") +
-                (licensePlateNumber != null ? "licensePlateNumber=" + licensePlateNumber + ", " : "") +
-                (driver != null ? "driver=" + driver + ", " : "") +
-                (phone != null ? "phone=" + phone + ", " : "") +
                 (userId != null ? "userId=" + userId + ", " : "") +
                 (toUserId != null ? "toUserId=" + toUserId + ", " : "") +
             "}";

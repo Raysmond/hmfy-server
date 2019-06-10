@@ -1,26 +1,18 @@
 import { Moment } from 'moment';
 
-export const enum ShipMethod {
-  LAND = 'LAND',
-  AIR = 'AIR',
-  WATER = 'WATER'
-}
-
 export interface IShipPlan {
   id?: number;
   company?: string;
-  demandedAmount?: number;
-  finishAmount?: number;
-  remainAmount?: number;
-  availableAmount?: number;
-  shipMethond?: ShipMethod;
-  shipNumber?: string;
-  endTime?: Moment;
+  applyId?: number;
+  applyNumber?: string;
+  truckNumber?: string;
+  auditStatus?: number;
+  gateTime?: Moment;
+  leaveTime?: Moment;
+  deliverTime?: Moment;
+  allowInTime?: Moment;
   createTime?: Moment;
   updateTime?: Moment;
-  licensePlateNumber?: string;
-  driver?: string;
-  phone?: string;
   userLogin?: string;
   userId?: number;
   toUserLogin?: string;
@@ -31,18 +23,16 @@ export class ShipPlan implements IShipPlan {
   constructor(
     public id?: number,
     public company?: string,
-    public demandedAmount?: number,
-    public finishAmount?: number,
-    public remainAmount?: number,
-    public availableAmount?: number,
-    public shipMethond?: ShipMethod,
-    public shipNumber?: string,
-    public endTime?: Moment,
+    public applyId?: number,
+    public applyNumber?: string,
+    public truckNumber?: string,
+    public auditStatus?: number,
+    public gateTime?: Moment,
+    public leaveTime?: Moment,
+    public deliverTime?: Moment,
+    public allowInTime?: Moment,
     public createTime?: Moment,
     public updateTime?: Moment,
-    public licensePlateNumber?: string,
-    public driver?: string,
-    public phone?: string,
     public userLogin?: string,
     public userId?: number,
     public toUserLogin?: string,

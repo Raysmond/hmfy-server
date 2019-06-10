@@ -7,7 +7,7 @@ import { take, map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { DATE_TIME_FORMAT } from 'app/shared/constants/input.constants';
 import { ShipPlanService } from 'app/entities/ship-plan/ship-plan.service';
-import { IShipPlan, ShipPlan, ShipMethod } from 'app/shared/model/ship-plan.model';
+import { IShipPlan, ShipPlan } from 'app/shared/model/ship-plan.model';
 
 describe('Service Tests', () => {
   describe('ShipPlan Service', () => {
@@ -31,17 +31,15 @@ describe('Service Tests', () => {
         0,
         'AAAAAAA',
         0,
-        0,
-        0,
-        0,
-        ShipMethod.LAND,
         'AAAAAAA',
+        'AAAAAAA',
+        0,
         currentDate,
         currentDate,
         currentDate,
-        'AAAAAAA',
-        'AAAAAAA',
-        'AAAAAAA'
+        currentDate,
+        currentDate,
+        currentDate
       );
     });
 
@@ -49,7 +47,10 @@ describe('Service Tests', () => {
       it('should find an element', async () => {
         const returnedFromService = Object.assign(
           {
-            endTime: currentDate.format(DATE_TIME_FORMAT),
+            gateTime: currentDate.format(DATE_TIME_FORMAT),
+            leaveTime: currentDate.format(DATE_TIME_FORMAT),
+            deliverTime: currentDate.format(DATE_TIME_FORMAT),
+            allowInTime: currentDate.format(DATE_TIME_FORMAT),
             createTime: currentDate.format(DATE_TIME_FORMAT),
             updateTime: currentDate.format(DATE_TIME_FORMAT)
           },
@@ -69,7 +70,10 @@ describe('Service Tests', () => {
         const returnedFromService = Object.assign(
           {
             id: 0,
-            endTime: currentDate.format(DATE_TIME_FORMAT),
+            gateTime: currentDate.format(DATE_TIME_FORMAT),
+            leaveTime: currentDate.format(DATE_TIME_FORMAT),
+            deliverTime: currentDate.format(DATE_TIME_FORMAT),
+            allowInTime: currentDate.format(DATE_TIME_FORMAT),
             createTime: currentDate.format(DATE_TIME_FORMAT),
             updateTime: currentDate.format(DATE_TIME_FORMAT)
           },
@@ -77,7 +81,10 @@ describe('Service Tests', () => {
         );
         const expected = Object.assign(
           {
-            endTime: currentDate,
+            gateTime: currentDate,
+            leaveTime: currentDate,
+            deliverTime: currentDate,
+            allowInTime: currentDate,
             createTime: currentDate,
             updateTime: currentDate
           },
@@ -96,25 +103,26 @@ describe('Service Tests', () => {
         const returnedFromService = Object.assign(
           {
             company: 'BBBBBB',
-            demandedAmount: 1,
-            finishAmount: 1,
-            remainAmount: 1,
-            availableAmount: 1,
-            shipMethond: 'BBBBBB',
-            shipNumber: 'BBBBBB',
-            endTime: currentDate.format(DATE_TIME_FORMAT),
+            applyId: 1,
+            applyNumber: 'BBBBBB',
+            truckNumber: 'BBBBBB',
+            auditStatus: 1,
+            gateTime: currentDate.format(DATE_TIME_FORMAT),
+            leaveTime: currentDate.format(DATE_TIME_FORMAT),
+            deliverTime: currentDate.format(DATE_TIME_FORMAT),
+            allowInTime: currentDate.format(DATE_TIME_FORMAT),
             createTime: currentDate.format(DATE_TIME_FORMAT),
-            updateTime: currentDate.format(DATE_TIME_FORMAT),
-            licensePlateNumber: 'BBBBBB',
-            driver: 'BBBBBB',
-            phone: 'BBBBBB'
+            updateTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
 
         const expected = Object.assign(
           {
-            endTime: currentDate,
+            gateTime: currentDate,
+            leaveTime: currentDate,
+            deliverTime: currentDate,
+            allowInTime: currentDate,
             createTime: currentDate,
             updateTime: currentDate
           },
@@ -133,24 +141,25 @@ describe('Service Tests', () => {
         const returnedFromService = Object.assign(
           {
             company: 'BBBBBB',
-            demandedAmount: 1,
-            finishAmount: 1,
-            remainAmount: 1,
-            availableAmount: 1,
-            shipMethond: 'BBBBBB',
-            shipNumber: 'BBBBBB',
-            endTime: currentDate.format(DATE_TIME_FORMAT),
+            applyId: 1,
+            applyNumber: 'BBBBBB',
+            truckNumber: 'BBBBBB',
+            auditStatus: 1,
+            gateTime: currentDate.format(DATE_TIME_FORMAT),
+            leaveTime: currentDate.format(DATE_TIME_FORMAT),
+            deliverTime: currentDate.format(DATE_TIME_FORMAT),
+            allowInTime: currentDate.format(DATE_TIME_FORMAT),
             createTime: currentDate.format(DATE_TIME_FORMAT),
-            updateTime: currentDate.format(DATE_TIME_FORMAT),
-            licensePlateNumber: 'BBBBBB',
-            driver: 'BBBBBB',
-            phone: 'BBBBBB'
+            updateTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
         const expected = Object.assign(
           {
-            endTime: currentDate,
+            gateTime: currentDate,
+            leaveTime: currentDate,
+            deliverTime: currentDate,
+            allowInTime: currentDate,
             createTime: currentDate,
             updateTime: currentDate
           },

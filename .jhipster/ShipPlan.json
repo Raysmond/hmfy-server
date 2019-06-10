@@ -1,93 +1,92 @@
 {
-    "fluentMethods": true,
-    "clientRootFolder": "",
-    "relationships": [
-        {
-            "relationshipName": "user",
-            "otherEntityName": "user",
-            "relationshipType": "many-to-one",
-            "otherEntityField": "login",
-            "ownerSide": true,
-            "otherEntityRelationshipName": "shipPlan"
-        },
-        {
-            "relationshipName": "toUser",
-            "otherEntityName": "user",
-            "relationshipType": "many-to-one",
-            "otherEntityField": "login",
-            "ownerSide": true,
-            "otherEntityRelationshipName": "shipPlan"
-        }
-    ],
-    "fields": [
-        {
-            "fieldName": "company",
-            "fieldType": "String"
-        },
-        {
-            "fieldName": "demandedAmount",
-            "fieldType": "Integer",
-            "fieldValidateRules": [
-                "required",
-                "min"
-            ],
-            "fieldValidateRulesMin": 0
-        },
-        {
-            "fieldName": "finishAmount",
-            "fieldType": "Integer"
-        },
-        {
-            "fieldName": "remainAmount",
-            "fieldType": "Integer"
-        },
-        {
-            "fieldName": "availableAmount",
-            "fieldType": "Integer"
-        },
-        {
-            "fieldName": "shipMethond",
-            "fieldType": "ShipMethod",
-            "fieldValues": "LAND,AIR,WATER"
-        },
-        {
-            "fieldName": "shipNumber",
-            "fieldType": "String"
-        },
-        {
-            "fieldName": "endTime",
-            "fieldType": "ZonedDateTime"
-        },
-        {
-            "fieldName": "createTime",
-            "fieldType": "ZonedDateTime"
-        },
-        {
-            "fieldName": "updateTime",
-            "fieldType": "ZonedDateTime"
-        },
-        {
-            "fieldName": "licensePlateNumber",
-            "fieldType": "String",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
-            "fieldName": "driver",
-            "fieldType": "String"
-        },
-        {
-            "fieldName": "phone",
-            "fieldType": "String"
-        }
-    ],
-    "changelogDate": "20190601171803",
-    "dto": "mapstruct",
-    "searchEngine": false,
-    "service": "serviceImpl",
-    "entityTableName": "ship_plan",
-    "databaseType": "sql",
-    "jpaMetamodelFiltering": true,
-    "pagination": "pagination"
+  "fluentMethods": true,
+  "clientRootFolder": "",
+  "relationships": [
+    {
+      "relationshipName": "user",
+      "otherEntityName": "user",
+      "relationshipType": "many-to-one",
+      "otherEntityField": "login",
+      "ownerSide": true,
+      "otherEntityRelationshipName": "shipPlan"
+    },
+    {
+      "relationshipName": "toUser",
+      "otherEntityName": "user",
+      "relationshipType": "many-to-one",
+      "otherEntityField": "login",
+      "ownerSide": true,
+      "otherEntityRelationshipName": "shipPlan"
+    }
+  ],
+  "fields": [
+    {
+      "fieldName": "company",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "applyId",
+      "fieldType": "Integer",
+      "fieldValidateRules": [
+        "required",
+        "unique"
+      ]
+    },
+    {
+      "fieldName": "applyNumber",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "truckNumber",
+      "fieldType": "String",
+      "fieldValidateRules": [
+        "required"
+      ]
+    },
+    {
+      "fieldName": "auditStatus",
+      "fieldType": "Integer",
+      "fieldValidateRules": [
+        "required"
+      ]
+    },
+    {
+      "fieldName": "gateTime",
+      "fieldType": "ZonedDateTime"
+    },
+    {
+      "fieldName": "leaveTime",
+      "fieldType": "ZonedDateTime"
+    },
+    {
+      "fieldName": "deliverTime",
+      "fieldType": "ZonedDateTime"
+    },
+    {
+      "fieldName": "allowInTime",
+      "fieldType": "ZonedDateTime"
+    },
+    {
+      "fieldName": "createTime",
+      "fieldType": "ZonedDateTime",
+      "fieldValidateRules": [
+        "required"
+      ]
+    },
+    {
+      "fieldName": "updateTime",
+      "fieldType": "ZonedDateTime",
+      "fieldValidateRules": [
+        "required"
+      ]
+    }
+  ],
+  "changelogDate": "20190601171803",
+  "dto": "mapstruct",
+  "searchEngine": false,
+  "service": "serviceImpl",
+  "entityTableName": "ship_plan",
+  "databaseType": "sql",
+  "jpaMetamodelFiltering": true,
+  "pagination": "pagination"
 }

@@ -38,7 +38,6 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.shield.domain.enumeration.ShipMethod;
 /**
  * Integration tests for the {@Link ShipPlanResource} REST controller.
  */
@@ -48,41 +47,35 @@ public class ShipPlanResourceIT {
     private static final String DEFAULT_COMPANY = "AAAAAAAAAA";
     private static final String UPDATED_COMPANY = "BBBBBBBBBB";
 
-    private static final Integer DEFAULT_DEMANDED_AMOUNT = 0;
-    private static final Integer UPDATED_DEMANDED_AMOUNT = 1;
+    private static final Integer DEFAULT_APPLY_ID = 1;
+    private static final Integer UPDATED_APPLY_ID = 2;
 
-    private static final Integer DEFAULT_FINISH_AMOUNT = 1;
-    private static final Integer UPDATED_FINISH_AMOUNT = 2;
+    private static final String DEFAULT_APPLY_NUMBER = "AAAAAAAAAA";
+    private static final String UPDATED_APPLY_NUMBER = "BBBBBBBBBB";
 
-    private static final Integer DEFAULT_REMAIN_AMOUNT = 1;
-    private static final Integer UPDATED_REMAIN_AMOUNT = 2;
+    private static final String DEFAULT_TRUCK_NUMBER = "AAAAAAAAAA";
+    private static final String UPDATED_TRUCK_NUMBER = "BBBBBBBBBB";
 
-    private static final Integer DEFAULT_AVAILABLE_AMOUNT = 1;
-    private static final Integer UPDATED_AVAILABLE_AMOUNT = 2;
+    private static final Integer DEFAULT_AUDIT_STATUS = 1;
+    private static final Integer UPDATED_AUDIT_STATUS = 2;
 
-    private static final ShipMethod DEFAULT_SHIP_METHOND = ShipMethod.LAND;
-    private static final ShipMethod UPDATED_SHIP_METHOND = ShipMethod.AIR;
+    private static final ZonedDateTime DEFAULT_GATE_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
+    private static final ZonedDateTime UPDATED_GATE_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
 
-    private static final String DEFAULT_SHIP_NUMBER = "AAAAAAAAAA";
-    private static final String UPDATED_SHIP_NUMBER = "BBBBBBBBBB";
+    private static final ZonedDateTime DEFAULT_LEAVE_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
+    private static final ZonedDateTime UPDATED_LEAVE_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
 
-    private static final ZonedDateTime DEFAULT_END_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_END_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final ZonedDateTime DEFAULT_DELIVER_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
+    private static final ZonedDateTime UPDATED_DELIVER_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+
+    private static final ZonedDateTime DEFAULT_ALLOW_IN_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
+    private static final ZonedDateTime UPDATED_ALLOW_IN_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
 
     private static final ZonedDateTime DEFAULT_CREATE_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
     private static final ZonedDateTime UPDATED_CREATE_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
 
     private static final ZonedDateTime DEFAULT_UPDATE_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
     private static final ZonedDateTime UPDATED_UPDATE_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
-
-    private static final String DEFAULT_LICENSE_PLATE_NUMBER = "AAAAAAAAAA";
-    private static final String UPDATED_LICENSE_PLATE_NUMBER = "BBBBBBBBBB";
-
-    private static final String DEFAULT_DRIVER = "AAAAAAAAAA";
-    private static final String UPDATED_DRIVER = "BBBBBBBBBB";
-
-    private static final String DEFAULT_PHONE = "AAAAAAAAAA";
-    private static final String UPDATED_PHONE = "BBBBBBBBBB";
 
     @Autowired
     private ShipPlanRepository shipPlanRepository;
@@ -136,18 +129,16 @@ public class ShipPlanResourceIT {
     public static ShipPlan createEntity(EntityManager em) {
         ShipPlan shipPlan = new ShipPlan()
             .company(DEFAULT_COMPANY)
-            .demandedAmount(DEFAULT_DEMANDED_AMOUNT)
-            .finishAmount(DEFAULT_FINISH_AMOUNT)
-            .remainAmount(DEFAULT_REMAIN_AMOUNT)
-            .availableAmount(DEFAULT_AVAILABLE_AMOUNT)
-            .shipMethond(DEFAULT_SHIP_METHOND)
-            .shipNumber(DEFAULT_SHIP_NUMBER)
-            .endTime(DEFAULT_END_TIME)
+            .applyId(DEFAULT_APPLY_ID)
+            .applyNumber(DEFAULT_APPLY_NUMBER)
+            .truckNumber(DEFAULT_TRUCK_NUMBER)
+            .auditStatus(DEFAULT_AUDIT_STATUS)
+            .gateTime(DEFAULT_GATE_TIME)
+            .leaveTime(DEFAULT_LEAVE_TIME)
+            .deliverTime(DEFAULT_DELIVER_TIME)
+            .allowInTime(DEFAULT_ALLOW_IN_TIME)
             .createTime(DEFAULT_CREATE_TIME)
-            .updateTime(DEFAULT_UPDATE_TIME)
-            .licensePlateNumber(DEFAULT_LICENSE_PLATE_NUMBER)
-            .driver(DEFAULT_DRIVER)
-            .phone(DEFAULT_PHONE);
+            .updateTime(DEFAULT_UPDATE_TIME);
         return shipPlan;
     }
     /**
@@ -159,18 +150,16 @@ public class ShipPlanResourceIT {
     public static ShipPlan createUpdatedEntity(EntityManager em) {
         ShipPlan shipPlan = new ShipPlan()
             .company(UPDATED_COMPANY)
-            .demandedAmount(UPDATED_DEMANDED_AMOUNT)
-            .finishAmount(UPDATED_FINISH_AMOUNT)
-            .remainAmount(UPDATED_REMAIN_AMOUNT)
-            .availableAmount(UPDATED_AVAILABLE_AMOUNT)
-            .shipMethond(UPDATED_SHIP_METHOND)
-            .shipNumber(UPDATED_SHIP_NUMBER)
-            .endTime(UPDATED_END_TIME)
+            .applyId(UPDATED_APPLY_ID)
+            .applyNumber(UPDATED_APPLY_NUMBER)
+            .truckNumber(UPDATED_TRUCK_NUMBER)
+            .auditStatus(UPDATED_AUDIT_STATUS)
+            .gateTime(UPDATED_GATE_TIME)
+            .leaveTime(UPDATED_LEAVE_TIME)
+            .deliverTime(UPDATED_DELIVER_TIME)
+            .allowInTime(UPDATED_ALLOW_IN_TIME)
             .createTime(UPDATED_CREATE_TIME)
-            .updateTime(UPDATED_UPDATE_TIME)
-            .licensePlateNumber(UPDATED_LICENSE_PLATE_NUMBER)
-            .driver(UPDATED_DRIVER)
-            .phone(UPDATED_PHONE);
+            .updateTime(UPDATED_UPDATE_TIME);
         return shipPlan;
     }
 
@@ -196,18 +185,16 @@ public class ShipPlanResourceIT {
         assertThat(shipPlanList).hasSize(databaseSizeBeforeCreate + 1);
         ShipPlan testShipPlan = shipPlanList.get(shipPlanList.size() - 1);
         assertThat(testShipPlan.getCompany()).isEqualTo(DEFAULT_COMPANY);
-        assertThat(testShipPlan.getDemandedAmount()).isEqualTo(DEFAULT_DEMANDED_AMOUNT);
-        assertThat(testShipPlan.getFinishAmount()).isEqualTo(DEFAULT_FINISH_AMOUNT);
-        assertThat(testShipPlan.getRemainAmount()).isEqualTo(DEFAULT_REMAIN_AMOUNT);
-        assertThat(testShipPlan.getAvailableAmount()).isEqualTo(DEFAULT_AVAILABLE_AMOUNT);
-        assertThat(testShipPlan.getShipMethond()).isEqualTo(DEFAULT_SHIP_METHOND);
-        assertThat(testShipPlan.getShipNumber()).isEqualTo(DEFAULT_SHIP_NUMBER);
-        assertThat(testShipPlan.getEndTime()).isEqualTo(DEFAULT_END_TIME);
+        assertThat(testShipPlan.getApplyId()).isEqualTo(DEFAULT_APPLY_ID);
+        assertThat(testShipPlan.getApplyNumber()).isEqualTo(DEFAULT_APPLY_NUMBER);
+        assertThat(testShipPlan.getTruckNumber()).isEqualTo(DEFAULT_TRUCK_NUMBER);
+        assertThat(testShipPlan.getAuditStatus()).isEqualTo(DEFAULT_AUDIT_STATUS);
+        assertThat(testShipPlan.getGateTime()).isEqualTo(DEFAULT_GATE_TIME);
+        assertThat(testShipPlan.getLeaveTime()).isEqualTo(DEFAULT_LEAVE_TIME);
+        assertThat(testShipPlan.getDeliverTime()).isEqualTo(DEFAULT_DELIVER_TIME);
+        assertThat(testShipPlan.getAllowInTime()).isEqualTo(DEFAULT_ALLOW_IN_TIME);
         assertThat(testShipPlan.getCreateTime()).isEqualTo(DEFAULT_CREATE_TIME);
         assertThat(testShipPlan.getUpdateTime()).isEqualTo(DEFAULT_UPDATE_TIME);
-        assertThat(testShipPlan.getLicensePlateNumber()).isEqualTo(DEFAULT_LICENSE_PLATE_NUMBER);
-        assertThat(testShipPlan.getDriver()).isEqualTo(DEFAULT_DRIVER);
-        assertThat(testShipPlan.getPhone()).isEqualTo(DEFAULT_PHONE);
     }
 
     @Test
@@ -233,10 +220,10 @@ public class ShipPlanResourceIT {
 
     @Test
     @Transactional
-    public void checkDemandedAmountIsRequired() throws Exception {
+    public void checkApplyIdIsRequired() throws Exception {
         int databaseSizeBeforeTest = shipPlanRepository.findAll().size();
         // set the field null
-        shipPlan.setDemandedAmount(null);
+        shipPlan.setApplyId(null);
 
         // Create the ShipPlan, which fails.
         ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(shipPlan);
@@ -252,10 +239,67 @@ public class ShipPlanResourceIT {
 
     @Test
     @Transactional
-    public void checkLicensePlateNumberIsRequired() throws Exception {
+    public void checkTruckNumberIsRequired() throws Exception {
         int databaseSizeBeforeTest = shipPlanRepository.findAll().size();
         // set the field null
-        shipPlan.setLicensePlateNumber(null);
+        shipPlan.setTruckNumber(null);
+
+        // Create the ShipPlan, which fails.
+        ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(shipPlan);
+
+        restShipPlanMockMvc.perform(post("/api/ship-plans")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(shipPlanDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<ShipPlan> shipPlanList = shipPlanRepository.findAll();
+        assertThat(shipPlanList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
+    public void checkAuditStatusIsRequired() throws Exception {
+        int databaseSizeBeforeTest = shipPlanRepository.findAll().size();
+        // set the field null
+        shipPlan.setAuditStatus(null);
+
+        // Create the ShipPlan, which fails.
+        ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(shipPlan);
+
+        restShipPlanMockMvc.perform(post("/api/ship-plans")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(shipPlanDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<ShipPlan> shipPlanList = shipPlanRepository.findAll();
+        assertThat(shipPlanList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
+    public void checkCreateTimeIsRequired() throws Exception {
+        int databaseSizeBeforeTest = shipPlanRepository.findAll().size();
+        // set the field null
+        shipPlan.setCreateTime(null);
+
+        // Create the ShipPlan, which fails.
+        ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(shipPlan);
+
+        restShipPlanMockMvc.perform(post("/api/ship-plans")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(shipPlanDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<ShipPlan> shipPlanList = shipPlanRepository.findAll();
+        assertThat(shipPlanList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
+    public void checkUpdateTimeIsRequired() throws Exception {
+        int databaseSizeBeforeTest = shipPlanRepository.findAll().size();
+        // set the field null
+        shipPlan.setUpdateTime(null);
 
         // Create the ShipPlan, which fails.
         ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(shipPlan);
@@ -281,18 +325,16 @@ public class ShipPlanResourceIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(shipPlan.getId().intValue())))
             .andExpect(jsonPath("$.[*].company").value(hasItem(DEFAULT_COMPANY.toString())))
-            .andExpect(jsonPath("$.[*].demandedAmount").value(hasItem(DEFAULT_DEMANDED_AMOUNT)))
-            .andExpect(jsonPath("$.[*].finishAmount").value(hasItem(DEFAULT_FINISH_AMOUNT)))
-            .andExpect(jsonPath("$.[*].remainAmount").value(hasItem(DEFAULT_REMAIN_AMOUNT)))
-            .andExpect(jsonPath("$.[*].availableAmount").value(hasItem(DEFAULT_AVAILABLE_AMOUNT)))
-            .andExpect(jsonPath("$.[*].shipMethond").value(hasItem(DEFAULT_SHIP_METHOND.toString())))
-            .andExpect(jsonPath("$.[*].shipNumber").value(hasItem(DEFAULT_SHIP_NUMBER.toString())))
-            .andExpect(jsonPath("$.[*].endTime").value(hasItem(sameInstant(DEFAULT_END_TIME))))
+            .andExpect(jsonPath("$.[*].applyId").value(hasItem(DEFAULT_APPLY_ID)))
+            .andExpect(jsonPath("$.[*].applyNumber").value(hasItem(DEFAULT_APPLY_NUMBER.toString())))
+            .andExpect(jsonPath("$.[*].truckNumber").value(hasItem(DEFAULT_TRUCK_NUMBER.toString())))
+            .andExpect(jsonPath("$.[*].auditStatus").value(hasItem(DEFAULT_AUDIT_STATUS)))
+            .andExpect(jsonPath("$.[*].gateTime").value(hasItem(sameInstant(DEFAULT_GATE_TIME))))
+            .andExpect(jsonPath("$.[*].leaveTime").value(hasItem(sameInstant(DEFAULT_LEAVE_TIME))))
+            .andExpect(jsonPath("$.[*].deliverTime").value(hasItem(sameInstant(DEFAULT_DELIVER_TIME))))
+            .andExpect(jsonPath("$.[*].allowInTime").value(hasItem(sameInstant(DEFAULT_ALLOW_IN_TIME))))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
-            .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
-            .andExpect(jsonPath("$.[*].licensePlateNumber").value(hasItem(DEFAULT_LICENSE_PLATE_NUMBER.toString())))
-            .andExpect(jsonPath("$.[*].driver").value(hasItem(DEFAULT_DRIVER.toString())))
-            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE.toString())));
+            .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))));
     }
     
     @Test
@@ -307,18 +349,16 @@ public class ShipPlanResourceIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(shipPlan.getId().intValue()))
             .andExpect(jsonPath("$.company").value(DEFAULT_COMPANY.toString()))
-            .andExpect(jsonPath("$.demandedAmount").value(DEFAULT_DEMANDED_AMOUNT))
-            .andExpect(jsonPath("$.finishAmount").value(DEFAULT_FINISH_AMOUNT))
-            .andExpect(jsonPath("$.remainAmount").value(DEFAULT_REMAIN_AMOUNT))
-            .andExpect(jsonPath("$.availableAmount").value(DEFAULT_AVAILABLE_AMOUNT))
-            .andExpect(jsonPath("$.shipMethond").value(DEFAULT_SHIP_METHOND.toString()))
-            .andExpect(jsonPath("$.shipNumber").value(DEFAULT_SHIP_NUMBER.toString()))
-            .andExpect(jsonPath("$.endTime").value(sameInstant(DEFAULT_END_TIME)))
+            .andExpect(jsonPath("$.applyId").value(DEFAULT_APPLY_ID))
+            .andExpect(jsonPath("$.applyNumber").value(DEFAULT_APPLY_NUMBER.toString()))
+            .andExpect(jsonPath("$.truckNumber").value(DEFAULT_TRUCK_NUMBER.toString()))
+            .andExpect(jsonPath("$.auditStatus").value(DEFAULT_AUDIT_STATUS))
+            .andExpect(jsonPath("$.gateTime").value(sameInstant(DEFAULT_GATE_TIME)))
+            .andExpect(jsonPath("$.leaveTime").value(sameInstant(DEFAULT_LEAVE_TIME)))
+            .andExpect(jsonPath("$.deliverTime").value(sameInstant(DEFAULT_DELIVER_TIME)))
+            .andExpect(jsonPath("$.allowInTime").value(sameInstant(DEFAULT_ALLOW_IN_TIME)))
             .andExpect(jsonPath("$.createTime").value(sameInstant(DEFAULT_CREATE_TIME)))
-            .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)))
-            .andExpect(jsonPath("$.licensePlateNumber").value(DEFAULT_LICENSE_PLATE_NUMBER.toString()))
-            .andExpect(jsonPath("$.driver").value(DEFAULT_DRIVER.toString()))
-            .andExpect(jsonPath("$.phone").value(DEFAULT_PHONE.toString()));
+            .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)));
     }
 
     @Test
@@ -362,409 +402,475 @@ public class ShipPlanResourceIT {
 
     @Test
     @Transactional
-    public void getAllShipPlansByDemandedAmountIsEqualToSomething() throws Exception {
+    public void getAllShipPlansByApplyIdIsEqualToSomething() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where demandedAmount equals to DEFAULT_DEMANDED_AMOUNT
-        defaultShipPlanShouldBeFound("demandedAmount.equals=" + DEFAULT_DEMANDED_AMOUNT);
+        // Get all the shipPlanList where applyId equals to DEFAULT_APPLY_ID
+        defaultShipPlanShouldBeFound("applyId.equals=" + DEFAULT_APPLY_ID);
 
-        // Get all the shipPlanList where demandedAmount equals to UPDATED_DEMANDED_AMOUNT
-        defaultShipPlanShouldNotBeFound("demandedAmount.equals=" + UPDATED_DEMANDED_AMOUNT);
+        // Get all the shipPlanList where applyId equals to UPDATED_APPLY_ID
+        defaultShipPlanShouldNotBeFound("applyId.equals=" + UPDATED_APPLY_ID);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByDemandedAmountIsInShouldWork() throws Exception {
+    public void getAllShipPlansByApplyIdIsInShouldWork() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where demandedAmount in DEFAULT_DEMANDED_AMOUNT or UPDATED_DEMANDED_AMOUNT
-        defaultShipPlanShouldBeFound("demandedAmount.in=" + DEFAULT_DEMANDED_AMOUNT + "," + UPDATED_DEMANDED_AMOUNT);
+        // Get all the shipPlanList where applyId in DEFAULT_APPLY_ID or UPDATED_APPLY_ID
+        defaultShipPlanShouldBeFound("applyId.in=" + DEFAULT_APPLY_ID + "," + UPDATED_APPLY_ID);
 
-        // Get all the shipPlanList where demandedAmount equals to UPDATED_DEMANDED_AMOUNT
-        defaultShipPlanShouldNotBeFound("demandedAmount.in=" + UPDATED_DEMANDED_AMOUNT);
+        // Get all the shipPlanList where applyId equals to UPDATED_APPLY_ID
+        defaultShipPlanShouldNotBeFound("applyId.in=" + UPDATED_APPLY_ID);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByDemandedAmountIsNullOrNotNull() throws Exception {
+    public void getAllShipPlansByApplyIdIsNullOrNotNull() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where demandedAmount is not null
-        defaultShipPlanShouldBeFound("demandedAmount.specified=true");
+        // Get all the shipPlanList where applyId is not null
+        defaultShipPlanShouldBeFound("applyId.specified=true");
 
-        // Get all the shipPlanList where demandedAmount is null
-        defaultShipPlanShouldNotBeFound("demandedAmount.specified=false");
+        // Get all the shipPlanList where applyId is null
+        defaultShipPlanShouldNotBeFound("applyId.specified=false");
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByDemandedAmountIsGreaterThanOrEqualToSomething() throws Exception {
+    public void getAllShipPlansByApplyIdIsGreaterThanOrEqualToSomething() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where demandedAmount greater than or equals to DEFAULT_DEMANDED_AMOUNT
-        defaultShipPlanShouldBeFound("demandedAmount.greaterOrEqualThan=" + DEFAULT_DEMANDED_AMOUNT);
+        // Get all the shipPlanList where applyId greater than or equals to DEFAULT_APPLY_ID
+        defaultShipPlanShouldBeFound("applyId.greaterOrEqualThan=" + DEFAULT_APPLY_ID);
 
-        // Get all the shipPlanList where demandedAmount greater than or equals to UPDATED_DEMANDED_AMOUNT
-        defaultShipPlanShouldNotBeFound("demandedAmount.greaterOrEqualThan=" + UPDATED_DEMANDED_AMOUNT);
+        // Get all the shipPlanList where applyId greater than or equals to UPDATED_APPLY_ID
+        defaultShipPlanShouldNotBeFound("applyId.greaterOrEqualThan=" + UPDATED_APPLY_ID);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByDemandedAmountIsLessThanSomething() throws Exception {
+    public void getAllShipPlansByApplyIdIsLessThanSomething() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where demandedAmount less than or equals to DEFAULT_DEMANDED_AMOUNT
-        defaultShipPlanShouldNotBeFound("demandedAmount.lessThan=" + DEFAULT_DEMANDED_AMOUNT);
+        // Get all the shipPlanList where applyId less than or equals to DEFAULT_APPLY_ID
+        defaultShipPlanShouldNotBeFound("applyId.lessThan=" + DEFAULT_APPLY_ID);
 
-        // Get all the shipPlanList where demandedAmount less than or equals to UPDATED_DEMANDED_AMOUNT
-        defaultShipPlanShouldBeFound("demandedAmount.lessThan=" + UPDATED_DEMANDED_AMOUNT);
-    }
-
-
-    @Test
-    @Transactional
-    public void getAllShipPlansByFinishAmountIsEqualToSomething() throws Exception {
-        // Initialize the database
-        shipPlanRepository.saveAndFlush(shipPlan);
-
-        // Get all the shipPlanList where finishAmount equals to DEFAULT_FINISH_AMOUNT
-        defaultShipPlanShouldBeFound("finishAmount.equals=" + DEFAULT_FINISH_AMOUNT);
-
-        // Get all the shipPlanList where finishAmount equals to UPDATED_FINISH_AMOUNT
-        defaultShipPlanShouldNotBeFound("finishAmount.equals=" + UPDATED_FINISH_AMOUNT);
-    }
-
-    @Test
-    @Transactional
-    public void getAllShipPlansByFinishAmountIsInShouldWork() throws Exception {
-        // Initialize the database
-        shipPlanRepository.saveAndFlush(shipPlan);
-
-        // Get all the shipPlanList where finishAmount in DEFAULT_FINISH_AMOUNT or UPDATED_FINISH_AMOUNT
-        defaultShipPlanShouldBeFound("finishAmount.in=" + DEFAULT_FINISH_AMOUNT + "," + UPDATED_FINISH_AMOUNT);
-
-        // Get all the shipPlanList where finishAmount equals to UPDATED_FINISH_AMOUNT
-        defaultShipPlanShouldNotBeFound("finishAmount.in=" + UPDATED_FINISH_AMOUNT);
-    }
-
-    @Test
-    @Transactional
-    public void getAllShipPlansByFinishAmountIsNullOrNotNull() throws Exception {
-        // Initialize the database
-        shipPlanRepository.saveAndFlush(shipPlan);
-
-        // Get all the shipPlanList where finishAmount is not null
-        defaultShipPlanShouldBeFound("finishAmount.specified=true");
-
-        // Get all the shipPlanList where finishAmount is null
-        defaultShipPlanShouldNotBeFound("finishAmount.specified=false");
-    }
-
-    @Test
-    @Transactional
-    public void getAllShipPlansByFinishAmountIsGreaterThanOrEqualToSomething() throws Exception {
-        // Initialize the database
-        shipPlanRepository.saveAndFlush(shipPlan);
-
-        // Get all the shipPlanList where finishAmount greater than or equals to DEFAULT_FINISH_AMOUNT
-        defaultShipPlanShouldBeFound("finishAmount.greaterOrEqualThan=" + DEFAULT_FINISH_AMOUNT);
-
-        // Get all the shipPlanList where finishAmount greater than or equals to UPDATED_FINISH_AMOUNT
-        defaultShipPlanShouldNotBeFound("finishAmount.greaterOrEqualThan=" + UPDATED_FINISH_AMOUNT);
-    }
-
-    @Test
-    @Transactional
-    public void getAllShipPlansByFinishAmountIsLessThanSomething() throws Exception {
-        // Initialize the database
-        shipPlanRepository.saveAndFlush(shipPlan);
-
-        // Get all the shipPlanList where finishAmount less than or equals to DEFAULT_FINISH_AMOUNT
-        defaultShipPlanShouldNotBeFound("finishAmount.lessThan=" + DEFAULT_FINISH_AMOUNT);
-
-        // Get all the shipPlanList where finishAmount less than or equals to UPDATED_FINISH_AMOUNT
-        defaultShipPlanShouldBeFound("finishAmount.lessThan=" + UPDATED_FINISH_AMOUNT);
+        // Get all the shipPlanList where applyId less than or equals to UPDATED_APPLY_ID
+        defaultShipPlanShouldBeFound("applyId.lessThan=" + UPDATED_APPLY_ID);
     }
 
 
     @Test
     @Transactional
-    public void getAllShipPlansByRemainAmountIsEqualToSomething() throws Exception {
+    public void getAllShipPlansByApplyNumberIsEqualToSomething() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where remainAmount equals to DEFAULT_REMAIN_AMOUNT
-        defaultShipPlanShouldBeFound("remainAmount.equals=" + DEFAULT_REMAIN_AMOUNT);
+        // Get all the shipPlanList where applyNumber equals to DEFAULT_APPLY_NUMBER
+        defaultShipPlanShouldBeFound("applyNumber.equals=" + DEFAULT_APPLY_NUMBER);
 
-        // Get all the shipPlanList where remainAmount equals to UPDATED_REMAIN_AMOUNT
-        defaultShipPlanShouldNotBeFound("remainAmount.equals=" + UPDATED_REMAIN_AMOUNT);
+        // Get all the shipPlanList where applyNumber equals to UPDATED_APPLY_NUMBER
+        defaultShipPlanShouldNotBeFound("applyNumber.equals=" + UPDATED_APPLY_NUMBER);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByRemainAmountIsInShouldWork() throws Exception {
+    public void getAllShipPlansByApplyNumberIsInShouldWork() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where remainAmount in DEFAULT_REMAIN_AMOUNT or UPDATED_REMAIN_AMOUNT
-        defaultShipPlanShouldBeFound("remainAmount.in=" + DEFAULT_REMAIN_AMOUNT + "," + UPDATED_REMAIN_AMOUNT);
+        // Get all the shipPlanList where applyNumber in DEFAULT_APPLY_NUMBER or UPDATED_APPLY_NUMBER
+        defaultShipPlanShouldBeFound("applyNumber.in=" + DEFAULT_APPLY_NUMBER + "," + UPDATED_APPLY_NUMBER);
 
-        // Get all the shipPlanList where remainAmount equals to UPDATED_REMAIN_AMOUNT
-        defaultShipPlanShouldNotBeFound("remainAmount.in=" + UPDATED_REMAIN_AMOUNT);
+        // Get all the shipPlanList where applyNumber equals to UPDATED_APPLY_NUMBER
+        defaultShipPlanShouldNotBeFound("applyNumber.in=" + UPDATED_APPLY_NUMBER);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByRemainAmountIsNullOrNotNull() throws Exception {
+    public void getAllShipPlansByApplyNumberIsNullOrNotNull() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where remainAmount is not null
-        defaultShipPlanShouldBeFound("remainAmount.specified=true");
+        // Get all the shipPlanList where applyNumber is not null
+        defaultShipPlanShouldBeFound("applyNumber.specified=true");
 
-        // Get all the shipPlanList where remainAmount is null
-        defaultShipPlanShouldNotBeFound("remainAmount.specified=false");
+        // Get all the shipPlanList where applyNumber is null
+        defaultShipPlanShouldNotBeFound("applyNumber.specified=false");
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByRemainAmountIsGreaterThanOrEqualToSomething() throws Exception {
+    public void getAllShipPlansByTruckNumberIsEqualToSomething() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where remainAmount greater than or equals to DEFAULT_REMAIN_AMOUNT
-        defaultShipPlanShouldBeFound("remainAmount.greaterOrEqualThan=" + DEFAULT_REMAIN_AMOUNT);
+        // Get all the shipPlanList where truckNumber equals to DEFAULT_TRUCK_NUMBER
+        defaultShipPlanShouldBeFound("truckNumber.equals=" + DEFAULT_TRUCK_NUMBER);
 
-        // Get all the shipPlanList where remainAmount greater than or equals to UPDATED_REMAIN_AMOUNT
-        defaultShipPlanShouldNotBeFound("remainAmount.greaterOrEqualThan=" + UPDATED_REMAIN_AMOUNT);
+        // Get all the shipPlanList where truckNumber equals to UPDATED_TRUCK_NUMBER
+        defaultShipPlanShouldNotBeFound("truckNumber.equals=" + UPDATED_TRUCK_NUMBER);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByRemainAmountIsLessThanSomething() throws Exception {
+    public void getAllShipPlansByTruckNumberIsInShouldWork() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where remainAmount less than or equals to DEFAULT_REMAIN_AMOUNT
-        defaultShipPlanShouldNotBeFound("remainAmount.lessThan=" + DEFAULT_REMAIN_AMOUNT);
+        // Get all the shipPlanList where truckNumber in DEFAULT_TRUCK_NUMBER or UPDATED_TRUCK_NUMBER
+        defaultShipPlanShouldBeFound("truckNumber.in=" + DEFAULT_TRUCK_NUMBER + "," + UPDATED_TRUCK_NUMBER);
 
-        // Get all the shipPlanList where remainAmount less than or equals to UPDATED_REMAIN_AMOUNT
-        defaultShipPlanShouldBeFound("remainAmount.lessThan=" + UPDATED_REMAIN_AMOUNT);
+        // Get all the shipPlanList where truckNumber equals to UPDATED_TRUCK_NUMBER
+        defaultShipPlanShouldNotBeFound("truckNumber.in=" + UPDATED_TRUCK_NUMBER);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByTruckNumberIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where truckNumber is not null
+        defaultShipPlanShouldBeFound("truckNumber.specified=true");
+
+        // Get all the shipPlanList where truckNumber is null
+        defaultShipPlanShouldNotBeFound("truckNumber.specified=false");
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByAuditStatusIsEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where auditStatus equals to DEFAULT_AUDIT_STATUS
+        defaultShipPlanShouldBeFound("auditStatus.equals=" + DEFAULT_AUDIT_STATUS);
+
+        // Get all the shipPlanList where auditStatus equals to UPDATED_AUDIT_STATUS
+        defaultShipPlanShouldNotBeFound("auditStatus.equals=" + UPDATED_AUDIT_STATUS);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByAuditStatusIsInShouldWork() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where auditStatus in DEFAULT_AUDIT_STATUS or UPDATED_AUDIT_STATUS
+        defaultShipPlanShouldBeFound("auditStatus.in=" + DEFAULT_AUDIT_STATUS + "," + UPDATED_AUDIT_STATUS);
+
+        // Get all the shipPlanList where auditStatus equals to UPDATED_AUDIT_STATUS
+        defaultShipPlanShouldNotBeFound("auditStatus.in=" + UPDATED_AUDIT_STATUS);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByAuditStatusIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where auditStatus is not null
+        defaultShipPlanShouldBeFound("auditStatus.specified=true");
+
+        // Get all the shipPlanList where auditStatus is null
+        defaultShipPlanShouldNotBeFound("auditStatus.specified=false");
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByAuditStatusIsGreaterThanOrEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where auditStatus greater than or equals to DEFAULT_AUDIT_STATUS
+        defaultShipPlanShouldBeFound("auditStatus.greaterOrEqualThan=" + DEFAULT_AUDIT_STATUS);
+
+        // Get all the shipPlanList where auditStatus greater than or equals to UPDATED_AUDIT_STATUS
+        defaultShipPlanShouldNotBeFound("auditStatus.greaterOrEqualThan=" + UPDATED_AUDIT_STATUS);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByAuditStatusIsLessThanSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where auditStatus less than or equals to DEFAULT_AUDIT_STATUS
+        defaultShipPlanShouldNotBeFound("auditStatus.lessThan=" + DEFAULT_AUDIT_STATUS);
+
+        // Get all the shipPlanList where auditStatus less than or equals to UPDATED_AUDIT_STATUS
+        defaultShipPlanShouldBeFound("auditStatus.lessThan=" + UPDATED_AUDIT_STATUS);
     }
 
 
     @Test
     @Transactional
-    public void getAllShipPlansByAvailableAmountIsEqualToSomething() throws Exception {
+    public void getAllShipPlansByGateTimeIsEqualToSomething() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where availableAmount equals to DEFAULT_AVAILABLE_AMOUNT
-        defaultShipPlanShouldBeFound("availableAmount.equals=" + DEFAULT_AVAILABLE_AMOUNT);
+        // Get all the shipPlanList where gateTime equals to DEFAULT_GATE_TIME
+        defaultShipPlanShouldBeFound("gateTime.equals=" + DEFAULT_GATE_TIME);
 
-        // Get all the shipPlanList where availableAmount equals to UPDATED_AVAILABLE_AMOUNT
-        defaultShipPlanShouldNotBeFound("availableAmount.equals=" + UPDATED_AVAILABLE_AMOUNT);
+        // Get all the shipPlanList where gateTime equals to UPDATED_GATE_TIME
+        defaultShipPlanShouldNotBeFound("gateTime.equals=" + UPDATED_GATE_TIME);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByAvailableAmountIsInShouldWork() throws Exception {
+    public void getAllShipPlansByGateTimeIsInShouldWork() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where availableAmount in DEFAULT_AVAILABLE_AMOUNT or UPDATED_AVAILABLE_AMOUNT
-        defaultShipPlanShouldBeFound("availableAmount.in=" + DEFAULT_AVAILABLE_AMOUNT + "," + UPDATED_AVAILABLE_AMOUNT);
+        // Get all the shipPlanList where gateTime in DEFAULT_GATE_TIME or UPDATED_GATE_TIME
+        defaultShipPlanShouldBeFound("gateTime.in=" + DEFAULT_GATE_TIME + "," + UPDATED_GATE_TIME);
 
-        // Get all the shipPlanList where availableAmount equals to UPDATED_AVAILABLE_AMOUNT
-        defaultShipPlanShouldNotBeFound("availableAmount.in=" + UPDATED_AVAILABLE_AMOUNT);
+        // Get all the shipPlanList where gateTime equals to UPDATED_GATE_TIME
+        defaultShipPlanShouldNotBeFound("gateTime.in=" + UPDATED_GATE_TIME);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByAvailableAmountIsNullOrNotNull() throws Exception {
+    public void getAllShipPlansByGateTimeIsNullOrNotNull() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where availableAmount is not null
-        defaultShipPlanShouldBeFound("availableAmount.specified=true");
+        // Get all the shipPlanList where gateTime is not null
+        defaultShipPlanShouldBeFound("gateTime.specified=true");
 
-        // Get all the shipPlanList where availableAmount is null
-        defaultShipPlanShouldNotBeFound("availableAmount.specified=false");
+        // Get all the shipPlanList where gateTime is null
+        defaultShipPlanShouldNotBeFound("gateTime.specified=false");
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByAvailableAmountIsGreaterThanOrEqualToSomething() throws Exception {
+    public void getAllShipPlansByGateTimeIsGreaterThanOrEqualToSomething() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where availableAmount greater than or equals to DEFAULT_AVAILABLE_AMOUNT
-        defaultShipPlanShouldBeFound("availableAmount.greaterOrEqualThan=" + DEFAULT_AVAILABLE_AMOUNT);
+        // Get all the shipPlanList where gateTime greater than or equals to DEFAULT_GATE_TIME
+        defaultShipPlanShouldBeFound("gateTime.greaterOrEqualThan=" + DEFAULT_GATE_TIME);
 
-        // Get all the shipPlanList where availableAmount greater than or equals to UPDATED_AVAILABLE_AMOUNT
-        defaultShipPlanShouldNotBeFound("availableAmount.greaterOrEqualThan=" + UPDATED_AVAILABLE_AMOUNT);
+        // Get all the shipPlanList where gateTime greater than or equals to UPDATED_GATE_TIME
+        defaultShipPlanShouldNotBeFound("gateTime.greaterOrEqualThan=" + UPDATED_GATE_TIME);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByAvailableAmountIsLessThanSomething() throws Exception {
+    public void getAllShipPlansByGateTimeIsLessThanSomething() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where availableAmount less than or equals to DEFAULT_AVAILABLE_AMOUNT
-        defaultShipPlanShouldNotBeFound("availableAmount.lessThan=" + DEFAULT_AVAILABLE_AMOUNT);
+        // Get all the shipPlanList where gateTime less than or equals to DEFAULT_GATE_TIME
+        defaultShipPlanShouldNotBeFound("gateTime.lessThan=" + DEFAULT_GATE_TIME);
 
-        // Get all the shipPlanList where availableAmount less than or equals to UPDATED_AVAILABLE_AMOUNT
-        defaultShipPlanShouldBeFound("availableAmount.lessThan=" + UPDATED_AVAILABLE_AMOUNT);
+        // Get all the shipPlanList where gateTime less than or equals to UPDATED_GATE_TIME
+        defaultShipPlanShouldBeFound("gateTime.lessThan=" + UPDATED_GATE_TIME);
     }
 
 
     @Test
     @Transactional
-    public void getAllShipPlansByShipMethondIsEqualToSomething() throws Exception {
+    public void getAllShipPlansByLeaveTimeIsEqualToSomething() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where shipMethond equals to DEFAULT_SHIP_METHOND
-        defaultShipPlanShouldBeFound("shipMethond.equals=" + DEFAULT_SHIP_METHOND);
+        // Get all the shipPlanList where leaveTime equals to DEFAULT_LEAVE_TIME
+        defaultShipPlanShouldBeFound("leaveTime.equals=" + DEFAULT_LEAVE_TIME);
 
-        // Get all the shipPlanList where shipMethond equals to UPDATED_SHIP_METHOND
-        defaultShipPlanShouldNotBeFound("shipMethond.equals=" + UPDATED_SHIP_METHOND);
+        // Get all the shipPlanList where leaveTime equals to UPDATED_LEAVE_TIME
+        defaultShipPlanShouldNotBeFound("leaveTime.equals=" + UPDATED_LEAVE_TIME);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByShipMethondIsInShouldWork() throws Exception {
+    public void getAllShipPlansByLeaveTimeIsInShouldWork() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where shipMethond in DEFAULT_SHIP_METHOND or UPDATED_SHIP_METHOND
-        defaultShipPlanShouldBeFound("shipMethond.in=" + DEFAULT_SHIP_METHOND + "," + UPDATED_SHIP_METHOND);
+        // Get all the shipPlanList where leaveTime in DEFAULT_LEAVE_TIME or UPDATED_LEAVE_TIME
+        defaultShipPlanShouldBeFound("leaveTime.in=" + DEFAULT_LEAVE_TIME + "," + UPDATED_LEAVE_TIME);
 
-        // Get all the shipPlanList where shipMethond equals to UPDATED_SHIP_METHOND
-        defaultShipPlanShouldNotBeFound("shipMethond.in=" + UPDATED_SHIP_METHOND);
+        // Get all the shipPlanList where leaveTime equals to UPDATED_LEAVE_TIME
+        defaultShipPlanShouldNotBeFound("leaveTime.in=" + UPDATED_LEAVE_TIME);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByShipMethondIsNullOrNotNull() throws Exception {
+    public void getAllShipPlansByLeaveTimeIsNullOrNotNull() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where shipMethond is not null
-        defaultShipPlanShouldBeFound("shipMethond.specified=true");
+        // Get all the shipPlanList where leaveTime is not null
+        defaultShipPlanShouldBeFound("leaveTime.specified=true");
 
-        // Get all the shipPlanList where shipMethond is null
-        defaultShipPlanShouldNotBeFound("shipMethond.specified=false");
+        // Get all the shipPlanList where leaveTime is null
+        defaultShipPlanShouldNotBeFound("leaveTime.specified=false");
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByShipNumberIsEqualToSomething() throws Exception {
+    public void getAllShipPlansByLeaveTimeIsGreaterThanOrEqualToSomething() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where shipNumber equals to DEFAULT_SHIP_NUMBER
-        defaultShipPlanShouldBeFound("shipNumber.equals=" + DEFAULT_SHIP_NUMBER);
+        // Get all the shipPlanList where leaveTime greater than or equals to DEFAULT_LEAVE_TIME
+        defaultShipPlanShouldBeFound("leaveTime.greaterOrEqualThan=" + DEFAULT_LEAVE_TIME);
 
-        // Get all the shipPlanList where shipNumber equals to UPDATED_SHIP_NUMBER
-        defaultShipPlanShouldNotBeFound("shipNumber.equals=" + UPDATED_SHIP_NUMBER);
+        // Get all the shipPlanList where leaveTime greater than or equals to UPDATED_LEAVE_TIME
+        defaultShipPlanShouldNotBeFound("leaveTime.greaterOrEqualThan=" + UPDATED_LEAVE_TIME);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByShipNumberIsInShouldWork() throws Exception {
+    public void getAllShipPlansByLeaveTimeIsLessThanSomething() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where shipNumber in DEFAULT_SHIP_NUMBER or UPDATED_SHIP_NUMBER
-        defaultShipPlanShouldBeFound("shipNumber.in=" + DEFAULT_SHIP_NUMBER + "," + UPDATED_SHIP_NUMBER);
+        // Get all the shipPlanList where leaveTime less than or equals to DEFAULT_LEAVE_TIME
+        defaultShipPlanShouldNotBeFound("leaveTime.lessThan=" + DEFAULT_LEAVE_TIME);
 
-        // Get all the shipPlanList where shipNumber equals to UPDATED_SHIP_NUMBER
-        defaultShipPlanShouldNotBeFound("shipNumber.in=" + UPDATED_SHIP_NUMBER);
+        // Get all the shipPlanList where leaveTime less than or equals to UPDATED_LEAVE_TIME
+        defaultShipPlanShouldBeFound("leaveTime.lessThan=" + UPDATED_LEAVE_TIME);
+    }
+
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByDeliverTimeIsEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where deliverTime equals to DEFAULT_DELIVER_TIME
+        defaultShipPlanShouldBeFound("deliverTime.equals=" + DEFAULT_DELIVER_TIME);
+
+        // Get all the shipPlanList where deliverTime equals to UPDATED_DELIVER_TIME
+        defaultShipPlanShouldNotBeFound("deliverTime.equals=" + UPDATED_DELIVER_TIME);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByShipNumberIsNullOrNotNull() throws Exception {
+    public void getAllShipPlansByDeliverTimeIsInShouldWork() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where shipNumber is not null
-        defaultShipPlanShouldBeFound("shipNumber.specified=true");
+        // Get all the shipPlanList where deliverTime in DEFAULT_DELIVER_TIME or UPDATED_DELIVER_TIME
+        defaultShipPlanShouldBeFound("deliverTime.in=" + DEFAULT_DELIVER_TIME + "," + UPDATED_DELIVER_TIME);
 
-        // Get all the shipPlanList where shipNumber is null
-        defaultShipPlanShouldNotBeFound("shipNumber.specified=false");
+        // Get all the shipPlanList where deliverTime equals to UPDATED_DELIVER_TIME
+        defaultShipPlanShouldNotBeFound("deliverTime.in=" + UPDATED_DELIVER_TIME);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByEndTimeIsEqualToSomething() throws Exception {
+    public void getAllShipPlansByDeliverTimeIsNullOrNotNull() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where endTime equals to DEFAULT_END_TIME
-        defaultShipPlanShouldBeFound("endTime.equals=" + DEFAULT_END_TIME);
+        // Get all the shipPlanList where deliverTime is not null
+        defaultShipPlanShouldBeFound("deliverTime.specified=true");
 
-        // Get all the shipPlanList where endTime equals to UPDATED_END_TIME
-        defaultShipPlanShouldNotBeFound("endTime.equals=" + UPDATED_END_TIME);
+        // Get all the shipPlanList where deliverTime is null
+        defaultShipPlanShouldNotBeFound("deliverTime.specified=false");
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByEndTimeIsInShouldWork() throws Exception {
+    public void getAllShipPlansByDeliverTimeIsGreaterThanOrEqualToSomething() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where endTime in DEFAULT_END_TIME or UPDATED_END_TIME
-        defaultShipPlanShouldBeFound("endTime.in=" + DEFAULT_END_TIME + "," + UPDATED_END_TIME);
+        // Get all the shipPlanList where deliverTime greater than or equals to DEFAULT_DELIVER_TIME
+        defaultShipPlanShouldBeFound("deliverTime.greaterOrEqualThan=" + DEFAULT_DELIVER_TIME);
 
-        // Get all the shipPlanList where endTime equals to UPDATED_END_TIME
-        defaultShipPlanShouldNotBeFound("endTime.in=" + UPDATED_END_TIME);
+        // Get all the shipPlanList where deliverTime greater than or equals to UPDATED_DELIVER_TIME
+        defaultShipPlanShouldNotBeFound("deliverTime.greaterOrEqualThan=" + UPDATED_DELIVER_TIME);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByEndTimeIsNullOrNotNull() throws Exception {
+    public void getAllShipPlansByDeliverTimeIsLessThanSomething() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where endTime is not null
-        defaultShipPlanShouldBeFound("endTime.specified=true");
+        // Get all the shipPlanList where deliverTime less than or equals to DEFAULT_DELIVER_TIME
+        defaultShipPlanShouldNotBeFound("deliverTime.lessThan=" + DEFAULT_DELIVER_TIME);
 
-        // Get all the shipPlanList where endTime is null
-        defaultShipPlanShouldNotBeFound("endTime.specified=false");
+        // Get all the shipPlanList where deliverTime less than or equals to UPDATED_DELIVER_TIME
+        defaultShipPlanShouldBeFound("deliverTime.lessThan=" + UPDATED_DELIVER_TIME);
+    }
+
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByAllowInTimeIsEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where allowInTime equals to DEFAULT_ALLOW_IN_TIME
+        defaultShipPlanShouldBeFound("allowInTime.equals=" + DEFAULT_ALLOW_IN_TIME);
+
+        // Get all the shipPlanList where allowInTime equals to UPDATED_ALLOW_IN_TIME
+        defaultShipPlanShouldNotBeFound("allowInTime.equals=" + UPDATED_ALLOW_IN_TIME);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByEndTimeIsGreaterThanOrEqualToSomething() throws Exception {
+    public void getAllShipPlansByAllowInTimeIsInShouldWork() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where endTime greater than or equals to DEFAULT_END_TIME
-        defaultShipPlanShouldBeFound("endTime.greaterOrEqualThan=" + DEFAULT_END_TIME);
+        // Get all the shipPlanList where allowInTime in DEFAULT_ALLOW_IN_TIME or UPDATED_ALLOW_IN_TIME
+        defaultShipPlanShouldBeFound("allowInTime.in=" + DEFAULT_ALLOW_IN_TIME + "," + UPDATED_ALLOW_IN_TIME);
 
-        // Get all the shipPlanList where endTime greater than or equals to UPDATED_END_TIME
-        defaultShipPlanShouldNotBeFound("endTime.greaterOrEqualThan=" + UPDATED_END_TIME);
+        // Get all the shipPlanList where allowInTime equals to UPDATED_ALLOW_IN_TIME
+        defaultShipPlanShouldNotBeFound("allowInTime.in=" + UPDATED_ALLOW_IN_TIME);
     }
 
     @Test
     @Transactional
-    public void getAllShipPlansByEndTimeIsLessThanSomething() throws Exception {
+    public void getAllShipPlansByAllowInTimeIsNullOrNotNull() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
 
-        // Get all the shipPlanList where endTime less than or equals to DEFAULT_END_TIME
-        defaultShipPlanShouldNotBeFound("endTime.lessThan=" + DEFAULT_END_TIME);
+        // Get all the shipPlanList where allowInTime is not null
+        defaultShipPlanShouldBeFound("allowInTime.specified=true");
 
-        // Get all the shipPlanList where endTime less than or equals to UPDATED_END_TIME
-        defaultShipPlanShouldBeFound("endTime.lessThan=" + UPDATED_END_TIME);
+        // Get all the shipPlanList where allowInTime is null
+        defaultShipPlanShouldNotBeFound("allowInTime.specified=false");
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByAllowInTimeIsGreaterThanOrEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where allowInTime greater than or equals to DEFAULT_ALLOW_IN_TIME
+        defaultShipPlanShouldBeFound("allowInTime.greaterOrEqualThan=" + DEFAULT_ALLOW_IN_TIME);
+
+        // Get all the shipPlanList where allowInTime greater than or equals to UPDATED_ALLOW_IN_TIME
+        defaultShipPlanShouldNotBeFound("allowInTime.greaterOrEqualThan=" + UPDATED_ALLOW_IN_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByAllowInTimeIsLessThanSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where allowInTime less than or equals to DEFAULT_ALLOW_IN_TIME
+        defaultShipPlanShouldNotBeFound("allowInTime.lessThan=" + DEFAULT_ALLOW_IN_TIME);
+
+        // Get all the shipPlanList where allowInTime less than or equals to UPDATED_ALLOW_IN_TIME
+        defaultShipPlanShouldBeFound("allowInTime.lessThan=" + UPDATED_ALLOW_IN_TIME);
     }
 
 
@@ -902,123 +1008,6 @@ public class ShipPlanResourceIT {
 
     @Test
     @Transactional
-    public void getAllShipPlansByLicensePlateNumberIsEqualToSomething() throws Exception {
-        // Initialize the database
-        shipPlanRepository.saveAndFlush(shipPlan);
-
-        // Get all the shipPlanList where licensePlateNumber equals to DEFAULT_LICENSE_PLATE_NUMBER
-        defaultShipPlanShouldBeFound("licensePlateNumber.equals=" + DEFAULT_LICENSE_PLATE_NUMBER);
-
-        // Get all the shipPlanList where licensePlateNumber equals to UPDATED_LICENSE_PLATE_NUMBER
-        defaultShipPlanShouldNotBeFound("licensePlateNumber.equals=" + UPDATED_LICENSE_PLATE_NUMBER);
-    }
-
-    @Test
-    @Transactional
-    public void getAllShipPlansByLicensePlateNumberIsInShouldWork() throws Exception {
-        // Initialize the database
-        shipPlanRepository.saveAndFlush(shipPlan);
-
-        // Get all the shipPlanList where licensePlateNumber in DEFAULT_LICENSE_PLATE_NUMBER or UPDATED_LICENSE_PLATE_NUMBER
-        defaultShipPlanShouldBeFound("licensePlateNumber.in=" + DEFAULT_LICENSE_PLATE_NUMBER + "," + UPDATED_LICENSE_PLATE_NUMBER);
-
-        // Get all the shipPlanList where licensePlateNumber equals to UPDATED_LICENSE_PLATE_NUMBER
-        defaultShipPlanShouldNotBeFound("licensePlateNumber.in=" + UPDATED_LICENSE_PLATE_NUMBER);
-    }
-
-    @Test
-    @Transactional
-    public void getAllShipPlansByLicensePlateNumberIsNullOrNotNull() throws Exception {
-        // Initialize the database
-        shipPlanRepository.saveAndFlush(shipPlan);
-
-        // Get all the shipPlanList where licensePlateNumber is not null
-        defaultShipPlanShouldBeFound("licensePlateNumber.specified=true");
-
-        // Get all the shipPlanList where licensePlateNumber is null
-        defaultShipPlanShouldNotBeFound("licensePlateNumber.specified=false");
-    }
-
-    @Test
-    @Transactional
-    public void getAllShipPlansByDriverIsEqualToSomething() throws Exception {
-        // Initialize the database
-        shipPlanRepository.saveAndFlush(shipPlan);
-
-        // Get all the shipPlanList where driver equals to DEFAULT_DRIVER
-        defaultShipPlanShouldBeFound("driver.equals=" + DEFAULT_DRIVER);
-
-        // Get all the shipPlanList where driver equals to UPDATED_DRIVER
-        defaultShipPlanShouldNotBeFound("driver.equals=" + UPDATED_DRIVER);
-    }
-
-    @Test
-    @Transactional
-    public void getAllShipPlansByDriverIsInShouldWork() throws Exception {
-        // Initialize the database
-        shipPlanRepository.saveAndFlush(shipPlan);
-
-        // Get all the shipPlanList where driver in DEFAULT_DRIVER or UPDATED_DRIVER
-        defaultShipPlanShouldBeFound("driver.in=" + DEFAULT_DRIVER + "," + UPDATED_DRIVER);
-
-        // Get all the shipPlanList where driver equals to UPDATED_DRIVER
-        defaultShipPlanShouldNotBeFound("driver.in=" + UPDATED_DRIVER);
-    }
-
-    @Test
-    @Transactional
-    public void getAllShipPlansByDriverIsNullOrNotNull() throws Exception {
-        // Initialize the database
-        shipPlanRepository.saveAndFlush(shipPlan);
-
-        // Get all the shipPlanList where driver is not null
-        defaultShipPlanShouldBeFound("driver.specified=true");
-
-        // Get all the shipPlanList where driver is null
-        defaultShipPlanShouldNotBeFound("driver.specified=false");
-    }
-
-    @Test
-    @Transactional
-    public void getAllShipPlansByPhoneIsEqualToSomething() throws Exception {
-        // Initialize the database
-        shipPlanRepository.saveAndFlush(shipPlan);
-
-        // Get all the shipPlanList where phone equals to DEFAULT_PHONE
-        defaultShipPlanShouldBeFound("phone.equals=" + DEFAULT_PHONE);
-
-        // Get all the shipPlanList where phone equals to UPDATED_PHONE
-        defaultShipPlanShouldNotBeFound("phone.equals=" + UPDATED_PHONE);
-    }
-
-    @Test
-    @Transactional
-    public void getAllShipPlansByPhoneIsInShouldWork() throws Exception {
-        // Initialize the database
-        shipPlanRepository.saveAndFlush(shipPlan);
-
-        // Get all the shipPlanList where phone in DEFAULT_PHONE or UPDATED_PHONE
-        defaultShipPlanShouldBeFound("phone.in=" + DEFAULT_PHONE + "," + UPDATED_PHONE);
-
-        // Get all the shipPlanList where phone equals to UPDATED_PHONE
-        defaultShipPlanShouldNotBeFound("phone.in=" + UPDATED_PHONE);
-    }
-
-    @Test
-    @Transactional
-    public void getAllShipPlansByPhoneIsNullOrNotNull() throws Exception {
-        // Initialize the database
-        shipPlanRepository.saveAndFlush(shipPlan);
-
-        // Get all the shipPlanList where phone is not null
-        defaultShipPlanShouldBeFound("phone.specified=true");
-
-        // Get all the shipPlanList where phone is null
-        defaultShipPlanShouldNotBeFound("phone.specified=false");
-    }
-
-    @Test
-    @Transactional
     public void getAllShipPlansByUserIsEqualToSomething() throws Exception {
         // Initialize the database
         User user = UserResourceIT.createEntity(em);
@@ -1063,18 +1052,16 @@ public class ShipPlanResourceIT {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(shipPlan.getId().intValue())))
             .andExpect(jsonPath("$.[*].company").value(hasItem(DEFAULT_COMPANY)))
-            .andExpect(jsonPath("$.[*].demandedAmount").value(hasItem(DEFAULT_DEMANDED_AMOUNT)))
-            .andExpect(jsonPath("$.[*].finishAmount").value(hasItem(DEFAULT_FINISH_AMOUNT)))
-            .andExpect(jsonPath("$.[*].remainAmount").value(hasItem(DEFAULT_REMAIN_AMOUNT)))
-            .andExpect(jsonPath("$.[*].availableAmount").value(hasItem(DEFAULT_AVAILABLE_AMOUNT)))
-            .andExpect(jsonPath("$.[*].shipMethond").value(hasItem(DEFAULT_SHIP_METHOND.toString())))
-            .andExpect(jsonPath("$.[*].shipNumber").value(hasItem(DEFAULT_SHIP_NUMBER)))
-            .andExpect(jsonPath("$.[*].endTime").value(hasItem(sameInstant(DEFAULT_END_TIME))))
+            .andExpect(jsonPath("$.[*].applyId").value(hasItem(DEFAULT_APPLY_ID)))
+            .andExpect(jsonPath("$.[*].applyNumber").value(hasItem(DEFAULT_APPLY_NUMBER)))
+            .andExpect(jsonPath("$.[*].truckNumber").value(hasItem(DEFAULT_TRUCK_NUMBER)))
+            .andExpect(jsonPath("$.[*].auditStatus").value(hasItem(DEFAULT_AUDIT_STATUS)))
+            .andExpect(jsonPath("$.[*].gateTime").value(hasItem(sameInstant(DEFAULT_GATE_TIME))))
+            .andExpect(jsonPath("$.[*].leaveTime").value(hasItem(sameInstant(DEFAULT_LEAVE_TIME))))
+            .andExpect(jsonPath("$.[*].deliverTime").value(hasItem(sameInstant(DEFAULT_DELIVER_TIME))))
+            .andExpect(jsonPath("$.[*].allowInTime").value(hasItem(sameInstant(DEFAULT_ALLOW_IN_TIME))))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
-            .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
-            .andExpect(jsonPath("$.[*].licensePlateNumber").value(hasItem(DEFAULT_LICENSE_PLATE_NUMBER)))
-            .andExpect(jsonPath("$.[*].driver").value(hasItem(DEFAULT_DRIVER)))
-            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE)));
+            .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))));
 
         // Check, that the count call also returns 1
         restShipPlanMockMvc.perform(get("/api/ship-plans/count?sort=id,desc&" + filter))
@@ -1123,18 +1110,16 @@ public class ShipPlanResourceIT {
         em.detach(updatedShipPlan);
         updatedShipPlan
             .company(UPDATED_COMPANY)
-            .demandedAmount(UPDATED_DEMANDED_AMOUNT)
-            .finishAmount(UPDATED_FINISH_AMOUNT)
-            .remainAmount(UPDATED_REMAIN_AMOUNT)
-            .availableAmount(UPDATED_AVAILABLE_AMOUNT)
-            .shipMethond(UPDATED_SHIP_METHOND)
-            .shipNumber(UPDATED_SHIP_NUMBER)
-            .endTime(UPDATED_END_TIME)
+            .applyId(UPDATED_APPLY_ID)
+            .applyNumber(UPDATED_APPLY_NUMBER)
+            .truckNumber(UPDATED_TRUCK_NUMBER)
+            .auditStatus(UPDATED_AUDIT_STATUS)
+            .gateTime(UPDATED_GATE_TIME)
+            .leaveTime(UPDATED_LEAVE_TIME)
+            .deliverTime(UPDATED_DELIVER_TIME)
+            .allowInTime(UPDATED_ALLOW_IN_TIME)
             .createTime(UPDATED_CREATE_TIME)
-            .updateTime(UPDATED_UPDATE_TIME)
-            .licensePlateNumber(UPDATED_LICENSE_PLATE_NUMBER)
-            .driver(UPDATED_DRIVER)
-            .phone(UPDATED_PHONE);
+            .updateTime(UPDATED_UPDATE_TIME);
         ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(updatedShipPlan);
 
         restShipPlanMockMvc.perform(put("/api/ship-plans")
@@ -1147,18 +1132,16 @@ public class ShipPlanResourceIT {
         assertThat(shipPlanList).hasSize(databaseSizeBeforeUpdate);
         ShipPlan testShipPlan = shipPlanList.get(shipPlanList.size() - 1);
         assertThat(testShipPlan.getCompany()).isEqualTo(UPDATED_COMPANY);
-        assertThat(testShipPlan.getDemandedAmount()).isEqualTo(UPDATED_DEMANDED_AMOUNT);
-        assertThat(testShipPlan.getFinishAmount()).isEqualTo(UPDATED_FINISH_AMOUNT);
-        assertThat(testShipPlan.getRemainAmount()).isEqualTo(UPDATED_REMAIN_AMOUNT);
-        assertThat(testShipPlan.getAvailableAmount()).isEqualTo(UPDATED_AVAILABLE_AMOUNT);
-        assertThat(testShipPlan.getShipMethond()).isEqualTo(UPDATED_SHIP_METHOND);
-        assertThat(testShipPlan.getShipNumber()).isEqualTo(UPDATED_SHIP_NUMBER);
-        assertThat(testShipPlan.getEndTime()).isEqualTo(UPDATED_END_TIME);
+        assertThat(testShipPlan.getApplyId()).isEqualTo(UPDATED_APPLY_ID);
+        assertThat(testShipPlan.getApplyNumber()).isEqualTo(UPDATED_APPLY_NUMBER);
+        assertThat(testShipPlan.getTruckNumber()).isEqualTo(UPDATED_TRUCK_NUMBER);
+        assertThat(testShipPlan.getAuditStatus()).isEqualTo(UPDATED_AUDIT_STATUS);
+        assertThat(testShipPlan.getGateTime()).isEqualTo(UPDATED_GATE_TIME);
+        assertThat(testShipPlan.getLeaveTime()).isEqualTo(UPDATED_LEAVE_TIME);
+        assertThat(testShipPlan.getDeliverTime()).isEqualTo(UPDATED_DELIVER_TIME);
+        assertThat(testShipPlan.getAllowInTime()).isEqualTo(UPDATED_ALLOW_IN_TIME);
         assertThat(testShipPlan.getCreateTime()).isEqualTo(UPDATED_CREATE_TIME);
         assertThat(testShipPlan.getUpdateTime()).isEqualTo(UPDATED_UPDATE_TIME);
-        assertThat(testShipPlan.getLicensePlateNumber()).isEqualTo(UPDATED_LICENSE_PLATE_NUMBER);
-        assertThat(testShipPlan.getDriver()).isEqualTo(UPDATED_DRIVER);
-        assertThat(testShipPlan.getPhone()).isEqualTo(UPDATED_PHONE);
     }
 
     @Test
