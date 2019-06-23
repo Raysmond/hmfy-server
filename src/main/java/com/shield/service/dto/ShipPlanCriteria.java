@@ -29,13 +29,17 @@ public class ShipPlanCriteria implements Serializable, Criteria {
 
     private StringFilter company;
 
-    private IntegerFilter applyId;
+    private LongFilter applyId;
 
     private StringFilter applyNumber;
 
     private StringFilter truckNumber;
 
     private IntegerFilter auditStatus;
+
+    private StringFilter productName;
+
+    private StringFilter deliverPosition;
 
     private ZonedDateTimeFilter gateTime;
 
@@ -51,8 +55,6 @@ public class ShipPlanCriteria implements Serializable, Criteria {
 
     private LongFilter userId;
 
-    private LongFilter toUserId;
-
     public ShipPlanCriteria(){
     }
 
@@ -63,6 +65,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.applyNumber = other.applyNumber == null ? null : other.applyNumber.copy();
         this.truckNumber = other.truckNumber == null ? null : other.truckNumber.copy();
         this.auditStatus = other.auditStatus == null ? null : other.auditStatus.copy();
+        this.productName = other.productName == null ? null : other.productName.copy();
+        this.deliverPosition = other.deliverPosition == null ? null : other.deliverPosition.copy();
         this.gateTime = other.gateTime == null ? null : other.gateTime.copy();
         this.leaveTime = other.leaveTime == null ? null : other.leaveTime.copy();
         this.deliverTime = other.deliverTime == null ? null : other.deliverTime.copy();
@@ -70,7 +74,6 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.createTime = other.createTime == null ? null : other.createTime.copy();
         this.updateTime = other.updateTime == null ? null : other.updateTime.copy();
         this.userId = other.userId == null ? null : other.userId.copy();
-        this.toUserId = other.toUserId == null ? null : other.toUserId.copy();
     }
 
     @Override
@@ -94,11 +97,11 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.company = company;
     }
 
-    public IntegerFilter getApplyId() {
+    public LongFilter getApplyId() {
         return applyId;
     }
 
-    public void setApplyId(IntegerFilter applyId) {
+    public void setApplyId(LongFilter applyId) {
         this.applyId = applyId;
     }
 
@@ -124,6 +127,22 @@ public class ShipPlanCriteria implements Serializable, Criteria {
 
     public void setAuditStatus(IntegerFilter auditStatus) {
         this.auditStatus = auditStatus;
+    }
+
+    public StringFilter getProductName() {
+        return productName;
+    }
+
+    public void setProductName(StringFilter productName) {
+        this.productName = productName;
+    }
+
+    public StringFilter getDeliverPosition() {
+        return deliverPosition;
+    }
+
+    public void setDeliverPosition(StringFilter deliverPosition) {
+        this.deliverPosition = deliverPosition;
     }
 
     public ZonedDateTimeFilter getGateTime() {
@@ -182,14 +201,6 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.userId = userId;
     }
 
-    public LongFilter getToUserId() {
-        return toUserId;
-    }
-
-    public void setToUserId(LongFilter toUserId) {
-        this.toUserId = toUserId;
-    }
-
 
     @Override
     public boolean equals(Object o) {
@@ -207,14 +218,15 @@ public class ShipPlanCriteria implements Serializable, Criteria {
             Objects.equals(applyNumber, that.applyNumber) &&
             Objects.equals(truckNumber, that.truckNumber) &&
             Objects.equals(auditStatus, that.auditStatus) &&
+            Objects.equals(productName, that.productName) &&
+            Objects.equals(deliverPosition, that.deliverPosition) &&
             Objects.equals(gateTime, that.gateTime) &&
             Objects.equals(leaveTime, that.leaveTime) &&
             Objects.equals(deliverTime, that.deliverTime) &&
             Objects.equals(allowInTime, that.allowInTime) &&
             Objects.equals(createTime, that.createTime) &&
             Objects.equals(updateTime, that.updateTime) &&
-            Objects.equals(userId, that.userId) &&
-            Objects.equals(toUserId, that.toUserId);
+            Objects.equals(userId, that.userId);
     }
 
     @Override
@@ -226,14 +238,15 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         applyNumber,
         truckNumber,
         auditStatus,
+        productName,
+        deliverPosition,
         gateTime,
         leaveTime,
         deliverTime,
         allowInTime,
         createTime,
         updateTime,
-        userId,
-        toUserId
+        userId
         );
     }
 
@@ -246,6 +259,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
                 (applyNumber != null ? "applyNumber=" + applyNumber + ", " : "") +
                 (truckNumber != null ? "truckNumber=" + truckNumber + ", " : "") +
                 (auditStatus != null ? "auditStatus=" + auditStatus + ", " : "") +
+                (productName != null ? "productName=" + productName + ", " : "") +
+                (deliverPosition != null ? "deliverPosition=" + deliverPosition + ", " : "") +
                 (gateTime != null ? "gateTime=" + gateTime + ", " : "") +
                 (leaveTime != null ? "leaveTime=" + leaveTime + ", " : "") +
                 (deliverTime != null ? "deliverTime=" + deliverTime + ", " : "") +
@@ -253,7 +268,6 @@ public class ShipPlanCriteria implements Serializable, Criteria {
                 (createTime != null ? "createTime=" + createTime + ", " : "") +
                 (updateTime != null ? "updateTime=" + updateTime + ", " : "") +
                 (userId != null ? "userId=" + userId + ", " : "") +
-                (toUserId != null ? "toUserId=" + toUserId + ", " : "") +
             "}";
     }
 

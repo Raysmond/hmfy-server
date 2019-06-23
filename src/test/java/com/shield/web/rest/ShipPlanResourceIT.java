@@ -59,6 +59,12 @@ public class ShipPlanResourceIT {
     private static final Integer DEFAULT_AUDIT_STATUS = 1;
     private static final Integer UPDATED_AUDIT_STATUS = 2;
 
+    private static final String DEFAULT_PRODUCT_NAME = "AAAAAAAAAA";
+    private static final String UPDATED_PRODUCT_NAME = "BBBBBBBBBB";
+
+    private static final String DEFAULT_DELIVER_POSITION = "AAAAAAAAAA";
+    private static final String UPDATED_DELIVER_POSITION = "BBBBBBBBBB";
+
     private static final ZonedDateTime DEFAULT_GATE_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
     private static final ZonedDateTime UPDATED_GATE_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
 
@@ -133,6 +139,8 @@ public class ShipPlanResourceIT {
             .applyNumber(DEFAULT_APPLY_NUMBER)
             .truckNumber(DEFAULT_TRUCK_NUMBER)
             .auditStatus(DEFAULT_AUDIT_STATUS)
+            .productName(DEFAULT_PRODUCT_NAME)
+            .deliverPosition(DEFAULT_DELIVER_POSITION)
             .gateTime(DEFAULT_GATE_TIME)
             .leaveTime(DEFAULT_LEAVE_TIME)
             .deliverTime(DEFAULT_DELIVER_TIME)
@@ -154,6 +162,8 @@ public class ShipPlanResourceIT {
             .applyNumber(UPDATED_APPLY_NUMBER)
             .truckNumber(UPDATED_TRUCK_NUMBER)
             .auditStatus(UPDATED_AUDIT_STATUS)
+            .productName(UPDATED_PRODUCT_NAME)
+            .deliverPosition(UPDATED_DELIVER_POSITION)
             .gateTime(UPDATED_GATE_TIME)
             .leaveTime(UPDATED_LEAVE_TIME)
             .deliverTime(UPDATED_DELIVER_TIME)
@@ -189,6 +199,8 @@ public class ShipPlanResourceIT {
         assertThat(testShipPlan.getApplyNumber()).isEqualTo(DEFAULT_APPLY_NUMBER);
         assertThat(testShipPlan.getTruckNumber()).isEqualTo(DEFAULT_TRUCK_NUMBER);
         assertThat(testShipPlan.getAuditStatus()).isEqualTo(DEFAULT_AUDIT_STATUS);
+        assertThat(testShipPlan.getProductName()).isEqualTo(DEFAULT_PRODUCT_NAME);
+        assertThat(testShipPlan.getDeliverPosition()).isEqualTo(DEFAULT_DELIVER_POSITION);
         assertThat(testShipPlan.getGateTime()).isEqualTo(DEFAULT_GATE_TIME);
         assertThat(testShipPlan.getLeaveTime()).isEqualTo(DEFAULT_LEAVE_TIME);
         assertThat(testShipPlan.getDeliverTime()).isEqualTo(DEFAULT_DELIVER_TIME);
@@ -277,6 +289,44 @@ public class ShipPlanResourceIT {
 
     @Test
     @Transactional
+    public void checkProductNameIsRequired() throws Exception {
+        int databaseSizeBeforeTest = shipPlanRepository.findAll().size();
+        // set the field null
+        shipPlan.setProductName(null);
+
+        // Create the ShipPlan, which fails.
+        ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(shipPlan);
+
+        restShipPlanMockMvc.perform(post("/api/ship-plans")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(shipPlanDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<ShipPlan> shipPlanList = shipPlanRepository.findAll();
+        assertThat(shipPlanList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
+    public void checkDeliverPositionIsRequired() throws Exception {
+        int databaseSizeBeforeTest = shipPlanRepository.findAll().size();
+        // set the field null
+        shipPlan.setDeliverPosition(null);
+
+        // Create the ShipPlan, which fails.
+        ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(shipPlan);
+
+        restShipPlanMockMvc.perform(post("/api/ship-plans")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(shipPlanDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<ShipPlan> shipPlanList = shipPlanRepository.findAll();
+        assertThat(shipPlanList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
     public void checkCreateTimeIsRequired() throws Exception {
         int databaseSizeBeforeTest = shipPlanRepository.findAll().size();
         // set the field null
@@ -329,6 +379,8 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.[*].applyNumber").value(hasItem(DEFAULT_APPLY_NUMBER.toString())))
             .andExpect(jsonPath("$.[*].truckNumber").value(hasItem(DEFAULT_TRUCK_NUMBER.toString())))
             .andExpect(jsonPath("$.[*].auditStatus").value(hasItem(DEFAULT_AUDIT_STATUS)))
+            .andExpect(jsonPath("$.[*].productName").value(hasItem(DEFAULT_PRODUCT_NAME.toString())))
+            .andExpect(jsonPath("$.[*].deliverPosition").value(hasItem(DEFAULT_DELIVER_POSITION.toString())))
             .andExpect(jsonPath("$.[*].gateTime").value(hasItem(sameInstant(DEFAULT_GATE_TIME))))
             .andExpect(jsonPath("$.[*].leaveTime").value(hasItem(sameInstant(DEFAULT_LEAVE_TIME))))
             .andExpect(jsonPath("$.[*].deliverTime").value(hasItem(sameInstant(DEFAULT_DELIVER_TIME))))
@@ -353,6 +405,8 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.applyNumber").value(DEFAULT_APPLY_NUMBER.toString()))
             .andExpect(jsonPath("$.truckNumber").value(DEFAULT_TRUCK_NUMBER.toString()))
             .andExpect(jsonPath("$.auditStatus").value(DEFAULT_AUDIT_STATUS))
+            .andExpect(jsonPath("$.productName").value(DEFAULT_PRODUCT_NAME.toString()))
+            .andExpect(jsonPath("$.deliverPosition").value(DEFAULT_DELIVER_POSITION.toString()))
             .andExpect(jsonPath("$.gateTime").value(sameInstant(DEFAULT_GATE_TIME)))
             .andExpect(jsonPath("$.leaveTime").value(sameInstant(DEFAULT_LEAVE_TIME)))
             .andExpect(jsonPath("$.deliverTime").value(sameInstant(DEFAULT_DELIVER_TIME)))
@@ -609,6 +663,84 @@ public class ShipPlanResourceIT {
         defaultShipPlanShouldBeFound("auditStatus.lessThan=" + UPDATED_AUDIT_STATUS);
     }
 
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByProductNameIsEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where productName equals to DEFAULT_PRODUCT_NAME
+        defaultShipPlanShouldBeFound("productName.equals=" + DEFAULT_PRODUCT_NAME);
+
+        // Get all the shipPlanList where productName equals to UPDATED_PRODUCT_NAME
+        defaultShipPlanShouldNotBeFound("productName.equals=" + UPDATED_PRODUCT_NAME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByProductNameIsInShouldWork() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where productName in DEFAULT_PRODUCT_NAME or UPDATED_PRODUCT_NAME
+        defaultShipPlanShouldBeFound("productName.in=" + DEFAULT_PRODUCT_NAME + "," + UPDATED_PRODUCT_NAME);
+
+        // Get all the shipPlanList where productName equals to UPDATED_PRODUCT_NAME
+        defaultShipPlanShouldNotBeFound("productName.in=" + UPDATED_PRODUCT_NAME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByProductNameIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where productName is not null
+        defaultShipPlanShouldBeFound("productName.specified=true");
+
+        // Get all the shipPlanList where productName is null
+        defaultShipPlanShouldNotBeFound("productName.specified=false");
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByDeliverPositionIsEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where deliverPosition equals to DEFAULT_DELIVER_POSITION
+        defaultShipPlanShouldBeFound("deliverPosition.equals=" + DEFAULT_DELIVER_POSITION);
+
+        // Get all the shipPlanList where deliverPosition equals to UPDATED_DELIVER_POSITION
+        defaultShipPlanShouldNotBeFound("deliverPosition.equals=" + UPDATED_DELIVER_POSITION);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByDeliverPositionIsInShouldWork() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where deliverPosition in DEFAULT_DELIVER_POSITION or UPDATED_DELIVER_POSITION
+        defaultShipPlanShouldBeFound("deliverPosition.in=" + DEFAULT_DELIVER_POSITION + "," + UPDATED_DELIVER_POSITION);
+
+        // Get all the shipPlanList where deliverPosition equals to UPDATED_DELIVER_POSITION
+        defaultShipPlanShouldNotBeFound("deliverPosition.in=" + UPDATED_DELIVER_POSITION);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByDeliverPositionIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where deliverPosition is not null
+        defaultShipPlanShouldBeFound("deliverPosition.specified=true");
+
+        // Get all the shipPlanList where deliverPosition is null
+        defaultShipPlanShouldNotBeFound("deliverPosition.specified=false");
+    }
 
     @Test
     @Transactional
@@ -1024,25 +1156,6 @@ public class ShipPlanResourceIT {
         defaultShipPlanShouldNotBeFound("userId.equals=" + (userId + 1));
     }
 
-
-    @Test
-    @Transactional
-    public void getAllShipPlansByToUserIsEqualToSomething() throws Exception {
-        // Initialize the database
-        User toUser = UserResourceIT.createEntity(em);
-        em.persist(toUser);
-        em.flush();
-        shipPlan.setToUser(toUser);
-        shipPlanRepository.saveAndFlush(shipPlan);
-        Long toUserId = toUser.getId();
-
-        // Get all the shipPlanList where toUser equals to toUserId
-        defaultShipPlanShouldBeFound("toUserId.equals=" + toUserId);
-
-        // Get all the shipPlanList where toUser equals to toUserId + 1
-        defaultShipPlanShouldNotBeFound("toUserId.equals=" + (toUserId + 1));
-    }
-
     /**
      * Executes the search, and checks that the default entity is returned.
      */
@@ -1056,6 +1169,8 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.[*].applyNumber").value(hasItem(DEFAULT_APPLY_NUMBER)))
             .andExpect(jsonPath("$.[*].truckNumber").value(hasItem(DEFAULT_TRUCK_NUMBER)))
             .andExpect(jsonPath("$.[*].auditStatus").value(hasItem(DEFAULT_AUDIT_STATUS)))
+            .andExpect(jsonPath("$.[*].productName").value(hasItem(DEFAULT_PRODUCT_NAME)))
+            .andExpect(jsonPath("$.[*].deliverPosition").value(hasItem(DEFAULT_DELIVER_POSITION)))
             .andExpect(jsonPath("$.[*].gateTime").value(hasItem(sameInstant(DEFAULT_GATE_TIME))))
             .andExpect(jsonPath("$.[*].leaveTime").value(hasItem(sameInstant(DEFAULT_LEAVE_TIME))))
             .andExpect(jsonPath("$.[*].deliverTime").value(hasItem(sameInstant(DEFAULT_DELIVER_TIME))))
@@ -1114,6 +1229,8 @@ public class ShipPlanResourceIT {
             .applyNumber(UPDATED_APPLY_NUMBER)
             .truckNumber(UPDATED_TRUCK_NUMBER)
             .auditStatus(UPDATED_AUDIT_STATUS)
+            .productName(UPDATED_PRODUCT_NAME)
+            .deliverPosition(UPDATED_DELIVER_POSITION)
             .gateTime(UPDATED_GATE_TIME)
             .leaveTime(UPDATED_LEAVE_TIME)
             .deliverTime(UPDATED_DELIVER_TIME)
@@ -1136,6 +1253,8 @@ public class ShipPlanResourceIT {
         assertThat(testShipPlan.getApplyNumber()).isEqualTo(UPDATED_APPLY_NUMBER);
         assertThat(testShipPlan.getTruckNumber()).isEqualTo(UPDATED_TRUCK_NUMBER);
         assertThat(testShipPlan.getAuditStatus()).isEqualTo(UPDATED_AUDIT_STATUS);
+        assertThat(testShipPlan.getProductName()).isEqualTo(UPDATED_PRODUCT_NAME);
+        assertThat(testShipPlan.getDeliverPosition()).isEqualTo(UPDATED_DELIVER_POSITION);
         assertThat(testShipPlan.getGateTime()).isEqualTo(UPDATED_GATE_TIME);
         assertThat(testShipPlan.getLeaveTime()).isEqualTo(UPDATED_LEAVE_TIME);
         assertThat(testShipPlan.getDeliverTime()).isEqualTo(UPDATED_DELIVER_TIME);

@@ -9,14 +9,6 @@
       "otherEntityField": "login",
       "ownerSide": true,
       "otherEntityRelationshipName": "shipPlan"
-    },
-    {
-      "relationshipName": "toUser",
-      "otherEntityName": "user",
-      "relationshipType": "many-to-one",
-      "otherEntityField": "login",
-      "ownerSide": true,
-      "otherEntityRelationshipName": "shipPlan"
     }
   ],
   "fields": [
@@ -46,6 +38,20 @@
     {
       "fieldName": "auditStatus",
       "fieldType": "Integer",
+      "fieldValidateRules": [
+        "required"
+      ]
+    },
+    {
+      "fieldName": "productName",
+      "fieldType": "String",
+      "fieldValidateRules": [
+        "required"
+      ]
+    },
+    {
+      "fieldName": "deliverPosition",
+      "fieldType": "String",
       "fieldValidateRules": [
         "required"
       ]

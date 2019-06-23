@@ -57,7 +57,8 @@ eclipse {
     sourceSets {
         main {
             java {
-                srcDirs += ["build/generated/source/apt/main"]
+                // srcDirs += ["build/generated/source/apt/main"]
+                srcDirs += ["build/generated/sources/annotationProcessor/java/main"]
             }
         }
     }
@@ -257,6 +258,10 @@ dependencies {
     implementation "com.github.binarywang:weixin-java-miniapp:3.4.0"
     implementation "com.github.binarywang:weixin-java-mp:3.4.0"
     implementation 'org.projectlombok:lombok:1.18.8'
+    implementation 'com.microsoft.sqlserver:sqljdbc4:4.0'
+    implementation 'org.springframework.integration:spring-integration-core'
+    implementation 'org.springframework.integration:spring-integration-ip'
+    implementation 'org.springframework.integration:spring-integration-stream'
     annotationProcessor 'org.projectlombok:lombok:1.18.8'
 
     //jhipster-needle-gradle-dependency - JHipster will add additional dependencies here

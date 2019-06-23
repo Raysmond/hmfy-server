@@ -16,7 +16,6 @@ public interface ShipPlanRepository extends JpaRepository<ShipPlan, Long>, JpaSp
     @Query("select shipPlan from ShipPlan shipPlan where shipPlan.user.login = ?#{principal.username}")
     List<ShipPlan> findByUserIsCurrentUser();
 
-    @Query("select shipPlan from ShipPlan shipPlan where shipPlan.toUser.login = ?#{principal.username}")
-    List<ShipPlan> findByToUserIsCurrentUser();
 
+    List<ShipPlan> findByApplyIdIn(List<Long> applyIds);
 }

@@ -28,11 +28,19 @@
                 <constraints nullable="true" />
             </column>
 
-            <column name="truck_number" type="varchar(255)">
+            <column name="truck_number" type="varchar(20)">
                 <constraints nullable="false" />
             </column>
 
             <column name="audit_status" type="integer">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="product_name" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="deliver_position" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
 
@@ -64,10 +72,6 @@
                 <constraints nullable="true" />
             </column>
 
-            <column name="to_user_id" type="bigint">
-                <constraints nullable="true" />
-            </column>
-
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here, do not remove-->
         </createTable>
 
@@ -91,20 +95,21 @@
         <loadData
                   file="config/liquibase/data/ship_plan.csv"
                   separator=";"
-                  tableName="ship_plan"
-                  context="dev">
+                  tableName="ship_plan">
             <column name="id" type="numeric"/>
             <column name="company" type="string"/>
             <column name="apply_id" type="numeric"/>
             <column name="apply_number" type="string"/>
+            <column name="product_name" type="string"/>
+            <column name="deliver_position" type="string"/>
             <column name="truck_number" type="string"/>
             <column name="audit_status" type="numeric"/>
-            <column name="gate_time" type="date"/>
-            <column name="leave_time" type="date"/>
-            <column name="deliver_time" type="date"/>
-            <column name="allow_in_time" type="date"/>
-            <column name="create_time" type="date"/>
-            <column name="update_time" type="date"/>
+            <column name="gate_time" type="datetime"/>
+            <column name="leave_time" type="datetime"/>
+            <column name="deliver_time" type="datetime"/>
+            <column name="allow_in_time" type="datetime"/>
+            <column name="create_time" type="datetime"/>
+            <column name="update_time" type="datetime"/>
         </loadData>
     </changeSet>
 

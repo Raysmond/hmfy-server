@@ -20,11 +20,13 @@
             <th jhiSortBy="applyNumber"><span jhiTranslate="shieldApp.shipPlan.applyNumber">Apply Number</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="truckNumber"><span jhiTranslate="shieldApp.shipPlan.truckNumber">Truck Number</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="auditStatus"><span jhiTranslate="shieldApp.shipPlan.auditStatus">Audit Status</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th><span jhiTranslate="shieldApp.shipPlan.productName">Product Name</span></th>
+            <th><span jhiTranslate="shieldApp.shipPlan.deliverPosition">Deliver Position</span></th>
             <th jhiSortBy="gateTime"><span jhiTranslate="shieldApp.shipPlan.gateTime">Gate Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="leaveTime"><span jhiTranslate="shieldApp.shipPlan.leaveTime">Leave Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="deliverTime"><span jhiTranslate="shieldApp.shipPlan.deliverTime">Deliver Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="allowInTime"><span jhiTranslate="shieldApp.shipPlan.allowInTime">Allow In Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="createTime"><span jhiTranslate="shieldApp.shipPlan.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <!--<th jhiSortBy="createTime"><span jhiTranslate="shieldApp.shipPlan.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
             <!--<th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.shipPlan.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
             <!--<th jhiSortBy="userLogin"><span jhiTranslate="shieldApp.shipPlan.user">User</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
             <!--<th jhiSortBy="toUserLogin"><span jhiTranslate="shieldApp.shipPlan.toUser">To User</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
@@ -39,11 +41,13 @@
                 <td>{{shipPlan.applyNumber}}</td>
                 <td>{{shipPlan.truckNumber}}</td>
                 <td>{{shipPlan.auditStatus}}</td>
+                <td>{{shipPlan.productName}}</td>
+                <td>{{shipPlan.deliverPosition}}</td>
                 <td>{{shipPlan.gateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
                 <td>{{shipPlan.leaveTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
                 <td>{{shipPlan.deliverTime | date:'yyyy-MM-dd'}}</td>
                 <td>{{shipPlan.allowInTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-                <td>{{shipPlan.createTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                <!--<td>{{shipPlan.createTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
                 <!--<td>{{shipPlan.updateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
                 <!--<td>-->
                     <!--{{shipPlan.userLogin}}-->

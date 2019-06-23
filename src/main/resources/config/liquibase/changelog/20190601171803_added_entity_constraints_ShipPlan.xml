@@ -7,18 +7,16 @@
         Added the constraints for entity ShipPlan.
     -->
     <changeSet id="20190601171803-2" author="jhipster">
-        
+
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="ship_plan"
                                  constraintName="fk_ship_plan_user_id"
                                  referencedColumnNames="id"
                                  referencedTableName="jhi_user"/>
 
-        <addForeignKeyConstraint baseColumnNames="to_user_id"
-                                 baseTableName="ship_plan"
-                                 constraintName="fk_ship_plan_to_user_id"
-                                 referencedColumnNames="id"
-                                 referencedTableName="jhi_user"/>
-
+        <createIndex indexName="idx_truck_number"
+                     tableName="ship_plan">
+            <column name="truck_number" type="varchar(20)"/>
+        </createIndex>
     </changeSet>
 </databaseChangeLog>

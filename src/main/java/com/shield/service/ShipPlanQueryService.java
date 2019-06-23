@@ -104,6 +104,12 @@ public class ShipPlanQueryService extends QueryService<ShipPlan> {
             if (criteria.getAuditStatus() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getAuditStatus(), ShipPlan_.auditStatus));
             }
+            if (criteria.getProductName() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getProductName(), ShipPlan_.productName));
+            }
+            if (criteria.getDeliverPosition() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getDeliverPosition(), ShipPlan_.deliverPosition));
+            }
             if (criteria.getGateTime() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getGateTime(), ShipPlan_.gateTime));
             }
@@ -125,10 +131,6 @@ public class ShipPlanQueryService extends QueryService<ShipPlan> {
             if (criteria.getUserId() != null) {
                 specification = specification.and(buildSpecification(criteria.getUserId(),
                     root -> root.join(ShipPlan_.user, JoinType.LEFT).get(User_.id)));
-            }
-            if (criteria.getToUserId() != null) {
-                specification = specification.and(buildSpecification(criteria.getToUserId(),
-                    root -> root.join(ShipPlan_.toUser, JoinType.LEFT).get(User_.id)));
             }
         }
         return specification;

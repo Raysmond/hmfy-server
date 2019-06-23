@@ -16,7 +16,6 @@ import { IUser, UserService } from 'app/core';
   templateUrl: './ship-plan-update.component.html'
 })
 export class ShipPlanUpdateComponent implements OnInit {
-  shipPlan: IShipPlan;
   isSaving: boolean;
 
   users: IUser[];
@@ -28,14 +27,15 @@ export class ShipPlanUpdateComponent implements OnInit {
     applyNumber: [],
     truckNumber: [null, [Validators.required]],
     auditStatus: [null, [Validators.required]],
+    productName: [null, [Validators.required]],
+    deliverPosition: [null, [Validators.required]],
     gateTime: [],
     leaveTime: [],
     deliverTime: [],
     allowInTime: [],
     createTime: [null, [Validators.required]],
     updateTime: [null, [Validators.required]],
-    userId: [],
-    toUserId: []
+    userId: []
   });
 
   constructor(
@@ -50,7 +50,6 @@ export class ShipPlanUpdateComponent implements OnInit {
     this.isSaving = false;
     this.activatedRoute.data.subscribe(({ shipPlan }) => {
       this.updateForm(shipPlan);
-      this.shipPlan = shipPlan;
     });
     this.userService
       .query()
@@ -69,14 +68,15 @@ export class ShipPlanUpdateComponent implements OnInit {
       applyNumber: shipPlan.applyNumber,
       truckNumber: shipPlan.truckNumber,
       auditStatus: shipPlan.auditStatus,
+      productName: shipPlan.productName,
+      deliverPosition: shipPlan.deliverPosition,
       gateTime: shipPlan.gateTime != null ? shipPlan.gateTime.format(DATE_TIME_FORMAT) : null,
       leaveTime: shipPlan.leaveTime != null ? shipPlan.leaveTime.format(DATE_TIME_FORMAT) : null,
       deliverTime: shipPlan.deliverTime != null ? shipPlan.deliverTime.format(DATE_TIME_FORMAT) : null,
       allowInTime: shipPlan.allowInTime != null ? shipPlan.allowInTime.format(DATE_TIME_FORMAT) : null,
       createTime: shipPlan.createTime != null ? shipPlan.createTime.format(DATE_TIME_FORMAT) : null,
       updateTime: shipPlan.updateTime != null ? shipPlan.updateTime.format(DATE_TIME_FORMAT) : null,
-      userId: shipPlan.userId,
-      toUserId: shipPlan.toUserId
+      userId: shipPlan.userId
     });
   }
 
@@ -103,6 +103,8 @@ export class ShipPlanUpdateComponent implements OnInit {
       applyNumber: this.editForm.get(['applyNumber']).value,
       truckNumber: this.editForm.get(['truckNumber']).value,
       auditStatus: this.editForm.get(['auditStatus']).value,
+      productName: this.editForm.get(['productName']).value,
+      deliverPosition: this.editForm.get(['deliverPosition']).value,
       gateTime: this.editForm.get(['gateTime']).value != null ? moment(this.editForm.get(['gateTime']).value, DATE_TIME_FORMAT) : undefined,
       leaveTime:
         this.editForm.get(['leaveTime']).value != null ? moment(this.editForm.get(['leaveTime']).value, DATE_TIME_FORMAT) : undefined,
@@ -114,8 +116,7 @@ export class ShipPlanUpdateComponent implements OnInit {
         this.editForm.get(['createTime']).value != null ? moment(this.editForm.get(['createTime']).value, DATE_TIME_FORMAT) : undefined,
       updateTime:
         this.editForm.get(['updateTime']).value != null ? moment(this.editForm.get(['updateTime']).value, DATE_TIME_FORMAT) : undefined,
-      userId: this.editForm.get(['userId']).value,
-      toUserId: this.editForm.get(['toUserId']).value
+      userId: this.editForm.get(['userId']).value
     };
     return entity;
   }

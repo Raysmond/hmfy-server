@@ -14,7 +14,7 @@ public class ShipPlanDTO implements Serializable {
     private String company;
 
     @NotNull
-    private Integer applyId;
+    private Long applyId;
 
     private String applyNumber;
 
@@ -23,6 +23,12 @@ public class ShipPlanDTO implements Serializable {
 
     @NotNull
     private Integer auditStatus;
+
+    @NotNull
+    private String productName;
+
+    @NotNull
+    private String deliverPosition;
 
     private ZonedDateTime gateTime;
 
@@ -43,10 +49,6 @@ public class ShipPlanDTO implements Serializable {
 
     private String userLogin;
 
-    private Long toUserId;
-
-    private String toUserLogin;
-
     public Long getId() {
         return id;
     }
@@ -63,11 +65,11 @@ public class ShipPlanDTO implements Serializable {
         this.company = company;
     }
 
-    public Integer getApplyId() {
+    public Long getApplyId() {
         return applyId;
     }
 
-    public void setApplyId(Integer applyId) {
+    public void setApplyId(Long applyId) {
         this.applyId = applyId;
     }
 
@@ -93,6 +95,22 @@ public class ShipPlanDTO implements Serializable {
 
     public void setAuditStatus(Integer auditStatus) {
         this.auditStatus = auditStatus;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public String getDeliverPosition() {
+        return deliverPosition;
+    }
+
+    public void setDeliverPosition(String deliverPosition) {
+        this.deliverPosition = deliverPosition;
     }
 
     public ZonedDateTime getGateTime() {
@@ -159,22 +177,6 @@ public class ShipPlanDTO implements Serializable {
         this.userLogin = userLogin;
     }
 
-    public Long getToUserId() {
-        return toUserId;
-    }
-
-    public void setToUserId(Long userId) {
-        this.toUserId = userId;
-    }
-
-    public String getToUserLogin() {
-        return toUserLogin;
-    }
-
-    public void setToUserLogin(String userLogin) {
-        this.toUserLogin = userLogin;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -205,6 +207,8 @@ public class ShipPlanDTO implements Serializable {
             ", applyNumber='" + getApplyNumber() + "'" +
             ", truckNumber='" + getTruckNumber() + "'" +
             ", auditStatus=" + getAuditStatus() +
+            ", productName='" + getProductName() + "'" +
+            ", deliverPosition='" + getDeliverPosition() + "'" +
             ", gateTime='" + getGateTime() + "'" +
             ", leaveTime='" + getLeaveTime() + "'" +
             ", deliverTime='" + getDeliverTime() + "'" +
@@ -213,8 +217,6 @@ public class ShipPlanDTO implements Serializable {
             ", updateTime='" + getUpdateTime() + "'" +
             ", user=" + getUserId() +
             ", user='" + getUserLogin() + "'" +
-            ", toUser=" + getToUserId() +
-            ", toUser='" + getToUserLogin() + "'" +
             "}";
     }
 }

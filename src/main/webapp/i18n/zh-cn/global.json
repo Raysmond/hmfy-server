@@ -1,6 +1,6 @@
 {
   "global": {
-    "title": "Shield",
+    "title": "宝田发运预约排队系统",
     "browsehappy": "您目前使用<strong>过于老旧</strong>的浏览器, 建议您<a href=\"http://browsehappy.com/?locale=en\">升级浏览器</a>让您有更佳的上网体验.",
     "menu": {
       "home": "首页",
@@ -10,7 +10,7 @@
         "region": "区域管理",
         "car": "车辆",
         "appointment": "发运预约",
-        "wxMaUser": "Wx Ma User",
+        "wxMaUser": "绑定微信账户",
         "shipPlan": "发运计划",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },

@@ -34,19 +34,55 @@ spring:
   jackson:
     serialization:
       indent-output: true
-  datasource:
-    type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://localhost:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
+  #  datasource:
+  #    type: com.zaxxer.hikari.HikariDataSource
+  #    url: jdbc:mysql://localhost:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
+  #    username: root
+  #    password:
+  #    hikari:
+  #      poolName: Hikari
+  #      auto-commit: false
+  #      data-source-properties:
+  #        cachePrepStmts: true
+  #        prepStmtCacheSize: 250
+  #        prepStmtCacheSqlLimit: 2048
+  #        useServerPrepStmts: true
+
+  mysql-datasource:
+    jdbc-url: jdbc:mysql://localhost:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
     username: root
     password:
-    hikari:
-      poolName: Hikari
-      auto-commit: false
-      data-source-properties:
-        cachePrepStmts: true
-        prepStmtCacheSize: 250
-        prepStmtCacheSqlLimit: 2048
-        useServerPrepStmts: true
+    poolName: Hikari
+    auto-commit: false
+    data-source-properties:
+      cachePrepStmts: true
+      prepStmtCacheSize: 250
+      prepStmtCacheSqlLimit: 2048
+      useServerPrepStmts: true
+  sqlserver-datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    #      jdbc-url: jdbc:sqlserver://10.41.76.253:22433;databaseName=GateManage
+    jdbc-url: jdbc:sqlserver://127.0.0.1:1433;databaseName=GateManage
+    username: Wechat
+    password: QQ@@12345
+    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    poolName: Hikari
+    auto-commit: false
+    data-source-properties:
+      cachePrepStmts: true
+      prepStmtCacheSize: 250
+      prepStmtCacheSqlLimit: 2048
+      useServerPrepStmts: true
+  sqlserver-jpa:
+    database-platform: org.hibernate.dialect.SQLServer2012Dialect
+    database: SQL_SERVER
+    show-sql: true
+    properties:
+      hibernate.id.new_generator_mappings: true
+      hibernate.connection.provider_disables_autocommit: true
+      hibernate.cache.use_second_level_cache: false
+      hibernate.cache.use_query_cache: false
+      hibernate.generate_statistics: false
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     database: MYSQL

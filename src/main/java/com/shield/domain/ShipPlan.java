@@ -1,6 +1,4 @@
 package com.shield.domain;
-
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -10,7 +8,6 @@ import javax.validation.constraints.*;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.Objects;
 
 /**
  * A ShipPlan.
@@ -31,7 +28,7 @@ public class ShipPlan implements Serializable {
 
     @NotNull
     @Column(name = "apply_id", nullable = false, unique = true)
-    private Integer applyId;
+    private Long applyId;
 
     @Column(name = "apply_number")
     private String applyNumber;
@@ -43,6 +40,14 @@ public class ShipPlan implements Serializable {
     @NotNull
     @Column(name = "audit_status", nullable = false)
     private Integer auditStatus;
+
+    @NotNull
+    @Column(name = "product_name", nullable = false)
+    private String productName;
+
+    @NotNull
+    @Column(name = "deliver_position", nullable = false)
+    private String deliverPosition;
 
     @Column(name = "gate_time")
     private ZonedDateTime gateTime;
@@ -68,10 +73,6 @@ public class ShipPlan implements Serializable {
     @JsonIgnoreProperties("shipPlans")
     private User user;
 
-    @ManyToOne
-    @JsonIgnoreProperties("shipPlans")
-    private User toUser;
-
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
         return id;
@@ -94,16 +95,16 @@ public class ShipPlan implements Serializable {
         this.company = company;
     }
 
-    public Integer getApplyId() {
+    public Long getApplyId() {
         return applyId;
     }
 
-    public ShipPlan applyId(Integer applyId) {
+    public ShipPlan applyId(Long applyId) {
         this.applyId = applyId;
         return this;
     }
 
-    public void setApplyId(Integer applyId) {
+    public void setApplyId(Long applyId) {
         this.applyId = applyId;
     }
 
@@ -144,6 +145,32 @@ public class ShipPlan implements Serializable {
 
     public void setAuditStatus(Integer auditStatus) {
         this.auditStatus = auditStatus;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public ShipPlan productName(String productName) {
+        this.productName = productName;
+        return this;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public String getDeliverPosition() {
+        return deliverPosition;
+    }
+
+    public ShipPlan deliverPosition(String deliverPosition) {
+        this.deliverPosition = deliverPosition;
+        return this;
+    }
+
+    public void setDeliverPosition(String deliverPosition) {
+        this.deliverPosition = deliverPosition;
     }
 
     public ZonedDateTime getGateTime() {
@@ -236,19 +263,6 @@ public class ShipPlan implements Serializable {
     public void setUser(User user) {
         this.user = user;
     }
-
-    public User getToUser() {
-        return toUser;
-    }
-
-    public ShipPlan toUser(User user) {
-        this.toUser = user;
-        return this;
-    }
-
-    public void setToUser(User user) {
-        this.toUser = user;
-    }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override
@@ -276,6 +290,8 @@ public class ShipPlan implements Serializable {
             ", applyNumber='" + getApplyNumber() + "'" +
             ", truckNumber='" + getTruckNumber() + "'" +
             ", auditStatus=" + getAuditStatus() +
+            ", productName='" + getProductName() + "'" +
+            ", deliverPosition='" + getDeliverPosition() + "'" +
             ", gateTime='" + getGateTime() + "'" +
             ", leaveTime='" + getLeaveTime() + "'" +
             ", deliverTime='" + getDeliverTime() + "'" +

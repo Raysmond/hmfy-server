@@ -4,7 +4,8 @@
       "home": {
         "title": "Ship Plans",
         "createLabel": "Create a new Ship Plan",
-        "createOrEditLabel": "Create or edit a Ship Plan"
+        "createOrEditLabel": "Create or edit a Ship Plan",
+        "notFound": "No Ship Plan found"
       },
       "created": "A new Ship Plan is created with identifier {{ param }}",
       "updated": "A Ship Plan is updated with identifier {{ param }}",
@@ -20,14 +21,15 @@
       "applyNumber": "Apply Number",
       "truckNumber": "Truck Number",
       "auditStatus": "Audit Status",
+      "productName": "Product Name",
+      "deliverPosition": "Deliver Position",
       "gateTime": "Gate Time",
       "leaveTime": "Leave Time",
       "deliverTime": "Deliver Time",
       "allowInTime": "Allow In Time",
       "createTime": "Create Time",
       "updateTime": "Update Time",
-      "user": "User",
-      "toUser": "To User"
+      "user": "User"
     }
   }
 }

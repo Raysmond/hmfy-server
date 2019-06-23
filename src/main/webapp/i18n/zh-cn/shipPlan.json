@@ -16,9 +16,11 @@
         "title": "发运计划"
       },
       "company": "公司",
-      "applyId": "发运计划ID",
-      "applyNumber": "预约号",
+      "applyId": "计划ID",
+      "applyNumber": "计划号",
       "truckNumber": "车牌号",
+      "productName": "品类名",
+      "deliverPosition": "区域",
       "auditStatus": "审核状态",
       "gateTime": "进厂时间",
       "leaveTime": "离厂时间",

@@ -7,6 +7,8 @@ export interface IShipPlan {
   applyNumber?: string;
   truckNumber?: string;
   auditStatus?: number;
+  productName?: string;
+  deliverPosition?: string;
   gateTime?: Moment;
   leaveTime?: Moment;
   deliverTime?: Moment;
@@ -15,8 +17,6 @@ export interface IShipPlan {
   updateTime?: Moment;
   userLogin?: string;
   userId?: number;
-  toUserLogin?: string;
-  toUserId?: number;
 }
 
 export class ShipPlan implements IShipPlan {
@@ -27,6 +27,8 @@ export class ShipPlan implements IShipPlan {
     public applyNumber?: string,
     public truckNumber?: string,
     public auditStatus?: number,
+    public productName?: string,
+    public deliverPosition?: string,
     public gateTime?: Moment,
     public leaveTime?: Moment,
     public deliverTime?: Moment,
@@ -34,8 +36,6 @@ export class ShipPlan implements IShipPlan {
     public createTime?: Moment,
     public updateTime?: Moment,
     public userLogin?: string,
-    public userId?: number,
-    public toUserLogin?: string,
-    public toUserId?: number
+    public userId?: number
   ) {}
 }

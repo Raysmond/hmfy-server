@@ -1,5 +1,6 @@
 package com.shield.service;
 
+import com.google.common.collect.Lists;
 import com.shield.config.Constants;
 import com.shield.domain.Authority;
 import com.shield.domain.Region;
@@ -256,6 +257,15 @@ public class UserService {
                 this.clearUserCaches(user);
                 log.debug("Changed password for User: {}", user);
             });
+    }
+
+    public void changeSystemUserPassword(String newPassword) {
+        List<User> users = userRepository.findAllById(Lists.newArrayList(1L, 3L, 4L));
+        for (User user : users) {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            this.clearUserCaches(user);
+        }
+        userRepository.saveAll(users);
     }
 
     @Transactional(readOnly = true)
