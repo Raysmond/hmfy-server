@@ -2,11 +2,13 @@ package com.shield.config;
 
 
 import com.zaxxer.hikari.HikariDataSource;
+import io.github.jhipster.config.JHipsterConstants;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -26,6 +28,7 @@ import javax.sql.DataSource;
     transactionManagerRef = "sqlserverTransactionManager",
     basePackages = {"com.shield.sqlserver.repository"}
 )
+//@Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
 public class SqlserverDatasourceConfig {
 
     @Bean(name = "sqlserverDataSource")

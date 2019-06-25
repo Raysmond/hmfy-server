@@ -100,6 +100,17 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @ManyToOne(optional = true)
     private Region region;
 
+    @Column(name = "truck_number")
+    private String truckNumber;
+
+    public String getTruckNumber() {
+        return truckNumber;
+    }
+
+    public void setTruckNumber(String truckNumber) {
+        this.truckNumber = truckNumber;
+    }
+
     public Region getRegion() {
         return region;
     }

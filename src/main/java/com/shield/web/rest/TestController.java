@@ -1,8 +1,11 @@
 package com.shield.web.rest;
 
+import com.shield.domain.Region;
+import com.shield.repository.RegionRepository;
 import com.shield.service.UserService;
 import com.shield.sqlserver.domain.VehDelivPlan;
 import com.shield.sqlserver.repository.VehDelivPlanRepository;
+import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.net.SocketFactory;
 import java.io.IOException;
 import java.net.Socket;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @RestController
@@ -41,6 +46,21 @@ public class TestController {
     public String changedDefaultPassword() {
         String password = "bt!888";
         userService.changeSystemUserPassword(password);
+        return "ok";
+    }
+
+    @Autowired
+    RegionRepository regionRepository;
+
+    @GetMapping("test")
+    public String test() {
+        List<Region> regions = regionRepository.findAll();
+        Region region = regions.get(0);
+        System.out.println(ZoneId.systemDefault());
+        System.out.println(ZonedDateTime.now());
+        System.out.println(ZonedDateTime.now().getZone());
+        region.setUpdateTime(ZonedDateTime.now());
+        regionRepository.save(region);
         return "ok";
     }
 }

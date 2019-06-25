@@ -18,7 +18,7 @@
     },
     {
       "fieldName": "applyId",
-      "fieldType": "Integer",
+      "fieldType": "Long",
       "fieldValidateRules": [
         "required",
         "unique"

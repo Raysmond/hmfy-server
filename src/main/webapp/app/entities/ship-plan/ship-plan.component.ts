@@ -43,7 +43,7 @@ export class ShipPlanComponent implements OnInit, OnDestroy {
     this.routeData = this.activatedRoute.data.subscribe(data => {
       this.page = data.pagingParams.page;
       this.previousPage = data.pagingParams.page;
-      this.reverse = data.pagingParams.ascending;
+      this.reverse = data.pagingParams.decending;
       this.predicate = data.pagingParams.predicate;
     });
   }

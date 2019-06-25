@@ -15,6 +15,8 @@ export interface IUser {
   userInfo?: any;
   regionId?: any;
   regionName?: string;
+  rawPassword?: string;
+  truckNumber?: string;
 }
 
 export class User implements IUser {
@@ -34,7 +36,9 @@ export class User implements IUser {
     public password?: string,
     public userInfo?: any,
     public regionId?: any,
-    public regionName?: string
+    public regionName?: string,
+    public truckNumber?: string,
+    public rawPassword?: string
   ) {
     this.id = id ? id : null;
     this.login = login ? login : null;
@@ -52,5 +56,7 @@ export class User implements IUser {
     this.userInfo = userInfo ? userInfo : null;
     this.regionId = regionId ? regionId : null;
     this.regionName = regionName ? regionName : null;
+    this.truckNumber = truckNumber ? truckNumber : null;
+    this.rawPassword = rawPassword ? rawPassword : null;
   }
 }

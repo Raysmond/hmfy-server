@@ -27,6 +27,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
     @Query("select a from Appointment a where a.region.id = ?1 and a.status = 'WAIT' and a.valid = true")
     List<Appointment> findWaitingList(Long regionId);
 
-    @Query("select a from Appointment a where a.region.id = ?1 and a.status = ?2 and a.valid = ?3")
-    List<Appointment> findAllByRegionId(Long regionId, AppointmentStatus status, Boolean valid);
+    @Query("select a from Appointment a where a.region.id = ?1 and a.status = ?2 and a.valid = ?3 and a.createTime > ?4")
+    List<Appointment> findAllByRegionId(Long regionId, AppointmentStatus status, Boolean valid, ZonedDateTime beginTime);
 }

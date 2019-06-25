@@ -39,7 +39,9 @@ export class UserMgmtUpdateComponent implements OnInit {
     activated: [true],
     langKey: [],
     authorities: [],
-    regionId: [null]
+    regionId: [null],
+    rawPassword: [],
+    truckNumber: []
   });
 
   constructor(
@@ -85,7 +87,8 @@ export class UserMgmtUpdateComponent implements OnInit {
       activated: user.activated,
       langKey: user.langKey,
       authorities: user.authorities,
-      regionId: user.regionId
+      regionId: user.regionId,
+      truckNumber: user.truckNumber
     });
   }
 
@@ -112,6 +115,8 @@ export class UserMgmtUpdateComponent implements OnInit {
     user.langKey = this.editForm.get(['langKey']).value;
     user.authorities = this.editForm.get(['authorities']).value;
     user.regionId = this.editForm.get(['regionId']).value;
+    user.truckNumber = this.editForm.get(['truckNumber']).value;
+    user.rawPassword = this.editForm.get(['rawPassword']).value;
   }
 
   private onSaveSuccess(result) {

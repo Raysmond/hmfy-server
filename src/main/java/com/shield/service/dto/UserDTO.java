@@ -59,6 +59,12 @@ public class UserDTO {
 
     private String regionName;
 
+    private String truckNumber;
+
+    // 用于设置密码
+    private String rawPassword;
+
+
     public UserDTO() {
         // Empty constructor needed for Jackson.
     }
@@ -79,6 +85,7 @@ public class UserDTO {
         this.authorities = user.getAuthorities().stream()
             .map(Authority::getName)
             .collect(Collectors.toSet());
+        this.truckNumber = user.getTruckNumber();
         if (null != user.getWxMaUser()) {
             this.userInfo = new WxMaUserDTO();
             this.userInfo.setOpenId(user.getWxMaUser().getOpenId());
@@ -96,6 +103,23 @@ public class UserDTO {
             this.regionId = user.getRegion().getId();
             this.regionName = user.getRegion().getName();
         }
+    }
+
+
+    public String getTruckNumber() {
+        return truckNumber;
+    }
+
+    public void setTruckNumber(String truckNumber) {
+        this.truckNumber = truckNumber;
+    }
+
+    public String getRawPassword() {
+        return rawPassword;
+    }
+
+    public void setRawPassword(String rawPassword) {
+        this.rawPassword = rawPassword;
     }
 
     public WxMaUserDTO getUserInfo() {

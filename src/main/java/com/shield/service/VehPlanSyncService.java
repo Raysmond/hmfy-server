@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
+//@Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
 public class VehPlanSyncService {
 
     @Autowired
@@ -39,10 +40,10 @@ public class VehPlanSyncService {
 
 
     @Scheduled(fixedRate = 60 * 1000)
-    private void syncVehPlans() {
+    public void syncVehPlans() {
         // 同步前两天开始的发运计划
         ZonedDateTime begin = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).minusDays(2L);
-        List<VehDelivPlan> plans = vehDelivPlanRepository.findAllByCreateTimeAfter(begin);
+        List<VehDelivPlan> plans = vehDelivPlanRepository.findAllByCreateTimeAfterOrderByCreateTime(begin);
         log.info("start to sync {} veh plans, starts with {}", plans.size(), begin.format(DateTimeFormatter.BASIC_ISO_DATE));
 
         if (CollectionUtils.isEmpty(plans)) {
@@ -78,7 +79,7 @@ public class VehPlanSyncService {
                     newShipPlan.setDeliverTime(plan.getDeliverTime());
                     newShipPlan.setProductName(plan.getProductName());
                     newShipPlan.setAuditStatus(plan.getAuditStatus());
-//                    newShipPlan.setCreateTime(plan.getCreateTime());
+                    newShipPlan.setCreateTime(plan.getCreateTime());
                     newShipPlan.setCreateTime(ZonedDateTime.now());
                     newShipPlan.setUpdateTime(ZonedDateTime.now());
                     changedApplyIds.add(plan.getApplyId());

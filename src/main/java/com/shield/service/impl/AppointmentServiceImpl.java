@@ -195,16 +195,16 @@ public class AppointmentServiceImpl implements AppointmentService {
     private ZonedDateTime getTodayStartTime() {
         LocalDate today = LocalDate.now();
         LocalTime time = LocalTime.MIN;
-        return ZonedDateTime.of(today, time, ZoneId.systemDefault());
+        return ZonedDateTime.of(today, time, ZoneId.systemDefault()).minusDays(2L);
     }
 
     private static final long DEFAULT_VALID_TIME_SECONDS = 7200;
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 60 * 1000)
     public void checkAppointments() {
         for (Region region : regionRepository.findAll()) {
             Long validSeconds = region.getValidTime() != null ? region.getValidTime() : DEFAULT_VALID_TIME_SECONDS;
-            List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.START, Boolean.TRUE);
+            List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.START, Boolean.TRUE, getTodayStartTime());
             for (Appointment appointment : appointments) {
                 if (appointment.getStartTime() == null || appointment.getStartTime().plusSeconds(validSeconds).isBefore(ZonedDateTime.now())) {
                     log.info("Appointment [{}] expired after {} seconds", appointment.getId(), validSeconds);

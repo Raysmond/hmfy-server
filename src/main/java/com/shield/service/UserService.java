@@ -13,6 +13,7 @@ import com.shield.service.dto.UserDTO;
 import com.shield.service.util.RandomUtil;
 import com.shield.web.rest.errors.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
@@ -147,9 +148,14 @@ public class UserService {
         } else {
             user.setLangKey(userDTO.getLangKey());
         }
-//        String encryptedPassword = passwordEncoder.encode(RandomUtil.generatePassword());
-        String encryptedPassword = passwordEncoder.encode("123");
-        user.setPassword(encryptedPassword);
+
+        if (StringUtils.isNotBlank(userDTO.getRawPassword())) {
+            user.setPassword(passwordEncoder.encode(userDTO.getRawPassword()));
+        } else {
+            // String encryptedPassword = passwordEncoder.encode(RandomUtil.generatePassword());
+            String encryptedPassword = passwordEncoder.encode("bt!888");
+            user.setPassword(encryptedPassword);
+        }
         user.setResetKey(RandomUtil.generateResetKey());
         user.setResetDate(Instant.now());
         user.setActivated(true);
@@ -222,6 +228,11 @@ public class UserService {
                 } else {
                     user.setRegion(null);
                 }
+                if (StringUtils.isNotBlank(userDTO.getRawPassword())) {
+                    // 管理员可以更新密码
+                    user.setPassword(passwordEncoder.encode(userDTO.getRawPassword()));
+                }
+                user.setTruckNumber(userDTO.getTruckNumber());
                 Set<Authority> managedAuthorities = user.getAuthorities();
                 managedAuthorities.clear();
                 userDTO.getAuthorities().stream()

@@ -26,7 +26,7 @@
             <th jhiSortBy="queueQuota"><span jhiTranslate="shieldApp.region.queueQuota">Queue Quota</span> </th>
             <th jhiSortBy="queueValidTime"><span jhiTranslate="shieldApp.region.queueValidTime">Queue Valid Time</span></th>
             <!--<th jhiSortBy="createTime"><span jhiTranslate="shieldApp.region.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-            <!--<th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.region.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+            <th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.region.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th>预约员</th>
                 <th></th>
             </tr>
@@ -50,7 +50,7 @@
                 <td>{{region.queueValidTime}}</td>
                 <td>{{region.drivers}}</td>
                 <!--<td>{{region.createTime | date:'medium'}}</td>-->
-                <!--<td>{{region.updateTime | date:'medium'}}</td>-->
+                <td>{{region.updateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
                 <td class="text-right">
                     <div class="btn-group">
                         <button type="submit"

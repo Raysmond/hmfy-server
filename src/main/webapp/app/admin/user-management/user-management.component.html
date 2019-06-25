@@ -19,10 +19,12 @@
                 <th jhiSortBy="email"><span jhiTranslate="userManagement.email">Email</span>
                 </th>
                 <th></th>
-                <th jhiSortBy="langKey"><span jhiTranslate="userManagement.langKey">Lang Key</span>
-                </th>
+                <!--<th jhiSortBy="langKey"><span jhiTranslate="userManagement.langKey">Lang Key</span>-->
+                <!--</th>-->
                 <th><span jhiTranslate="userManagement.profiles">Profiles</span></th>
                 <th>绑定区域</th>
+                <th jhiSortBy="langKey"><span jhiTranslate="userManagement.truckNumber">Truck Number</span>
+                </th>
                 <th>绑定微信账号</th>
                 <th jhiSortBy="createdDate"><span jhiTranslate="userManagement.createdDate">Created Date</span>
                     <!--<fa-icon [icon]="'sort'"></fa-icon>-->
@@ -49,7 +51,7 @@
                         Activated
                     </button>
                 </td>
-                <td>{{user.langKey}}</td>
+                <!--<td>{{user.langKey}}</td>-->
                 <td>
                     <div *ngFor="let authority of user.authorities">
                         <!--<span class="badge badge-info" jhiTranslate="{{'userManagement.role.' + authority}}">{{ authority }}</span>-->
@@ -64,9 +66,10 @@
                         <a [routerLink]="['/region', user.regionId , 'view' ]">{{user.regionName}}</a>
                     </div>
                 </td>
+                <td>{{user.truckNumber}}</td>
                 <td>
                     <div *ngIf="user.userInfo">
-                        <!--<img src="{{user.userInfo.avatarUrl}}}}" style="width: 64px;"/>-->
+                        <img src="{{user.userInfo.avatarUrl}}" style="width: 64px;"/>
                         {{user.userInfo.nickName}}
                     </div>
                 </td>

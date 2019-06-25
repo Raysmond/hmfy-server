@@ -47,8 +47,8 @@ public class ShipPlanResourceIT {
     private static final String DEFAULT_COMPANY = "AAAAAAAAAA";
     private static final String UPDATED_COMPANY = "BBBBBBBBBB";
 
-    private static final Integer DEFAULT_APPLY_ID = 1;
-    private static final Integer UPDATED_APPLY_ID = 2;
+    private static final Long DEFAULT_APPLY_ID = 1L;
+    private static final Long UPDATED_APPLY_ID = 2L;
 
     private static final String DEFAULT_APPLY_NUMBER = "AAAAAAAAAA";
     private static final String UPDATED_APPLY_NUMBER = "BBBBBBBBBB";
