@@ -12,7 +12,7 @@ export interface IAppointment {
   id?: number;
   licensePlateNumber?: string;
   driver?: string;
-  phone?: string;
+  applyId?: number;
   number?: number;
   valid?: boolean;
   status?: AppointmentStatus;
@@ -35,7 +35,7 @@ export class Appointment implements IAppointment {
     public id?: number,
     public licensePlateNumber?: string,
     public driver?: string,
-    public phone?: string,
+    public applyId?: number,
     public number?: number,
     public valid?: boolean,
     public status?: AppointmentStatus,

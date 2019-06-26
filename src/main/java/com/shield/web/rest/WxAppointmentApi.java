@@ -1,6 +1,7 @@
 package com.shield.web.rest;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
+import com.google.common.collect.Lists;
 import com.shield.config.WxMiniAppConfiguration;
 import com.shield.domain.User;
 import com.shield.security.AuthoritiesConstants;
@@ -8,8 +9,10 @@ import com.shield.security.SecurityUtils;
 import com.shield.service.*;
 import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.dto.CarDTO;
+import com.shield.service.dto.ShipPlanDTO;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import com.shield.web.rest.vm.AppointmentRequestDTO;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +47,9 @@ public class WxAppointmentApi {
     @Autowired
     private CarService carService;
 
+    @Autowired
+    private ShipPlanService shipPlanService;
+
     /**
      * 预约排队接口
      */
@@ -68,7 +74,6 @@ public class WxAppointmentApi {
         AppointmentDTO appointmentDTO = new AppointmentDTO();
         appointmentDTO.setLicensePlateNumber(appointment.getLicensePlateNumber());
         appointmentDTO.setDriver(appointment.getDriver());
-        appointmentDTO.setPhone(appointment.getPhone());
         appointmentDTO.setRegionId(appointment.getRegionId());
         AppointmentDTO result = appointmentService.makeAppointment(appointment.getRegionId(), appointmentDTO);
 
@@ -77,10 +82,13 @@ public class WxAppointmentApi {
         return ResponseEntity.created(new URI(String.format("/api/wx/%s/appointments/%d", appid, result.getId()))).body(result);
     }
 
-    @GetMapping("/cars")
-    public ResponseEntity<List<CarDTO>> getUserCars(@PathVariable String appid) {
+    @GetMapping("/ship_plans")
+    public ResponseEntity<List<ShipPlanDTO>> getUserShipPlans(@PathVariable String appid) {
         User user = userService.getUserWithAuthorities().get();
-        return ResponseEntity.ok(carService.getByUserId(user.getId()));
+        if (StringUtils.isNotBlank(user.getTruckNumber()) && SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.APPOINTMENT)) {
+            return ResponseEntity.ok(shipPlanService.getAvailableByTruckNumber(user.getTruckNumber()));
+        }
+        return ResponseEntity.ok(Lists.newArrayList());
     }
 
 }

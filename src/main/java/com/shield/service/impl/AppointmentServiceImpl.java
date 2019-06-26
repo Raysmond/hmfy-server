@@ -155,7 +155,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment appointment = new Appointment();
         appointment.setLicensePlateNumber(appointmentDTO.getLicensePlateNumber());
         appointment.setDriver(appointmentDTO.getDriver());
-        appointment.setPhone(appointmentDTO.getPhone());
         appointment.setCreateTime(ZonedDateTime.now());
         appointment.setUpdateTime(ZonedDateTime.now());
         appointment.setRegion(region);

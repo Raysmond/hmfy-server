@@ -1,6 +1,4 @@
 package com.shield.domain;
-
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -10,7 +8,6 @@ import javax.validation.constraints.*;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.Objects;
 
 import com.shield.domain.enumeration.AppointmentStatus;
 
@@ -36,11 +33,11 @@ public class Appointment implements Serializable {
     @Column(name = "driver", nullable = false)
     private String driver;
 
-    @Column(name = "phone")
-    private String phone;
+    @Column(name = "apply_id")
+    private Long applyId;
 
     
-    @Column(name = "jhi_number", unique = true)
+    @Column(name = "number", unique = true)
     private Integer number;
 
     @NotNull
@@ -122,17 +119,17 @@ public class Appointment implements Serializable {
         this.driver = driver;
     }
 
-    public String getPhone() {
-        return phone;
+    public Long getApplyId() {
+        return applyId;
     }
 
-    public Appointment phone(String phone) {
-        this.phone = phone;
+    public Appointment applyId(Long applyId) {
+        this.applyId = applyId;
         return this;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setApplyId(Long applyId) {
+        this.applyId = applyId;
     }
 
     public Integer getNumber() {
@@ -327,7 +324,7 @@ public class Appointment implements Serializable {
             "id=" + getId() +
             ", licensePlateNumber='" + getLicensePlateNumber() + "'" +
             ", driver='" + getDriver() + "'" +
-            ", phone='" + getPhone() + "'" +
+            ", applyId=" + getApplyId() +
             ", number=" + getNumber() +
             ", valid='" + isValid() + "'" +
             ", status='" + getStatus() + "'" +

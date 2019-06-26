@@ -95,8 +95,8 @@ public class AppointmentQueryService extends QueryService<Appointment> {
             if (criteria.getDriver() != null) {
                 specification = specification.and(buildStringSpecification(criteria.getDriver(), Appointment_.driver));
             }
-            if (criteria.getPhone() != null) {
-                specification = specification.and(buildStringSpecification(criteria.getPhone(), Appointment_.phone));
+            if (criteria.getApplyId() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getApplyId(), Appointment_.applyId));
             }
             if (criteria.getNumber() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getNumber(), Appointment_.number));

@@ -51,7 +51,7 @@ public class CarServiceImpl implements CarService {
             cars = cars.stream()
                 .filter(it -> it.getLicensePlateNumber() != null && it.getLicensePlateNumber().equals(appointmentDTO.getLicensePlateNumber())
                     && it.getDriver() != null && it.getDriver().equals(appointmentDTO.getDriver())
-                    && it.getPhone() != null && it.getPhone().equals(appointmentDTO.getPhone())
+                    && it.getPhone() != null
                 ).collect(Collectors.toList());
             if (CollectionUtils.isEmpty(cars)) {
                 Car car = new Car();
@@ -60,7 +60,6 @@ public class CarServiceImpl implements CarService {
                 car.setUser(user);
                 car.setLicensePlateNumber(appointmentDTO.getLicensePlateNumber());
                 car.setDriver(appointmentDTO.getDriver());
-                car.setPhone(appointmentDTO.getPhone());
                 car.setCreateTime(ZonedDateTime.now());
                 car.setUpdateTime(ZonedDateTime.now());
                 car = carRepository.save(car);

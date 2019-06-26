@@ -50,7 +50,7 @@ public class AppointmentCriteria implements Serializable, Criteria {
 
     private StringFilter driver;
 
-    private StringFilter phone;
+    private LongFilter applyId;
 
     private IntegerFilter number;
 
@@ -85,7 +85,7 @@ public class AppointmentCriteria implements Serializable, Criteria {
         this.id = other.id == null ? null : other.id.copy();
         this.licensePlateNumber = other.licensePlateNumber == null ? null : other.licensePlateNumber.copy();
         this.driver = other.driver == null ? null : other.driver.copy();
-        this.phone = other.phone == null ? null : other.phone.copy();
+        this.applyId = other.applyId == null ? null : other.applyId.copy();
         this.number = other.number == null ? null : other.number.copy();
         this.valid = other.valid == null ? null : other.valid.copy();
         this.status = other.status == null ? null : other.status.copy();
@@ -130,12 +130,12 @@ public class AppointmentCriteria implements Serializable, Criteria {
         this.driver = driver;
     }
 
-    public StringFilter getPhone() {
-        return phone;
+    public LongFilter getApplyId() {
+        return applyId;
     }
 
-    public void setPhone(StringFilter phone) {
-        this.phone = phone;
+    public void setApplyId(LongFilter applyId) {
+        this.applyId = applyId;
     }
 
     public IntegerFilter getNumber() {
@@ -256,7 +256,7 @@ public class AppointmentCriteria implements Serializable, Criteria {
             Objects.equals(id, that.id) &&
             Objects.equals(licensePlateNumber, that.licensePlateNumber) &&
             Objects.equals(driver, that.driver) &&
-            Objects.equals(phone, that.phone) &&
+            Objects.equals(applyId, that.applyId) &&
             Objects.equals(number, that.number) &&
             Objects.equals(valid, that.valid) &&
             Objects.equals(status, that.status) &&
@@ -278,7 +278,7 @@ public class AppointmentCriteria implements Serializable, Criteria {
         id,
         licensePlateNumber,
         driver,
-        phone,
+        applyId,
         number,
         valid,
         status,
@@ -301,7 +301,7 @@ public class AppointmentCriteria implements Serializable, Criteria {
                 (id != null ? "id=" + id + ", " : "") +
                 (licensePlateNumber != null ? "licensePlateNumber=" + licensePlateNumber + ", " : "") +
                 (driver != null ? "driver=" + driver + ", " : "") +
-                (phone != null ? "phone=" + phone + ", " : "") +
+                (applyId != null ? "applyId=" + applyId + ", " : "") +
                 (number != null ? "number=" + number + ", " : "") +
                 (valid != null ? "valid=" + valid + ", " : "") +
                 (status != null ? "status=" + status + ", " : "") +

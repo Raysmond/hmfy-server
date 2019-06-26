@@ -24,12 +24,12 @@
                 <constraints nullable="false" />
             </column>
 
-            <column name="phone" type="varchar(255)">
+            <column name="apply_id" type="bigint">
                 <constraints nullable="true" />
             </column>
 
-            <column name="jhi_number" type="integer">
-                <constraints nullable="true" unique="true" uniqueConstraintName="ux_appointment_jhi_number" />
+            <column name="number" type="integer">
+                <constraints nullable="true" unique="true" uniqueConstraintName="ux_appointment_number" />
             </column>
 
             <column name="valid" type="boolean">
@@ -103,23 +103,22 @@
         <loadData
                   file="config/liquibase/data/appointment.csv"
                   separator=";"
-                  tableName="appointment"
-                  context="dev">
+                  tableName="appointment">
             <column name="id" type="numeric"/>
             <column name="license_plate_number" type="string"/>
             <column name="driver" type="string"/>
-            <column name="phone" type="string"/>
-            <column name="jhi_number" type="numeric"/>
+            <column name="apply_id" type="numeric"/>
+            <column name="number" type="numeric"/>
             <column name="valid" type="boolean"/>
             <column name="status" type="string"/>
             <column name="queue_number" type="numeric"/>
             <column name="vip" type="boolean"/>
-            <column name="create_time" type="date"/>
-            <column name="update_time" type="date"/>
-            <column name="start_time" type="date"/>
-            <column name="enter_time" type="date"/>
-            <column name="leave_time" type="date"/>
-            <column name="expire_time" type="date"/>
+            <column name="create_time" type="datetime"/>
+            <column name="update_time" type="datetime"/>
+            <column name="start_time" type="datetime"/>
+            <column name="enter_time" type="datetime"/>
+            <column name="leave_time" type="datetime"/>
+            <column name="expire_time" type="datetime"/>
             <column name="region_id" type="numeric"/>
             <column name="user_id" type="numeric"/>
         </loadData>

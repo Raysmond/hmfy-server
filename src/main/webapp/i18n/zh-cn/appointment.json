@@ -17,6 +17,7 @@
       },
       "licensePlateNumber": "车牌号",
       "driver": "司机",
+      "applyId": "计划ID",
       "number": "预约号",
       "valid": "有效",
       "status": "状态",

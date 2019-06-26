@@ -39,8 +39,8 @@
             ]
         },
         {
-          "fieldName": "phone",
-          "fieldType": "String"
+          "fieldName": "applyId",
+          "fieldType": "Long"
         },
         {
             "fieldName": "number",

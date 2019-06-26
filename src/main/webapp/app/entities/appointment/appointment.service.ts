@@ -5,58 +5,48 @@ import * as moment from 'moment';
 import { DATE_FORMAT } from 'app/shared/constants/input.constants';
 import { map } from 'rxjs/operators';
 
-import { SERVER_API_REGION_ADMIN_URL, SERVER_API_URL } from 'app/app.constants';
+import { SERVER_API_URL } from 'app/app.constants';
 import { createRequestOption } from 'app/shared';
 import { IAppointment } from 'app/shared/model/appointment.model';
 
 type EntityResponseType = HttpResponse<IAppointment>;
 type EntityArrayResponseType = HttpResponse<IAppointment[]>;
-import { AccountService } from 'app/core/';
 
 @Injectable({ providedIn: 'root' })
 export class AppointmentService {
   public resourceUrl = SERVER_API_URL + 'api/appointments';
-  public regionAdminResourceUrl = SERVER_API_REGION_ADMIN_URL + 'api/appointments';
 
-  constructor(protected http: HttpClient, private accountService: AccountService) {}
-
-  getResourceUrl() {
-    if (this.accountService.hasAnyAuthority(['ROLE_ADMIN'])) {
-      return this.resourceUrl;
-    } else {
-      return this.regionAdminResourceUrl;
-    }
-  }
+  constructor(protected http: HttpClient) {}
 
   create(appointment: IAppointment): Observable<EntityResponseType> {
     const copy = this.convertDateFromClient(appointment);
     return this.http
-      .post<IAppointment>(this.getResourceUrl(), copy, { observe: 'response' })
+      .post<IAppointment>(this.resourceUrl, copy, { observe: 'response' })
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
   update(appointment: IAppointment): Observable<EntityResponseType> {
     const copy = this.convertDateFromClient(appointment);
     return this.http
-      .put<IAppointment>(this.getResourceUrl(), copy, { observe: 'response' })
+      .put<IAppointment>(this.resourceUrl, copy, { observe: 'response' })
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
   find(id: number): Observable<EntityResponseType> {
     return this.http
-      .get<IAppointment>(`${this.getResourceUrl()}/${id}`, { observe: 'response' })
+      .get<IAppointment>(`${this.resourceUrl}/${id}`, { observe: 'response' })
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
   query(req?: any): Observable<EntityArrayResponseType> {
     const options = createRequestOption(req);
     return this.http
-      .get<IAppointment[]>(this.getResourceUrl(), { params: options, observe: 'response' })
+      .get<IAppointment[]>(this.resourceUrl, { params: options, observe: 'response' })
       .pipe(map((res: EntityArrayResponseType) => this.convertDateArrayFromServer(res)));
   }
 
   delete(id: number): Observable<HttpResponse<any>> {
-    return this.http.delete<any>(`${this.getResourceUrl()}/${id}`, { observe: 'response' });
+    return this.http.delete<any>(`${this.resourceUrl}/${id}`, { observe: 'response' });
   }
 
   protected convertDateFromClient(appointment: IAppointment): IAppointment {

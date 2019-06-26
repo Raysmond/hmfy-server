@@ -18,7 +18,6 @@ import { IUser, UserService } from 'app/core';
   templateUrl: './appointment-update.component.html'
 })
 export class AppointmentUpdateComponent implements OnInit {
-  appointment: IAppointment;
   isSaving: boolean;
 
   regions: IRegion[];
@@ -29,8 +28,8 @@ export class AppointmentUpdateComponent implements OnInit {
     id: [],
     licensePlateNumber: [null, [Validators.required]],
     driver: [null, [Validators.required]],
-    phone: [],
-    number: [null, [Validators.required]],
+    applyId: [],
+    number: [null, []],
     valid: [null, [Validators.required]],
     status: [null, [Validators.required]],
     queueNumber: [],
@@ -58,7 +57,6 @@ export class AppointmentUpdateComponent implements OnInit {
     this.isSaving = false;
     this.activatedRoute.data.subscribe(({ appointment }) => {
       this.updateForm(appointment);
-      this.appointment = appointment;
     });
     this.regionService
       .query()
@@ -81,7 +79,7 @@ export class AppointmentUpdateComponent implements OnInit {
       id: appointment.id,
       licensePlateNumber: appointment.licensePlateNumber,
       driver: appointment.driver,
-      phone: appointment.phone,
+      applyId: appointment.applyId,
       number: appointment.number,
       valid: appointment.valid,
       status: appointment.status,
@@ -118,7 +116,7 @@ export class AppointmentUpdateComponent implements OnInit {
       id: this.editForm.get(['id']).value,
       licensePlateNumber: this.editForm.get(['licensePlateNumber']).value,
       driver: this.editForm.get(['driver']).value,
-      phone: this.editForm.get(['phone']).value,
+      applyId: this.editForm.get(['applyId']).value,
       number: this.editForm.get(['number']).value,
       valid: this.editForm.get(['valid']).value,
       status: this.editForm.get(['status']).value,

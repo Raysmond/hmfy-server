@@ -4,7 +4,8 @@
       "home": {
         "title": "Appointments",
         "createLabel": "Create a new Appointment",
-        "createOrEditLabel": "Create or edit a Appointment"
+        "createOrEditLabel": "Create or edit a Appointment",
+        "notFound": "No Appointment found"
       },
       "created": "A new Appointment is created with identifier {{ param }}",
       "updated": "A Appointment is updated with identifier {{ param }}",
@@ -17,7 +18,7 @@
       },
       "licensePlateNumber": "License Plate Number",
       "driver": "Driver",
-      "phone": "Phone",
+      "applyId": "Apply Id",
       "number": "Number",
       "valid": "Valid",
       "status": "Status",

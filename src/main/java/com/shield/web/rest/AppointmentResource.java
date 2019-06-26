@@ -1,22 +1,16 @@
 package com.shield.web.rest;
 
-import com.shield.domain.User;
-import com.shield.security.AuthoritiesConstants;
-import com.shield.security.SecurityUtils;
 import com.shield.service.AppointmentService;
-import com.shield.service.UserService;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.dto.AppointmentCriteria;
 import com.shield.service.AppointmentQueryService;
 
-import io.github.jhipster.service.filter.LongFilter;
 import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,10 +45,6 @@ public class AppointmentResource {
     private final AppointmentService appointmentService;
 
     private final AppointmentQueryService appointmentQueryService;
-
-
-    @Autowired
-    private UserService userService;
 
     public AppointmentResource(AppointmentService appointmentService, AppointmentQueryService appointmentQueryService) {
         this.appointmentService = appointmentService;
@@ -111,28 +101,17 @@ public class AppointmentResource {
     @GetMapping("/appointments")
     public ResponseEntity<List<AppointmentDTO>> getAllAppointments(AppointmentCriteria criteria, Pageable pageable, @RequestParam MultiValueMap<String, String> queryParams, UriComponentsBuilder uriBuilder) {
         log.debug("REST request to get Appointments by criteria: {}", criteria);
-        Page<AppointmentDTO> page = Page.empty(pageable);
-        if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.ADMIN)) {
-            page = appointmentQueryService.findByCriteria(criteria, pageable);
-        } else if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.REGION_ADMIN)) {
-            User user = userService.getUserWithAuthorities().get();
-            if (user.getRegion() != null) {
-                LongFilter regionFilter = new LongFilter();
-                regionFilter.setEquals(user.getRegion().getId());
-                criteria.setRegionId(regionFilter);
-                page = appointmentQueryService.findByCriteria(criteria, pageable);
-            }
-        }
+        Page<AppointmentDTO> page = appointmentQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(uriBuilder.queryParams(queryParams), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
     /**
-     * {@code GET  /appointments/count} : count all the appointments.
-     *
-     * @param criteria the criteria which the requested entities should match.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the count in body.
-     */
+    * {@code GET  /appointments/count} : count all the appointments.
+    *
+    * @param criteria the criteria which the requested entities should match.
+    * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the count in body.
+    */
     @GetMapping("/appointments/count")
     public ResponseEntity<Long> countAppointments(AppointmentCriteria criteria) {
         log.debug("REST request to count Appointments by criteria: {}", criteria);

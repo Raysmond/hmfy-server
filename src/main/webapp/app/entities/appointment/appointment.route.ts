@@ -37,7 +37,7 @@ export const appointmentRoute: Routes = [
       pagingParams: JhiResolvePagingParams
     },
     data: {
-      authorities: ['ROLE_ADMIN', 'ROLE_REGION_ADMIN'],
+      authorities: ['ROLE_USER'],
       defaultSort: 'id,asc',
       pageTitle: 'shieldApp.appointment.home.title'
     },
@@ -50,7 +50,7 @@ export const appointmentRoute: Routes = [
       appointment: AppointmentResolve
     },
     data: {
-      authorities: ['ROLE_ADMIN', 'ROLE_REGION_ADMIN'],
+      authorities: ['ROLE_USER'],
       pageTitle: 'shieldApp.appointment.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -62,7 +62,7 @@ export const appointmentRoute: Routes = [
       appointment: AppointmentResolve
     },
     data: {
-      authorities: ['ROLE_ADMIN', 'ROLE_REGION_ADMIN'],
+      authorities: ['ROLE_USER'],
       pageTitle: 'shieldApp.appointment.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -74,7 +74,7 @@ export const appointmentRoute: Routes = [
       appointment: AppointmentResolve
     },
     data: {
-      authorities: ['ROLE_ADMIN', 'ROLE_REGION_ADMIN'],
+      authorities: ['ROLE_USER'],
       pageTitle: 'shieldApp.appointment.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -89,7 +89,7 @@ export const appointmentPopupRoute: Routes = [
       appointment: AppointmentResolve
     },
     data: {
-      authorities: ['ROLE_ADMIN', 'ROLE_REGION_ADMIN'],
+      authorities: ['ROLE_USER'],
       pageTitle: 'shieldApp.appointment.home.title'
     },
     canActivate: [UserRouteAccessService],
