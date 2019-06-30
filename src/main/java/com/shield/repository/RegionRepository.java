@@ -2,6 +2,7 @@ package com.shield.repository;
 
 import com.shield.domain.Region;
 import com.shield.service.dto.CountDTO;
+import com.shield.service.dto.RegionDTO;
 import com.shield.service.dto.RegionStatCount;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
@@ -24,4 +25,7 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
         "group by u.region_id", nativeQuery = true)
     List<CountDTO> countDriversByRegionId();
 
+    Region findOneByName(String name);
+
+    Region findOneByParkId(String parkId);
 }

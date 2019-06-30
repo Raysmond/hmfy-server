@@ -23,6 +23,7 @@
       "auditStatus": "Audit Status",
       "productName": "Product Name",
       "deliverPosition": "Deliver Position",
+      "valid": "Valid",
       "gateTime": "Gate Time",
       "leaveTime": "Leave Time",
       "deliverTime": "Deliver Time",

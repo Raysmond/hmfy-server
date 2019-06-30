@@ -103,12 +103,23 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Column(name = "truck_number")
     private String truckNumber;
 
+    @Column(name = "company")
+    private String company;
+
     public String getTruckNumber() {
         return truckNumber;
     }
 
     public void setTruckNumber(String truckNumber) {
         this.truckNumber = truckNumber;
+    }
+
+    public String getCompany() {
+        return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
     }
 
     public Region getRegion() {

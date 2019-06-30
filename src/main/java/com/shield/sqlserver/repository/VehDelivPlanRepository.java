@@ -9,4 +9,5 @@ import java.util.List;
 public interface VehDelivPlanRepository extends JpaRepository<VehDelivPlan, Long> {
 
     List<VehDelivPlan> findAllByCreateTimeAfterOrderByCreateTime(ZonedDateTime createTime);
+    List<VehDelivPlan> findAllByDeliverTimeGreaterThanEqualOrderByCreateTime(ZonedDateTime startDeliverTime);
 }

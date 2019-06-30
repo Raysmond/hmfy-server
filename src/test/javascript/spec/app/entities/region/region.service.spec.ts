@@ -27,7 +27,23 @@ describe('Service Tests', () => {
       httpMock = injector.get(HttpTestingController);
       currentDate = moment();
 
-      elemDefault = new Region(0, 'AAAAAAA', 0, 0, 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', false, 0, 0, 0, currentDate, currentDate);
+      elemDefault = new Region(
+        0,
+        'AAAAAAA',
+        0,
+        0,
+        'AAAAAAA',
+        'AAAAAAA',
+        'AAAAAAA',
+        false,
+        false,
+        'AAAAAAA',
+        0,
+        0,
+        0,
+        currentDate,
+        currentDate
+      );
     });
 
     describe('Service methods', () => {
@@ -84,6 +100,8 @@ describe('Service Tests', () => {
             endTime: 'BBBBBB',
             days: 'BBBBBB',
             open: true,
+            autoAppointment: true,
+            parkId: 'BBBBBB',
             validTime: 1,
             queueQuota: 1,
             queueValidTime: 1,
@@ -119,6 +137,8 @@ describe('Service Tests', () => {
             endTime: 'BBBBBB',
             days: 'BBBBBB',
             open: true,
+            autoAppointment: true,
+            parkId: 'BBBBBB',
             validTime: 1,
             queueQuota: 1,
             queueValidTime: 1,

@@ -15,7 +15,8 @@
             <thead>
             <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
             <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="name"><span jhiTranslate="shieldApp.region.name">Name</span> </th>
+            <th><span jhiTranslate="shieldApp.region.name">Name</span> </th>
+            <th><span jhiTranslate="shieldApp.region.parkId">Park ID</span> </th>
             <th jhiSortBy="quota"><span jhiTranslate="shieldApp.region.quota">Quota</span> </th>
             <th jhiSortBy="vipQuota"><span jhiTranslate="shieldApp.region.vipQuota">Vip Quota</span> </th>
             <th jhiSortBy="startTime"><span jhiTranslate="shieldApp.region.startTime">Start Time</span> </th>
@@ -35,6 +36,7 @@
             <tr *ngFor="let region of regions ;trackBy: trackId">
                 <td><a [routerLink]="['/region', region.id, 'view' ]">{{region.id}}</a></td>
                 <td>{{region.name}}</td>
+                <td>{{region.parkId}}</td>
                 <td>{{region.quota}}</td>
                 <td>{{region.vipQuota}}</td>
                 <td>{{region.startTime}}</td>

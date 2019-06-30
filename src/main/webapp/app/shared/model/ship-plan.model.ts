@@ -9,6 +9,7 @@ export interface IShipPlan {
   auditStatus?: number;
   productName?: string;
   deliverPosition?: string;
+  valid?: boolean;
   gateTime?: Moment;
   leaveTime?: Moment;
   deliverTime?: Moment;
@@ -29,6 +30,7 @@ export class ShipPlan implements IShipPlan {
     public auditStatus?: number,
     public productName?: string,
     public deliverPosition?: string,
+    public valid?: boolean,
     public gateTime?: Moment,
     public leaveTime?: Moment,
     public deliverTime?: Moment,
@@ -37,5 +39,7 @@ export class ShipPlan implements IShipPlan {
     public updateTime?: Moment,
     public userLogin?: string,
     public userId?: number
-  ) {}
+  ) {
+    this.valid = this.valid || false;
+  }
 }

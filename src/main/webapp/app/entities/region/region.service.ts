@@ -6,11 +6,8 @@ import { DATE_FORMAT } from 'app/shared/constants/input.constants';
 import { map } from 'rxjs/operators';
 
 import { SERVER_API_URL } from 'app/app.constants';
-import { SERVER_API_REGION_ADMIN_URL } from 'app/app.constants';
 import { createRequestOption } from 'app/shared';
 import { IRegion } from 'app/shared/model/region.model';
-
-import { AccountService } from 'app/core/';
 
 type EntityResponseType = HttpResponse<IRegion>;
 type EntityArrayResponseType = HttpResponse<IRegion[]>;
@@ -18,47 +15,38 @@ type EntityArrayResponseType = HttpResponse<IRegion[]>;
 @Injectable({ providedIn: 'root' })
 export class RegionService {
   public resourceUrl = SERVER_API_URL + 'api/regions';
-  public regionAdminResourceUrl = SERVER_API_REGION_ADMIN_URL + 'api/regions';
 
-  constructor(protected http: HttpClient, private accountService: AccountService) {}
-
-  getResourceUrl() {
-    if (this.accountService.hasAnyAuthority(['ROLE_ADMIN'])) {
-      return this.resourceUrl;
-    } else {
-      return this.regionAdminResourceUrl;
-    }
-  }
+  constructor(protected http: HttpClient) {}
 
   create(region: IRegion): Observable<EntityResponseType> {
     const copy = this.convertDateFromClient(region);
     return this.http
-      .post<IRegion>(this.getResourceUrl(), copy, { observe: 'response' })
+      .post<IRegion>(this.resourceUrl, copy, { observe: 'response' })
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
   update(region: IRegion): Observable<EntityResponseType> {
     const copy = this.convertDateFromClient(region);
     return this.http
-      .put<IRegion>(this.getResourceUrl(), copy, { observe: 'response' })
+      .put<IRegion>(this.resourceUrl, copy, { observe: 'response' })
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
   find(id: number): Observable<EntityResponseType> {
     return this.http
-      .get<IRegion>(`${this.getResourceUrl()}/${id}`, { observe: 'response' })
+      .get<IRegion>(`${this.resourceUrl}/${id}`, { observe: 'response' })
       .pipe(map((res: EntityResponseType) => this.convertDateFromServer(res)));
   }
 
   query(req?: any): Observable<EntityArrayResponseType> {
     const options = createRequestOption(req);
     return this.http
-      .get<IRegion[]>(this.getResourceUrl(), { params: options, observe: 'response' })
+      .get<IRegion[]>(this.resourceUrl, { params: options, observe: 'response' })
       .pipe(map((res: EntityArrayResponseType) => this.convertDateArrayFromServer(res)));
   }
 
   delete(id: number): Observable<HttpResponse<any>> {
-    return this.http.delete<any>(`${this.getResourceUrl()}/${id}`, { observe: 'response' });
+    return this.http.delete<any>(`${this.resourceUrl}/${id}`, { observe: 'response' });
   }
 
   protected convertDateFromClient(region: IRegion): IRegion {

@@ -41,6 +41,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
 
     private StringFilter deliverPosition;
 
+    private BooleanFilter valid;
+
     private ZonedDateTimeFilter gateTime;
 
     private ZonedDateTimeFilter leaveTime;
@@ -67,6 +69,7 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.auditStatus = other.auditStatus == null ? null : other.auditStatus.copy();
         this.productName = other.productName == null ? null : other.productName.copy();
         this.deliverPosition = other.deliverPosition == null ? null : other.deliverPosition.copy();
+        this.valid = other.valid == null ? null : other.valid.copy();
         this.gateTime = other.gateTime == null ? null : other.gateTime.copy();
         this.leaveTime = other.leaveTime == null ? null : other.leaveTime.copy();
         this.deliverTime = other.deliverTime == null ? null : other.deliverTime.copy();
@@ -145,6 +148,14 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.deliverPosition = deliverPosition;
     }
 
+    public BooleanFilter getValid() {
+        return valid;
+    }
+
+    public void setValid(BooleanFilter valid) {
+        this.valid = valid;
+    }
+
     public ZonedDateTimeFilter getGateTime() {
         return gateTime;
     }
@@ -220,6 +231,7 @@ public class ShipPlanCriteria implements Serializable, Criteria {
             Objects.equals(auditStatus, that.auditStatus) &&
             Objects.equals(productName, that.productName) &&
             Objects.equals(deliverPosition, that.deliverPosition) &&
+            Objects.equals(valid, that.valid) &&
             Objects.equals(gateTime, that.gateTime) &&
             Objects.equals(leaveTime, that.leaveTime) &&
             Objects.equals(deliverTime, that.deliverTime) &&
@@ -240,6 +252,7 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         auditStatus,
         productName,
         deliverPosition,
+        valid,
         gateTime,
         leaveTime,
         deliverTime,
@@ -261,6 +274,7 @@ public class ShipPlanCriteria implements Serializable, Criteria {
                 (auditStatus != null ? "auditStatus=" + auditStatus + ", " : "") +
                 (productName != null ? "productName=" + productName + ", " : "") +
                 (deliverPosition != null ? "deliverPosition=" + deliverPosition + ", " : "") +
+                (valid != null ? "valid=" + valid + ", " : "") +
                 (gateTime != null ? "gateTime=" + gateTime + ", " : "") +
                 (leaveTime != null ? "leaveTime=" + leaveTime + ", " : "") +
                 (deliverTime != null ? "deliverTime=" + deliverTime + ", " : "") +

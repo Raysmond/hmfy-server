@@ -1,10 +1,15 @@
 package com.shield.service;
 
+import com.shield.domain.Appointment;
+import com.shield.domain.ShipPlan;
+import com.shield.service.dto.AppointmentDTO;
+import com.shield.service.dto.PlanDTO;
 import com.shield.service.dto.ShipPlanDTO;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,5 +50,12 @@ public interface ShipPlanService {
      */
     void delete(Long id);
 
-    List<ShipPlanDTO> getAvailableByTruckNumber(String truckNumber);
+    List<ShipPlanDTO> getAvailableByTruckNumber(Long regionId, String truckNumber);
+
+    Page<PlanDTO> getAllByTruckNumber(Pageable pageable, String truckNumber, Long shipPlanId);
+
+
+    List<ShipPlanDTO> findAllByDeliverTime(ZonedDateTime beginDeliverTime, ZonedDateTime endBeginDeliverTime, Integer auditStatus);
+
+    List<ShipPlanDTO> findAllShouldDeleteCarWhiteList(ZonedDateTime todayBegin, ZonedDateTime todayEnd);
 }

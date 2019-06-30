@@ -1,0 +1,39 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div *ngIf="parkMsg">
+            <h2><span jhiTranslate="shieldApp.parkMsg.detail.title">Park Msg</span> {{parkMsg.id}}</h2>
+            <hr>
+            <jhi-alert-error></jhi-alert-error>
+            <dl class="row-md jh-entity-details">
+                <dt><span jhiTranslate="shieldApp.parkMsg.parkid">Parkid</span></dt>
+                <dd>
+                    <span>{{parkMsg.parkid}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.parkMsg.service">Service</span></dt>
+                <dd>
+                    <span>{{parkMsg.service}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.parkMsg.createTime">Create Time</span></dt>
+                <dd>
+                    <span>{{parkMsg.createTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.parkMsg.body">Body</span></dt>
+                <dd>
+                    <span>{{parkMsg.body}}</span>
+                </dd>
+            </dl>
+
+            <button type="submit"
+                    (click)="previousState()"
+                    class="btn btn-info">
+                <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+            </button>
+
+            <button type="button"
+                    [routerLink]="['/park-msg', parkMsg.id, 'edit']"
+                    class="btn btn-primary">
+                <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+            </button>
+        </div>
+    </div>
+</div>

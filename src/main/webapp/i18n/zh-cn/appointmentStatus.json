@@ -6,7 +6,9 @@
       "WAIT": "排队中",
       "START": "预约成功",
       "ENTER": "进厂",
-      "LEAVE": "离厂"
+      "LEAVE": "离厂",
+      "CANCELED": "已取消",
+      "EXPIRED": "预约过期"
     }
   }
 }

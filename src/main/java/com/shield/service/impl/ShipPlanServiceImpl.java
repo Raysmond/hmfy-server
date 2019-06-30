@@ -1,12 +1,21 @@
 package com.shield.service.impl;
 
+import com.google.common.collect.Lists;
 import com.shield.domain.Appointment;
+import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.repository.AppointmentRepository;
+import com.shield.service.AppointmentService;
+import com.shield.service.RegionService;
 import com.shield.service.ShipPlanService;
 import com.shield.domain.ShipPlan;
 import com.shield.repository.ShipPlanRepository;
+import com.shield.service.dto.AppointmentDTO;
+import com.shield.service.dto.PlanDTO;
+import com.shield.service.dto.RegionDTO;
 import com.shield.service.dto.ShipPlanDTO;
 import com.shield.service.mapper.ShipPlanMapper;
+import com.shield.web.rest.errors.BadRequestAlertException;
+import io.github.jhipster.web.util.PageUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +29,9 @@ import org.springframework.util.CollectionUtils;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,6 +51,12 @@ public class ShipPlanServiceImpl implements ShipPlanService {
 
     @Autowired
     private AppointmentRepository appointmentRepository;
+
+    @Autowired
+    private AppointmentService appointmentService;
+
+    @Autowired
+    private RegionService regionService;
 
     public ShipPlanServiceImpl(ShipPlanRepository shipPlanRepository, ShipPlanMapper shipPlanMapper) {
         this.shipPlanRepository = shipPlanRepository;
@@ -101,20 +118,102 @@ public class ShipPlanServiceImpl implements ShipPlanService {
     }
 
     @Override
-    public List<ShipPlanDTO> getAvailableByTruckNumber(String truckNumber) {
+    public List<ShipPlanDTO> getAvailableByTruckNumber(Long regionId, String truckNumber) {
+        Optional<RegionDTO> region = regionService.findOne(regionId);
+        if (!region.isPresent()) {
+            throw new BadRequestAlertException("Region not found", "", "");
+        }
+        RegionDTO regionDTO = region.get();
+
         ZonedDateTime begin = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
         ZonedDateTime end = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).plusDays(1);
-
         // 只获取今天的
-        List<ShipPlan> plans = shipPlanRepository.findAvailableByTruckNumber(truckNumber, begin, end);
+        List<ShipPlan> plans = shipPlanRepository.findAvailableByTruckNumber(truckNumber, regionDTO.getName(), begin, end);
 
         if (!CollectionUtils.isEmpty(plans)) {
             List<Long> applyIds = plans.stream().map(ShipPlan::getApplyId).collect(Collectors.toList());
             List<Appointment> appointments = appointmentRepository.findByApplyIdIn(applyIds, begin);
-            Set<Long> takenApplyIds = appointments.stream().map(Appointment::getApplyId).collect(Collectors.toSet());
+            Set<Long> takenApplyIds = appointments.stream().filter(it -> it.getStatus().equals(AppointmentStatus.LEAVE)).map(Appointment::getApplyId).collect(Collectors.toSet());
             plans = plans.stream().filter(it -> !takenApplyIds.contains(it.getApplyId())).collect(Collectors.toList());
         }
 
         return plans.stream().map(shipPlanMapper::toDto).collect(Collectors.toList());
     }
+
+    @Override
+    public Page<PlanDTO> getAllByTruckNumber(Pageable pageable, String truckNumber, Long shipPlanId) {
+        ZonedDateTime begin = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+        ZonedDateTime end = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).plusDays(1);
+
+        Page<PlanDTO> result = Page.empty(pageable);
+
+        if (shipPlanId == null) {
+            Page<ShipPlanDTO> shipPlanDTOPage = shipPlanRepository.findAllByTruckNumber(truckNumber, Boolean.TRUE, pageable).map(shipPlanMapper::toDto);
+            result = shipPlanDTOPage.map(PlanDTO::new);
+        } else {
+            ShipPlanDTO shipPlanDTO = shipPlanRepository.findById(shipPlanId).map(shipPlanMapper::toDto).orElse(null);
+            if (shipPlanDTO != null) {
+                result = PageUtil.createPageFromList(Lists.newArrayList(new PlanDTO(shipPlanDTO)), pageable);
+            }
+        }
+
+        if (result.getContent().isEmpty()) {
+            return result;
+        }
+
+        List<Long> applyIds = result.getContent().stream().map(it -> it.getPlan().getApplyId()).collect(Collectors.toList());
+        Map<Long, AppointmentDTO> appointmentDTOS = appointmentService.findLastByApplyIdIn(applyIds);
+
+        for (PlanDTO item : result) {
+            if (appointmentDTOS.containsKey(item.getPlan().getApplyId())) {
+                item.setAppointment(appointmentDTOS.get(item.getPlan().getApplyId()));
+            }
+
+            ZonedDateTime dt = item.getPlan().getDeliverTime().plusSeconds(1L);
+            if (item.getAppointment() == null) {
+                if (dt.isAfter(begin) && dt.isBefore(end)) {
+                    item.setStatus("可预约");
+                } else if (dt.isAfter(end)) {
+                    item.setStatus("未开始");
+                } else {
+                    item.setStatus("预约日期失效");
+                }
+            } else {
+                AppointmentStatus status = item.getAppointment().getStatus();
+                RegionDTO regionDTO = regionService.findOne(item.getAppointment().getRegionId()).get();
+                if (item.getAppointment().getStartTime() != null) {
+                    item.setMaxAllowInTime(item.getAppointment().getStartTime().plusSeconds(regionDTO.getValidTime()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+                }
+                if (!item.getAppointment().isValid()) {
+                    item.setStatus("预约过期");
+                } else {
+                    if (status == AppointmentStatus.WAIT) {
+                        item.setStatus("排队中");
+                    } else if (status == AppointmentStatus.START) {
+                        item.setStatus("预约成功");
+                    } else if (status == AppointmentStatus.ENTER) {
+                        item.setStatus("已进厂");
+                    } else if (status == AppointmentStatus.LEAVE) {
+                        item.setStatus("已离厂");
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<ShipPlanDTO> findAllByDeliverTime(ZonedDateTime beginDeliverTime, ZonedDateTime endBeginDeliverTime, Integer auditStatus) {
+        return shipPlanRepository.findAllByDeliverTime(beginDeliverTime, endBeginDeliverTime, auditStatus)
+            .stream().map(shipPlanMapper::toDto)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ShipPlanDTO> findAllShouldDeleteCarWhiteList(ZonedDateTime todayBegin, ZonedDateTime todayEnd) {
+        return shipPlanRepository.findALlNeedToRemoveCarWhiteList(todayBegin, todayEnd)
+            .stream().map(shipPlanMapper::toDto)
+            .collect(Collectors.toList());
+    }
+
 }

@@ -4,7 +4,8 @@
       "home": {
         "title": "Regions",
         "createLabel": "Create a new Region",
-        "createOrEditLabel": "Create or edit a Region"
+        "createOrEditLabel": "Create or edit a Region",
+        "notFound": "No Region found"
       },
       "created": "A new Region is created with identifier {{ param }}",
       "updated": "A Region is updated with identifier {{ param }}",
@@ -22,6 +23,8 @@
       "endTime": "End Time",
       "days": "Days",
       "open": "Open",
+      "autoAppointment": "Auto Appointment",
+      "parkId": "Park Id",
       "validTime": "Valid Time",
       "queueQuota": "Queue Quota",
       "queueValidTime": "Queue Valid Time",

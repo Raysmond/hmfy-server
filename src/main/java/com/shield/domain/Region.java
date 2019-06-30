@@ -1,6 +1,4 @@
 package com.shield.domain;
-
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -9,7 +7,6 @@ import javax.validation.constraints.*;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.Objects;
 
 /**
  * A Region.
@@ -50,6 +47,12 @@ public class Region implements Serializable {
 
     @Column(name = "jhi_open")
     private Boolean open;
+
+    @Column(name = "auto_appointment")
+    private Boolean autoAppointment;
+
+    @Column(name = "park_id")
+    private String parkId;
 
     @NotNull
     @Min(value = 0)
@@ -172,6 +175,32 @@ public class Region implements Serializable {
         this.open = open;
     }
 
+    public Boolean isAutoAppointment() {
+        return autoAppointment;
+    }
+
+    public Region autoAppointment(Boolean autoAppointment) {
+        this.autoAppointment = autoAppointment;
+        return this;
+    }
+
+    public void setAutoAppointment(Boolean autoAppointment) {
+        this.autoAppointment = autoAppointment;
+    }
+
+    public String getParkId() {
+        return parkId;
+    }
+
+    public Region parkId(String parkId) {
+        this.parkId = parkId;
+        return this;
+    }
+
+    public void setParkId(String parkId) {
+        this.parkId = parkId;
+    }
+
     public Integer getValidTime() {
         return validTime;
     }
@@ -265,6 +294,8 @@ public class Region implements Serializable {
             ", endTime='" + getEndTime() + "'" +
             ", days='" + getDays() + "'" +
             ", open='" + isOpen() + "'" +
+            ", autoAppointment='" + isAutoAppointment() + "'" +
+            ", parkId='" + getParkId() + "'" +
             ", validTime=" + getValidTime() +
             ", queueQuota=" + getQueueQuota() +
             ", queueValidTime=" + getQueueValidTime() +

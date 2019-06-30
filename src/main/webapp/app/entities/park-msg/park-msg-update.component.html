@@ -1,0 +1,85 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+            <h2 id="jhi-park-msg-heading" jhiTranslate="shieldApp.parkMsg.home.createOrEditLabel">Create or edit a Park Msg</h2>
+            <div>
+                <jhi-alert-error></jhi-alert-error>
+                <div class="form-group" [hidden]="!editForm.get('id').value">
+                    <label for="id" jhiTranslate="global.field.id">ID</label>
+                    <input type="text" class="form-control" id="id" name="id" formControlName="id"
+                        readonly />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.parkMsg.parkid" for="field_parkid">Parkid</label>
+                    <input type="text" class="form-control" name="parkid" id="field_parkid"
+                           formControlName="parkid"/>
+                    <div *ngIf="editForm.get('parkid').invalid && (editForm.get('parkid').dirty || editForm.get('parkid').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('parkid').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('parkid').errors.maxlength" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: 64 }">
+                        This field cannot be longer than 64 characters.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.parkMsg.service" for="field_service">Service</label>
+                    <input type="text" class="form-control" name="service" id="field_service"
+                           formControlName="service"/>
+                    <div *ngIf="editForm.get('service').invalid && (editForm.get('service').dirty || editForm.get('service').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('service').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('service').errors.maxlength" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: 64 }">
+                        This field cannot be longer than 64 characters.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.parkMsg.createTime" for="field_createTime">Create Time</label>
+                    <div class="d-flex">
+                        <input id="field_createTime" type="datetime-local" class="form-control" name="createTime" formControlName="createTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                    <div *ngIf="editForm.get('createTime').invalid && (editForm.get('createTime').dirty || editForm.get('createTime').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('createTime').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                            [hidden]="!editForm.get('createTime').errors?.ZonedDateTimelocal" jhiTranslate="entity.validation.ZonedDateTimelocal">
+                            This field should be a date and time.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.parkMsg.body" for="field_body">Body</label>
+                    <input type="text" class="form-control" name="body" id="field_body"
+                           formControlName="body"/>
+                    <div *ngIf="editForm.get('body').invalid && (editForm.get('body').dirty || editForm.get('body').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('body').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('body').errors.maxlength" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: 4096 }">
+                        This field cannot be longer than 4096 characters.
+                        </small>
+                    </div>
+                </div>
+
+            </div>
+            <div>
+                <button type="button" id="cancel-save" class="btn btn-secondary"  (click)="previousState()">
+                    <fa-icon [icon]="'ban'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+                </button>
+                <button type="submit" id="save-entity" [disabled]="editForm.invalid || isSaving" class="btn btn-primary">
+                    <fa-icon [icon]="'save'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

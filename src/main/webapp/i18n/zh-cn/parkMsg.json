@@ -1,0 +1,25 @@
+{
+  "shieldApp": {
+    "parkMsg": {
+      "home": {
+        "title": "Park Msgs",
+        "createLabel": "创建新 Park Msg",
+        "createOrEditLabel": "创建或编辑 Park Msg",
+        "notFound": "No Park Msg found"
+      },
+      "created": "Park Msg {{ param }} 创建成功",
+      "updated": "Park Msg {{ param }} 更新成功",
+      "deleted": "Park Msg {{ param }} 删除成功",
+      "delete": {
+        "question": "你确定要删除 Park Msg {{ id }} 吗？"
+      },
+      "detail": {
+        "title": "Park Msg"
+      },
+      "parkid": "Parkid",
+      "service": "Service",
+      "createTime": "Create Time",
+      "body": "Body"
+    }
+  }
+}

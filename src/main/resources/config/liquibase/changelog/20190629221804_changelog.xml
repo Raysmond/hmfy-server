@@ -3,9 +3,10 @@
                    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
-    <changeSet author="raysmond (generated)" id="1561732984401-1">
-        <addColumn tableName="jhi_user">
-            <column name="company" type="varchar(64)"/>
+    <changeSet author="raysmond (generated)" id="1561820123437-1">
+        <addColumn tableName="region">
+            <column name="auto_appointment" type="boolean"/>
+            <column name="park_id" type="varchar(64)"/>
         </addColumn>
     </changeSet>
 </databaseChangeLog>

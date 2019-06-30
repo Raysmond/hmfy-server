@@ -1,6 +1,5 @@
 package com.shield.service;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.shield.domain.ShipPlan;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -41,18 +39,16 @@ public class VehPlanSyncService {
 
     @Scheduled(fixedRate = 60 * 1000)
     public void syncVehPlans() {
-        // 同步前两天开始的发运计划
-        ZonedDateTime begin = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).minusDays(2L);
-        List<VehDelivPlan> plans = vehDelivPlanRepository.findAllByCreateTimeAfterOrderByCreateTime(begin);
-        log.info("start to sync {} veh plans, starts with {}", plans.size(), begin.format(DateTimeFormatter.BASIC_ISO_DATE));
+        ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+        List<VehDelivPlan> plans = vehDelivPlanRepository.findAllByDeliverTimeGreaterThanEqualOrderByCreateTime(today);
+        log.info("Find {} veh plans from SQLServer, deliverTime >= {}", plans.size(), today.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         if (CollectionUtils.isEmpty(plans)) {
             return;
         }
         List<Long> applyIds = plans.stream().map(VehDelivPlan::getApplyId).collect(Collectors.toList());
         List<ShipPlan> shipPlans = shipPlanRepository.findByApplyIdIn(applyIds);
-        log.info("all applyIds: {}", Joiner.on(",").join(applyIds));
-        List<ShipPlan> allShipPlans = Lists.newArrayList();
+        List<ShipPlan> updateShipPlans = Lists.newArrayList();
         Set<Long> changedApplyIds = Sets.newHashSet();
         for (VehDelivPlan plan : plans) {
             if (changedApplyIds.contains(plan.getApplyId())) {
@@ -71,27 +67,33 @@ public class VehPlanSyncService {
                     }
                     return it;
                 }).orElseGet(() -> {
-                    ShipPlan newShipPlan = new ShipPlan();
-                    newShipPlan.setApplyId(plan.getApplyId());
-                    newShipPlan.setApplyNumber(plan.getApplyNumber());
-                    newShipPlan.setTruckNumber(plan.getTruckNumber());
-                    newShipPlan.setDeliverPosition(plan.getDeliverPosition());
-                    newShipPlan.setDeliverTime(plan.getDeliverTime());
-                    newShipPlan.setProductName(plan.getProductName());
-                    newShipPlan.setAuditStatus(plan.getAuditStatus());
-                    newShipPlan.setCreateTime(plan.getCreateTime());
-                    newShipPlan.setCreateTime(ZonedDateTime.now());
-                    newShipPlan.setUpdateTime(ZonedDateTime.now());
+                    ShipPlan newShipPlan = generateShipPlanFromVehPlan(plan);
                     changedApplyIds.add(plan.getApplyId());
                     return newShipPlan;
                 });
-            allShipPlans.add(shipPlan);
+            updateShipPlans.add(shipPlan);
         }
 
-        allShipPlans = allShipPlans.stream().filter(it -> changedApplyIds.contains(it.getApplyId())).collect(Collectors.toList());
-        if (!CollectionUtils.isEmpty(allShipPlans)) {
-            shipPlanRepository.saveAll(allShipPlans);
-            log.info("Synchronized {} veh plans", allShipPlans.size());
+        updateShipPlans = updateShipPlans.stream().filter(it -> changedApplyIds.contains(it.getApplyId())).collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(updateShipPlans)) {
+            shipPlanRepository.saveAll(updateShipPlans);
         }
+        log.info("Synchronized {} veh plans", updateShipPlans.size());
+    }
+
+    private ShipPlan generateShipPlanFromVehPlan(VehDelivPlan plan) {
+        ShipPlan newShipPlan = new ShipPlan();
+        newShipPlan.setApplyId(plan.getApplyId());
+        newShipPlan.setApplyNumber(plan.getApplyNumber());
+        newShipPlan.setTruckNumber(plan.getTruckNumber());
+        newShipPlan.setDeliverPosition(plan.getDeliverPosition());
+        newShipPlan.setDeliverTime(plan.getDeliverTime());
+        newShipPlan.setValid(Boolean.TRUE);
+        newShipPlan.setProductName(plan.getProductName());
+        newShipPlan.setAuditStatus(plan.getAuditStatus());
+        newShipPlan.setCreateTime(plan.getCreateTime());
+        newShipPlan.setCreateTime(ZonedDateTime.now());
+        newShipPlan.setUpdateTime(ZonedDateTime.now());
+        return newShipPlan;
     }
 }

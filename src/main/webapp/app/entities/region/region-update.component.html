@@ -4,7 +4,7 @@
             <h2 id="jhi-region-heading" jhiTranslate="shieldApp.region.home.createOrEditLabel">Create or edit a Region</h2>
             <div>
                 <jhi-alert-error></jhi-alert-error>
-                <div class="form-group" [hidden]="!region.id">
+                <div class="form-group" [hidden]="!editForm.get('id').value">
                     <label for="id" jhiTranslate="global.field.id">ID</label>
                     <input type="text" class="form-control" id="id" name="id" formControlName="id"
                         readonly />
@@ -77,6 +77,16 @@
                     <label class="form-control-label" jhiTranslate="shieldApp.region.open" for="field_open">Open</label>
                     <input type="checkbox" class="form-control" name="open" id="field_open"
                            formControlName="open"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.region.autoAppointment" for="field_autoAppointment">Auto Appointment</label>
+                    <input type="checkbox" class="form-control" name="autoAppointment" id="field_autoAppointment"
+                           formControlName="autoAppointment"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.region.parkId" for="field_parkId">Park Id</label>
+                    <input type="text" class="form-control" name="parkId" id="field_parkId"
+                           formControlName="parkId"/>
                 </div>
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.region.validTime" for="field_validTime">Valid Time</label>

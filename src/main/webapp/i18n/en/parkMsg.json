@@ -1,0 +1,25 @@
+{
+  "shieldApp": {
+    "parkMsg": {
+      "home": {
+        "title": "Park Msgs",
+        "createLabel": "Create a new Park Msg",
+        "createOrEditLabel": "Create or edit a Park Msg",
+        "notFound": "No Park Msg found"
+      },
+      "created": "A new Park Msg is created with identifier {{ param }}",
+      "updated": "A Park Msg is updated with identifier {{ param }}",
+      "deleted": "A Park Msg is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Park Msg {{ id }}?"
+      },
+      "detail": {
+        "title": "Park Msg"
+      },
+      "parkid": "Parkid",
+      "service": "Service",
+      "createTime": "Create Time",
+      "body": "Body"
+    }
+  }
+}

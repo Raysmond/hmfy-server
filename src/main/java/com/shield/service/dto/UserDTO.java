@@ -64,6 +64,8 @@ public class UserDTO {
     // 用于设置密码
     private String rawPassword;
 
+    private String company;
+
 
     public UserDTO() {
         // Empty constructor needed for Jackson.
@@ -81,6 +83,7 @@ public class UserDTO {
         this.createdBy = user.getCreatedBy();
         this.createdDate = user.getCreatedDate();
         this.lastModifiedBy = user.getLastModifiedBy();
+        this.company = user.getCompany();
         this.lastModifiedDate = user.getLastModifiedDate();
         this.authorities = user.getAuthorities().stream()
             .map(Authority::getName)
@@ -105,6 +108,13 @@ public class UserDTO {
         }
     }
 
+    public String getCompany() {
+        return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
+    }
 
     public String getTruckNumber() {
         return truckNumber;

@@ -41,6 +41,8 @@
                                 <option value="START">{{'shieldApp.AppointmentStatus.START' | translate}}</option>
                                 <option value="ENTER">{{'shieldApp.AppointmentStatus.ENTER' | translate}}</option>
                                 <option value="LEAVE">{{'shieldApp.AppointmentStatus.LEAVE' | translate}}</option>
+                                <option value="CANCELED">{{'shieldApp.AppointmentStatus.CANCELED' | translate}}</option>
+                                <option value="EXPIRED">{{'shieldApp.AppointmentStatus.EXPIRED' | translate}}</option>
                             </select>
                         </div>
                     </div>
@@ -64,34 +66,37 @@
                         <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span>
                             <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
-                        <th jhiSortBy="licensePlateNumber"><span
+                        <th><span
+                            jhiTranslate="shieldApp.appointment.applyId">Apply ID</span>
+                        </th>
+                        <th><span
                             jhiTranslate="shieldApp.appointment.licensePlateNumber">License Plate Number</span>
                         </th>
-                        <th jhiSortBy="driver"><span jhiTranslate="shieldApp.appointment.driver">Driver</span>
+                        <th><span jhiTranslate="shieldApp.appointment.driver">Driver</span>
                         </th>
-                        <th jhiSortBy="phone"><span jhiTranslate="shieldApp.appointment.phone">Phone</span>
+                        <!--<th jhiSortBy="phone"><span jhiTranslate="shieldApp.appointment.phone">Phone</span>-->
+                        <!--</th>-->
+                        <th><span jhiTranslate="shieldApp.appointment.number">Number</span>
                         </th>
-                        <th jhiSortBy="number"><span jhiTranslate="shieldApp.appointment.number">Number</span>
-                        </th>
-                        <th jhiSortBy="queueNumber"><span
+                        <th><span
                             jhiTranslate="shieldApp.appointment.queueNumber">Queue Number</span>
                         </th>
-                        <th jhiSortBy="valid"><span jhiTranslate="shieldApp.appointment.valid">Valid</span>
+                        <th><span jhiTranslate="shieldApp.appointment.valid">Valid</span>
                         </th>
-                        <th jhiSortBy="status"><span jhiTranslate="shieldApp.appointment.status">Status</span>
+                        <th><span jhiTranslate="shieldApp.appointment.status">Status</span>
                         </th>
 
-                        <th jhiSortBy="vip"><span jhiTranslate="shieldApp.appointment.vip">Vip</span>
+                        <th><span jhiTranslate="shieldApp.appointment.vip">Vip</span>
                         </th>
                         <!--<th jhiSortBy="createTime"><span jhiTranslate="shieldApp.appointment.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-                        <!--<th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.appointment.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-                        <th jhiSortBy="startTime"><span jhiTranslate="shieldApp.appointment.startTime">Start Time</span>
+                        <th jhiSortBy="startTime"><span jhiTranslate="shieldApp.appointment.startTime">Start Time</span>  <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
+                        <th><span jhiTranslate="shieldApp.appointment.updateTime">Update Time</span></th>
                         <!--<th jhiSortBy="enterTime"><span jhiTranslate="shieldApp.appointment.enterTime">Enter Time</span>-->
-                            <!--<fa-icon [icon]="'sort'"></fa-icon>-->
+                        <!--<fa-icon [icon]="'sort'"></fa-icon>-->
                         <!--</th>-->
                         <!--<th jhiSortBy="leaveTime"><span jhiTranslate="shieldApp.appointment.leaveTime">Leave Time</span>-->
-                            <!--<fa-icon [icon]="'sort'"></fa-icon>-->
+                        <!--<fa-icon [icon]="'sort'"></fa-icon>-->
                         <!--</th>-->
                         <th jhiSortBy="regionName"><span jhiTranslate="shieldApp.appointment.region">Region</span>
                         </th>
@@ -103,9 +108,10 @@
                     <tbody>
                     <tr *ngFor="let appointment of appointments ;trackBy: trackId">
                         <td><a [routerLink]="['/appointment', appointment.id, 'view' ]">{{appointment.id}}</a></td>
+                        <td>{{appointment.applyId}}</td>
                         <td>{{appointment.licensePlateNumber}}</td>
                         <td>{{appointment.driver}}</td>
-                        <td>{{appointment.phone}}</td>
+                        <!--<td>{{appointment.phone}}</td>-->
                         <td>{{appointment.number}}</td>
                         <td>{{appointment.queueNumber}}</td>
                         <td>
@@ -124,6 +130,10 @@
                                   jhiTranslate="{{'shieldApp.AppointmentStatus.ENTER'}}">{{appointment.status}}</span>
                             <span class="badge badge-secondary" *ngIf="appointment.status=='LEAVE'"
                                   jhiTranslate="{{'shieldApp.AppointmentStatus.LEAVE'}}">{{appointment.status}}</span>
+                            <span class="badge badge-secondary" *ngIf="appointment.status=='CANCELED'"
+                                  jhiTranslate="{{'shieldApp.AppointmentStatus.CANCELED'}}">{{appointment.status}}</span>
+                            <span class="badge badge-danger" *ngIf="appointment.status=='EXPIRED'"
+                                  jhiTranslate="{{'shieldApp.AppointmentStatus.EXPIRED'}}">{{appointment.status}}</span>
                         </td>
                         <td>
                             <!--{{appointment.vip}}-->
@@ -131,10 +141,10 @@
 
                         </td>
                         <!--<td>{{appointment.createTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
-                        <!--<td>{{appointment.updateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
                         <td>{{appointment.startTime | date:'yyyy-MM-dd HH:mm'}}</td>
                         <!--<td>{{appointment.enterTime | date:'yyyy-MM-dd HH:mm'}}</td>-->
                         <!--<td>{{appointment.leaveTime | date:'yyyy-MM-dd HH:mm'}}</td>-->
+                        <td>{{appointment.updateTime | date:'yyyy-MM-dd HH:mm'}}</td>
                         <td>
                             <div *ngIf="appointment.regionId">
                                 <a [routerLink]="['../region', appointment.regionId , 'view' ]">{{appointment.regionName}}</a>
@@ -158,12 +168,12 @@
                                     <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>-->
                                 </button>
                                 <!--<button type="submit"-->
-                                        <!--[routerLink]="['/', 'appointment', { outlets: { popup: appointment.id + '/delete'} }]"-->
-                                        <!--replaceUrl="true"-->
-                                        <!--queryParamsHandling="merge"-->
-                                        <!--class="btn btn-danger btn-sm">-->
-                                    <!--<fa-icon [icon]="'times'"></fa-icon>-->
-                                    <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>-->
+                                <!--[routerLink]="['/', 'appointment', { outlets: { popup: appointment.id + '/delete'} }]"-->
+                                <!--replaceUrl="true"-->
+                                <!--queryParamsHandling="merge"-->
+                                <!--class="btn btn-danger btn-sm">-->
+                                <!--<fa-icon [icon]="'times'"></fa-icon>-->
+                                <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>-->
                                 <!--</button>-->
                             </div>
                         </td>

@@ -1,4 +1,11 @@
+mv shield.jar shield.bak.jar
+mv shield-0.0.1-SNAPSHOT.jar shield.jar
 
-./gradlew -Pprod clean bootJar
+sudo docker-compose -f app.yml stop shield-app
 
-scp -P 2233 build/libs/shield-0.0.1-SNAPSHOT.jar zou@116.247.114.12:/home/zou/shield/docker/
+sudo docker-compose -f app.yml rm -f shield-app
+
+sudo docker rmi shield:latest
+sudo docker build -t shield .
+
+sudo docker-compose -f app.yml up -d shield-app

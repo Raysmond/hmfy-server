@@ -45,7 +45,7 @@ spring:
   #        prepStmtCacheSqlLimit: 2048
   #        useServerPrepStmts: true
   mysql-datasource:
-    jdbc-url: jdbc:mysql://shield-mysql:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
+    jdbc-url: jdbc:mysql://shield-mysql:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai
     username: root
     password:
     poolName: Hikari

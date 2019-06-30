@@ -159,6 +159,8 @@ public class UserService {
         user.setResetKey(RandomUtil.generateResetKey());
         user.setResetDate(Instant.now());
         user.setActivated(true);
+        user.setTruckNumber(userDTO.getTruckNumber());
+        user.setCompany(userDTO.getCompany());
         if (userDTO.getAuthorities() != null) {
             Set<Authority> authorities = userDTO.getAuthorities().stream()
                 .map(authorityRepository::findById)
@@ -232,6 +234,7 @@ public class UserService {
                     // 管理员可以更新密码
                     user.setPassword(passwordEncoder.encode(userDTO.getRawPassword()));
                 }
+                user.setCompany(userDTO.getCompany());
                 user.setTruckNumber(userDTO.getTruckNumber());
                 Set<Authority> managedAuthorities = user.getAuthorities();
                 managedAuthorities.clear();

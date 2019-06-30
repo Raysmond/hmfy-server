@@ -1,8 +1,9 @@
 package com.shield.web.rest;
 
 import com.shield.service.RegionService;
-import com.shield.service.dto.RegionDTO;
 import com.shield.web.rest.errors.BadRequestAlertException;
+import com.shield.service.dto.RegionDTO;
+
 import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -12,16 +13,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -90,17 +92,10 @@ public class RegionResource {
      * @param pageable the pagination information.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of regions in body.
      */
-    @GetMapping({"/regions"})
+    @GetMapping("/regions")
     public ResponseEntity<List<RegionDTO>> getAllRegions(Pageable pageable, @RequestParam MultiValueMap<String, String> queryParams, UriComponentsBuilder uriBuilder) {
         log.debug("REST request to get a page of Regions");
         Page<RegionDTO> page = regionService.findAll(pageable);
-        Map<Long, Long> countDrivers = regionService.countDriversByRegionId();
-        page.map(it -> {
-            if (countDrivers.containsKey(it.getId())) {
-                it.setDrivers(countDrivers.get(it.getId()).intValue());
-            }
-            return it;
-        });
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(uriBuilder.queryParams(queryParams), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
@@ -124,10 +119,10 @@ public class RegionResource {
      * @param id the id of the regionDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/regions/{id}")
-    public ResponseEntity<Void> deleteRegion(@PathVariable Long id) {
-        log.debug("REST request to delete Region : {}", id);
-        regionService.delete(id);
-        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString())).build();
-    }
+//    @DeleteMapping("/regions/{id}")
+//    public ResponseEntity<Void> deleteRegion(@PathVariable Long id) {
+//        log.debug("REST request to delete Region : {}", id);
+//        regionService.delete(id);
+//        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString())).build();
+//    }
 }

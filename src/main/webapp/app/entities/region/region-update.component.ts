@@ -13,7 +13,6 @@ import { RegionService } from './region.service';
   templateUrl: './region-update.component.html'
 })
 export class RegionUpdateComponent implements OnInit {
-  region: IRegion;
   isSaving: boolean;
 
   editForm = this.fb.group({
@@ -25,6 +24,8 @@ export class RegionUpdateComponent implements OnInit {
     endTime: [],
     days: [],
     open: [],
+    autoAppointment: [],
+    parkId: [],
     validTime: [null, [Validators.required, Validators.min(0)]],
     queueQuota: [null, [Validators.required, Validators.min(0)]],
     queueValidTime: [null, [Validators.required, Validators.min(0)]],
@@ -38,7 +39,6 @@ export class RegionUpdateComponent implements OnInit {
     this.isSaving = false;
     this.activatedRoute.data.subscribe(({ region }) => {
       this.updateForm(region);
-      this.region = region;
     });
   }
 
@@ -52,6 +52,8 @@ export class RegionUpdateComponent implements OnInit {
       endTime: region.endTime,
       days: region.days,
       open: region.open,
+      autoAppointment: region.autoAppointment,
+      parkId: region.parkId,
       validTime: region.validTime,
       queueQuota: region.queueQuota,
       queueValidTime: region.queueValidTime,
@@ -85,6 +87,8 @@ export class RegionUpdateComponent implements OnInit {
       endTime: this.editForm.get(['endTime']).value,
       days: this.editForm.get(['days']).value,
       open: this.editForm.get(['open']).value,
+      autoAppointment: this.editForm.get(['autoAppointment']).value,
+      parkId: this.editForm.get(['parkId']).value,
       validTime: this.editForm.get(['validTime']).value,
       queueQuota: this.editForm.get(['queueQuota']).value,
       queueValidTime: this.editForm.get(['queueValidTime']).value,

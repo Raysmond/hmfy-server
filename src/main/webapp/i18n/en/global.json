@@ -12,6 +12,7 @@
         "appointment": "Appointment",
         "wxMaUser": "Wx Ma User",
         "shipPlan": "Ship Plan",
+        "parkMsg": "Park Msg",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },
       "account": {

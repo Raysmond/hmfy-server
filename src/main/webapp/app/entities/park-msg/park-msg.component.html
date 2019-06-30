@@ -1,0 +1,71 @@
+<div>
+    <h2 id="page-heading">
+        <span jhiTranslate="shieldApp.parkMsg.home.title">Park Msgs</span>
+        <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-park-msg" [routerLink]="['/park-msg/new']">
+            <fa-icon [icon]="'plus'"></fa-icon>
+            <span  jhiTranslate="shieldApp.parkMsg.home.createLabel">
+            Create new Park Msg
+            </span>
+        </button>
+    </h2>
+    <jhi-alert></jhi-alert>
+    <br/>
+    <div class="alert alert-warning" *ngIf="parkMsgs?.length === 0">
+        <span jhiTranslate="shieldApp.parkMsg.home.notFound">No parkMsgs found</span>
+    </div>
+    <div class="table-responsive" *ngIf="parkMsgs?.length > 0">
+        <table class="table table-striped">
+            <thead>
+            <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
+            <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="parkid"><span jhiTranslate="shieldApp.parkMsg.parkid">Parkid</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="service"><span jhiTranslate="shieldApp.parkMsg.service">Service</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="createTime"><span jhiTranslate="shieldApp.parkMsg.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="body"><span jhiTranslate="shieldApp.parkMsg.body">Body</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let parkMsg of parkMsgs ;trackBy: trackId">
+                <td><a [routerLink]="['/park-msg', parkMsg.id, 'view' ]">{{parkMsg.id}}</a></td>
+                <td>{{parkMsg.parkid}}</td>
+                <td>{{parkMsg.service}}</td>
+                <td>{{parkMsg.createTime | date:'medium'}}</td>
+                <td>{{parkMsg.body}}</td>
+                <td class="text-right">
+                    <div class="btn-group">
+                        <button type="submit"
+                                [routerLink]="['/park-msg', parkMsg.id, 'view' ]"
+                                class="btn btn-info btn-sm">
+                            <fa-icon [icon]="'eye'"></fa-icon>
+                            <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
+                        </button>
+                        <button type="submit"
+                                [routerLink]="['/park-msg', parkMsg.id, 'edit']"
+                                class="btn btn-primary btn-sm">
+                            <fa-icon [icon]="'pencil-alt'"></fa-icon>
+                            <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
+                        </button>
+                        <button type="submit"
+                                [routerLink]="['/', 'park-msg', { outlets: { popup: parkMsg.id + '/delete'} }]"
+                                replaceUrl="true"
+                                queryParamsHandling="merge"
+                                class="btn btn-danger btn-sm">
+                            <fa-icon [icon]="'times'"></fa-icon>
+                            <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div [hidden]="parkMsgs?.length === 0">
+        <div class="row justify-content-center">
+            <jhi-item-count [page]="page" [total]="totalItems" [maxSize]="5" [itemsPerPage]="itemsPerPage"></jhi-item-count>
+        </div>
+        <div class="row justify-content-center">
+            <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" (pageChange)="loadPage(page)"></ngb-pagination>
+        </div>
+    </div>
+</div>

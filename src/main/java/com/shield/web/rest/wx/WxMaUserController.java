@@ -88,6 +88,10 @@ public class WxMaUserController {
         WxMaUserInfo userInfo;
         String login;
         String password;
+        String encryptedData;
+        String iv;
+        String errMsg;
+        String signature;
     }
 
     @PostMapping("/login")
@@ -96,7 +100,14 @@ public class WxMaUserController {
 
         try {
             WxMaJscode2SessionResult session = wxService.getUserService().getSessionInfo(loginVm.code);
-            logger.info("WeChat user openid: {} login, session_key: {}", session.getOpenid(), session.getSessionKey());
+            logger.info("WeChat user openid: {} login, session_key: {}, unionid: {}", session.getOpenid(), session.getSessionKey(), session.getUnionid());
+
+            String unionId = null;
+            if (StringUtils.isNotBlank(loginVm.encryptedData)) {
+                WxMaUserInfo wxMaUserInfo =  wxService.getUserService().getUserInfo(session.getSessionKey(), loginVm.getEncryptedData(), loginVm.getIv());
+                logger.info("Wechat userInfo from encryptedData: openid: {}, unionid: {}", wxMaUserInfo.getOpenId(), wxMaUserInfo.getUnionId());
+                unionId = wxMaUserInfo.getUnionId();
+            }
 
             Optional<WxMaUserDTO> wxMaUser = wxMaUserService.findByOpenId(session.getOpenid());
             User user;
@@ -107,6 +118,7 @@ public class WxMaUserController {
                 user = userService.getUserWithAuthorities(userId).get();
                 wxMaUserDTO.setUpdateTime(ZonedDateTime.now());
                 wxMaUserDTO.updateWithWxUserInfo(loginVm.userInfo);
+                wxMaUserDTO.setUnionId(unionId);
                 wxMaUserService.save(wxMaUserDTO);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(user.getLogin());
@@ -118,7 +130,7 @@ public class WxMaUserController {
                 WxMaUserDTO wxMaUserDTO = new WxMaUserDTO();
                 wxMaUserDTO.updateWithWxUserInfo(loginVm.userInfo);
                 wxMaUserDTO.setOpenId(session.getOpenid());
-                wxMaUserDTO.setUnionId(session.getUnionid());
+                wxMaUserDTO.setUnionId(unionId);
                 wxMaUserDTO.setCreateTime(ZonedDateTime.now());
                 wxMaUserDTO.setUpdateTime(ZonedDateTime.now());
                 wxMaUserDTO.setUserId(userService.getUserWithAuthoritiesByLogin(loginVm.login).get().getId());

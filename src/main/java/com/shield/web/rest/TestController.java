@@ -1,22 +1,13 @@
 package com.shield.web.rest;
 
-import com.shield.domain.Region;
-import com.shield.repository.RegionRepository;
 import com.shield.service.UserService;
-import com.shield.sqlserver.domain.VehDelivPlan;
 import com.shield.sqlserver.repository.VehDelivPlanRepository;
-import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.net.SocketFactory;
 import java.io.IOException;
-import java.net.Socket;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/test")
@@ -34,33 +25,37 @@ public class TestController {
 
     @GetMapping("/socket")
     public String testSocket() throws IOException, InterruptedException {
-        Socket socket = SocketFactory.getDefault().createSocket("localhost", 9981);
-        socket.getOutputStream().write(("helloworld:" + Math.random() + "\r\n").getBytes());
-        Thread.sleep(1000
-        );
-        socket.close();
+//        Socket socket = SocketFactory.getDefault().createSocket("localhost", 9981);
+//        socket.getOutputStream().write(("from remote:" + Math.random() + "\r\n").getBytes());
+//        Thread.sleep(1000 );
+//
+//        Writer out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+//        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+//
+//        for (int i = 1; i < 3; ++i) {
+//            String msg =  "hello" + i;
+//
+//            out.write(msg+"\r\n");
+//            out.flush();
+//            //System.out.print(msg+"\r\n");
+//
+//            System.out.println("Waiting for message ...");
+//
+//            StringBuffer str = new StringBuffer();
+//            int c;
+//            while ((c = in.read()) != -1) {
+//                str.append((char) c);
+//            }
+//
+//            String response = str.toString();
+//            System.out.println("got message: " + response);
+//
+//            Thread.sleep(1000);
+//        }
+//
+//        socket.close();
+
         return "ok";
     }
 
-    @GetMapping("/change-default-password")
-    public String changedDefaultPassword() {
-        String password = "bt!888";
-        userService.changeSystemUserPassword(password);
-        return "ok";
-    }
-
-    @Autowired
-    RegionRepository regionRepository;
-
-    @GetMapping("test")
-    public String test() {
-        List<Region> regions = regionRepository.findAll();
-        Region region = regions.get(0);
-        System.out.println(ZoneId.systemDefault());
-        System.out.println(ZonedDateTime.now());
-        System.out.println(ZonedDateTime.now().getZone());
-        region.setUpdateTime(ZonedDateTime.now());
-        regionRepository.save(region);
-        return "ok";
-    }
 }

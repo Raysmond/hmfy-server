@@ -1,15 +1,20 @@
 package com.shield.service.impl;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.shield.domain.Appointment;
 import com.shield.domain.Region;
+import com.shield.domain.ShipPlan;
 import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.repository.RegionRepository;
+import com.shield.repository.ShipPlanRepository;
 import com.shield.service.AppointmentService;
 import com.shield.repository.AppointmentRepository;
 import com.shield.service.UserService;
 import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.mapper.AppointmentMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,18 +26,18 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.shield.service.ParkingTcpHandlerService.REDIS_KEY_DELETE_CAR_WHITELIST;
+import static com.shield.service.ParkingTcpHandlerService.REDIS_KEY_UPLOAD_CAR_WHITELIST;
 
 /**
  * Service Implementation for managing {@link Appointment}.
@@ -54,6 +59,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ShipPlanRepository shipPlanRepository;
 
     @Autowired
     @Qualifier("redisLongTemplate")
@@ -127,6 +135,126 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
 
+    @Override
+    public List<AppointmentDTO> findByApplyIdIn(List<Long> applyIds) {
+        return appointmentRepository.findByApplyIdIn(applyIds)
+            .stream()
+            .map(it -> appointmentMapper.toDto(it)).collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<Long, AppointmentDTO> findLastByApplyIdIn(List<Long> applyIds) {
+        List<AppointmentDTO> items = this.findByApplyIdIn(applyIds);
+        items.sort(Comparator.comparing(AppointmentDTO::getCreateTime).reversed());
+        Map<Long, AppointmentDTO> applyId2Appointment = Maps.newHashMap();
+        for (AppointmentDTO item : items) {
+            if (!applyId2Appointment.containsKey(item.getApplyId())) {
+                applyId2Appointment.put(item.getApplyId(), item);
+            }
+        }
+        return applyId2Appointment;
+    }
+
+    @Override
+    public AppointmentDTO cancelAppointment(Long appointmentId) {
+        Appointment appointment = appointmentRepository.getOne(appointmentId);
+        appointment.setValid(Boolean.FALSE);
+        appointment.setStatus(AppointmentStatus.CANCELED);
+        appointment = appointmentRepository.save(appointment);
+        return appointmentMapper.toDto(appointment);
+    }
+
+    @Override
+    public void updateCarInAndOutTime(String parkId, String truckNumber, String carInTime, String carOutTime) {
+        Region region = regionRepository.findOneByParkId(parkId);
+        if (region == null) {
+            log.error("Cannot find region by parkid: {}", parkId);
+            return;
+        }
+        ZonedDateTime inTime = null;
+        ZonedDateTime outTime = null;
+        if (StringUtils.isNotBlank(carInTime)) {
+            inTime = ZonedDateTime.parse(carInTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        }
+        if (StringUtils.isNotBlank(carOutTime)) {
+            outTime = ZonedDateTime.parse(carOutTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        }
+
+        ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+
+        List<ShipPlan> shipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today, today.plusSeconds(1));
+        if (shipPlans.size() > 1) {
+            log.error("Multiple plans found for truckNumber {}, region: {}, deliverDate: {}", truckNumber, region.getName(), today);
+        }
+        if (!CollectionUtils.isEmpty(shipPlans)) {
+            for (ShipPlan plan : shipPlans) {
+                boolean changed = false;
+                if (plan.getGateTime() == null && inTime != null) {
+                    plan.setGateTime(inTime);
+                    changed = true;
+                }
+                if (plan.getLeaveTime() == null && outTime != null) {
+                    plan.setLeaveTime(outTime);
+                    changed = true;
+                }
+                if (changed) {
+                    plan.setUpdateTime(plan.getUpdateTime());
+                    shipPlanRepository.save(plan);
+                    log.info("update ShipPlan gateTime: {}, leaveTime: {}, truckNumber: {}", carInTime, carOutTime, truckNumber);
+                }
+            }
+        }
+
+        List<Appointment> appointments = appointmentRepository.findLatestByTruckNumber(region.getId(), truckNumber, today);
+        if (!CollectionUtils.isEmpty(appointments)) {
+            Appointment appointment = appointments.get(0);
+            boolean changed = false;
+            if (appointment.getStatus().equals(AppointmentStatus.START) && inTime != null) {
+                appointment.setStatus(AppointmentStatus.ENTER);
+                changed = true;
+            }
+            if (outTime != null) {
+                appointment.setStatus(AppointmentStatus.LEAVE);
+                appointment.setUpdateTime(ZonedDateTime.now());
+                redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
+                changed = true;
+            }
+            if (changed) {
+                appointmentRepository.save(appointment);
+                log.info("update appointment [{}] status: {}, inTime: {}, outTime: {}, truckNumber: {}",
+                    appointment.getId(), appointment.getStatus(), carInTime, carOutTime, truckNumber);
+            }
+        }
+//
+//        Appointment latestAppointment = appointments.get(0);
+//        if (latestAppointment.getApplyId() != null) {
+//            List<ShipPlan> shipPlans = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(latestAppointment.getApplyId()));
+//            if (!CollectionUtils.isEmpty(shipPlans)) {
+//                for (ShipPlan plan : shipPlans) {
+//                    if (inTime != null) {
+//                        plan.setGateTime(inTime);
+//                    }
+//                    if (outTime != null) {
+//                        plan.setLeaveTime(outTime);
+//                    }
+//                    plan.setUpdateTime(plan.getUpdateTime());
+//                }
+//                shipPlanRepository.saveAll(shipPlans);
+//                log.info("update ShipPlan gateTime: {}, leaveTime: {}, applyId: {}, truckNumber: {}", carInTime, carOutTime, latestAppointment.getApplyId(), truckNumber);
+//            }
+//        }
+    }
+
+    @Override
+    public Long countAppointmentOfRegionId(Long regionId) {
+        return appointmentRepository.countAllValidByRegionId(regionId);
+    }
+
+    @Override
+    public Long countAllWaitByRegionId(Long regionId) {
+        return appointmentRepository.countAllWaitByRegionId(regionId);
+    }
+
     public Integer generateAppointmentNumber(Long regionId) {
         String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
 //        String key = String.format(APPOINTMENT_NUMBER_KEY, regionId, today);
@@ -160,7 +288,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setRegion(region);
         appointment.setUser(userService.getUserWithAuthorities().get());
         appointment.setVip(false);
-        appointment.setValid(false);
+        appointment.setValid(true);
+        appointment.setApplyId(appointmentDTO.getApplyId());
         appointment.setStatus(AppointmentStatus.CREATE);
         appointmentRepository.save(appointment);
 
@@ -185,6 +314,8 @@ public class AppointmentServiceImpl implements AppointmentService {
                 appointmentRepository.save(appointment);
                 log.info("Appointment [{}] made success at region ({}, {}), number: {}, licensePlateNumber: {}",
                     appointment.getId(), region.getId(), region.getName(), appointment.getNumber(), appointment.getLicensePlateNumber());
+
+                redisLongTemplate.opsForSet().add(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
                 return true;
             }
             return false;
@@ -197,7 +328,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return ZonedDateTime.of(today, time, ZoneId.systemDefault()).minusDays(2L);
     }
 
-    private static final long DEFAULT_VALID_TIME_SECONDS = 7200;
+    private static final Long DEFAULT_VALID_TIME_SECONDS = 7200L;
 
     @Scheduled(fixedRate = 60 * 1000)
     public void checkAppointments() {
@@ -209,7 +340,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                     log.info("Appointment [{}] expired after {} seconds", appointment.getId(), validSeconds);
                     appointment.setUpdateTime(ZonedDateTime.now());
                     appointment.setValid(false);
+                    appointment.setStatus(AppointmentStatus.EXPIRED);
                     appointmentRepository.save(appointment);
+                    redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
+                    redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
                 }
             }
 

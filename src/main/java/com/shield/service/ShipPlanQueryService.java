@@ -110,6 +110,9 @@ public class ShipPlanQueryService extends QueryService<ShipPlan> {
             if (criteria.getDeliverPosition() != null) {
                 specification = specification.and(buildStringSpecification(criteria.getDeliverPosition(), ShipPlan_.deliverPosition));
             }
+            if (criteria.getValid() != null) {
+                specification = specification.and(buildSpecification(criteria.getValid(), ShipPlan_.valid));
+            }
             if (criteria.getGateTime() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getGateTime(), ShipPlan_.gateTime));
             }

@@ -45,6 +45,14 @@
       "fieldType": "Boolean"
     },
     {
+      "fieldName": "autoAppointment",
+      "fieldType": "Boolean"
+    },
+    {
+      "fieldName": "parkId",
+      "fieldType": "String"
+    },
+    {
       "fieldName": "validTime",
       "fieldType": "Integer",
       "fieldValidateRules": [

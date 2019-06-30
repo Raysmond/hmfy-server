@@ -9,6 +9,8 @@ export interface IRegion {
   endTime?: string;
   days?: string;
   open?: boolean;
+  autoAppointment?: boolean;
+  parkId?: string;
   validTime?: number;
   queueQuota?: number;
   queueValidTime?: number;
@@ -26,6 +28,8 @@ export class Region implements IRegion {
     public endTime?: string,
     public days?: string,
     public open?: boolean,
+    public autoAppointment?: boolean,
+    public parkId?: string,
     public validTime?: number,
     public queueQuota?: number,
     public queueValidTime?: number,
@@ -33,5 +37,6 @@ export class Region implements IRegion {
     public updateTime?: Moment
   ) {
     this.open = this.open || false;
+    this.autoAppointment = this.autoAppointment || false;
   }
 }

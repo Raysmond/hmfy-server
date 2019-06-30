@@ -1,5 +1,4 @@
 package com.shield.service.dto;
-
 import java.time.ZonedDateTime;
 import javax.validation.constraints.*;
 import java.io.Serializable;
@@ -31,6 +30,13 @@ public class RegionDTO implements Serializable {
 
     private Boolean open;
 
+    private Boolean autoAppointment;
+
+    private String parkId;
+
+    private Integer remainQuota;
+    private Integer drivers = 0;
+
     @NotNull
     @Min(value = 0)
     private Integer validTime;
@@ -47,7 +53,21 @@ public class RegionDTO implements Serializable {
 
     private ZonedDateTime updateTime;
 
-    private Integer drivers = 0;
+    public Integer getDrivers() {
+        return drivers;
+    }
+
+    public void setDrivers(Integer drivers) {
+        this.drivers = drivers;
+    }
+
+    public Integer getRemainQuota() {
+        return remainQuota;
+    }
+
+    public void setRemainQuota(Integer remainQuota) {
+        this.remainQuota = remainQuota;
+    }
 
     public Long getId() {
         return id;
@@ -113,6 +133,22 @@ public class RegionDTO implements Serializable {
         this.open = open;
     }
 
+    public Boolean isAutoAppointment() {
+        return autoAppointment;
+    }
+
+    public void setAutoAppointment(Boolean autoAppointment) {
+        this.autoAppointment = autoAppointment;
+    }
+
+    public String getParkId() {
+        return parkId;
+    }
+
+    public void setParkId(String parkId) {
+        this.parkId = parkId;
+    }
+
     public Integer getValidTime() {
         return validTime;
     }
@@ -153,14 +189,6 @@ public class RegionDTO implements Serializable {
         this.updateTime = updateTime;
     }
 
-    public Integer getDrivers() {
-        return drivers;
-    }
-
-    public void setDrivers(Integer drivers) {
-        this.drivers = drivers;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -193,6 +221,8 @@ public class RegionDTO implements Serializable {
             ", endTime='" + getEndTime() + "'" +
             ", days='" + getDays() + "'" +
             ", open='" + isOpen() + "'" +
+            ", autoAppointment='" + isAutoAppointment() + "'" +
+            ", parkId='" + getParkId() + "'" +
             ", validTime=" + getValidTime() +
             ", queueQuota=" + getQueueQuota() +
             ", queueValidTime=" + getQueueValidTime() +

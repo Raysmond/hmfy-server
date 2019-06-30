@@ -24,6 +24,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
     @Query("select count(a.id) from Appointment a where a.region.id = ?1 and a.valid = true and a.status in ('START', 'ENTER')")
     Long countAllValidByRegionId(Long regionId);
 
+    @Query("select count(a.id) from Appointment a where a.region.id = ?1 and a.valid = true and a.status = 'WAIT'")
+    Long countAllWaitByRegionId(Long regionId);
+
     @Query("select a from Appointment a where a.region.id = ?1 and a.status = 'WAIT' and a.valid = true")
     List<Appointment> findWaitingList(Long regionId);
 
@@ -32,4 +35,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
 
     @Query("select a from Appointment a where a.applyId in ?1 and a.createTime > ?2 and a.valid = true")
     List<Appointment> findByApplyIdIn(List<Long> applyIds, ZonedDateTime beginTime);
+
+    @Query("select a from Appointment a where a.applyId in ?1 and a.status <> 'CANCELED'")
+    List<Appointment> findByApplyIdIn(List<Long> applyIds);
+
+    @Query("select a from Appointment a where a.region.id = ?1 and a.licensePlateNumber = ?2 and a.createTime >= ?3 and a.valid = true order by a.createTime desc")
+    List<Appointment> findLatestByTruckNumber(Long regionId, String truckNumber, ZonedDateTime createTime);
 }

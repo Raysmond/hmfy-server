@@ -22,6 +22,8 @@
       "queueValidTime": "最长排队时间(s)",
       "startTime": "开启时间",
       "endTime": "结束时间",
+      "autoAppointment": "自动注册",
+      "parkId": "车场ID",
       "days": "开启星期",
       "open": "开启状态",
       "createTime": "新建时间",

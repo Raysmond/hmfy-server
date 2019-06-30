@@ -23,6 +23,7 @@
                 <!--</th>-->
                 <th><span jhiTranslate="userManagement.profiles">Profiles</span></th>
                 <th>绑定区域</th>
+                <th>公司</th>
                 <th jhiSortBy="langKey"><span jhiTranslate="userManagement.truckNumber">Truck Number</span>
                 </th>
                 <th>绑定微信账号</th>
@@ -66,6 +67,7 @@
                         <a [routerLink]="['/region', user.regionId , 'view' ]">{{user.regionName}}</a>
                     </div>
                 </td>
+                <td>{{user.company}}</td>
                 <td>{{user.truckNumber}}</td>
                 <td>
                     <div *ngIf="user.userInfo">

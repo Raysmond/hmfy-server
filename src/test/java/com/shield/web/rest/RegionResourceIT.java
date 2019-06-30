@@ -62,6 +62,12 @@ public class RegionResourceIT {
     private static final Boolean DEFAULT_OPEN = false;
     private static final Boolean UPDATED_OPEN = true;
 
+    private static final Boolean DEFAULT_AUTO_APPOINTMENT = false;
+    private static final Boolean UPDATED_AUTO_APPOINTMENT = true;
+
+    private static final String DEFAULT_PARK_ID = "AAAAAAAAAA";
+    private static final String UPDATED_PARK_ID = "BBBBBBBBBB";
+
     private static final Integer DEFAULT_VALID_TIME = 0;
     private static final Integer UPDATED_VALID_TIME = 1;
 
@@ -132,6 +138,8 @@ public class RegionResourceIT {
             .endTime(DEFAULT_END_TIME)
             .days(DEFAULT_DAYS)
             .open(DEFAULT_OPEN)
+            .autoAppointment(DEFAULT_AUTO_APPOINTMENT)
+            .parkId(DEFAULT_PARK_ID)
             .validTime(DEFAULT_VALID_TIME)
             .queueQuota(DEFAULT_QUEUE_QUOTA)
             .queueValidTime(DEFAULT_QUEUE_VALID_TIME)
@@ -154,6 +162,8 @@ public class RegionResourceIT {
             .endTime(UPDATED_END_TIME)
             .days(UPDATED_DAYS)
             .open(UPDATED_OPEN)
+            .autoAppointment(UPDATED_AUTO_APPOINTMENT)
+            .parkId(UPDATED_PARK_ID)
             .validTime(UPDATED_VALID_TIME)
             .queueQuota(UPDATED_QUEUE_QUOTA)
             .queueValidTime(UPDATED_QUEUE_VALID_TIME)
@@ -190,6 +200,8 @@ public class RegionResourceIT {
         assertThat(testRegion.getEndTime()).isEqualTo(DEFAULT_END_TIME);
         assertThat(testRegion.getDays()).isEqualTo(DEFAULT_DAYS);
         assertThat(testRegion.isOpen()).isEqualTo(DEFAULT_OPEN);
+        assertThat(testRegion.isAutoAppointment()).isEqualTo(DEFAULT_AUTO_APPOINTMENT);
+        assertThat(testRegion.getParkId()).isEqualTo(DEFAULT_PARK_ID);
         assertThat(testRegion.getValidTime()).isEqualTo(DEFAULT_VALID_TIME);
         assertThat(testRegion.getQueueQuota()).isEqualTo(DEFAULT_QUEUE_QUOTA);
         assertThat(testRegion.getQueueValidTime()).isEqualTo(DEFAULT_QUEUE_VALID_TIME);
@@ -350,6 +362,8 @@ public class RegionResourceIT {
             .andExpect(jsonPath("$.[*].endTime").value(hasItem(DEFAULT_END_TIME.toString())))
             .andExpect(jsonPath("$.[*].days").value(hasItem(DEFAULT_DAYS.toString())))
             .andExpect(jsonPath("$.[*].open").value(hasItem(DEFAULT_OPEN.booleanValue())))
+            .andExpect(jsonPath("$.[*].autoAppointment").value(hasItem(DEFAULT_AUTO_APPOINTMENT.booleanValue())))
+            .andExpect(jsonPath("$.[*].parkId").value(hasItem(DEFAULT_PARK_ID.toString())))
             .andExpect(jsonPath("$.[*].validTime").value(hasItem(DEFAULT_VALID_TIME)))
             .andExpect(jsonPath("$.[*].queueQuota").value(hasItem(DEFAULT_QUEUE_QUOTA)))
             .andExpect(jsonPath("$.[*].queueValidTime").value(hasItem(DEFAULT_QUEUE_VALID_TIME)))
@@ -375,6 +389,8 @@ public class RegionResourceIT {
             .andExpect(jsonPath("$.endTime").value(DEFAULT_END_TIME.toString()))
             .andExpect(jsonPath("$.days").value(DEFAULT_DAYS.toString()))
             .andExpect(jsonPath("$.open").value(DEFAULT_OPEN.booleanValue()))
+            .andExpect(jsonPath("$.autoAppointment").value(DEFAULT_AUTO_APPOINTMENT.booleanValue()))
+            .andExpect(jsonPath("$.parkId").value(DEFAULT_PARK_ID.toString()))
             .andExpect(jsonPath("$.validTime").value(DEFAULT_VALID_TIME))
             .andExpect(jsonPath("$.queueQuota").value(DEFAULT_QUEUE_QUOTA))
             .andExpect(jsonPath("$.queueValidTime").value(DEFAULT_QUEUE_VALID_TIME))
@@ -410,6 +426,8 @@ public class RegionResourceIT {
             .endTime(UPDATED_END_TIME)
             .days(UPDATED_DAYS)
             .open(UPDATED_OPEN)
+            .autoAppointment(UPDATED_AUTO_APPOINTMENT)
+            .parkId(UPDATED_PARK_ID)
             .validTime(UPDATED_VALID_TIME)
             .queueQuota(UPDATED_QUEUE_QUOTA)
             .queueValidTime(UPDATED_QUEUE_VALID_TIME)
@@ -433,6 +451,8 @@ public class RegionResourceIT {
         assertThat(testRegion.getEndTime()).isEqualTo(UPDATED_END_TIME);
         assertThat(testRegion.getDays()).isEqualTo(UPDATED_DAYS);
         assertThat(testRegion.isOpen()).isEqualTo(UPDATED_OPEN);
+        assertThat(testRegion.isAutoAppointment()).isEqualTo(UPDATED_AUTO_APPOINTMENT);
+        assertThat(testRegion.getParkId()).isEqualTo(UPDATED_PARK_ID);
         assertThat(testRegion.getValidTime()).isEqualTo(UPDATED_VALID_TIME);
         assertThat(testRegion.getQueueQuota()).isEqualTo(UPDATED_QUEUE_QUOTA);
         assertThat(testRegion.getQueueValidTime()).isEqualTo(UPDATED_QUEUE_VALID_TIME);

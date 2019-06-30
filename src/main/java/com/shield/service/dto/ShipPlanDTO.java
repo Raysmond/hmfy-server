@@ -30,6 +30,9 @@ public class ShipPlanDTO implements Serializable {
     @NotNull
     private String deliverPosition;
 
+    @NotNull
+    private Boolean valid;
+
     private ZonedDateTime gateTime;
 
     private ZonedDateTime leaveTime;
@@ -111,6 +114,14 @@ public class ShipPlanDTO implements Serializable {
 
     public void setDeliverPosition(String deliverPosition) {
         this.deliverPosition = deliverPosition;
+    }
+
+    public Boolean isValid() {
+        return valid;
+    }
+
+    public void setValid(Boolean valid) {
+        this.valid = valid;
     }
 
     public ZonedDateTime getGateTime() {
@@ -209,6 +220,7 @@ public class ShipPlanDTO implements Serializable {
             ", auditStatus=" + getAuditStatus() +
             ", productName='" + getProductName() + "'" +
             ", deliverPosition='" + getDeliverPosition() + "'" +
+            ", valid='" + isValid() + "'" +
             ", gateTime='" + getGateTime() + "'" +
             ", leaveTime='" + getLeaveTime() + "'" +
             ", deliverTime='" + getDeliverTime() + "'" +

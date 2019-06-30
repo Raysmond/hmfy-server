@@ -27,7 +27,7 @@ public class ShipPlan implements Serializable {
     private String company;
 
     @NotNull
-    @Column(name = "apply_id", nullable = false, unique = true)
+    @Column(name = "apply_id", nullable = false)
     private Long applyId;
 
     @Column(name = "apply_number")
@@ -48,6 +48,10 @@ public class ShipPlan implements Serializable {
     @NotNull
     @Column(name = "deliver_position", nullable = false)
     private String deliverPosition;
+
+    @NotNull
+    @Column(name = "valid", nullable = false)
+    private Boolean valid;
 
     @Column(name = "gate_time")
     private ZonedDateTime gateTime;
@@ -173,6 +177,19 @@ public class ShipPlan implements Serializable {
         this.deliverPosition = deliverPosition;
     }
 
+    public Boolean isValid() {
+        return valid;
+    }
+
+    public ShipPlan valid(Boolean valid) {
+        this.valid = valid;
+        return this;
+    }
+
+    public void setValid(Boolean valid) {
+        this.valid = valid;
+    }
+
     public ZonedDateTime getGateTime() {
         return gateTime;
     }
@@ -292,6 +309,7 @@ public class ShipPlan implements Serializable {
             ", auditStatus=" + getAuditStatus() +
             ", productName='" + getProductName() + "'" +
             ", deliverPosition='" + getDeliverPosition() + "'" +
+            ", valid='" + isValid() + "'" +
             ", gateTime='" + getGateTime() + "'" +
             ", leaveTime='" + getLeaveTime() + "'" +
             ", deliverTime='" + getDeliverTime() + "'" +

@@ -29,6 +29,7 @@ export class ShipPlanUpdateComponent implements OnInit {
     auditStatus: [null, [Validators.required]],
     productName: [null, [Validators.required]],
     deliverPosition: [null, [Validators.required]],
+    valid: [null, [Validators.required]],
     gateTime: [],
     leaveTime: [],
     deliverTime: [],
@@ -70,6 +71,7 @@ export class ShipPlanUpdateComponent implements OnInit {
       auditStatus: shipPlan.auditStatus,
       productName: shipPlan.productName,
       deliverPosition: shipPlan.deliverPosition,
+      valid: shipPlan.valid,
       gateTime: shipPlan.gateTime != null ? shipPlan.gateTime.format(DATE_TIME_FORMAT) : null,
       leaveTime: shipPlan.leaveTime != null ? shipPlan.leaveTime.format(DATE_TIME_FORMAT) : null,
       deliverTime: shipPlan.deliverTime != null ? shipPlan.deliverTime.format(DATE_TIME_FORMAT) : null,
@@ -105,6 +107,7 @@ export class ShipPlanUpdateComponent implements OnInit {
       auditStatus: this.editForm.get(['auditStatus']).value,
       productName: this.editForm.get(['productName']).value,
       deliverPosition: this.editForm.get(['deliverPosition']).value,
+      valid: this.editForm.get(['valid']).value,
       gateTime: this.editForm.get(['gateTime']).value != null ? moment(this.editForm.get(['gateTime']).value, DATE_TIME_FORMAT) : undefined,
       leaveTime:
         this.editForm.get(['leaveTime']).value != null ? moment(this.editForm.get(['leaveTime']).value, DATE_TIME_FORMAT) : undefined,

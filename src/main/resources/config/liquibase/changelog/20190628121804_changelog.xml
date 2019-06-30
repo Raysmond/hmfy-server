@@ -3,17 +3,10 @@
                    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
-    <changeSet author="raysmond (generated)" id="1561472332857-1">
-        <addColumn tableName="jhi_user">
-            <column name="truck_number" type="varchar(32)"/>
+    <changeSet author="raysmond (generated)" id="1561703184276-1">
+        <addColumn tableName="ship_plan">
+            <column name="valid" type="boolean" defaultValueBoolean="true" afterColumn="audit_status"/>
         </addColumn>
-    </changeSet>
-    <changeSet author="raysmond (generated)" id="1561472332857-2">
-        <createIndex
-            indexName="idx_truck_number"
-            tableName="jhi_user"
-            unique="true">
-            <column name="truck_number" type="varchar(32)"/>
-        </createIndex>
+        <dropUniqueConstraint constraintName="ux_ship_plan_apply_id" tableName="ship_plan"/>
     </changeSet>
 </databaseChangeLog>

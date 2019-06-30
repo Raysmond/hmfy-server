@@ -12,6 +12,7 @@
         "appointment": "发运预约",
         "wxMaUser": "绑定微信账户",
         "shipPlan": "发运计划",
+        "parkMsg": "门禁消息",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },
       "account": {

@@ -159,4 +159,14 @@ public class RegionServiceImpl implements RegionService {
         log.debug("Request to delete Region : {}", id);
         regionRepository.deleteById(id);
     }
+
+    @Override
+    public RegionDTO findByName(String name) {
+        Region region = regionRepository.findOneByName(name);
+        if (null != region) {
+            return regionMapper.toDto(region);
+        } else {
+            return null;
+        }
+    }
 }

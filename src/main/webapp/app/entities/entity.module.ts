@@ -103,6 +103,10 @@ import { RouterModule } from '@angular/router';
       {
         path: 'ship-plan',
         loadChildren: './ship-plan/ship-plan.module#ShieldShipPlanModule'
+      },
+      {
+        path: 'park-msg',
+        loadChildren: './park-msg/park-msg.module#ShieldParkMsgModule'
       }
       /* jhipster-needle-add-entity-route - JHipster will add entity modules routes here */
     ])
