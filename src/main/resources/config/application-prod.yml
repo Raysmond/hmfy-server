@@ -45,7 +45,9 @@ spring:
   #        prepStmtCacheSqlLimit: 2048
   #        useServerPrepStmts: true
   mysql-datasource:
+    #    type: com.zaxxer.hikari.HikariDataSource
     jdbc-url: jdbc:mysql://shield-mysql:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai
+    #    jdbc-url: jdbc:mysql://shield-mysql:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
     username: root
     password:
     poolName: Hikari
@@ -79,6 +81,7 @@ spring:
       hibernate.cache.use_second_level_cache: false
       hibernate.cache.use_query_cache: false
       hibernate.generate_statistics: false
+      hibernate.jdbc.time_zone: Asia/Shanghai
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     database: MYSQL
@@ -89,6 +92,7 @@ spring:
       hibernate.cache.use_second_level_cache: true
       hibernate.cache.use_query_cache: false
       hibernate.generate_statistics: false
+      hibernate.jdbc.time_zone: Asia/Shanghai
   # Replace by 'prod, faker' to add the faker context and have sample data loaded in production
   liquibase:
     contexts: prod

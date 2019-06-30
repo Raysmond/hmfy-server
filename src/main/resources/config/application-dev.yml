@@ -50,6 +50,7 @@ spring:
 
   mysql-datasource:
     jdbc-url: jdbc:mysql://localhost:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai
+    #    jdbc-url: jdbc:mysql://localhost:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
     username: root
     password:
     poolName: Hikari

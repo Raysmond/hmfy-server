@@ -75,4 +75,5 @@ public class ParkingTcpConfiguration {
     public String service(Message<String> msg) {
         return parkingTcpHandlerService.handle(msg);
     }
+
 }

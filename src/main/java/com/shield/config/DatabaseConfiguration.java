@@ -2,6 +2,7 @@ package com.shield.config;
 
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.jhipster.config.JHipsterConstants;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,6 +24,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 //
 //
 //@Configuration
@@ -35,6 +40,7 @@ import javax.sql.DataSource;
 //}
 
 
+@Slf4j
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "springSecurityAuditorAware")
 @EnableTransactionManagement
