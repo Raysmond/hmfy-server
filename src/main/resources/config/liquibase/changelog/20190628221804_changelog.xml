@@ -1,0 +1,12 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="raysmond (generated)" id="1561703184276-1">
+        <addColumn tableName="ship_plan">
+            <column name="valid" type="boolean" defaultValueBoolean="true" afterColumn="audit_status"/>
+        </addColumn>
+        <dropUniqueConstraint constraintName="ux_ship_plan_apply_id" tableName="ship_plan"/>
+    </changeSet>
+</databaseChangeLog>
