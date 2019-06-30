@@ -7,7 +7,7 @@ import { take, map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { DATE_TIME_FORMAT } from 'app/shared/constants/input.constants';
 import { ParkMsgService } from 'app/entities/park-msg/park-msg.service';
-import { IParkMsg, ParkMsg } from 'app/shared/model/park-msg.model';
+import { IParkMsg, ParkMsg, ParkMsgType } from 'app/shared/model/park-msg.model';
 
 describe('Service Tests', () => {
   describe('ParkMsg Service', () => {
@@ -27,7 +27,7 @@ describe('Service Tests', () => {
       httpMock = injector.get(HttpTestingController);
       currentDate = moment();
 
-      elemDefault = new ParkMsg(0, 'AAAAAAA', 'AAAAAAA', currentDate, 'AAAAAAA');
+      elemDefault = new ParkMsg(0, 'AAAAAAA', 'AAAAAAA', currentDate, 'AAAAAAA', ParkMsgType.IN);
     });
 
     describe('Service methods', () => {
@@ -77,7 +77,8 @@ describe('Service Tests', () => {
             parkid: 'BBBBBB',
             service: 'BBBBBB',
             createTime: currentDate.format(DATE_TIME_FORMAT),
-            body: 'BBBBBB'
+            body: 'BBBBBB',
+            type: 'BBBBBB'
           },
           elemDefault
         );
@@ -103,7 +104,8 @@ describe('Service Tests', () => {
             parkid: 'BBBBBB',
             service: 'BBBBBB',
             createTime: currentDate.format(DATE_TIME_FORMAT),
-            body: 'BBBBBB'
+            body: 'BBBBBB',
+            type: 'BBBBBB'
           },
           elemDefault
         );

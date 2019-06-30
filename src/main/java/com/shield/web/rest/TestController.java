@@ -1,7 +1,19 @@
 package com.shield.web.rest;
 
+import cn.binarywang.wx.miniapp.api.WxMaService;
+import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl;
+import cn.binarywang.wx.miniapp.config.WxMaInMemoryConfig;
+import com.google.common.collect.Lists;
+import com.shield.config.WxMiniAppConfiguration;
 import com.shield.service.UserService;
 import com.shield.sqlserver.repository.VehDelivPlanRepository;
+import me.chanjar.weixin.common.bean.menu.WxMenu;
+import me.chanjar.weixin.common.bean.menu.WxMenuButton;
+import me.chanjar.weixin.common.error.WxErrorException;
+import me.chanjar.weixin.mp.api.WxMpInMemoryConfigStorage;
+import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
+import me.chanjar.weixin.mp.bean.menu.WxMpMenu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,5 +69,71 @@ public class TestController {
 
         return "ok";
     }
+
+//    @GetMapping("/get-menu")
+//    public String getMenu () throws WxErrorException {
+//        WxMpInMemoryConfigStorage config = new WxMpInMemoryConfigStorage();
+//        config.setAppId("wxb862ec87afd34ff1"); // 设置微信公众号的appid
+//        config.setSecret("b2b41c90b7e9399895a397f15f3602dd"); // 设置微信公众号的app corpSecret
+////        config.setToken("..."); // 设置微信公众号的token
+////        config.setAesKey("..."); // 设置微信公众号的EncodingAESKey
+//
+//        WxMpService wxService = new WxMpServiceImpl();
+//        wxService.setWxMpConfigStorage(config);
+//
+//        WxMpMenu menu = wxService.getMenuService().menuGet();
+//        System.out.println(menu.toJson());
+//
+//        WxMpMenu.WxMpConditionalMenu addMenu = new WxMpMenu.WxMpConditionalMenu();
+//        addMenu.setMenuId("appointment");
+//        addMenu.setButtons(Lists.newArrayList());
+//        WxMenuButton button = new WxMenuButton();
+//        button.setType("miniprogram");
+//        button.setName("车辆取号");
+//        button.setAppId("wx32a67eb90d6d98e9");
+//        button.setUrl("https://dp.meowpapa.com");
+//        button.setPagePath("page/index/index");
+//
+//        WxMenu wxMenu = WxMenu.fromJson(menu.toJson());
+//        System.out.println(wxMenu.toJson());
+//        wxMenu.getButtons().add(button);
+//
+//        System.out.println(wxMenu.toJson());
+//
+//        return wxMenu.toJson();
+//    }
+//
+//    @GetMapping("/add-menu")
+//    public String addMenu () throws WxErrorException {
+//        WxMpInMemoryConfigStorage config = new WxMpInMemoryConfigStorage();
+//        config.setAppId("wxb862ec87afd34ff1"); // 设置微信公众号的appid
+//        config.setSecret("b2b41c90b7e9399895a397f15f3602dd"); // 设置微信公众号的app corpSecret
+////        config.setToken("..."); // 设置微信公众号的token
+////        config.setAesKey("..."); // 设置微信公众号的EncodingAESKey
+//
+//        WxMpService wxService = new WxMpServiceImpl();
+//        wxService.setWxMpConfigStorage(config);
+//
+//        WxMpMenu menu = wxService.getMenuService().menuGet();
+//        WxMpMenu.WxMpConditionalMenu addMenu = new WxMpMenu.WxMpConditionalMenu();
+//
+//        addMenu.setMenuId("appointment");
+//        addMenu.setButtons(Lists.newArrayList());
+//        WxMenuButton button = new WxMenuButton();
+//        button.setType("miniprogram");
+//        button.setName("车辆取号");
+//        button.setAppId("wx32a67eb90d6d98e9");
+//        button.setUrl("https://dp.meowpapa.com");
+//        button.setPagePath("page/index/index");
+//
+//        WxMenu wxMenu = WxMenu.fromJson(menu.toJson());
+//        System.out.println(wxMenu.toJson());
+//        wxMenu.getButtons().add(button);
+//
+//        System.out.println(wxMenu.toJson());
+//
+//        wxService.getMenuService().menuCreate(wxMenu);
+//        return wxMenu.toJson();
+//    }
 
 }

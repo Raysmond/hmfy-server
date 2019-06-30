@@ -19,7 +19,8 @@
       "parkid": "Parkid",
       "service": "Service",
       "createTime": "Create Time",
-      "body": "Body"
+      "body": "Body",
+      "type": "Type"
     }
   }
 }

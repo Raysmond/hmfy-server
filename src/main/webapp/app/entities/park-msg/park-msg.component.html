@@ -22,6 +22,7 @@
             <th jhiSortBy="service"><span jhiTranslate="shieldApp.parkMsg.service">Service</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="createTime"><span jhiTranslate="shieldApp.parkMsg.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="body"><span jhiTranslate="shieldApp.parkMsg.body">Body</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="type"><span jhiTranslate="shieldApp.parkMsg.type">Type</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th></th>
             </tr>
             </thead>
@@ -32,6 +33,7 @@
                 <td>{{parkMsg.service}}</td>
                 <td>{{parkMsg.createTime | date:'medium'}}</td>
                 <td>{{parkMsg.body}}</td>
+                <td jhiTranslate="{{'shieldApp.ParkMsgType.' + parkMsg.type}}">{{parkMsg.type}}</td>
                 <td class="text-right">
                     <div class="btn-group">
                         <button type="submit"

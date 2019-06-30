@@ -8,6 +8,8 @@ import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
+import com.shield.domain.enumeration.ParkMsgType;
+
 /**
  * A ParkMsg.
  */
@@ -40,6 +42,10 @@ public class ParkMsg implements Serializable {
     @Size(max = 4096)
     @Column(name = "body", length = 4096, nullable = false)
     private String body;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    private ParkMsgType type;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -101,6 +107,19 @@ public class ParkMsg implements Serializable {
     public void setBody(String body) {
         this.body = body;
     }
+
+    public ParkMsgType getType() {
+        return type;
+    }
+
+    public ParkMsg type(ParkMsgType type) {
+        this.type = type;
+        return this;
+    }
+
+    public void setType(ParkMsgType type) {
+        this.type = type;
+    }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override
@@ -127,6 +146,7 @@ public class ParkMsg implements Serializable {
             ", service='" + getService() + "'" +
             ", createTime='" + getCreateTime() + "'" +
             ", body='" + getBody() + "'" +
+            ", type='" + getType() + "'" +
             "}";
     }
 }

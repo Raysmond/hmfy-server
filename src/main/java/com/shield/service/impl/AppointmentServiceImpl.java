@@ -160,7 +160,13 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment appointment = appointmentRepository.getOne(appointmentId);
         appointment.setValid(Boolean.FALSE);
         appointment.setStatus(AppointmentStatus.CANCELED);
+        appointment.setUpdateTime(ZonedDateTime.now());
         appointment = appointmentRepository.save(appointment);
+
+        if (redisLongTemplate.hasKey(REDIS_KEY_UPLOAD_CAR_WHITELIST) == Boolean.TRUE) {
+            redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
+        }
+        redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
         return appointmentMapper.toDto(appointment);
     }
 
@@ -182,25 +188,32 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
 
-        List<ShipPlan> shipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today, today.plusSeconds(1));
+        List<ShipPlan> shipPlans = shipPlanRepository.findAllByDeliverTime(today, today.plusDays(1), 1);
         if (shipPlans.size() > 1) {
-            log.error("Multiple plans found for truckNumber {}, region: {}, deliverDate: {}", truckNumber, region.getName(), today);
+            log.warn("Multiple plans found for truckNumber {}, region: {}, deliverDate: {}", truckNumber, region.getName(), today);
         }
         if (!CollectionUtils.isEmpty(shipPlans)) {
+            ShipPlan plan = shipPlans.get(0);
+            if (plan.getGateTime() == null && inTime != null) {
+                plan.setGateTime(inTime);
+                plan.setUpdateTime(ZonedDateTime.now());
+                shipPlanRepository.save(plan);
+                log.info("update ShipPlan gateTime: {}, truckNumber: {}", carInTime, truckNumber);
+            }
+        }
+
+        if (outTime != null) {
+            shipPlans = shipPlanRepository.findAllByDeliverTime(today, today.plusDays(1), 3);
             for (ShipPlan plan : shipPlans) {
-                boolean changed = false;
-                if (plan.getGateTime() == null && inTime != null) {
-                    plan.setGateTime(inTime);
-                    changed = true;
-                }
-                if (plan.getLeaveTime() == null && outTime != null) {
+                if (plan.getLeaveTime() == null) {
                     plan.setLeaveTime(outTime);
-                    changed = true;
-                }
-                if (changed) {
-                    plan.setUpdateTime(plan.getUpdateTime());
+                    plan.setUpdateTime(ZonedDateTime.now());
+                    if (plan.getGateTime() == null && inTime != null) {
+                        plan.setGateTime(inTime);
+                    }
                     shipPlanRepository.save(plan);
-                    log.info("update ShipPlan gateTime: {}, leaveTime: {}, truckNumber: {}", carInTime, carOutTime, truckNumber);
+                    log.info("update ShipPlan leaveTime: {}, truckNumber: {}", carOutTime, truckNumber);
+                    break;
                 }
             }
         }
@@ -215,34 +228,16 @@ public class AppointmentServiceImpl implements AppointmentService {
             }
             if (outTime != null) {
                 appointment.setStatus(AppointmentStatus.LEAVE);
-                appointment.setUpdateTime(ZonedDateTime.now());
                 redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
                 changed = true;
             }
             if (changed) {
+                appointment.setUpdateTime(ZonedDateTime.now());
                 appointmentRepository.save(appointment);
                 log.info("update appointment [{}] status: {}, inTime: {}, outTime: {}, truckNumber: {}",
                     appointment.getId(), appointment.getStatus(), carInTime, carOutTime, truckNumber);
             }
         }
-//
-//        Appointment latestAppointment = appointments.get(0);
-//        if (latestAppointment.getApplyId() != null) {
-//            List<ShipPlan> shipPlans = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(latestAppointment.getApplyId()));
-//            if (!CollectionUtils.isEmpty(shipPlans)) {
-//                for (ShipPlan plan : shipPlans) {
-//                    if (inTime != null) {
-//                        plan.setGateTime(inTime);
-//                    }
-//                    if (outTime != null) {
-//                        plan.setLeaveTime(outTime);
-//                    }
-//                    plan.setUpdateTime(plan.getUpdateTime());
-//                }
-//                shipPlanRepository.saveAll(shipPlans);
-//                log.info("update ShipPlan gateTime: {}, leaveTime: {}, applyId: {}, truckNumber: {}", carInTime, carOutTime, latestAppointment.getApplyId(), truckNumber);
-//            }
-//        }
     }
 
     @Override
@@ -342,7 +337,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                     appointment.setValid(false);
                     appointment.setStatus(AppointmentStatus.EXPIRED);
                     appointmentRepository.save(appointment);
-                    redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
+
+                    if (redisLongTemplate.hasKey(REDIS_KEY_UPLOAD_CAR_WHITELIST) == Boolean.TRUE) {
+                        redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
+                    }
                     redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
                 }
             }

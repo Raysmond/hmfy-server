@@ -35,6 +35,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.shield.domain.enumeration.ParkMsgType;
 /**
  * Integration tests for the {@Link ParkMsgResource} REST controller.
  */
@@ -52,6 +53,9 @@ public class ParkMsgResourceIT {
 
     private static final String DEFAULT_BODY = "AAAAAAAAAA";
     private static final String UPDATED_BODY = "BBBBBBBBBB";
+
+    private static final ParkMsgType DEFAULT_TYPE = ParkMsgType.IN;
+    private static final ParkMsgType UPDATED_TYPE = ParkMsgType.OUT;
 
     @Autowired
     private ParkMsgRepository parkMsgRepository;
@@ -104,7 +108,8 @@ public class ParkMsgResourceIT {
             .parkid(DEFAULT_PARKID)
             .service(DEFAULT_SERVICE)
             .createTime(DEFAULT_CREATE_TIME)
-            .body(DEFAULT_BODY);
+            .body(DEFAULT_BODY)
+            .type(DEFAULT_TYPE);
         return parkMsg;
     }
     /**
@@ -118,7 +123,8 @@ public class ParkMsgResourceIT {
             .parkid(UPDATED_PARKID)
             .service(UPDATED_SERVICE)
             .createTime(UPDATED_CREATE_TIME)
-            .body(UPDATED_BODY);
+            .body(UPDATED_BODY)
+            .type(UPDATED_TYPE);
         return parkMsg;
     }
 
@@ -147,6 +153,7 @@ public class ParkMsgResourceIT {
         assertThat(testParkMsg.getService()).isEqualTo(DEFAULT_SERVICE);
         assertThat(testParkMsg.getCreateTime()).isEqualTo(DEFAULT_CREATE_TIME);
         assertThat(testParkMsg.getBody()).isEqualTo(DEFAULT_BODY);
+        assertThat(testParkMsg.getType()).isEqualTo(DEFAULT_TYPE);
     }
 
     @Test
@@ -260,7 +267,8 @@ public class ParkMsgResourceIT {
             .andExpect(jsonPath("$.[*].parkid").value(hasItem(DEFAULT_PARKID.toString())))
             .andExpect(jsonPath("$.[*].service").value(hasItem(DEFAULT_SERVICE.toString())))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
-            .andExpect(jsonPath("$.[*].body").value(hasItem(DEFAULT_BODY.toString())));
+            .andExpect(jsonPath("$.[*].body").value(hasItem(DEFAULT_BODY.toString())))
+            .andExpect(jsonPath("$.[*].type").value(hasItem(DEFAULT_TYPE.toString())));
     }
     
     @Test
@@ -277,7 +285,8 @@ public class ParkMsgResourceIT {
             .andExpect(jsonPath("$.parkid").value(DEFAULT_PARKID.toString()))
             .andExpect(jsonPath("$.service").value(DEFAULT_SERVICE.toString()))
             .andExpect(jsonPath("$.createTime").value(sameInstant(DEFAULT_CREATE_TIME)))
-            .andExpect(jsonPath("$.body").value(DEFAULT_BODY.toString()));
+            .andExpect(jsonPath("$.body").value(DEFAULT_BODY.toString()))
+            .andExpect(jsonPath("$.type").value(DEFAULT_TYPE.toString()));
     }
 
     @Test
@@ -304,7 +313,8 @@ public class ParkMsgResourceIT {
             .parkid(UPDATED_PARKID)
             .service(UPDATED_SERVICE)
             .createTime(UPDATED_CREATE_TIME)
-            .body(UPDATED_BODY);
+            .body(UPDATED_BODY)
+            .type(UPDATED_TYPE);
         ParkMsgDTO parkMsgDTO = parkMsgMapper.toDto(updatedParkMsg);
 
         restParkMsgMockMvc.perform(put("/api/park-msgs")
@@ -320,6 +330,7 @@ public class ParkMsgResourceIT {
         assertThat(testParkMsg.getService()).isEqualTo(UPDATED_SERVICE);
         assertThat(testParkMsg.getCreateTime()).isEqualTo(UPDATED_CREATE_TIME);
         assertThat(testParkMsg.getBody()).isEqualTo(UPDATED_BODY);
+        assertThat(testParkMsg.getType()).isEqualTo(UPDATED_TYPE);
     }
 
     @Test

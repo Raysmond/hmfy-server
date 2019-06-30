@@ -3,6 +3,7 @@ import java.time.ZonedDateTime;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Objects;
+import com.shield.domain.enumeration.ParkMsgType;
 
 /**
  * A DTO for the {@link com.shield.domain.ParkMsg} entity.
@@ -25,6 +26,8 @@ public class ParkMsgDTO implements Serializable {
     @NotNull
     @Size(max = 4096)
     private String body;
+
+    private ParkMsgType type;
 
 
     public Long getId() {
@@ -67,6 +70,14 @@ public class ParkMsgDTO implements Serializable {
         this.body = body;
     }
 
+    public ParkMsgType getType() {
+        return type;
+    }
+
+    public void setType(ParkMsgType type) {
+        this.type = type;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -96,6 +107,7 @@ public class ParkMsgDTO implements Serializable {
             ", service='" + getService() + "'" +
             ", createTime='" + getCreateTime() + "'" +
             ", body='" + getBody() + "'" +
+            ", type='" + getType() + "'" +
             "}";
     }
 }

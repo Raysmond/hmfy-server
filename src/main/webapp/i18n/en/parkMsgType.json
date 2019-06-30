@@ -1,0 +1,9 @@
+{
+  "shieldApp": {
+    "ParkMsgType": {
+      "null": "",
+      "IN": "IN",
+      "OUT": "OUT"
+    }
+  }
+}

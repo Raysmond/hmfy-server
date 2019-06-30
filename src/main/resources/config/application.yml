@@ -155,3 +155,8 @@ application:
       token: #微信小程序消息服务器配置的token
       aesKey: #微信小程序消息服务器配置的EncodingAESKey
       msgDataFormat: JSON
+    - appid: wxb862ec87afd34ff1
+      secret: b2b41c90b7e9399895a397f15f3602dd
+      token: #微信小程序消息服务器配置的token
+      aesKey: #微信小程序消息服务器配置的EncodingAESKey
+      msgDataFormat: JSON

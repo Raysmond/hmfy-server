@@ -40,7 +40,7 @@ public class UploadCarWhiteListMsg {
     private Double cardmoney = 230.50;
     private String period = "月";
     private String carusername; // 车主姓名	老陈
-    private String carusertel = "188"; // 车主电话	13822220222
+    private String carusertel = "18800000000"; // 车主电话	13822220222
     private String drive_no = "NO000000000"; // 驾驶证	NO111111222
     private String address = "上海市宝山区"; // xxxx市xxx区xxx路112号
     private String carlocate = "A-1-10"; // 车位	A-1-10

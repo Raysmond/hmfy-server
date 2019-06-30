@@ -20,7 +20,8 @@ export class ParkMsgUpdateComponent implements OnInit {
     parkid: [null, [Validators.required, Validators.maxLength(64)]],
     service: [null, [Validators.required, Validators.maxLength(64)]],
     createTime: [null, [Validators.required]],
-    body: [null, [Validators.required, Validators.maxLength(4096)]]
+    body: [null, [Validators.required, Validators.maxLength(4096)]],
+    type: []
   });
 
   constructor(protected parkMsgService: ParkMsgService, protected activatedRoute: ActivatedRoute, private fb: FormBuilder) {}
@@ -38,7 +39,8 @@ export class ParkMsgUpdateComponent implements OnInit {
       parkid: parkMsg.parkid,
       service: parkMsg.service,
       createTime: parkMsg.createTime != null ? parkMsg.createTime.format(DATE_TIME_FORMAT) : null,
-      body: parkMsg.body
+      body: parkMsg.body,
+      type: parkMsg.type
     });
   }
 
@@ -64,7 +66,8 @@ export class ParkMsgUpdateComponent implements OnInit {
       service: this.editForm.get(['service']).value,
       createTime:
         this.editForm.get(['createTime']).value != null ? moment(this.editForm.get(['createTime']).value, DATE_TIME_FORMAT) : undefined,
-      body: this.editForm.get(['body']).value
+      body: this.editForm.get(['body']).value,
+      type: this.editForm.get(['type']).value
     };
     return entity;
   }
