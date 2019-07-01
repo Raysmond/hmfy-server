@@ -1,6 +1,7 @@
 package com.shield.service.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.shield.domain.Appointment;
 import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.repository.AppointmentRepository;
@@ -30,10 +31,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -203,17 +201,26 @@ public class ShipPlanServiceImpl implements ShipPlanService {
     }
 
     @Override
-    public List<ShipPlanDTO> findAllByDeliverTime(ZonedDateTime beginDeliverTime, ZonedDateTime endBeginDeliverTime, Integer auditStatus) {
-        return shipPlanRepository.findAllByDeliverTime(beginDeliverTime, endBeginDeliverTime, auditStatus)
+    public List<ShipPlanDTO> findAllByDeliverTime(String regionName, ZonedDateTime beginDeliverTime, ZonedDateTime endBeginDeliverTime, Integer auditStatus) {
+        return shipPlanRepository.findAllByDeliverTime(regionName, beginDeliverTime, endBeginDeliverTime, auditStatus)
             .stream().map(shipPlanMapper::toDto)
             .collect(Collectors.toList());
     }
 
     @Override
     public List<ShipPlanDTO> findAllShouldDeleteCarWhiteList(ZonedDateTime todayBegin, ZonedDateTime todayEnd) {
-        return shipPlanRepository.findALlNeedToRemoveCarWhiteList(todayBegin, todayEnd)
-            .stream().map(shipPlanMapper::toDto)
-            .collect(Collectors.toList());
+        List<ShipPlan> shipPlans = shipPlanRepository.findByDeliverTime(todayBegin, todayEnd)
+            .stream().sorted(Comparator.comparing(ShipPlan::getUpdateTime).reversed()).collect(Collectors.toList());
+        List<ShipPlan> uniqueShipPlans = Lists.newArrayList();
+        Set<Long> uniqueIds = Sets.newHashSet();
+        for (ShipPlan plan : shipPlans) {
+            if (!uniqueIds.contains(plan.getId())) {
+                uniqueIds.add(plan.getId());
+                uniqueShipPlans.add(plan);
+            }
+        }
+
+        return uniqueShipPlans.stream().filter(it -> !it.getAuditStatus().equals(Integer.valueOf(1))).map(shipPlanMapper::toDto).collect(Collectors.toList());
     }
 
 }

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,7 +56,8 @@ public interface ShipPlanService {
     Page<PlanDTO> getAllByTruckNumber(Pageable pageable, String truckNumber, Long shipPlanId);
 
 
-    List<ShipPlanDTO> findAllByDeliverTime(ZonedDateTime beginDeliverTime, ZonedDateTime endBeginDeliverTime, Integer auditStatus);
+    List<ShipPlanDTO> findAllByDeliverTime(String regionName, ZonedDateTime beginDeliverTime, ZonedDateTime endBeginDeliverTime, Integer auditStatus);
 
     List<ShipPlanDTO> findAllShouldDeleteCarWhiteList(ZonedDateTime todayBegin, ZonedDateTime todayEnd);
+
 }

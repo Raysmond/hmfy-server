@@ -15,6 +15,8 @@ import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
 import me.chanjar.weixin.mp.bean.menu.WxMpMenu;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +36,7 @@ public class TestController {
 //    public List<VehDelivPlan> getVehPlans() {
 //        return vehDelivPlanRepository.findAll();
 //    }
+
 
     @GetMapping("/socket")
     public String testSocket() throws IOException, InterruptedException {
@@ -71,7 +74,7 @@ public class TestController {
     }
 
 //    @GetMapping("/get-menu")
-//    public String getMenu () throws WxErrorException {
+//    public String getMenu() throws WxErrorException {
 //        WxMpInMemoryConfigStorage config = new WxMpInMemoryConfigStorage();
 //        config.setAppId("wxb862ec87afd34ff1"); // 设置微信公众号的appid
 //        config.setSecret("b2b41c90b7e9399895a397f15f3602dd"); // 设置微信公众号的app corpSecret
@@ -92,19 +95,21 @@ public class TestController {
 //        button.setName("车辆取号");
 //        button.setAppId("wx32a67eb90d6d98e9");
 //        button.setUrl("https://dp.meowpapa.com");
-//        button.setPagePath("page/index/index");
+//        button.setPagePath("pages/index/index");
 //
 //        WxMenu wxMenu = WxMenu.fromJson(menu.toJson());
 //        System.out.println(wxMenu.toJson());
-//        wxMenu.getButtons().add(button);
+////        wxMenu.getButtons().add(button);
+//        wxMenu.getButtons().set(1, button);
 //
 //        System.out.println(wxMenu.toJson());
 //
 //        return wxMenu.toJson();
 //    }
 //
+//    //
 //    @GetMapping("/add-menu")
-//    public String addMenu () throws WxErrorException {
+//    public String addMenu() throws WxErrorException {
 //        WxMpInMemoryConfigStorage config = new WxMpInMemoryConfigStorage();
 //        config.setAppId("wxb862ec87afd34ff1"); // 设置微信公众号的appid
 //        config.setSecret("b2b41c90b7e9399895a397f15f3602dd"); // 设置微信公众号的app corpSecret
@@ -124,11 +129,12 @@ public class TestController {
 //        button.setName("车辆取号");
 //        button.setAppId("wx32a67eb90d6d98e9");
 //        button.setUrl("https://dp.meowpapa.com");
-//        button.setPagePath("page/index/index");
+//        button.setPagePath("pages/index/index");
 //
 //        WxMenu wxMenu = WxMenu.fromJson(menu.toJson());
 //        System.out.println(wxMenu.toJson());
-//        wxMenu.getButtons().add(button);
+////        wxMenu.getButtons().add(button);
+//        wxMenu.getButtons().set(1, button);
 //
 //        System.out.println(wxMenu.toJson());
 //

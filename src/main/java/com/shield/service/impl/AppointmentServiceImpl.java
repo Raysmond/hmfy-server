@@ -1,5 +1,6 @@
 package com.shield.service.impl;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -36,8 +37,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.shield.service.ParkingTcpHandlerService.REDIS_KEY_DELETE_CAR_WHITELIST;
-import static com.shield.service.ParkingTcpHandlerService.REDIS_KEY_UPLOAD_CAR_WHITELIST;
+import static com.shield.service.ParkingTcpHandlerService.*;
 
 /**
  * Service Implementation for managing {@link Appointment}.
@@ -70,7 +70,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private static final String QUEUE_NUMBER_KEY = "queue_number_%s_%s";
     private static final Long INITIAL_APPOINTMENT_NUMBER = 10000L;
     private static final Long INITIAL_QUEUE_NUMBER = 100L;
-
+    public static final String REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN = "sync_ship_plan_ids";
 
     private static final Set<AppointmentStatus> ACTIVE_STATUS = Sets.newHashSet(
         AppointmentStatus.START,
@@ -171,70 +171,90 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public void updateCarInAndOutTime(String parkId, String truckNumber, String carInTime, String carOutTime) {
+    public void updateCarInAndOutTime(String parkId, String truckNumber, String service, String carInTime, String carOutTime) {
         Region region = regionRepository.findOneByParkId(parkId);
         if (region == null) {
             log.error("Cannot find region by parkid: {}", parkId);
             return;
         }
-        ZonedDateTime inTime = null;
-        ZonedDateTime outTime = null;
-        if (StringUtils.isNotBlank(carInTime)) {
-            inTime = ZonedDateTime.parse(carInTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        }
-        if (StringUtils.isNotBlank(carOutTime)) {
-            outTime = ZonedDateTime.parse(carOutTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        }
-
         ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
-
-        List<ShipPlan> shipPlans = shipPlanRepository.findAllByDeliverTime(today, today.plusDays(1), 1);
-        if (shipPlans.size() > 1) {
-            log.warn("Multiple plans found for truckNumber {}, region: {}, deliverDate: {}", truckNumber, region.getName(), today);
-        }
-        if (!CollectionUtils.isEmpty(shipPlans)) {
-            ShipPlan plan = shipPlans.get(0);
-            if (plan.getGateTime() == null && inTime != null) {
-                plan.setGateTime(inTime);
+        if (service.equals("uploadcarin")) {
+            // 车辆入场
+            ZonedDateTime inTime = ZonedDateTime.parse(carInTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault()));
+            List<ShipPlan> shipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today, today.plusDays(1))
+                .stream().filter(it -> it.getAuditStatus().equals(Integer.valueOf(1)))
+                .sorted(Comparator.comparing(ShipPlan::getCreateTime)).collect(Collectors.toList());
+            if (shipPlans.size() > 1) {
+                // 理论上车辆入场，当计划audit_status=1的只有一条
+                // 不排除同时建了多个计划的情况，有多个有效计划时，只取最早创建的一条
+                log.error("Multiple plans found for truckNumber {}, region: {}, deliverDate: {}, planIds: [{}]",
+                    truckNumber, region.getName(), today, Joiner.on(",").join(shipPlans.stream().map(ShipPlan::getId).collect(Collectors.toList())));
+            }
+            if (!CollectionUtils.isEmpty(shipPlans)) {
+                ShipPlan plan = shipPlans.get(0);
+                log.info("Find ShipPlan id={} for truckNumber {}, uploadcarin gateTime: {}", plan.getId(), truckNumber, carInTime);
+                if (plan.getGateTime() == null) {
+                    plan.setGateTime(inTime);
+                    plan.setUpdateTime(ZonedDateTime.now());
+                    shipPlanRepository.save(plan);
+                    log.info("update ShipPlan {} gateTime: {}, truckNumber: {}", plan.getApplyId(), carInTime, truckNumber);
+                    redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
+                }
+            } else {
+                log.error("Cannot find ShipPlan for truckNumber {}, uploadcarin gateTime: {}", truckNumber, carInTime);
+            }
+        } else if (service.equals("uploadcarout")) {
+            // 车辆出厂
+            ZonedDateTime outTime = ZonedDateTime.parse(carOutTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault()));
+            List<ShipPlan> shipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today, today.plusDays(1))
+                .stream().filter(it -> it.getAuditStatus().equals(Integer.valueOf(3)) || (it.getLeaveTime() == null && it.getGateTime() != null))
+                .sorted(Comparator.comparing(ShipPlan::getUpdateTime).reversed())
+                .collect(Collectors.toList());
+            // 取未出场的，最近一个提货完成的计划
+            if (!shipPlans.isEmpty()) {
+                ShipPlan plan = shipPlans.get(0);
+                log.info("Find ShipPlan id={} for truckNumber {}, uploadcarout gateTime: {}, leaveTime: {}", plan.getId(), truckNumber, carInTime, carOutTime);
+                plan.setLeaveTime(outTime);
+                if (plan.getGateTime() == null && StringUtils.isNotBlank(carInTime)) {
+                    ZonedDateTime inTime = ZonedDateTime.parse(carInTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault()));
+                    plan.setGateTime(inTime);
+                }
                 plan.setUpdateTime(ZonedDateTime.now());
                 shipPlanRepository.save(plan);
-                log.info("update ShipPlan gateTime: {}, truckNumber: {}", carInTime, truckNumber);
-            }
-        }
-
-        if (outTime != null) {
-            shipPlans = shipPlanRepository.findAllByDeliverTime(today, today.plusDays(1), 3);
-            for (ShipPlan plan : shipPlans) {
-                if (plan.getLeaveTime() == null) {
-                    plan.setLeaveTime(outTime);
-                    plan.setUpdateTime(ZonedDateTime.now());
-                    if (plan.getGateTime() == null && inTime != null) {
-                        plan.setGateTime(inTime);
-                    }
-                    shipPlanRepository.save(plan);
-                    log.info("update ShipPlan leaveTime: {}, truckNumber: {}", carOutTime, truckNumber);
-                    break;
-                }
+                log.info("update ShipPlan {} leaveTime: {}, truckNumber: {}", plan.getApplyId(), carOutTime, truckNumber);
+                redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
+                redisLongTemplate.opsForSet().add(AUTO_DELETE_PLAN_ID_QUEUE, plan.getId());
+            } else {
+                log.error("Cannot find ShipPlan for truckNumber {}, uploadcarout gateTime: {}, leaveTime: {}", truckNumber, carInTime, carOutTime);
             }
         }
 
         List<Appointment> appointments = appointmentRepository.findLatestByTruckNumber(region.getId(), truckNumber, today);
         if (!CollectionUtils.isEmpty(appointments)) {
             Appointment appointment = appointments.get(0);
-            boolean changed = false;
-            if (appointment.getStatus().equals(AppointmentStatus.START) && inTime != null) {
-                appointment.setStatus(AppointmentStatus.ENTER);
-                changed = true;
+            boolean save = false;
+            if (service.equals("uploadcarin")) {
+                if (appointment.getStatus().equals(AppointmentStatus.START)) {
+                    appointment.setStatus(AppointmentStatus.ENTER);
+                    ZonedDateTime inTime = ZonedDateTime.parse(carInTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault()));
+                    appointment.setEnterTime(inTime);
+                    save = true;
+                }
+            } else if (service.equals("uploadcarout")) {
+                if (appointment.getStatus().equals(AppointmentStatus.ENTER)) {
+                    ZonedDateTime outTime = ZonedDateTime.parse(carOutTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault()));
+                    appointment.setLeaveTime(outTime);
+                    appointment.setStatus(AppointmentStatus.LEAVE);
+                    save = true;
+
+                    redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
+                }
             }
-            if (outTime != null) {
-                appointment.setStatus(AppointmentStatus.LEAVE);
-                redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
-                changed = true;
-            }
-            if (changed) {
+
+            if (save) {
                 appointment.setUpdateTime(ZonedDateTime.now());
                 appointmentRepository.save(appointment);
-                log.info("update appointment [{}] status: {}, inTime: {}, outTime: {}, truckNumber: {}",
+                log.info("Update appointment [{}] status: {}, inTime: {}, outTime: {}, truckNumber: {}",
                     appointment.getId(), appointment.getStatus(), carInTime, carOutTime, truckNumber);
             }
         }
@@ -307,10 +327,19 @@ public class AppointmentServiceImpl implements AppointmentService {
                 appointment.setUpdateTime(ZonedDateTime.now());
                 appointment.setNumber(generateAppointmentNumber(region.getId()));
                 appointmentRepository.save(appointment);
-                log.info("Appointment [{}] made success at region ({}, {}), number: {}, licensePlateNumber: {}",
+                log.info("Appointment [{}] made success at region ({}, {}), number: {}, truckNumber: {}",
                     appointment.getId(), region.getId(), region.getName(), appointment.getNumber(), appointment.getLicensePlateNumber());
 
                 redisLongTemplate.opsForSet().add(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
+
+                if (appointment.getApplyId() != null) {
+                    List<ShipPlan> plans = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(appointment.getApplyId()));
+                    for (ShipPlan plan : plans) {
+                        plan.setAllowInTime(ZonedDateTime.now().plusSeconds(region.getValidTime()));
+                        shipPlanRepository.save(plan);
+                        redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
+                    }
+                }
                 return true;
             }
             return false;
@@ -323,12 +352,10 @@ public class AppointmentServiceImpl implements AppointmentService {
         return ZonedDateTime.of(today, time, ZoneId.systemDefault()).minusDays(2L);
     }
 
-    private static final Long DEFAULT_VALID_TIME_SECONDS = 7200L;
-
     @Scheduled(fixedRate = 60 * 1000)
     public void checkAppointments() {
         for (Region region : regionRepository.findAll()) {
-            Long validSeconds = region.getValidTime() != null ? region.getValidTime() : DEFAULT_VALID_TIME_SECONDS;
+            Long validSeconds = region.getValidTime().longValue();
             List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.START, Boolean.TRUE, getTodayStartTime());
             for (Appointment appointment : appointments) {
                 if (appointment.getStartTime() == null || appointment.getStartTime().plusSeconds(validSeconds).isBefore(ZonedDateTime.now())) {
@@ -338,9 +365,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     appointment.setStatus(AppointmentStatus.EXPIRED);
                     appointmentRepository.save(appointment);
 
-                    if (redisLongTemplate.hasKey(REDIS_KEY_UPLOAD_CAR_WHITELIST) == Boolean.TRUE) {
-                        redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
-                    }
+                    redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
                     redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
                 }
             }

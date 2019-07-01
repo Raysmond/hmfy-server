@@ -57,6 +57,6 @@ public interface AppointmentService {
     AppointmentDTO cancelAppointment(Long appointmentId);
 
 
-    void updateCarInAndOutTime(String parkId, String truckNumber, String carInTime, String carOutTime);
+    void updateCarInAndOutTime(String parkId, String truckNumber, String service, String carInTime, String carOutTime);
 
 }

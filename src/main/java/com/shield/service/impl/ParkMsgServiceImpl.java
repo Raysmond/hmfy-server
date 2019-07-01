@@ -86,4 +86,10 @@ public class ParkMsgServiceImpl implements ParkMsgService {
         log.debug("Request to delete ParkMsg : {}", id);
         parkMsgRepository.deleteById(id);
     }
+
+    @Override
+    public Page<ParkMsgDTO> findAllByService(Pageable pageable, String service) {
+        return parkMsgRepository.findByService(service, pageable)
+            .map(parkMsgMapper::toDto);
+    }
 }

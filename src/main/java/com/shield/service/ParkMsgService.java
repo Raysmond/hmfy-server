@@ -43,4 +43,6 @@ public interface ParkMsgService {
      * @param id the id of the entity.
      */
     void delete(Long id);
+
+    Page<ParkMsgDTO> findAllByService(Pageable pageable, String service);
 }

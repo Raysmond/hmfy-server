@@ -32,14 +32,14 @@ public class UploadCarWhiteListMsg {
     private String service = "whitelist_sync";
     private String parkid;
     private String car_number;
-    private Integer car_type = 0; // 0小车/1大车
+    private Integer car_type = 1; // 0小车/1大车
     private Integer card_type = 1; // 1月租车/2充值车(operate_type=2时不需,因为车牌类型不能修改)
     private String card_id; // 车牌记录号	11221 (operate_type=2时必需)
     private String startdate;
     private String validdate;
     private Double cardmoney = 230.50;
     private String period = "月";
-    private String carusername; // 车主姓名	老陈
+    private String carusername = "取号"; // 车主姓名	老陈
     private String carusertel = "18800000000"; // 车主电话	13822220222
     private String drive_no = "NO000000000"; // 驾驶证	NO111111222
     private String address = "上海市宝山区"; // xxxx市xxx区xxx路112号
