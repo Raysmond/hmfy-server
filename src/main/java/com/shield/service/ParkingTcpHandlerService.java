@@ -98,7 +98,7 @@ public class ParkingTcpHandlerService {
             return responseMsg;
         } catch (Exception e) {
             log.error("failed to handle msg: {}, exception: ", msg.getPayload(), e);
-            return "{\"service\": \"\", \"result_code\":1, \"message\": \"处理失败\"}\r\n";
+            return "{\"service\": \"\", \"result_code\":1, \"message\": \"处理失败\"}";
         }
     }
 
