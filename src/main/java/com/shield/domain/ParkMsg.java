@@ -34,9 +34,16 @@ public class ParkMsg implements Serializable {
     @Column(name = "service", length = 64, nullable = false)
     private String service;
 
+    @Column(name = "truck_number")
+    private String truckNumber;
+
     @NotNull
     @Column(name = "create_time", nullable = false)
     private ZonedDateTime createTime;
+
+    @NotNull
+    @Column(name = "send_time", nullable = false)
+    private ZonedDateTime sendTime;
 
     @NotNull
     @Size(max = 4096)
@@ -46,6 +53,10 @@ public class ParkMsg implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private ParkMsgType type;
+
+    @NotNull
+    @Column(name = "send_times", nullable = false)
+    private Integer sendTimes;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -82,6 +93,19 @@ public class ParkMsg implements Serializable {
         this.service = service;
     }
 
+    public String getTruckNumber() {
+        return truckNumber;
+    }
+
+    public ParkMsg truckNumber(String truckNumber) {
+        this.truckNumber = truckNumber;
+        return this;
+    }
+
+    public void setTruckNumber(String truckNumber) {
+        this.truckNumber = truckNumber;
+    }
+
     public ZonedDateTime getCreateTime() {
         return createTime;
     }
@@ -93,6 +117,19 @@ public class ParkMsg implements Serializable {
 
     public void setCreateTime(ZonedDateTime createTime) {
         this.createTime = createTime;
+    }
+
+    public ZonedDateTime getSendTime() {
+        return sendTime;
+    }
+
+    public ParkMsg sendTime(ZonedDateTime sendTime) {
+        this.sendTime = sendTime;
+        return this;
+    }
+
+    public void setSendTime(ZonedDateTime sendTime) {
+        this.sendTime = sendTime;
     }
 
     public String getBody() {
@@ -120,6 +157,19 @@ public class ParkMsg implements Serializable {
     public void setType(ParkMsgType type) {
         this.type = type;
     }
+
+    public Integer getSendTimes() {
+        return sendTimes;
+    }
+
+    public ParkMsg sendTimes(Integer sendTimes) {
+        this.sendTimes = sendTimes;
+        return this;
+    }
+
+    public void setSendTimes(Integer sendTimes) {
+        this.sendTimes = sendTimes;
+    }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override
@@ -144,9 +194,12 @@ public class ParkMsg implements Serializable {
             "id=" + getId() +
             ", parkid='" + getParkid() + "'" +
             ", service='" + getService() + "'" +
+            ", truckNumber='" + getTruckNumber() + "'" +
             ", createTime='" + getCreateTime() + "'" +
+            ", sendTime='" + getSendTime() + "'" +
             ", body='" + getBody() + "'" +
             ", type='" + getType() + "'" +
+            ", sendTimes=" + getSendTimes() +
             "}";
     }
 }

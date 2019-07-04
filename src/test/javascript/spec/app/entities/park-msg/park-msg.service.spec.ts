@@ -27,14 +27,15 @@ describe('Service Tests', () => {
       httpMock = injector.get(HttpTestingController);
       currentDate = moment();
 
-      elemDefault = new ParkMsg(0, 'AAAAAAA', 'AAAAAAA', currentDate, 'AAAAAAA', ParkMsgType.IN);
+      elemDefault = new ParkMsg(0, 'AAAAAAA', 'AAAAAAA', 'AAAAAAA', currentDate, currentDate, 'AAAAAAA', ParkMsgType.IN, 0);
     });
 
     describe('Service methods', () => {
       it('should find an element', async () => {
         const returnedFromService = Object.assign(
           {
-            createTime: currentDate.format(DATE_TIME_FORMAT)
+            createTime: currentDate.format(DATE_TIME_FORMAT),
+            sendTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
@@ -52,13 +53,15 @@ describe('Service Tests', () => {
         const returnedFromService = Object.assign(
           {
             id: 0,
-            createTime: currentDate.format(DATE_TIME_FORMAT)
+            createTime: currentDate.format(DATE_TIME_FORMAT),
+            sendTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
         const expected = Object.assign(
           {
-            createTime: currentDate
+            createTime: currentDate,
+            sendTime: currentDate
           },
           returnedFromService
         );
@@ -76,16 +79,20 @@ describe('Service Tests', () => {
           {
             parkid: 'BBBBBB',
             service: 'BBBBBB',
+            truckNumber: 'BBBBBB',
             createTime: currentDate.format(DATE_TIME_FORMAT),
+            sendTime: currentDate.format(DATE_TIME_FORMAT),
             body: 'BBBBBB',
-            type: 'BBBBBB'
+            type: 'BBBBBB',
+            sendTimes: 1
           },
           elemDefault
         );
 
         const expected = Object.assign(
           {
-            createTime: currentDate
+            createTime: currentDate,
+            sendTime: currentDate
           },
           returnedFromService
         );
@@ -103,15 +110,19 @@ describe('Service Tests', () => {
           {
             parkid: 'BBBBBB',
             service: 'BBBBBB',
+            truckNumber: 'BBBBBB',
             createTime: currentDate.format(DATE_TIME_FORMAT),
+            sendTime: currentDate.format(DATE_TIME_FORMAT),
             body: 'BBBBBB',
-            type: 'BBBBBB'
+            type: 'BBBBBB',
+            sendTimes: 1
           },
           elemDefault
         );
         const expected = Object.assign(
           {
-            createTime: currentDate
+            createTime: currentDate,
+            sendTime: currentDate
           },
           returnedFromService
         );

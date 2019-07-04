@@ -23,13 +23,14 @@
       "deliverPosition": "区域",
       "auditStatus": "审核状态",
       "gateTime": "进厂时间",
+      "valid": "有效",
       "leaveTime": "离厂时间",
-      "deliverTime": "应到时间",
+      "deliverTime": "提货日期",
       "allowInTime": "准入时间",
       "createTime": "创建时间",
       "updateTime": "更新时间",
       "user": "创建者",
-      "toUser": "指定预约员"
+      "syncTime": "同步时间"
     }
   }
 }

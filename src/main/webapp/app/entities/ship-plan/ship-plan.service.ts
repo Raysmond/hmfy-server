@@ -56,7 +56,8 @@ export class ShipPlanService {
       deliverTime: shipPlan.deliverTime != null && shipPlan.deliverTime.isValid() ? shipPlan.deliverTime.toJSON() : null,
       allowInTime: shipPlan.allowInTime != null && shipPlan.allowInTime.isValid() ? shipPlan.allowInTime.toJSON() : null,
       createTime: shipPlan.createTime != null && shipPlan.createTime.isValid() ? shipPlan.createTime.toJSON() : null,
-      updateTime: shipPlan.updateTime != null && shipPlan.updateTime.isValid() ? shipPlan.updateTime.toJSON() : null
+      updateTime: shipPlan.updateTime != null && shipPlan.updateTime.isValid() ? shipPlan.updateTime.toJSON() : null,
+      syncTime: shipPlan.syncTime != null && shipPlan.syncTime.isValid() ? shipPlan.syncTime.toJSON() : null
     });
     return copy;
   }
@@ -69,6 +70,7 @@ export class ShipPlanService {
       res.body.allowInTime = res.body.allowInTime != null ? moment(res.body.allowInTime) : null;
       res.body.createTime = res.body.createTime != null ? moment(res.body.createTime) : null;
       res.body.updateTime = res.body.updateTime != null ? moment(res.body.updateTime) : null;
+      res.body.syncTime = res.body.syncTime != null ? moment(res.body.syncTime) : null;
     }
     return res;
   }
@@ -82,6 +84,7 @@ export class ShipPlanService {
         shipPlan.allowInTime = shipPlan.allowInTime != null ? moment(shipPlan.allowInTime) : null;
         shipPlan.createTime = shipPlan.createTime != null ? moment(shipPlan.createTime) : null;
         shipPlan.updateTime = shipPlan.updateTime != null ? moment(shipPlan.updateTime) : null;
+        shipPlan.syncTime = shipPlan.syncTime != null ? moment(shipPlan.syncTime) : null;
       });
     }
     return res;

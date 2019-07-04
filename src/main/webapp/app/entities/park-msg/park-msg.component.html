@@ -20,9 +20,12 @@
             <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="parkid"><span jhiTranslate="shieldApp.parkMsg.parkid">Parkid</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="service"><span jhiTranslate="shieldApp.parkMsg.service">Service</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="truckNumber"><span jhiTranslate="shieldApp.parkMsg.truckNumber">Truck Number</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="createTime"><span jhiTranslate="shieldApp.parkMsg.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="sendTime"><span jhiTranslate="shieldApp.parkMsg.sendTime">Send Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="body"><span jhiTranslate="shieldApp.parkMsg.body">Body</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="type"><span jhiTranslate="shieldApp.parkMsg.type">Type</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="sendTimes"><span jhiTranslate="shieldApp.parkMsg.sendTimes">Send Times</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th></th>
             </tr>
             </thead>
@@ -31,9 +34,12 @@
                 <td><a [routerLink]="['/park-msg', parkMsg.id, 'view' ]">{{parkMsg.id}}</a></td>
                 <td>{{parkMsg.parkid}}</td>
                 <td>{{parkMsg.service}}</td>
+                <td>{{parkMsg.truckNumber}}</td>
                 <td>{{parkMsg.createTime | date:'medium'}}</td>
+                <td>{{parkMsg.sendTime | date:'medium'}}</td>
                 <td>{{parkMsg.body}}</td>
                 <td jhiTranslate="{{'shieldApp.ParkMsgType.' + parkMsg.type}}">{{parkMsg.type}}</td>
+                <td>{{parkMsg.sendTimes}}</td>
                 <td class="text-right">
                     <div class="btn-group">
                         <button type="submit"

@@ -5,8 +5,10 @@ import com.shield.config.Constants;
 import com.shield.domain.Authority;
 import com.shield.domain.Region;
 import com.shield.domain.User;
+import com.shield.domain.WxMaUser;
 import com.shield.repository.AuthorityRepository;
 import com.shield.repository.UserRepository;
+import com.shield.repository.WxMaUserRepository;
 import com.shield.security.AuthoritiesConstants;
 import com.shield.security.SecurityUtils;
 import com.shield.service.dto.UserDTO;
@@ -16,6 +18,7 @@ import com.shield.web.rest.errors.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +48,9 @@ public class UserService {
     private final AuthorityRepository authorityRepository;
 
     private final CacheManager cacheManager;
+
+    @Autowired
+    private WxMaUserRepository wxMaUserRepository;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthorityRepository authorityRepository, CacheManager cacheManager) {
         this.userRepository = userRepository;
@@ -332,8 +338,16 @@ public class UserService {
         return authorityRepository.findAll().stream().map(Authority::getName).collect(Collectors.toList());
     }
 
-    private void clearUserCaches(User user) {
+    public void clearUserCaches(User user) {
         Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE)).evict(user.getLogin());
         Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE)).evict(user.getEmail());
+    }
+
+    public void cancelWeChatAccountBind(User user) {
+        WxMaUser wxMaUser = user.getWxMaUser();
+        user.setWxMaUser(null);
+        userRepository.save(user);
+        wxMaUserRepository.delete(wxMaUser);
+        this.clearUserCaches(user);
     }
 }

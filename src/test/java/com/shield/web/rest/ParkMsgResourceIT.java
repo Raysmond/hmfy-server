@@ -48,14 +48,23 @@ public class ParkMsgResourceIT {
     private static final String DEFAULT_SERVICE = "AAAAAAAAAA";
     private static final String UPDATED_SERVICE = "BBBBBBBBBB";
 
+    private static final String DEFAULT_TRUCK_NUMBER = "AAAAAAAAAA";
+    private static final String UPDATED_TRUCK_NUMBER = "BBBBBBBBBB";
+
     private static final ZonedDateTime DEFAULT_CREATE_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
     private static final ZonedDateTime UPDATED_CREATE_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+
+    private static final ZonedDateTime DEFAULT_SEND_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
+    private static final ZonedDateTime UPDATED_SEND_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
 
     private static final String DEFAULT_BODY = "AAAAAAAAAA";
     private static final String UPDATED_BODY = "BBBBBBBBBB";
 
     private static final ParkMsgType DEFAULT_TYPE = ParkMsgType.IN;
     private static final ParkMsgType UPDATED_TYPE = ParkMsgType.OUT;
+
+    private static final Integer DEFAULT_SEND_TIMES = 1;
+    private static final Integer UPDATED_SEND_TIMES = 2;
 
     @Autowired
     private ParkMsgRepository parkMsgRepository;
@@ -107,9 +116,12 @@ public class ParkMsgResourceIT {
         ParkMsg parkMsg = new ParkMsg()
             .parkid(DEFAULT_PARKID)
             .service(DEFAULT_SERVICE)
+            .truckNumber(DEFAULT_TRUCK_NUMBER)
             .createTime(DEFAULT_CREATE_TIME)
+            .sendTime(DEFAULT_SEND_TIME)
             .body(DEFAULT_BODY)
-            .type(DEFAULT_TYPE);
+            .type(DEFAULT_TYPE)
+            .sendTimes(DEFAULT_SEND_TIMES);
         return parkMsg;
     }
     /**
@@ -122,9 +134,12 @@ public class ParkMsgResourceIT {
         ParkMsg parkMsg = new ParkMsg()
             .parkid(UPDATED_PARKID)
             .service(UPDATED_SERVICE)
+            .truckNumber(UPDATED_TRUCK_NUMBER)
             .createTime(UPDATED_CREATE_TIME)
+            .sendTime(UPDATED_SEND_TIME)
             .body(UPDATED_BODY)
-            .type(UPDATED_TYPE);
+            .type(UPDATED_TYPE)
+            .sendTimes(UPDATED_SEND_TIMES);
         return parkMsg;
     }
 
@@ -151,9 +166,12 @@ public class ParkMsgResourceIT {
         ParkMsg testParkMsg = parkMsgList.get(parkMsgList.size() - 1);
         assertThat(testParkMsg.getParkid()).isEqualTo(DEFAULT_PARKID);
         assertThat(testParkMsg.getService()).isEqualTo(DEFAULT_SERVICE);
+        assertThat(testParkMsg.getTruckNumber()).isEqualTo(DEFAULT_TRUCK_NUMBER);
         assertThat(testParkMsg.getCreateTime()).isEqualTo(DEFAULT_CREATE_TIME);
+        assertThat(testParkMsg.getSendTime()).isEqualTo(DEFAULT_SEND_TIME);
         assertThat(testParkMsg.getBody()).isEqualTo(DEFAULT_BODY);
         assertThat(testParkMsg.getType()).isEqualTo(DEFAULT_TYPE);
+        assertThat(testParkMsg.getSendTimes()).isEqualTo(DEFAULT_SEND_TIMES);
     }
 
     @Test
@@ -236,10 +254,48 @@ public class ParkMsgResourceIT {
 
     @Test
     @Transactional
+    public void checkSendTimeIsRequired() throws Exception {
+        int databaseSizeBeforeTest = parkMsgRepository.findAll().size();
+        // set the field null
+        parkMsg.setSendTime(null);
+
+        // Create the ParkMsg, which fails.
+        ParkMsgDTO parkMsgDTO = parkMsgMapper.toDto(parkMsg);
+
+        restParkMsgMockMvc.perform(post("/api/park-msgs")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(parkMsgDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<ParkMsg> parkMsgList = parkMsgRepository.findAll();
+        assertThat(parkMsgList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
     public void checkBodyIsRequired() throws Exception {
         int databaseSizeBeforeTest = parkMsgRepository.findAll().size();
         // set the field null
         parkMsg.setBody(null);
+
+        // Create the ParkMsg, which fails.
+        ParkMsgDTO parkMsgDTO = parkMsgMapper.toDto(parkMsg);
+
+        restParkMsgMockMvc.perform(post("/api/park-msgs")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(parkMsgDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<ParkMsg> parkMsgList = parkMsgRepository.findAll();
+        assertThat(parkMsgList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
+    public void checkSendTimesIsRequired() throws Exception {
+        int databaseSizeBeforeTest = parkMsgRepository.findAll().size();
+        // set the field null
+        parkMsg.setSendTimes(null);
 
         // Create the ParkMsg, which fails.
         ParkMsgDTO parkMsgDTO = parkMsgMapper.toDto(parkMsg);
@@ -266,9 +322,12 @@ public class ParkMsgResourceIT {
             .andExpect(jsonPath("$.[*].id").value(hasItem(parkMsg.getId().intValue())))
             .andExpect(jsonPath("$.[*].parkid").value(hasItem(DEFAULT_PARKID.toString())))
             .andExpect(jsonPath("$.[*].service").value(hasItem(DEFAULT_SERVICE.toString())))
+            .andExpect(jsonPath("$.[*].truckNumber").value(hasItem(DEFAULT_TRUCK_NUMBER.toString())))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
+            .andExpect(jsonPath("$.[*].sendTime").value(hasItem(sameInstant(DEFAULT_SEND_TIME))))
             .andExpect(jsonPath("$.[*].body").value(hasItem(DEFAULT_BODY.toString())))
-            .andExpect(jsonPath("$.[*].type").value(hasItem(DEFAULT_TYPE.toString())));
+            .andExpect(jsonPath("$.[*].type").value(hasItem(DEFAULT_TYPE.toString())))
+            .andExpect(jsonPath("$.[*].sendTimes").value(hasItem(DEFAULT_SEND_TIMES)));
     }
     
     @Test
@@ -284,9 +343,12 @@ public class ParkMsgResourceIT {
             .andExpect(jsonPath("$.id").value(parkMsg.getId().intValue()))
             .andExpect(jsonPath("$.parkid").value(DEFAULT_PARKID.toString()))
             .andExpect(jsonPath("$.service").value(DEFAULT_SERVICE.toString()))
+            .andExpect(jsonPath("$.truckNumber").value(DEFAULT_TRUCK_NUMBER.toString()))
             .andExpect(jsonPath("$.createTime").value(sameInstant(DEFAULT_CREATE_TIME)))
+            .andExpect(jsonPath("$.sendTime").value(sameInstant(DEFAULT_SEND_TIME)))
             .andExpect(jsonPath("$.body").value(DEFAULT_BODY.toString()))
-            .andExpect(jsonPath("$.type").value(DEFAULT_TYPE.toString()));
+            .andExpect(jsonPath("$.type").value(DEFAULT_TYPE.toString()))
+            .andExpect(jsonPath("$.sendTimes").value(DEFAULT_SEND_TIMES));
     }
 
     @Test
@@ -312,9 +374,12 @@ public class ParkMsgResourceIT {
         updatedParkMsg
             .parkid(UPDATED_PARKID)
             .service(UPDATED_SERVICE)
+            .truckNumber(UPDATED_TRUCK_NUMBER)
             .createTime(UPDATED_CREATE_TIME)
+            .sendTime(UPDATED_SEND_TIME)
             .body(UPDATED_BODY)
-            .type(UPDATED_TYPE);
+            .type(UPDATED_TYPE)
+            .sendTimes(UPDATED_SEND_TIMES);
         ParkMsgDTO parkMsgDTO = parkMsgMapper.toDto(updatedParkMsg);
 
         restParkMsgMockMvc.perform(put("/api/park-msgs")
@@ -328,9 +393,12 @@ public class ParkMsgResourceIT {
         ParkMsg testParkMsg = parkMsgList.get(parkMsgList.size() - 1);
         assertThat(testParkMsg.getParkid()).isEqualTo(UPDATED_PARKID);
         assertThat(testParkMsg.getService()).isEqualTo(UPDATED_SERVICE);
+        assertThat(testParkMsg.getTruckNumber()).isEqualTo(UPDATED_TRUCK_NUMBER);
         assertThat(testParkMsg.getCreateTime()).isEqualTo(UPDATED_CREATE_TIME);
+        assertThat(testParkMsg.getSendTime()).isEqualTo(UPDATED_SEND_TIME);
         assertThat(testParkMsg.getBody()).isEqualTo(UPDATED_BODY);
         assertThat(testParkMsg.getType()).isEqualTo(UPDATED_TYPE);
+        assertThat(testParkMsg.getSendTimes()).isEqualTo(UPDATED_SEND_TIMES);
     }
 
     @Test

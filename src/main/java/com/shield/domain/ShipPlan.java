@@ -73,6 +73,9 @@ public class ShipPlan implements Serializable {
     @Column(name = "update_time", nullable = false)
     private ZonedDateTime updateTime;
 
+    @Column(name = "sync_time")
+    private ZonedDateTime syncTime;
+
     @ManyToOne
     @JsonIgnoreProperties("shipPlans")
     private User user;
@@ -268,6 +271,19 @@ public class ShipPlan implements Serializable {
         this.updateTime = updateTime;
     }
 
+    public ZonedDateTime getSyncTime() {
+        return syncTime;
+    }
+
+    public ShipPlan syncTime(ZonedDateTime syncTime) {
+        this.syncTime = syncTime;
+        return this;
+    }
+
+    public void setSyncTime(ZonedDateTime syncTime) {
+        this.syncTime = syncTime;
+    }
+
     public User getUser() {
         return user;
     }
@@ -316,6 +332,7 @@ public class ShipPlan implements Serializable {
             ", allowInTime='" + getAllowInTime() + "'" +
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
+            ", syncTime='" + getSyncTime() + "'" +
             "}";
     }
 }

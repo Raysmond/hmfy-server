@@ -17,6 +17,7 @@
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.applyId" for="field_applyId">Apply Id</label>
                     <input type="number" class="form-control" name="applyId" id="field_applyId"
+                           [readOnly]="editForm.get('id').value"
                            formControlName="applyId"/>
                     <div *ngIf="editForm.get('applyId').invalid && (editForm.get('applyId').dirty || editForm.get('applyId').touched)">
                         <small class="form-text text-danger"
@@ -32,11 +33,13 @@
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.applyNumber" for="field_applyNumber">Apply Number</label>
                     <input type="text" class="form-control" name="applyNumber" id="field_applyNumber"
+                           [readOnly]="editForm.get('id').value"
                            formControlName="applyNumber"/>
                 </div>
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.truckNumber" for="field_truckNumber">Truck Number</label>
                     <input type="text" class="form-control" name="truckNumber" id="field_truckNumber"
+                           [readOnly]="editForm.get('id').value"
                            formControlName="truckNumber"/>
                     <div *ngIf="editForm.get('truckNumber').invalid && (editForm.get('truckNumber').dirty || editForm.get('truckNumber').touched)">
                         <small class="form-text text-danger"
@@ -63,6 +66,7 @@
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.productName" for="field_productName">Product Name</label>
                     <input type="text" class="form-control" name="productName" id="field_productName"
+                           [readOnly]="editForm.get('id').value"
                            formControlName="productName"/>
                     <div *ngIf="editForm.get('productName').invalid && (editForm.get('productName').dirty || editForm.get('productName').touched)">
                         <small class="form-text text-danger"
@@ -74,6 +78,7 @@
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.deliverPosition" for="field_deliverPosition">Deliver Position</label>
                     <input type="text" class="form-control" name="deliverPosition" id="field_deliverPosition"
+                           [readOnly]="editForm.get('id').value"
                            formControlName="deliverPosition"/>
                     <div *ngIf="editForm.get('deliverPosition').invalid && (editForm.get('deliverPosition').dirty || editForm.get('deliverPosition').touched)">
                         <small class="form-text text-danger"
@@ -108,7 +113,9 @@
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.deliverTime" for="field_deliverTime">Deliver Time</label>
                     <div class="d-flex">
-                        <input id="field_deliverTime" type="datetime-local" class="form-control" name="deliverTime" formControlName="deliverTime" placeholder="YYYY-MM-DD HH:mm"/>
+                        <input id="field_deliverTime" type="datetime-local" class="form-control" name="deliverTime" formControlName="deliverTime"
+                               [readOnly]="editForm.get('id').value"
+                               placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
                 </div>
                 <div class="form-group">
@@ -120,7 +127,9 @@
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.createTime" for="field_createTime">Create Time</label>
                     <div class="d-flex">
-                        <input id="field_createTime" type="datetime-local" class="form-control" name="createTime" formControlName="createTime" placeholder="YYYY-MM-DD HH:mm"/>
+                        <input id="field_createTime" type="datetime-local" class="form-control" name="createTime"
+                               [readOnly]="editForm.get('id').value"
+                               formControlName="createTime" placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
                     <div *ngIf="editForm.get('createTime').invalid && (editForm.get('createTime').dirty || editForm.get('createTime').touched)">
                         <small class="form-text text-danger"
@@ -136,7 +145,9 @@
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.updateTime" for="field_updateTime">Update Time</label>
                     <div class="d-flex">
-                        <input id="field_updateTime" type="datetime-local" class="form-control" name="updateTime" formControlName="updateTime" placeholder="YYYY-MM-DD HH:mm"/>
+                        <input id="field_updateTime" type="datetime-local" class="form-control" name="updateTime"
+                               [readOnly]="editForm.get('id').value"
+                               formControlName="updateTime" placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
                     <div *ngIf="editForm.get('updateTime').invalid && (editForm.get('updateTime').dirty || editForm.get('updateTime').touched)">
                         <small class="form-text text-danger"
@@ -149,14 +160,20 @@
                         </small>
                     </div>
                 </div>
+                <!--<div class="form-group">-->
+                    <!--<label class="form-control-label" jhiTranslate="shieldApp.shipPlan.syncTime" for="field_syncTime">Sync Time</label>-->
+                    <!--<div class="d-flex">-->
+                        <!--<input id="field_syncTime" type="datetime-local" class="form-control" name="syncTime" formControlName="syncTime" placeholder="YYYY-MM-DD HH:mm"/>-->
+                    <!--</div>-->
+                <!--</div>-->
 
-                <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.user" for="field_user">User</label>
-                    <select class="form-control" id="field_user" name="user" formControlName="userId">
-                        <option [ngValue]="null"></option>
-                        <option [ngValue]="userOption.id" *ngFor="let userOption of users; trackBy: trackUserById">{{userOption.login}}</option>
-                    </select>
-                </div>
+                <!--<div class="form-group">-->
+                    <!--<label class="form-control-label" jhiTranslate="shieldApp.shipPlan.user" for="field_user">User</label>-->
+                    <!--<select class="form-control" id="field_user" name="user" formControlName="userId">-->
+                        <!--<option [ngValue]="null"></option>-->
+                        <!--<option [ngValue]="userOption.id" *ngFor="let userOption of users; trackBy: trackUserById">{{userOption.login}}</option>-->
+                    <!--</select>-->
+                <!--</div>-->
             </div>
             <div>
                 <button type="button" id="cancel-save" class="btn btn-secondary"  (click)="previousState()">

@@ -55,6 +55,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
 
     private ZonedDateTimeFilter updateTime;
 
+    private ZonedDateTimeFilter syncTime;
+
     private LongFilter userId;
 
     public ShipPlanCriteria(){
@@ -76,6 +78,7 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.allowInTime = other.allowInTime == null ? null : other.allowInTime.copy();
         this.createTime = other.createTime == null ? null : other.createTime.copy();
         this.updateTime = other.updateTime == null ? null : other.updateTime.copy();
+        this.syncTime = other.syncTime == null ? null : other.syncTime.copy();
         this.userId = other.userId == null ? null : other.userId.copy();
     }
 
@@ -204,6 +207,14 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.updateTime = updateTime;
     }
 
+    public ZonedDateTimeFilter getSyncTime() {
+        return syncTime;
+    }
+
+    public void setSyncTime(ZonedDateTimeFilter syncTime) {
+        this.syncTime = syncTime;
+    }
+
     public LongFilter getUserId() {
         return userId;
     }
@@ -238,6 +249,7 @@ public class ShipPlanCriteria implements Serializable, Criteria {
             Objects.equals(allowInTime, that.allowInTime) &&
             Objects.equals(createTime, that.createTime) &&
             Objects.equals(updateTime, that.updateTime) &&
+            Objects.equals(syncTime, that.syncTime) &&
             Objects.equals(userId, that.userId);
     }
 
@@ -259,6 +271,7 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         allowInTime,
         createTime,
         updateTime,
+        syncTime,
         userId
         );
     }
@@ -281,6 +294,7 @@ public class ShipPlanCriteria implements Serializable, Criteria {
                 (allowInTime != null ? "allowInTime=" + allowInTime + ", " : "") +
                 (createTime != null ? "createTime=" + createTime + ", " : "") +
                 (updateTime != null ? "updateTime=" + updateTime + ", " : "") +
+                (syncTime != null ? "syncTime=" + syncTime + ", " : "") +
                 (userId != null ? "userId=" + userId + ", " : "") +
             "}";
     }

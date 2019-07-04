@@ -1,92 +1,174 @@
 <div>
     <h2 id="page-heading">
         <span jhiTranslate="shieldApp.shipPlan.home.title">Ship Plans</span>
-        <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-ship-plan" [routerLink]="['/ship-plan/new']">
-            <fa-icon [icon]="'plus'"></fa-icon>
-            <span  jhiTranslate="shieldApp.shipPlan.home.createLabel">
-            Create new Ship Plan
-            </span>
-        </button>
+        <!--<button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-ship-plan" [routerLink]="['/ship-plan/new']">-->
+        <!--<fa-icon [icon]="'plus'"></fa-icon>-->
+        <!--<span  jhiTranslate="shieldApp.shipPlan.home.createLabel">-->
+        <!--Create new Ship Plan-->
+        <!--</span>-->
+        <!--</button>-->
     </h2>
     <jhi-alert></jhi-alert>
     <br/>
-    <div class="table-responsive" *ngIf="shipPlans">
-        <table class="table table-striped">
-            <thead>
-            <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
-            <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="company"><span jhiTranslate="shieldApp.shipPlan.company">Company</span> </th>
-            <th jhiSortBy="applyId"><span jhiTranslate="shieldApp.shipPlan.applyId">Apply Id</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="applyNumber"><span jhiTranslate="shieldApp.shipPlan.applyNumber">Apply Number</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="truckNumber"><span jhiTranslate="shieldApp.shipPlan.truckNumber">Truck Number</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="auditStatus"><span jhiTranslate="shieldApp.shipPlan.auditStatus">Audit Status</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th><span jhiTranslate="shieldApp.shipPlan.productName">Product Name</span></th>
-            <th><span jhiTranslate="shieldApp.shipPlan.deliverPosition">Deliver Position</span></th>
-            <th jhiSortBy="gateTime"><span jhiTranslate="shieldApp.shipPlan.gateTime">Gate Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="leaveTime"><span jhiTranslate="shieldApp.shipPlan.leaveTime">Leave Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="deliverTime"><span jhiTranslate="shieldApp.shipPlan.deliverTime">Deliver Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <th jhiSortBy="allowInTime"><span jhiTranslate="shieldApp.shipPlan.allowInTime">Allow In Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
-            <!--<th jhiSortBy="createTime"><span jhiTranslate="shieldApp.shipPlan.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-            <!--<th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.shipPlan.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-            <!--<th jhiSortBy="userLogin"><span jhiTranslate="shieldApp.shipPlan.user">User</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-            <!--<th jhiSortBy="toUserLogin"><span jhiTranslate="shieldApp.shipPlan.toUser">To User</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
-            <th></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngFor="let shipPlan of shipPlans ;trackBy: trackId">
-                <td><a [routerLink]="['/ship-plan', shipPlan.id, 'view' ]">{{shipPlan.id}}</a></td>
-                <td>{{shipPlan.company}}</td>
-                <td>{{shipPlan.applyId}}</td>
-                <td>{{shipPlan.applyNumber}}</td>
-                <td>{{shipPlan.truckNumber}}</td>
-                <td>{{shipPlan.auditStatus}}</td>
-                <td>{{shipPlan.productName}}</td>
-                <td>{{shipPlan.deliverPosition}}</td>
-                <td>{{shipPlan.gateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-                <td>{{shipPlan.leaveTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-                <td>{{shipPlan.deliverTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-                <td>{{shipPlan.allowInTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-                <!--<td>{{shipPlan.createTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
-                <!--<td>{{shipPlan.updateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
-                <!--<td>-->
-                    <!--{{shipPlan.userLogin}}-->
-                <!--</td>-->
-                <!--<td>-->
-                    <!--{{shipPlan.toUserLogin}}-->
-                <!--</td>-->
-                <td class="text-right">
-                    <div class="btn-group">
-                        <button type="submit"
-                                [routerLink]="['/ship-plan', shipPlan.id, 'view' ]"
-                                class="btn btn-info btn-sm">
-                            <fa-icon [icon]="'eye'"></fa-icon>
-                        </button>
-                        <button type="submit"
-                                [routerLink]="['/ship-plan', shipPlan.id, 'edit']"
-                                class="btn btn-primary btn-sm">
-                            <fa-icon [icon]="'pencil-alt'"></fa-icon>
-                        </button>
-                        <!--<button type="submit"-->
+    <div class="card card-default">
+        <div class="card-body">
+            <form name="searchForm" role="form" novalidate (ngSubmit)="search()" [formGroup]="searchForm">
+                <div class="form-row align-items-center">
+                    <div class="col-auto">
+                        <div class="form-select mb-2">
+                            <label for="inlineFormInput">区域</label>
+                            <select class="form-control" id="field_region" name="deliverPosition"
+                                    formControlName="deliverPosition">
+                                <option [ngValue]="null" selected>--选择--</option>
+                                <option [ngValue]="regionOption.name"
+                                        *ngFor="let regionOption of regions; trackBy: trackRegionById">{{regionOption.name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="form-select mb-2">
+                            <label for="inlineFormInput">发运状态</label>
+                            <select class="custom-select" name="auditStatus" formControlName="auditStatus">
+                                <option selected [ngValue]="null">--选择--</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <label for="inlineFormInput">车牌号</label>
+                        <input class="form-control mb-2"
+                               id="inlineFormInput" type="text"
+                               name="truckNumber" formControlName="truckNumber"
+                        >
+                    </div>
+                    <div class="col-auto">
+                        <div class="form-group mb-2">
+                            <label class="form-control-label">提货日期</label>
+                            <input id="field_deliverTimeBegin" type="date" class="form-control" name="deliverTimeBegin"
+                                   formControlName="deliverTimeBegin" placeholder="YYYY-MM-DD"/>
+                        </div>
+                    </div>
+                    <!--<div class="col-auto">-->
+                        <!--<div class="form-group mb-2">-->
+                            <!--<label class="form-control-label">截止提货日期</label>-->
+                            <!--<input id="field_deliverTimeEnd" type="date" class="form-control" name="deliverTimeEnd"-->
+                                   <!--formControlName="deliverTimeEnd" placeholder="YYYY-MM-DD"/>-->
+                        <!--</div>-->
+                    <!--</div>-->
+
+                    <div class="col-auto">
+                        <button class="btn btn-primary mb-2" type="submit">搜索</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="table-responsive" *ngIf="shipPlans">
+                <table class="table table-striped">
+                    <thead>
+                    <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
+                        <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="company"><span jhiTranslate="shieldApp.shipPlan.company">Company</span></th>
+                        <th jhiSortBy="applyId"><span jhiTranslate="shieldApp.shipPlan.applyId">Apply Id</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="applyNumber"><span
+                            jhiTranslate="shieldApp.shipPlan.applyNumber">Apply Number</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="truckNumber"><span
+                            jhiTranslate="shieldApp.shipPlan.truckNumber">Truck Number</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="auditStatus"><span
+                            jhiTranslate="shieldApp.shipPlan.auditStatus">Audit Status</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th><span jhiTranslate="shieldApp.shipPlan.productName">Product Name</span></th>
+                        <th><span jhiTranslate="shieldApp.shipPlan.deliverPosition">Deliver Position</span></th>
+                        <th jhiSortBy="gateTime"><span jhiTranslate="shieldApp.shipPlan.gateTime">Gate Time</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="leaveTime"><span jhiTranslate="shieldApp.shipPlan.leaveTime">Leave Time</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="deliverTime"><span
+                            jhiTranslate="shieldApp.shipPlan.deliverTime">Deliver Time</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th jhiSortBy="allowInTime"><span
+                            jhiTranslate="shieldApp.shipPlan.allowInTime">Allow In Time</span>
+                            <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <!--<th jhiSortBy="createTime"><span jhiTranslate="shieldApp.shipPlan.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+                        <!--<th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.shipPlan.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+                        <!--<th jhiSortBy="userLogin"><span jhiTranslate="shieldApp.shipPlan.user">User</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+                        <!--<th jhiSortBy="toUserLogin"><span jhiTranslate="shieldApp.shipPlan.toUser">To User</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let shipPlan of shipPlans ;trackBy: trackId">
+                        <td><a [routerLink]="['/ship-plan', shipPlan.id, 'view' ]">{{shipPlan.id}}</a></td>
+                        <td>{{shipPlan.company}}</td>
+                        <td>{{shipPlan.applyId}}</td>
+                        <td>{{shipPlan.applyNumber}}</td>
+                        <td>{{shipPlan.truckNumber}}</td>
+                        <td>{{shipPlan.auditStatus}}</td>
+                        <td>{{shipPlan.productName}}</td>
+                        <td>{{shipPlan.deliverPosition}}</td>
+                        <td>{{shipPlan.gateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                        <td>{{shipPlan.leaveTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                        <td>{{shipPlan.deliverTime | date:'yyyy-MM-dd'}}</td>
+                        <td>{{shipPlan.allowInTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                        <!--<td>{{shipPlan.createTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
+                        <!--<td>{{shipPlan.updateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
+                        <!--<td>-->
+                        <!--{{shipPlan.userLogin}}-->
+                        <!--</td>-->
+                        <!--<td>-->
+                        <!--{{shipPlan.toUserLogin}}-->
+                        <!--</td>-->
+                        <td class="text-right">
+                            <div class="btn-group">
+                                <button type="submit"
+                                        [routerLink]="['/ship-plan', shipPlan.id, 'view' ]"
+                                        class="btn btn-info btn-sm">
+                                    <fa-icon [icon]="'eye'"></fa-icon>
+                                </button>
+                                <button type="submit"
+                                        [routerLink]="['/ship-plan', shipPlan.id, 'edit']"
+                                        class="btn btn-primary btn-sm">
+                                    <fa-icon [icon]="'pencil-alt'"></fa-icon>
+                                </button>
+                                <!--<button type="submit"-->
                                 <!--[routerLink]="['/', 'ship-plan', { outlets: { popup: shipPlan.id + '/delete'} }]"-->
                                 <!--replaceUrl="true"-->
                                 <!--queryParamsHandling="merge"-->
                                 <!--class="btn btn-danger btn-sm">-->
-                            <!--<fa-icon [icon]="'times'"></fa-icon>-->
-                            <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>-->
-                        <!--</button>-->
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-    <div *ngIf="shipPlans && shipPlans.length">
-        <div class="row justify-content-center">
-            <jhi-item-count [page]="page" [total]="totalItems" [maxSize]="5" [itemsPerPage]="itemsPerPage"></jhi-item-count>
-        </div>
-        <div class="row justify-content-center">
-            <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" (pageChange)="loadPage(page)"></ngb-pagination>
+                                <!--<fa-icon [icon]="'times'"></fa-icon>-->
+                                <!--<span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>-->
+                                <!--</button>-->
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div *ngIf="shipPlans && shipPlans.length">
+                <div class="row justify-content-center">
+                    <jhi-item-count [page]="page" [total]="totalItems" [maxSize]="5"
+                                    [itemsPerPage]="itemsPerPage"></jhi-item-count>
+                </div>
+                <div class="row justify-content-center">
+                    <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage"
+                                    [maxSize]="5" [rotate]="true" [boundaryLinks]="true"
+                                    (pageChange)="loadPage(page)"></ngb-pagination>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -86,6 +86,9 @@ public class ShipPlanResourceIT {
     private static final ZonedDateTime DEFAULT_UPDATE_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
     private static final ZonedDateTime UPDATED_UPDATE_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
 
+    private static final ZonedDateTime DEFAULT_SYNC_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
+    private static final ZonedDateTime UPDATED_SYNC_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+
     @Autowired
     private ShipPlanRepository shipPlanRepository;
 
@@ -150,7 +153,8 @@ public class ShipPlanResourceIT {
             .deliverTime(DEFAULT_DELIVER_TIME)
             .allowInTime(DEFAULT_ALLOW_IN_TIME)
             .createTime(DEFAULT_CREATE_TIME)
-            .updateTime(DEFAULT_UPDATE_TIME);
+            .updateTime(DEFAULT_UPDATE_TIME)
+            .syncTime(DEFAULT_SYNC_TIME);
         return shipPlan;
     }
     /**
@@ -174,7 +178,8 @@ public class ShipPlanResourceIT {
             .deliverTime(UPDATED_DELIVER_TIME)
             .allowInTime(UPDATED_ALLOW_IN_TIME)
             .createTime(UPDATED_CREATE_TIME)
-            .updateTime(UPDATED_UPDATE_TIME);
+            .updateTime(UPDATED_UPDATE_TIME)
+            .syncTime(UPDATED_SYNC_TIME);
         return shipPlan;
     }
 
@@ -213,6 +218,7 @@ public class ShipPlanResourceIT {
         assertThat(testShipPlan.getAllowInTime()).isEqualTo(DEFAULT_ALLOW_IN_TIME);
         assertThat(testShipPlan.getCreateTime()).isEqualTo(DEFAULT_CREATE_TIME);
         assertThat(testShipPlan.getUpdateTime()).isEqualTo(DEFAULT_UPDATE_TIME);
+        assertThat(testShipPlan.getSyncTime()).isEqualTo(DEFAULT_SYNC_TIME);
     }
 
     @Test
@@ -412,7 +418,8 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.[*].deliverTime").value(hasItem(sameInstant(DEFAULT_DELIVER_TIME))))
             .andExpect(jsonPath("$.[*].allowInTime").value(hasItem(sameInstant(DEFAULT_ALLOW_IN_TIME))))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
-            .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))));
+            .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
+            .andExpect(jsonPath("$.[*].syncTime").value(hasItem(sameInstant(DEFAULT_SYNC_TIME))));
     }
     
     @Test
@@ -439,7 +446,8 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.deliverTime").value(sameInstant(DEFAULT_DELIVER_TIME)))
             .andExpect(jsonPath("$.allowInTime").value(sameInstant(DEFAULT_ALLOW_IN_TIME)))
             .andExpect(jsonPath("$.createTime").value(sameInstant(DEFAULT_CREATE_TIME)))
-            .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)));
+            .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)))
+            .andExpect(jsonPath("$.syncTime").value(sameInstant(DEFAULT_SYNC_TIME)));
     }
 
     @Test
@@ -1206,6 +1214,72 @@ public class ShipPlanResourceIT {
 
     @Test
     @Transactional
+    public void getAllShipPlansBySyncTimeIsEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where syncTime equals to DEFAULT_SYNC_TIME
+        defaultShipPlanShouldBeFound("syncTime.equals=" + DEFAULT_SYNC_TIME);
+
+        // Get all the shipPlanList where syncTime equals to UPDATED_SYNC_TIME
+        defaultShipPlanShouldNotBeFound("syncTime.equals=" + UPDATED_SYNC_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansBySyncTimeIsInShouldWork() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where syncTime in DEFAULT_SYNC_TIME or UPDATED_SYNC_TIME
+        defaultShipPlanShouldBeFound("syncTime.in=" + DEFAULT_SYNC_TIME + "," + UPDATED_SYNC_TIME);
+
+        // Get all the shipPlanList where syncTime equals to UPDATED_SYNC_TIME
+        defaultShipPlanShouldNotBeFound("syncTime.in=" + UPDATED_SYNC_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansBySyncTimeIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where syncTime is not null
+        defaultShipPlanShouldBeFound("syncTime.specified=true");
+
+        // Get all the shipPlanList where syncTime is null
+        defaultShipPlanShouldNotBeFound("syncTime.specified=false");
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansBySyncTimeIsGreaterThanOrEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where syncTime greater than or equals to DEFAULT_SYNC_TIME
+        defaultShipPlanShouldBeFound("syncTime.greaterOrEqualThan=" + DEFAULT_SYNC_TIME);
+
+        // Get all the shipPlanList where syncTime greater than or equals to UPDATED_SYNC_TIME
+        defaultShipPlanShouldNotBeFound("syncTime.greaterOrEqualThan=" + UPDATED_SYNC_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansBySyncTimeIsLessThanSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where syncTime less than or equals to DEFAULT_SYNC_TIME
+        defaultShipPlanShouldNotBeFound("syncTime.lessThan=" + DEFAULT_SYNC_TIME);
+
+        // Get all the shipPlanList where syncTime less than or equals to UPDATED_SYNC_TIME
+        defaultShipPlanShouldBeFound("syncTime.lessThan=" + UPDATED_SYNC_TIME);
+    }
+
+
+    @Test
+    @Transactional
     public void getAllShipPlansByUserIsEqualToSomething() throws Exception {
         // Initialize the database
         User user = UserResourceIT.createEntity(em);
@@ -1243,7 +1317,8 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.[*].deliverTime").value(hasItem(sameInstant(DEFAULT_DELIVER_TIME))))
             .andExpect(jsonPath("$.[*].allowInTime").value(hasItem(sameInstant(DEFAULT_ALLOW_IN_TIME))))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
-            .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))));
+            .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
+            .andExpect(jsonPath("$.[*].syncTime").value(hasItem(sameInstant(DEFAULT_SYNC_TIME))));
 
         // Check, that the count call also returns 1
         restShipPlanMockMvc.perform(get("/api/ship-plans/count?sort=id,desc&" + filter))
@@ -1304,7 +1379,8 @@ public class ShipPlanResourceIT {
             .deliverTime(UPDATED_DELIVER_TIME)
             .allowInTime(UPDATED_ALLOW_IN_TIME)
             .createTime(UPDATED_CREATE_TIME)
-            .updateTime(UPDATED_UPDATE_TIME);
+            .updateTime(UPDATED_UPDATE_TIME)
+            .syncTime(UPDATED_SYNC_TIME);
         ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(updatedShipPlan);
 
         restShipPlanMockMvc.perform(put("/api/ship-plans")
@@ -1330,6 +1406,7 @@ public class ShipPlanResourceIT {
         assertThat(testShipPlan.getAllowInTime()).isEqualTo(UPDATED_ALLOW_IN_TIME);
         assertThat(testShipPlan.getCreateTime()).isEqualTo(UPDATED_CREATE_TIME);
         assertThat(testShipPlan.getUpdateTime()).isEqualTo(UPDATED_UPDATE_TIME);
+        assertThat(testShipPlan.getSyncTime()).isEqualTo(UPDATED_SYNC_TIME);
     }
 
     @Test

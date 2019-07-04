@@ -131,6 +131,9 @@ public class ShipPlanQueryService extends QueryService<ShipPlan> {
             if (criteria.getUpdateTime() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getUpdateTime(), ShipPlan_.updateTime));
             }
+            if (criteria.getSyncTime() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getSyncTime(), ShipPlan_.syncTime));
+            }
             if (criteria.getUserId() != null) {
                 specification = specification.and(buildSpecification(criteria.getUserId(),
                     root -> root.join(ShipPlan_.user, JoinType.LEFT).get(User_.id)));

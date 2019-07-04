@@ -42,6 +42,7 @@ describe('Service Tests', () => {
         currentDate,
         currentDate,
         currentDate,
+        currentDate,
         currentDate
       );
     });
@@ -55,7 +56,8 @@ describe('Service Tests', () => {
             deliverTime: currentDate.format(DATE_TIME_FORMAT),
             allowInTime: currentDate.format(DATE_TIME_FORMAT),
             createTime: currentDate.format(DATE_TIME_FORMAT),
-            updateTime: currentDate.format(DATE_TIME_FORMAT)
+            updateTime: currentDate.format(DATE_TIME_FORMAT),
+            syncTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
@@ -78,7 +80,8 @@ describe('Service Tests', () => {
             deliverTime: currentDate.format(DATE_TIME_FORMAT),
             allowInTime: currentDate.format(DATE_TIME_FORMAT),
             createTime: currentDate.format(DATE_TIME_FORMAT),
-            updateTime: currentDate.format(DATE_TIME_FORMAT)
+            updateTime: currentDate.format(DATE_TIME_FORMAT),
+            syncTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
@@ -89,7 +92,8 @@ describe('Service Tests', () => {
             deliverTime: currentDate,
             allowInTime: currentDate,
             createTime: currentDate,
-            updateTime: currentDate
+            updateTime: currentDate,
+            syncTime: currentDate
           },
           returnedFromService
         );
@@ -118,7 +122,8 @@ describe('Service Tests', () => {
             deliverTime: currentDate.format(DATE_TIME_FORMAT),
             allowInTime: currentDate.format(DATE_TIME_FORMAT),
             createTime: currentDate.format(DATE_TIME_FORMAT),
-            updateTime: currentDate.format(DATE_TIME_FORMAT)
+            updateTime: currentDate.format(DATE_TIME_FORMAT),
+            syncTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
@@ -130,7 +135,8 @@ describe('Service Tests', () => {
             deliverTime: currentDate,
             allowInTime: currentDate,
             createTime: currentDate,
-            updateTime: currentDate
+            updateTime: currentDate,
+            syncTime: currentDate
           },
           returnedFromService
         );
@@ -159,7 +165,8 @@ describe('Service Tests', () => {
             deliverTime: currentDate.format(DATE_TIME_FORMAT),
             allowInTime: currentDate.format(DATE_TIME_FORMAT),
             createTime: currentDate.format(DATE_TIME_FORMAT),
-            updateTime: currentDate.format(DATE_TIME_FORMAT)
+            updateTime: currentDate.format(DATE_TIME_FORMAT),
+            syncTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
@@ -170,7 +177,8 @@ describe('Service Tests', () => {
             deliverTime: currentDate,
             allowInTime: currentDate,
             createTime: currentDate,
-            updateTime: currentDate
+            updateTime: currentDate,
+            syncTime: currentDate
           },
           returnedFromService
         );

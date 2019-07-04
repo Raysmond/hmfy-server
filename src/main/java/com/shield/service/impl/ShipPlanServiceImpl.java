@@ -21,8 +21,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -33,6 +35,8 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
 
 /**
  * Service Implementation for managing {@link ShipPlan}.
@@ -56,6 +60,10 @@ public class ShipPlanServiceImpl implements ShipPlanService {
     @Autowired
     private RegionService regionService;
 
+    @Autowired
+    @Qualifier("redisLongTemplate")
+    private RedisTemplate<String, Long> redisLongTemplate;
+
     public ShipPlanServiceImpl(ShipPlanRepository shipPlanRepository, ShipPlanMapper shipPlanMapper) {
         this.shipPlanRepository = shipPlanRepository;
         this.shipPlanMapper = shipPlanMapper;
@@ -70,10 +78,37 @@ public class ShipPlanServiceImpl implements ShipPlanService {
     @Override
     public ShipPlanDTO save(ShipPlanDTO shipPlanDTO) {
         log.debug("Request to save ShipPlan : {}", shipPlanDTO);
+        boolean needSync = false;
+        if (shipPlanDTO.getId() != null && shipPlanDTO.getApplyId() != null && !shipPlanDTO.getApplyId().equals(0L)) {
+            Optional<ShipPlan> origin = shipPlanRepository.findById(shipPlanDTO.getId());
+            if (origin.isPresent()) {
+                ShipPlan originPlan = origin.get();
+                if (timeNotEqual(originPlan.getGateTime(), shipPlanDTO.getGateTime())
+                    || timeNotEqual(originPlan.getLeaveTime(), shipPlanDTO.getLeaveTime())
+                    || timeNotEqual(originPlan.getAllowInTime(), shipPlanDTO.getAllowInTime())) {
+                    needSync = true;
+                }
+            }
+        }
         ShipPlan shipPlan = shipPlanMapper.toEntity(shipPlanDTO);
         shipPlan = shipPlanRepository.save(shipPlan);
+
+        if (needSync) {
+            redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, shipPlan.getId());
+        }
         return shipPlanMapper.toDto(shipPlan);
     }
+
+    private boolean timeNotEqual(ZonedDateTime t1, ZonedDateTime t2) {
+        if (t1 == null && t2 == null) {
+            return false;
+        } else if (t1 == null || t2 == null) {
+            return false;
+        } else {
+            return !t1.equals(t2);
+        }
+    }
+
 
     /**
      * Get all the shipPlans.

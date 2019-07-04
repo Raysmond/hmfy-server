@@ -6,6 +6,7 @@ import com.shield.service.dto.ShipPlanDTO;
 import com.shield.service.dto.ShipPlanCriteria;
 import com.shield.service.ShipPlanQueryService;
 
+import io.github.jhipster.service.filter.ZonedDateTimeFilter;
 import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,10 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -99,19 +105,29 @@ public class ShipPlanResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of shipPlans in body.
      */
     @GetMapping("/ship-plans")
-    public ResponseEntity<List<ShipPlanDTO>> getAllShipPlans(ShipPlanCriteria criteria, Pageable pageable, @RequestParam MultiValueMap<String, String> queryParams, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<List<ShipPlanDTO>> getAllShipPlans(ShipPlanCriteria criteria, Pageable pageable,
+                                                             @RequestParam MultiValueMap<String, String> queryParams,
+                                                             @RequestParam(required = false) String deliverTimeBegin,
+                                                             @RequestParam(required = false) String deliverTimeEnd,
+                                                             UriComponentsBuilder uriBuilder) {
         log.debug("REST request to get ShipPlans by criteria: {}", criteria);
+        if (!StringUtils.isEmpty(deliverTimeBegin)) {
+            LocalDate t = LocalDate.parse(deliverTimeBegin, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            ZonedDateTimeFilter f = new ZonedDateTimeFilter();
+            f.setEquals(t.atStartOfDay(ZoneId.systemDefault()));
+            criteria.setDeliverTime(f);
+        }
         Page<ShipPlanDTO> page = shipPlanQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(uriBuilder.queryParams(queryParams), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
     /**
-    * {@code GET  /ship-plans/count} : count all the shipPlans.
-    *
-    * @param criteria the criteria which the requested entities should match.
-    * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the count in body.
-    */
+     * {@code GET  /ship-plans/count} : count all the shipPlans.
+     *
+     * @param criteria the criteria which the requested entities should match.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the count in body.
+     */
     @GetMapping("/ship-plans/count")
     public ResponseEntity<Long> countShipPlans(ShipPlanCriteria criteria) {
         log.debug("REST request to count ShipPlans by criteria: {}", criteria);

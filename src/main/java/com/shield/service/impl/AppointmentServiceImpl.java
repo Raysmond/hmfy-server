@@ -158,15 +158,16 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public AppointmentDTO cancelAppointment(Long appointmentId) {
         Appointment appointment = appointmentRepository.getOne(appointmentId);
+        AppointmentStatus currentStatus = appointment.getStatus();
         appointment.setValid(Boolean.FALSE);
         appointment.setStatus(AppointmentStatus.CANCELED);
         appointment.setUpdateTime(ZonedDateTime.now());
         appointment = appointmentRepository.save(appointment);
 
-        if (redisLongTemplate.hasKey(REDIS_KEY_UPLOAD_CAR_WHITELIST) == Boolean.TRUE) {
+        if (currentStatus.equals(AppointmentStatus.START)) {
             redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
+            redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
         }
-        redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
         return appointmentMapper.toDto(appointment);
     }
 
@@ -181,9 +182,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (service.equals("uploadcarin")) {
             // 车辆入场
             ZonedDateTime inTime = ZonedDateTime.parse(carInTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault()));
-            List<ShipPlan> shipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today, today.plusDays(1))
+            List<ShipPlan> shipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today)
                 .stream().filter(it -> it.getAuditStatus().equals(Integer.valueOf(1)))
-                .sorted(Comparator.comparing(ShipPlan::getCreateTime)).collect(Collectors.toList());
+                .sorted(Comparator.comparing(ShipPlan::getApplyId)).collect(Collectors.toList());
             if (shipPlans.size() > 1) {
                 // 理论上车辆入场，当计划audit_status=1的只有一条
                 // 不排除同时建了多个计划的情况，有多个有效计划时，只取最早创建的一条
@@ -206,9 +207,13 @@ public class AppointmentServiceImpl implements AppointmentService {
         } else if (service.equals("uploadcarout")) {
             // 车辆出厂
             ZonedDateTime outTime = ZonedDateTime.parse(carOutTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault()));
-            List<ShipPlan> shipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today, today.plusDays(1))
+            if (outTime.getYear() < ZonedDateTime.now().getYear()) {
+                log.info("uploadcarout leave time error, %s", carOutTime);
+                outTime = ZonedDateTime.now();
+            }
+            List<ShipPlan> shipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today)
                 .stream().filter(it -> it.getAuditStatus().equals(Integer.valueOf(3)) || (it.getLeaveTime() == null && it.getGateTime() != null))
-                .sorted(Comparator.comparing(ShipPlan::getUpdateTime).reversed())
+                .sorted(Comparator.comparing(ShipPlan::getApplyId).reversed())
                 .collect(Collectors.toList());
             // 取未出场的，最近一个提货完成的计划
             if (!shipPlans.isEmpty()) {

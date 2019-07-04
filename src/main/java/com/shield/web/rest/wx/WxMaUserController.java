@@ -12,12 +12,14 @@ import com.shield.service.dto.WxMaUserDTO;
 import com.shield.utils.JsonUtils;
 import com.shield.web.rest.UserJWTController;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -104,7 +106,7 @@ public class WxMaUserController {
 
             String unionId = null;
             if (StringUtils.isNotBlank(loginVm.encryptedData)) {
-                WxMaUserInfo wxMaUserInfo =  wxService.getUserService().getUserInfo(session.getSessionKey(), loginVm.getEncryptedData(), loginVm.getIv());
+                WxMaUserInfo wxMaUserInfo = wxService.getUserService().getUserInfo(session.getSessionKey(), loginVm.getEncryptedData(), loginVm.getIv());
                 logger.info("Wechat userInfo from encryptedData: openid: {}, unionid: {}", wxMaUserInfo.getOpenId(), wxMaUserInfo.getUnionId());
                 unionId = wxMaUserInfo.getUnionId();
             }
@@ -120,6 +122,7 @@ public class WxMaUserController {
                 wxMaUserDTO.updateWithWxUserInfo(loginVm.userInfo);
                 wxMaUserDTO.setUnionId(unionId);
                 wxMaUserService.save(wxMaUserDTO);
+                userService.clearUserCaches(user);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(user.getLogin());
                 authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -133,8 +136,10 @@ public class WxMaUserController {
                 wxMaUserDTO.setUnionId(unionId);
                 wxMaUserDTO.setCreateTime(ZonedDateTime.now());
                 wxMaUserDTO.setUpdateTime(ZonedDateTime.now());
-                wxMaUserDTO.setUserId(userService.getUserWithAuthoritiesByLogin(loginVm.login).get().getId());
+                user = userService.getUserWithAuthoritiesByLogin(loginVm.login).get();
+                wxMaUserDTO.setUserId(user.getId());
                 wxMaUserService.save(wxMaUserDTO);
+                userService.clearUserCaches(user);
             } else {
                 return new ResponseEntity<>(new JWTToken(null, "请先绑定预约员账号！"), HttpStatus.UNAUTHORIZED);
             }
@@ -147,6 +152,44 @@ public class WxMaUserController {
         } catch (WxErrorException e) {
             this.logger.error(e.getMessage(), e);
             return ResponseEntity.badRequest().body(new JWTToken(null, e.getMessage()));
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    static class ResultResponse {
+        private String message;
+        private Integer code = 0;
+
+        public ResultResponse(String message) {
+            this.message = message;
+        }
+
+        public ResultResponse(String message, Integer code) {
+            this.message = message;
+            this.code = code;
+        }
+    }
+
+    @PostMapping("/cancel_wechat_account_binding")
+    public ResponseEntity<ResultResponse> cancelWeChatAccountBind() {
+        User user = userService.getUserWithAuthorities().get();
+        if (user.getWxMaUser() == null) {
+            return ResponseEntity.badRequest().body(new ResultResponse("未绑定微信账号", 1));
+        } else {
+            logger.info("User [id={}, login={}] cancel binding wechat user, openid: {}", user.getId(), user.getLogin(), user.getWxMaUser().getOpenId());
+            userService.cancelWeChatAccountBind(user);
+            return ResponseEntity.ok(new ResultResponse("ok"));
+        }
+    }
+
+    @GetMapping("/check-wechat-user-bind")
+    public ResponseEntity<ResultResponse> checkWechatUserBind() {
+        User user = userService.getUserWithAuthorities().get();
+        if (user.getWxMaUser() == null) {
+            return ResponseEntity.ok(new ResultResponse("未绑定微信账号", 1));
+        } else {
+            return ResponseEntity.ok(new ResultResponse("已绑定微信账号", 0));
         }
     }
 

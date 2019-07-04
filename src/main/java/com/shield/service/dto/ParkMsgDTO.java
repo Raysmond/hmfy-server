@@ -20,14 +20,22 @@ public class ParkMsgDTO implements Serializable {
     @Size(max = 64)
     private String service;
 
+    private String truckNumber;
+
     @NotNull
     private ZonedDateTime createTime;
+
+    @NotNull
+    private ZonedDateTime sendTime;
 
     @NotNull
     @Size(max = 4096)
     private String body;
 
     private ParkMsgType type;
+
+    @NotNull
+    private Integer sendTimes;
 
 
     public Long getId() {
@@ -54,12 +62,28 @@ public class ParkMsgDTO implements Serializable {
         this.service = service;
     }
 
+    public String getTruckNumber() {
+        return truckNumber;
+    }
+
+    public void setTruckNumber(String truckNumber) {
+        this.truckNumber = truckNumber;
+    }
+
     public ZonedDateTime getCreateTime() {
         return createTime;
     }
 
     public void setCreateTime(ZonedDateTime createTime) {
         this.createTime = createTime;
+    }
+
+    public ZonedDateTime getSendTime() {
+        return sendTime;
+    }
+
+    public void setSendTime(ZonedDateTime sendTime) {
+        this.sendTime = sendTime;
     }
 
     public String getBody() {
@@ -76,6 +100,14 @@ public class ParkMsgDTO implements Serializable {
 
     public void setType(ParkMsgType type) {
         this.type = type;
+    }
+
+    public Integer getSendTimes() {
+        return sendTimes;
+    }
+
+    public void setSendTimes(Integer sendTimes) {
+        this.sendTimes = sendTimes;
     }
 
     @Override
@@ -105,9 +137,12 @@ public class ParkMsgDTO implements Serializable {
             "id=" + getId() +
             ", parkid='" + getParkid() + "'" +
             ", service='" + getService() + "'" +
+            ", truckNumber='" + getTruckNumber() + "'" +
             ", createTime='" + getCreateTime() + "'" +
+            ", sendTime='" + getSendTime() + "'" +
             ", body='" + getBody() + "'" +
             ", type='" + getType() + "'" +
+            ", sendTimes=" + getSendTimes() +
             "}";
     }
 }

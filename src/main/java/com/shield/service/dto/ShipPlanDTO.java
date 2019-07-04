@@ -47,6 +47,8 @@ public class ShipPlanDTO implements Serializable {
     @NotNull
     private ZonedDateTime updateTime;
 
+    private ZonedDateTime syncTime;
+
 
     private Long userId;
 
@@ -172,6 +174,14 @@ public class ShipPlanDTO implements Serializable {
         this.updateTime = updateTime;
     }
 
+    public ZonedDateTime getSyncTime() {
+        return syncTime;
+    }
+
+    public void setSyncTime(ZonedDateTime syncTime) {
+        this.syncTime = syncTime;
+    }
+
     public Long getUserId() {
         return userId;
     }
@@ -227,6 +237,7 @@ public class ShipPlanDTO implements Serializable {
             ", allowInTime='" + getAllowInTime() + "'" +
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
+            ", syncTime='" + getSyncTime() + "'" +
             ", user=" + getUserId() +
             ", user='" + getUserLogin() + "'" +
             "}";

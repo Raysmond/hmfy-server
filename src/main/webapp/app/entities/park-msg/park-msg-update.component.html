@@ -40,6 +40,11 @@
                     </div>
                 </div>
                 <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.parkMsg.truckNumber" for="field_truckNumber">Truck Number</label>
+                    <input type="text" class="form-control" name="truckNumber" id="field_truckNumber"
+                           formControlName="truckNumber"/>
+                </div>
+                <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.parkMsg.createTime" for="field_createTime">Create Time</label>
                     <div class="d-flex">
                         <input id="field_createTime" type="datetime-local" class="form-control" name="createTime" formControlName="createTime" placeholder="YYYY-MM-DD HH:mm"/>
@@ -51,6 +56,22 @@
                         </small>
                         <small class="form-text text-danger"
                             [hidden]="!editForm.get('createTime').errors?.ZonedDateTimelocal" jhiTranslate="entity.validation.ZonedDateTimelocal">
+                            This field should be a date and time.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.parkMsg.sendTime" for="field_sendTime">Send Time</label>
+                    <div class="d-flex">
+                        <input id="field_sendTime" type="datetime-local" class="form-control" name="sendTime" formControlName="sendTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                    <div *ngIf="editForm.get('sendTime').invalid && (editForm.get('sendTime').dirty || editForm.get('sendTime').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('sendTime').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                            [hidden]="!editForm.get('sendTime').errors?.ZonedDateTimelocal" jhiTranslate="entity.validation.ZonedDateTimelocal">
                             This field should be a date and time.
                         </small>
                     </div>
@@ -76,6 +97,21 @@
                         <option value="IN">{{'shieldApp.ParkMsgType.IN' | translate}}</option>
                         <option value="OUT">{{'shieldApp.ParkMsgType.OUT' | translate}}</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.parkMsg.sendTimes" for="field_sendTimes">Send Times</label>
+                    <input type="number" class="form-control" name="sendTimes" id="field_sendTimes"
+                           formControlName="sendTimes"/>
+                    <div *ngIf="editForm.get('sendTimes').invalid && (editForm.get('sendTimes').dirty || editForm.get('sendTimes').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('sendTimes').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                            [hidden]="!editForm.get('sendTimes')?.errors?.number" jhiTranslate="entity.validation.number">
+                            This field should be a number.
+                        </small>
+                    </div>
                 </div>
 
             </div>

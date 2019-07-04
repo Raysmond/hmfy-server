@@ -19,9 +19,12 @@ export class ParkMsgUpdateComponent implements OnInit {
     id: [],
     parkid: [null, [Validators.required, Validators.maxLength(64)]],
     service: [null, [Validators.required, Validators.maxLength(64)]],
+    truckNumber: [],
     createTime: [null, [Validators.required]],
+    sendTime: [null, [Validators.required]],
     body: [null, [Validators.required, Validators.maxLength(4096)]],
-    type: []
+    type: [],
+    sendTimes: [null, [Validators.required]]
   });
 
   constructor(protected parkMsgService: ParkMsgService, protected activatedRoute: ActivatedRoute, private fb: FormBuilder) {}
@@ -38,9 +41,12 @@ export class ParkMsgUpdateComponent implements OnInit {
       id: parkMsg.id,
       parkid: parkMsg.parkid,
       service: parkMsg.service,
+      truckNumber: parkMsg.truckNumber,
       createTime: parkMsg.createTime != null ? parkMsg.createTime.format(DATE_TIME_FORMAT) : null,
+      sendTime: parkMsg.sendTime != null ? parkMsg.sendTime.format(DATE_TIME_FORMAT) : null,
       body: parkMsg.body,
-      type: parkMsg.type
+      type: parkMsg.type,
+      sendTimes: parkMsg.sendTimes
     });
   }
 
@@ -64,10 +70,13 @@ export class ParkMsgUpdateComponent implements OnInit {
       id: this.editForm.get(['id']).value,
       parkid: this.editForm.get(['parkid']).value,
       service: this.editForm.get(['service']).value,
+      truckNumber: this.editForm.get(['truckNumber']).value,
       createTime:
         this.editForm.get(['createTime']).value != null ? moment(this.editForm.get(['createTime']).value, DATE_TIME_FORMAT) : undefined,
+      sendTime: this.editForm.get(['sendTime']).value != null ? moment(this.editForm.get(['sendTime']).value, DATE_TIME_FORMAT) : undefined,
       body: this.editForm.get(['body']).value,
-      type: this.editForm.get(['type']).value
+      type: this.editForm.get(['type']).value,
+      sendTimes: this.editForm.get(['sendTimes']).value
     };
     return entity;
   }

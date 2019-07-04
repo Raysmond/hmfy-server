@@ -16,6 +16,7 @@ export interface IShipPlan {
   allowInTime?: Moment;
   createTime?: Moment;
   updateTime?: Moment;
+  syncTime?: Moment;
   userLogin?: string;
   userId?: number;
 }
@@ -37,6 +38,7 @@ export class ShipPlan implements IShipPlan {
     public allowInTime?: Moment,
     public createTime?: Moment,
     public updateTime?: Moment,
+    public syncTime?: Moment,
     public userLogin?: string,
     public userId?: number
   ) {

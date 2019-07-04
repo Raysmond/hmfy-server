@@ -51,7 +51,8 @@ export class ParkMsgService {
 
   protected convertDateFromClient(parkMsg: IParkMsg): IParkMsg {
     const copy: IParkMsg = Object.assign({}, parkMsg, {
-      createTime: parkMsg.createTime != null && parkMsg.createTime.isValid() ? parkMsg.createTime.toJSON() : null
+      createTime: parkMsg.createTime != null && parkMsg.createTime.isValid() ? parkMsg.createTime.toJSON() : null,
+      sendTime: parkMsg.sendTime != null && parkMsg.sendTime.isValid() ? parkMsg.sendTime.toJSON() : null
     });
     return copy;
   }
@@ -59,6 +60,7 @@ export class ParkMsgService {
   protected convertDateFromServer(res: EntityResponseType): EntityResponseType {
     if (res.body) {
       res.body.createTime = res.body.createTime != null ? moment(res.body.createTime) : null;
+      res.body.sendTime = res.body.sendTime != null ? moment(res.body.sendTime) : null;
     }
     return res;
   }
@@ -67,6 +69,7 @@ export class ParkMsgService {
     if (res.body) {
       res.body.forEach((parkMsg: IParkMsg) => {
         parkMsg.createTime = parkMsg.createTime != null ? moment(parkMsg.createTime) : null;
+        parkMsg.sendTime = parkMsg.sendTime != null ? moment(parkMsg.sendTime) : null;
       });
     }
     return res;

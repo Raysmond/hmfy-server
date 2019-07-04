@@ -18,9 +18,12 @@
       },
       "parkid": "Parkid",
       "service": "Service",
+      "truckNumber": "Truck Number",
       "createTime": "Create Time",
+      "sendTime": "Send Time",
       "body": "Body",
-      "type": "Type"
+      "type": "Type",
+      "sendTimes": "Send Times"
     }
   }
 }

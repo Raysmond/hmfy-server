@@ -87,12 +87,15 @@ public class VehPlanSyncService {
 
         updateShipPlans = updateShipPlans.stream().filter(it -> changedApplyIds.contains(it.getApplyId())).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(updateShipPlans)) {
+            for (ShipPlan plan : updateShipPlans) {
+                plan.setSyncTime(ZonedDateTime.now());
+            }
             shipPlanRepository.saveAll(updateShipPlans);
         }
         log.info("Synchronized {} veh plans", updateShipPlans.size());
     }
 
-    @Scheduled(fixedRate = 5 * 1000)
+    @Scheduled(fixedRate = 10 * 1000)
     public void syncShipPlan() {
         ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
         Set<Long> shipPlanIds = redisLongTemplate.opsForSet().members(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN);
@@ -119,6 +122,9 @@ public class VehPlanSyncService {
                     vehDelivPlanRepository.saveAll(vehDelivPlans);
                     log.info("Updated {} VehDelivPlan data with ShipPlan data, where apply_id = {} ", vehDelivPlans.size(), plan.getApplyId());
                     redisLongTemplate.opsForSet().remove(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, shipPlanId);
+
+                    plan.setSyncTime(ZonedDateTime.now());
+                    shipPlanRepository.save(plan);
                 }
             }
         }

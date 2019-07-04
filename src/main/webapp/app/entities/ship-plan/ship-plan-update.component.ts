@@ -36,6 +36,7 @@ export class ShipPlanUpdateComponent implements OnInit {
     allowInTime: [],
     createTime: [null, [Validators.required]],
     updateTime: [null, [Validators.required]],
+    syncTime: [],
     userId: []
   });
 
@@ -78,6 +79,7 @@ export class ShipPlanUpdateComponent implements OnInit {
       allowInTime: shipPlan.allowInTime != null ? shipPlan.allowInTime.format(DATE_TIME_FORMAT) : null,
       createTime: shipPlan.createTime != null ? shipPlan.createTime.format(DATE_TIME_FORMAT) : null,
       updateTime: shipPlan.updateTime != null ? shipPlan.updateTime.format(DATE_TIME_FORMAT) : null,
+      syncTime: shipPlan.syncTime != null ? shipPlan.syncTime.format(DATE_TIME_FORMAT) : null,
       userId: shipPlan.userId
     });
   }
@@ -119,6 +121,7 @@ export class ShipPlanUpdateComponent implements OnInit {
         this.editForm.get(['createTime']).value != null ? moment(this.editForm.get(['createTime']).value, DATE_TIME_FORMAT) : undefined,
       updateTime:
         this.editForm.get(['updateTime']).value != null ? moment(this.editForm.get(['updateTime']).value, DATE_TIME_FORMAT) : undefined,
+      syncTime: this.editForm.get(['syncTime']).value != null ? moment(this.editForm.get(['syncTime']).value, DATE_TIME_FORMAT) : undefined,
       userId: this.editForm.get(['userId']).value
     };
     return entity;

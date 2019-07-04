@@ -3,19 +3,19 @@ package com.shield.web.rest;
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import com.google.common.collect.Lists;
 import com.shield.config.WxMiniAppConfiguration;
-import com.shield.domain.ShipPlan;
 import com.shield.domain.User;
 import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.security.AuthoritiesConstants;
 import com.shield.security.SecurityUtils;
-import com.shield.service.*;
-import com.shield.service.dto.*;
+import com.shield.service.AppointmentService;
+import com.shield.service.RegionService;
+import com.shield.service.ShipPlanService;
+import com.shield.service.UserService;
+import com.shield.service.dto.AppointmentDTO;
+import com.shield.service.dto.PlanDTO;
+import com.shield.service.dto.RegionDTO;
+import com.shield.service.dto.ShipPlanDTO;
 import com.shield.web.rest.errors.BadRequestAlertException;
-import com.shield.web.rest.vm.AppointmentRequestDTO;
-import io.github.jhipster.web.util.PageUtil;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,15 +28,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/wx/{appid}")
@@ -50,16 +43,10 @@ public class WxAppointmentApi {
     private AppointmentService appointmentService;
 
     @Autowired
-    private AppointmentQueryService appointmentQueryService;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
     private RegionService regionService;
-
-    @Autowired
-    private CarService carService;
 
     @Autowired
     private ShipPlanService shipPlanService;
@@ -70,7 +57,7 @@ public class WxAppointmentApi {
     @PostMapping("/ship_plans/{id}/make_appointment")
     public ResponseEntity<PlanDTO> makeAppointment(
         @PathVariable String appid,
-        @PathVariable Long id) throws URISyntaxException {
+        @PathVariable Long id) {
         log.debug("REST request to make appointment with ship plan id : {}", id);
         final WxMaService wxService = WxMiniAppConfiguration.getMaService(appid);
 
@@ -102,8 +89,6 @@ public class WxAppointmentApi {
         appointmentDTO.setRegionId(region.getId());
         appointmentDTO.setApplyId(plan.getPlan().getApplyId());
         AppointmentDTO appointment = appointmentService.makeAppointment(region.getId(), appointmentDTO);
-
-//        carService.findOrCreateAppointmentCarInfo(appointment);
 
         plan.setAppointment(appointment);
         if (appointment.getStatus().equals(AppointmentStatus.START)) {

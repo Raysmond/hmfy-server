@@ -30,6 +30,7 @@
       "allowInTime": "Allow In Time",
       "createTime": "Create Time",
       "updateTime": "Update Time",
+      "syncTime": "Sync Time",
       "user": "User"
     }
   }

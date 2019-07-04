@@ -3,6 +3,7 @@ import { HttpErrorResponse, HttpHeaders, HttpResponse } from '@angular/common/ht
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+import { FormBuilder, Validators } from '@angular/forms';
 import { JhiEventManager, JhiParseLinks, JhiAlertService } from 'ng-jhipster';
 
 import { IShipPlan } from 'app/shared/model/ship-plan.model';
@@ -10,6 +11,8 @@ import { AccountService } from 'app/core';
 
 import { ITEMS_PER_PAGE } from 'app/shared';
 import { ShipPlanService } from './ship-plan.service';
+import { IRegion } from 'app/shared/model/region.model';
+import { RegionService } from 'app/entities/region';
 
 @Component({
   selector: 'jhi-ship-plan',
@@ -30,6 +33,16 @@ export class ShipPlanComponent implements OnInit, OnDestroy {
   previousPage: any;
   reverse: any;
 
+  searchForm = this.fb.group({
+    truckNumber: null,
+    auditStatus: null,
+    deliverPosition: null,
+    deliverTimeBegin: this.formatDate(new Date()),
+    deliverTimeEnd: null
+  });
+
+  regions: IRegion[];
+
   constructor(
     protected shipPlanService: ShipPlanService,
     protected parseLinks: JhiParseLinks,
@@ -37,7 +50,9 @@ export class ShipPlanComponent implements OnInit, OnDestroy {
     protected accountService: AccountService,
     protected activatedRoute: ActivatedRoute,
     protected router: Router,
-    protected eventManager: JhiEventManager
+    protected eventManager: JhiEventManager,
+    protected regionService: RegionService,
+    private fb: FormBuilder
   ) {
     this.itemsPerPage = ITEMS_PER_PAGE;
     this.routeData = this.activatedRoute.data.subscribe(data => {
@@ -49,16 +64,44 @@ export class ShipPlanComponent implements OnInit, OnDestroy {
   }
 
   loadAll() {
+    let filterParams = {
+      page: this.page - 1,
+      size: this.itemsPerPage,
+      sort: this.sort()
+    };
+    console.log(this.searchForm);
+    if (this.searchForm.get(['auditStatus']).value) {
+      filterParams['auditStatus.equals'] = this.searchForm.get(['auditStatus']).value;
+    }
+    if (this.searchForm.get(['truckNumber']).value) {
+      filterParams['truckNumber.equals'] = this.searchForm.get(['truckNumber']).value;
+    }
+    if (this.searchForm.get(['deliverPosition']).value) {
+      filterParams['deliverPosition.equals'] = this.searchForm.get(['deliverPosition']).value;
+    }
+    if (this.searchForm.get(['deliverTimeBegin']).value) {
+      filterParams['deliverTimeBegin'] = this.searchForm.get(['deliverTimeBegin']).value;
+    }
+    if (this.searchForm.get(['deliverTimeEnd']).value) {
+      filterParams['deliverTimeEnd'] = this.searchForm.get(['deliverTimeEnd']).value;
+    }
     this.shipPlanService
-      .query({
-        page: this.page - 1,
-        size: this.itemsPerPage,
-        sort: this.sort()
-      })
+      .query(filterParams)
       .subscribe(
         (res: HttpResponse<IShipPlan[]>) => this.paginateShipPlans(res.body, res.headers),
         (res: HttpErrorResponse) => this.onError(res.message)
       );
+  }
+
+  formatDate(d) {
+    return d.getFullYear() + '-' + this.appendLeadingZeroes(d.getMonth() + 1) + '-' + this.appendLeadingZeroes(d.getDate());
+  }
+
+  appendLeadingZeroes(n) {
+    if (n <= 9) {
+      return '0' + n;
+    }
+    return n;
   }
 
   loadPage(page: number) {
@@ -66,6 +109,10 @@ export class ShipPlanComponent implements OnInit, OnDestroy {
       this.previousPage = page;
       this.transition();
     }
+  }
+
+  search() {
+    this.loadAll();
   }
 
   transition() {
@@ -97,6 +144,14 @@ export class ShipPlanComponent implements OnInit, OnDestroy {
       this.currentAccount = account;
     });
     this.registerChangeInShipPlans();
+
+    this.regionService
+      .query()
+      .pipe(
+        filter((mayBeOk: HttpResponse<IRegion[]>) => mayBeOk.ok),
+        map((response: HttpResponse<IRegion[]>) => response.body)
+      )
+      .subscribe((res: IRegion[]) => (this.regions = res), (res: HttpErrorResponse) => this.onError(res.message));
   }
 
   ngOnDestroy() {
@@ -127,5 +182,9 @@ export class ShipPlanComponent implements OnInit, OnDestroy {
 
   protected onError(errorMessage: string) {
     this.jhiAlertService.error(errorMessage, null, null);
+  }
+
+  trackRegionById(index: number, item: IRegion) {
+    return item.id;
   }
 }

@@ -7,8 +7,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.shield.domain.ParkMsg;
 import com.shield.domain.Region;
 import com.shield.domain.enumeration.ParkMsgType;
+import com.shield.repository.ParkMsgRepository;
 import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.dto.ParkMsgDTO;
 import com.shield.service.dto.RegionDTO;
@@ -70,6 +72,9 @@ public class ParkingTcpHandlerService {
     RedisTemplate<String, String> redisTemplate;
 
     @Autowired
+    private ParkMsgRepository parkMsgRepository;
+
+    @Autowired
     private AbstractServerConnectionFactory cf;
 
     private static final Gson GSON = new Gson();
@@ -88,6 +93,11 @@ public class ParkingTcpHandlerService {
     public static final String REDIS_KEY_DELETE_CAR_WHITELIST = "delete_car_whitelist_appointment_ids";
 
     public static final String REDIS_KEY_TRUCK_NUMBER_CARD_ID = "truck_number_2_card_id";
+
+    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    // 注册/删除 固定车辆白名单 检查队列 根据客户端返回消息进行确认
+    public static final String REDIS_KEY_CHECK_REGISTER_WHITELIST_TRUCK_NUMBER_QUEUE = "set_check_register_msg_id_queue";
 
     public String handle(Message<String> msg) {
         log.info("Receive TCP msg: {}", msg.getPayload());
@@ -121,6 +131,8 @@ public class ParkingTcpHandlerService {
             parkMsgDTO.setService(data.get("service").getAsString());
             parkMsgDTO.setCreateTime(ZonedDateTime.now());
             parkMsgDTO.setType(ParkMsgType.IN);
+            parkMsgDTO.setSendTime(ZonedDateTime.now());
+            parkMsgDTO.setSendTimes(1);
             if (!parkMsgDTO.getService().equals("heartbeat")) {
                 parkMsgService.save(parkMsgDTO);
             }
@@ -158,20 +170,37 @@ public class ParkingTcpHandlerService {
         }
     }
 
-    private void saveTcpSendMessage(String msg, String parkId, String service) {
+
+    private ParkMsgDTO saveTcpSendMessage(String msg, String parkId, String service, String truckNumber) {
         ParkMsgDTO parkMsgDTO = new ParkMsgDTO();
         parkMsgDTO.setBody(msg);
         parkMsgDTO.setParkid(parkId);
         parkMsgDTO.setService(service);
         parkMsgDTO.setCreateTime(ZonedDateTime.now());
         parkMsgDTO.setType(ParkMsgType.OUT);
-        parkMsgService.save(parkMsgDTO);
+        parkMsgDTO.setTruckNumber(truckNumber);
+        parkMsgDTO.setSendTimes(1);
+        parkMsgDTO.setSendTime(ZonedDateTime.now());
+        parkMsgDTO = parkMsgService.save(parkMsgDTO);
+        return parkMsgDTO;
     }
 
 
     private void handleWhiteListResponse(WhiteListMsgResponse whiteListMsgResponse) {
         if (whiteListMsgResponse.getMessage().equals("注册固定车成功")) {
             putTruckNumber2CardId(whiteListMsgResponse.getCar_number(), whiteListMsgResponse.getCard_id());
+        }
+        if (whiteListMsgResponse.getMessage().equals("注册固定车成功")
+            || whiteListMsgResponse.getMessage().equals("删除固定车成功")
+            || whiteListMsgResponse.getMessage().equals("注册固定车失败,车牌号重复")
+            || whiteListMsgResponse.getMessage().equals("删除固定车失败,card_id 不存在")) {
+            Page<ParkMsg> parkMsgs = parkMsgRepository.findByServiceAndTruckNumber(whiteListMsgResponse.getService(),
+                whiteListMsgResponse.getCar_number(), ParkMsgType.OUT,
+                PageRequest.of(0, 1, Sort.Direction.DESC, "id"));
+            if (!parkMsgs.getContent().isEmpty()) {
+                ParkMsg parkMsg = parkMsgs.getContent().get(0);
+                redisLongTemplate.opsForSet().remove(REDIS_KEY_CHECK_REGISTER_WHITELIST_TRUCK_NUMBER_QUEUE, parkMsg.getId());
+            }
         }
     }
 
@@ -190,7 +219,7 @@ public class ParkingTcpHandlerService {
         }
     }
 
-    @PostConstruct
+    //@PostConstruct
     private void loadWhiteListSyncServiceMsg() {
         Page<ParkMsgDTO> page = parkMsgService.findAllByService(PageRequest.of(0, 10000, Sort.Direction.ASC, "id"), "whitelist_sync");
         for (ParkMsgDTO parkMsg : page.getContent()) {
@@ -204,13 +233,45 @@ public class ParkingTcpHandlerService {
         }
     }
 
-    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    @Scheduled(fixedRate = 60 * 1000)
+    public void resendUnsuccessWhiteListMsg() {
+        Set<String> openConnectionIds = Sets.newHashSet(cf.getOpenConnectionIds());
+        if (openConnectionIds.isEmpty()) {
+            return;
+        }
+        Set<Long> registerMsgIds = redisLongTemplate.opsForSet().members(REDIS_KEY_CHECK_REGISTER_WHITELIST_TRUCK_NUMBER_QUEUE);
+        if (registerMsgIds == null || registerMsgIds.isEmpty()) {
+            return;
+        }
+        log.info("Find {} register car number msg ids, check if need resending", registerMsgIds.size());
+        for (Long msgId : registerMsgIds) {
+            Optional<ParkMsgDTO> parkMsg = parkMsgService.findOne(msgId);
+            if (parkMsg.isPresent()) {
+                ParkMsgDTO msg = parkMsg.get();
+                if (msg.getSendTimes() != null && msg.getSendTimes().equals(Integer.valueOf(3))) {
+                    log.error("Resend msg reach max times, msgId: {}, body: {}", msg.getId(), msg.getBody());
+                    redisLongTemplate.opsForSet().remove(REDIS_KEY_CHECK_REGISTER_WHITELIST_TRUCK_NUMBER_QUEUE, msg.getId());
+                    continue;
+                }
+                if (msg.getSendTime().plusSeconds(60).isAfter(ZonedDateTime.now())) {
+                    continue;
+                }
+                log.info("Start to resend msg, msgId: {}, body: {}", msg.getId(), msg.getBody());
+                if (sendMessageToClient(msg.getBody(), msg.getParkid())) {
+                    msg.setSendTime(ZonedDateTime.now());
+                    msg.setSendTimes(msg.getSendTimes() == null ? 2 : msg.getSendTimes() + 1);
+                    parkMsgService.save(msg);
+                }
+            }
+        }
+    }
+
 
     /**
      * 自动注册 固定车白名单
      */
     @Scheduled(fixedRate = 60 * 1000)
-    public void autoRegisterCarWhiteList() throws JsonProcessingException {
+    public void autoRegisterCarWhiteList() throws JsonProcessingException, InterruptedException {
         Set<String> openConnectionIds = Sets.newHashSet(cf.getOpenConnectionIds());
         if (openConnectionIds.isEmpty()) {
             return;
@@ -248,15 +309,18 @@ public class ParkingTcpHandlerService {
                     String msg = objectMapper.writeValueAsString(carWhiteListMsg);
                     if (sendMessageToClient(msg, region.getParkId())) {
                         redisLongTemplate.opsForSet().add(AUTO_REGISTERED_PLAN_IDS, planDTO.getId());
-                        saveTcpSendMessage(msg, region.getParkId(), carWhiteListMsg.getService());
+                        ParkMsgDTO parkMsg = saveTcpSendMessage(msg, region.getParkId(), carWhiteListMsg.getService(), carWhiteListMsg.getCar_number());
+                        redisLongTemplate.opsForSet().add(REDIS_KEY_CHECK_REGISTER_WHITELIST_TRUCK_NUMBER_QUEUE, parkMsg.getId());
                     }
+                    Thread.sleep(5000);
                 }
             }
         }
     }
 
+
     @Scheduled(fixedRate = 60 * 1000)
-    public void putAutoDeleteRegisterCarWhiteList() {
+    public void putAutoDeleteRegisterCarWhiteList() throws InterruptedException {
         ZonedDateTime begin = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
         ZonedDateTime end = begin.plusDays(1).minusSeconds(1);
         List<ShipPlanDTO> plans = shipPlanService.findAllShouldDeleteCarWhiteList(begin, end);
@@ -271,7 +335,7 @@ public class ParkingTcpHandlerService {
             if (plan.getLeaveTime() == null
                 && plan.getAuditStatus().equals(Integer.valueOf(3))
                 && plan.getUpdateTime().plusHours(1).isAfter(ZonedDateTime.now())) {
-                // 装完货，再过8min，才将白名单删除
+                // 装完货，再过1h，才将白名单删除
                 continue;
             }
 
@@ -286,7 +350,7 @@ public class ParkingTcpHandlerService {
      * 删除固定车白名单
      */
     @Scheduled(fixedRate = 60 * 1000)
-    public void deleteRegisterCarWhiteList() throws JsonProcessingException {
+    public void deleteRegisterCarWhiteList() throws JsonProcessingException, InterruptedException {
         Set<String> openConnectionIds = Sets.newHashSet(cf.getOpenConnectionIds());
         if (openConnectionIds.isEmpty()) {
             return;
@@ -311,35 +375,31 @@ public class ParkingTcpHandlerService {
                     continue;
                 }
 
-
                 log.info("ShipPlan [id={}], apply_id: {}, truckNumber: {}, need to be removed from car whitelist",
                     plan.getId(), plan.getApplyId(), plan.getTruckNumber());
 
-                sendDeleteCarWhiteListMsgForShipPlan(plan, region.getParkId());
-                redisLongTemplate.opsForSet().add(AUTO_REGISTERED_DELETE_PLAN_IDS, plan.getId());
-                redisLongTemplate.opsForSet().remove(AUTO_DELETE_PLAN_ID_QUEUE, plan.getId());
+                String cardId = getCardIdByTruckNumber(plan.getTruckNumber());
+                if (StringUtils.isBlank(cardId)) {
+                    log.warn("Cannot find card_id for truckNumber: {}", plan.getTruckNumber());
+                    continue;
+                }
+
+                DeleteCarWhiteListMsg deleteMsg = new DeleteCarWhiteListMsg();
+                deleteMsg.setCar_number(plan.getTruckNumber());
+                deleteMsg.setCard_id(cardId);
+                deleteMsg.setParkid(region.getParkId());
+                String msg = objectMapper.writeValueAsString(deleteMsg);
+                if (sendMessageToClient(msg, region.getParkId())) {
+                    ParkMsgDTO parkMsg = saveTcpSendMessage(msg, deleteMsg.getParkid(), deleteMsg.getService(), deleteMsg.getCar_number());
+                    redisLongTemplate.opsForSet().add(AUTO_REGISTERED_DELETE_PLAN_IDS, plan.getId());
+                    redisLongTemplate.opsForSet().remove(AUTO_DELETE_PLAN_ID_QUEUE, plan.getId());
+                    redisLongTemplate.opsForSet().add(REDIS_KEY_CHECK_REGISTER_WHITELIST_TRUCK_NUMBER_QUEUE, parkMsg.getId());
+                }
+                Thread.sleep(5000);
             }
         }
     }
 
-    private boolean sendDeleteCarWhiteListMsgForShipPlan(ShipPlanDTO plan, String parkId) throws JsonProcessingException {
-        String cardId = getCardIdByTruckNumber(plan.getTruckNumber());
-        if (StringUtils.isBlank(cardId)) {
-            log.warn("Cannot find card_id for truckNumber: {}", plan.getTruckNumber());
-            return true;
-        }
-
-        DeleteCarWhiteListMsg deleteMsg = new DeleteCarWhiteListMsg();
-        deleteMsg.setCar_number(plan.getTruckNumber());
-        deleteMsg.setCard_id(cardId);
-        deleteMsg.setParkid(parkId);
-        String msg = objectMapper.writeValueAsString(deleteMsg);
-        if (sendMessageToClient(msg, parkId)) {
-            saveTcpSendMessage(msg, deleteMsg.getParkid(), deleteMsg.getService());
-            return true;
-        }
-        return false;
-    }
 
     private boolean sendMessageToClient(String msg, String parkId) {
         Set<String> openConnectionIds = Sets.newHashSet(cf.getOpenConnectionIds());
@@ -375,16 +435,17 @@ public class ParkingTcpHandlerService {
             log.info("Find {} appointmentIds need to upload car whitelist", appointmentIds.size());
             for (Long appointmentId : appointmentIds) {
                 try {
-                    UploadCarWhiteListMsg uploadCarWhiteListMsg = generateUploadCarWhiteListMsg(appointmentId);
-                    if (uploadCarWhiteListMsg == null) {
+                    UploadCarWhiteListMsg whiteListMsg = generateUploadCarWhiteListMsg(appointmentId);
+                    if (whiteListMsg == null) {
                         redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointmentId);
                         continue;
                     }
-                    String sendMsg = objectMapper.writeValueAsString(uploadCarWhiteListMsg);
-                    if (sendMessageToClient(sendMsg, uploadCarWhiteListMsg.getParkid())) {
+                    String sendMsg = objectMapper.writeValueAsString(whiteListMsg);
+                    if (sendMessageToClient(sendMsg, whiteListMsg.getParkid())) {
                         redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointmentId);
                         log.info("Upload car whitelist successfully. appointmentId: {}, msg: {}", appointmentId, sendMsg);
-                        saveTcpSendMessage(sendMsg, uploadCarWhiteListMsg.getParkid(), uploadCarWhiteListMsg.getService());
+                        ParkMsgDTO parkMsg = saveTcpSendMessage(sendMsg, whiteListMsg.getParkid(), whiteListMsg.getService(), whiteListMsg.getCar_number());
+                        redisLongTemplate.opsForSet().add(REDIS_KEY_CHECK_REGISTER_WHITELIST_TRUCK_NUMBER_QUEUE, parkMsg.getId());
                     }
                 } catch (Exception e) {
                     log.error("Failed to upload car whitelist, appointmendId: {}", appointmentId, e);
@@ -407,7 +468,9 @@ public class ParkingTcpHandlerService {
                     if (sendMessageToClient(sendMsg, deleteCarWhiteListMsg.getParkid())) {
                         log.info("Delete car whitelist successfully. appointmentId: {}, msg: {}", appointmentId, sendMsg);
                         redisLongTemplate.opsForSet().remove(REDIS_KEY_DELETE_CAR_WHITELIST, appointmentId);
-                        saveTcpSendMessage(sendMsg, deleteCarWhiteListMsg.getParkid(), deleteCarWhiteListMsg.getService());
+                        ParkMsgDTO parkMsg = saveTcpSendMessage(sendMsg, deleteCarWhiteListMsg.getParkid(), deleteCarWhiteListMsg.getService(), deleteCarWhiteListMsg.getCar_number());
+                        redisTemplate.opsForSet().add(REDIS_KEY_CHECK_REGISTER_WHITELIST_TRUCK_NUMBER_QUEUE, deleteCarWhiteListMsg.getCar_number());
+                        redisLongTemplate.opsForSet().add(REDIS_KEY_CHECK_REGISTER_WHITELIST_TRUCK_NUMBER_QUEUE, parkMsg.getId());
                     }
                 } catch (Exception e) {
                     log.error("Failed to delete car whitelist, appointmentId: {}", appointmentId, e);
