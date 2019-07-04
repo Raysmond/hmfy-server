@@ -18,6 +18,10 @@ export interface IUser {
   rawPassword?: string;
   truckNumber?: string;
   company?: string;
+  carCapacity?: any;
+  carCompany?: string;
+  memo?: string;
+  phone?: string;
 }
 
 export class User implements IUser {
@@ -40,7 +44,11 @@ export class User implements IUser {
     public regionName?: string,
     public truckNumber?: string,
     public rawPassword?: string,
-    public company?: string
+    public company?: string,
+    public carCompany?: string,
+    public carCapacity?: string,
+    public memo?: string,
+    public phone?: string
   ) {
     this.id = id ? id : null;
     this.login = login ? login : null;
@@ -61,5 +69,9 @@ export class User implements IUser {
     this.truckNumber = truckNumber ? truckNumber : null;
     this.rawPassword = rawPassword ? rawPassword : null;
     this.company = company ? company : null;
+    this.carCapacity = carCapacity ? carCapacity : null;
+    this.carCompany = carCompany ? carCompany : null;
+    this.memo = memo ? memo : null;
+    this.phone = phone ? phone : null;
   }
 }

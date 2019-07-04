@@ -2,6 +2,7 @@ package com.shield.domain;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -32,6 +33,13 @@ public class Authority implements Serializable {
     }
 
     public void setName(String name) {
+        this.name = name;
+    }
+
+    public Authority() {
+    }
+
+    public Authority(String name) {
         this.name = name;
     }
 

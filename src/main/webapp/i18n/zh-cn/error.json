@@ -9,6 +9,7 @@
       "500": "内部服务器错误."
     },
     "concurrencyFailure": "出现并发提交. 您的提交被拒绝.",
-    "validation": "服务器校验失败."
+    "validation": "服务器校验失败.",
+    "NotBlank": "必填字段不允许为空"
   }
 }

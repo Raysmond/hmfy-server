@@ -31,8 +31,10 @@
     </ul><!-- END Left navbar-->
     <!-- START Right Navbar-->
     <ul class="navbar-nav flex-row">
-        <li class="nav-item d-none d-md-block"><a class="nav-link" href="#" data-toggle-fullscreen=""><em
-            class="fas fa-expand"></em></a></li>
+        <!--<li class="nav-item d-none d-md-block"><a class="nav-link" href="#" data-toggle-fullscreen=""><em-->
+            <!--class="fas fa-expand"></em></a></li>-->
+        <li *ngIf="!isAuthenticated()" class="nav-item">
+            <a class="nav-link" (click)="login()"><em class="icon-login"></em> 登录</a></li>
 
         <li *ngIf="isAuthenticated()" class="nav-item dropdown dropdown-list">
             <a class="nav-link dropdown-toggle dropdown-toggle-nocaret"
@@ -40,9 +42,13 @@
                 <em class="icon-user"></em> {{account.login}}
             </a><!-- START Dropdown menu-->
         </li><!-- END Alert menu-->
+
+        <li *ngIf="isAuthenticated()" class="nav-item">
+            <a class="nav-link" (click)="logout()"><em class="icon-logout"></em> 退出</a></li>
+
         <!-- START Offsidebar button-->
         <!--<li class="nav-item"><a class="nav-link" href="#" data-toggle-state="offsidebar-open"-->
-                                <!--data-no-persist="true"><em class="icon-notebook"></em></a></li>-->
+        <!--data-no-persist="true"><em class="icon-notebook"></em></a></li>-->
         <!-- END Offsidebar menu-->
     </ul><!-- END Right Navbar-->
     <!-- START Search form-->

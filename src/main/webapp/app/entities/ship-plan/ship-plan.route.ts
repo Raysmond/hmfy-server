@@ -37,7 +37,7 @@ export const shipPlanRoute: Routes = [
       pagingParams: JhiResolvePagingParams
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: ['ROLE_REGION_ADMIN', 'ROLE_ADMIN'],
       defaultSort: 'id,asc',
       pageTitle: 'shieldApp.shipPlan.home.title'
     },
@@ -50,7 +50,7 @@ export const shipPlanRoute: Routes = [
       shipPlan: ShipPlanResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: ['ROLE_REGION_ADMIN', 'ROLE_ADMIN'],
       pageTitle: 'shieldApp.shipPlan.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -62,7 +62,7 @@ export const shipPlanRoute: Routes = [
       shipPlan: ShipPlanResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: ['ROLE_REGION_ADMIN', 'ROLE_ADMIN'],
       pageTitle: 'shieldApp.shipPlan.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -74,7 +74,7 @@ export const shipPlanRoute: Routes = [
       shipPlan: ShipPlanResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: ['ROLE_REGION_ADMIN', 'ROLE_ADMIN'],
       pageTitle: 'shieldApp.shipPlan.home.title'
     },
     canActivate: [UserRouteAccessService]
@@ -89,7 +89,7 @@ export const shipPlanPopupRoute: Routes = [
       shipPlan: ShipPlanResolve
     },
     data: {
-      authorities: ['ROLE_USER'],
+      authorities: ['ROLE_REGION_ADMIN', 'ROLE_ADMIN'],
       pageTitle: 'shieldApp.shipPlan.home.title'
     },
     canActivate: [UserRouteAccessService],

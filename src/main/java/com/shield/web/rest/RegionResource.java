@@ -1,14 +1,23 @@
 package com.shield.web.rest;
 
+import com.google.common.collect.Lists;
+import com.shield.domain.User;
+import com.shield.security.AuthoritiesConstants;
+import com.shield.security.SecurityUtils;
 import com.shield.service.RegionService;
+import com.shield.service.UserService;
+import com.shield.service.mapper.RegionMapper;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import com.shield.service.dto.RegionDTO;
 
 import io.github.jhipster.web.util.HeaderUtil;
+import io.github.jhipster.web.util.PageUtil;
 import io.github.jhipster.web.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
+import net.bytebuddy.asm.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -86,6 +95,11 @@ public class RegionResource {
             .body(result);
     }
 
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private RegionMapper regionMapper;
+
     /**
      * {@code GET  /regions} : get all the regions.
      *
@@ -95,7 +109,17 @@ public class RegionResource {
     @GetMapping("/regions")
     public ResponseEntity<List<RegionDTO>> getAllRegions(Pageable pageable, @RequestParam MultiValueMap<String, String> queryParams, UriComponentsBuilder uriBuilder) {
         log.debug("REST request to get a page of Regions");
-        Page<RegionDTO> page = regionService.findAll(pageable);
+        Page<RegionDTO> page = null;
+        if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.REGION_ADMIN)) {
+            User user = userService.getUserWithAuthorities().get();
+            if (user.getRegion() == null) {
+                page = Page.empty();
+            } else {
+                page = PageUtil.createPageFromList(Lists.newArrayList(regionMapper.toDto(user.getRegion())), pageable);
+            }
+        } else {
+            page = regionService.findAll(pageable);
+        }
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(uriBuilder.queryParams(queryParams), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }

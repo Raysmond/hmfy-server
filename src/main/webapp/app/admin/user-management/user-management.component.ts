@@ -59,6 +59,16 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
     return true;
   }
 
+  isRegionAdmin() {
+    if (this.accountService.hasAnyAuthority(['ROLE_ADMIN'])) {
+      return false;
+    }
+    if (this.accountService.hasAnyAuthority(['ROLE_REGION_ADMIN'])) {
+      return true;
+    }
+    return true;
+  }
+
   ngOnInit() {
     this.accountService.identity().then(account => {
       this.currentAccount = account;

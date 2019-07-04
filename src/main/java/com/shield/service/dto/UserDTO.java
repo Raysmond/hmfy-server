@@ -5,6 +5,7 @@ import com.shield.config.Constants;
 import com.shield.domain.Authority;
 import com.shield.domain.User;
 
+import javax.persistence.Column;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
@@ -66,6 +67,16 @@ public class UserDTO {
 
     private String company;
 
+    // 车辆所属公司
+    private String carCompany;
+
+    // 行驶证上荷载量
+    private Integer carCapacity;
+
+    private String phone;
+
+    private String memo;
+
 
     public UserDTO() {
         // Empty constructor needed for Jackson.
@@ -106,6 +117,10 @@ public class UserDTO {
             this.regionId = user.getRegion().getId();
             this.regionName = user.getRegion().getName();
         }
+        this.setCarCompany(user.getCarCompany());
+        this.setCarCapacity(user.getCarCapacity());
+        this.setMemo(user.getMemo());
+        this.setPhone(user.getPhone());
     }
 
     public String getCompany() {
@@ -258,6 +273,38 @@ public class UserDTO {
 
     public void setAuthorities(Set<String> authorities) {
         this.authorities = authorities;
+    }
+
+    public String getCarCompany() {
+        return carCompany;
+    }
+
+    public void setCarCompany(String carCompany) {
+        this.carCompany = carCompany;
+    }
+
+    public Integer getCarCapacity() {
+        return carCapacity;
+    }
+
+    public void setCarCapacity(Integer carCapacity) {
+        this.carCapacity = carCapacity;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getMemo() {
+        return memo;
+    }
+
+    public void setMemo(String memo) {
+        this.memo = memo;
     }
 
     @Override

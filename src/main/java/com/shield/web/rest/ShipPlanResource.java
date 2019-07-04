@@ -1,22 +1,29 @@
 package com.shield.web.rest;
 
+import com.shield.security.AuthoritiesConstants;
+import com.shield.security.SecurityUtils;
 import com.shield.service.ShipPlanService;
+import com.shield.service.UserService;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import com.shield.service.dto.ShipPlanDTO;
 import com.shield.service.dto.ShipPlanCriteria;
 import com.shield.service.ShipPlanQueryService;
 
+import io.github.jhipster.service.filter.StringFilter;
 import io.github.jhipster.service.filter.ZonedDateTimeFilter;
 import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -52,6 +59,9 @@ public class ShipPlanResource {
 
     private final ShipPlanQueryService shipPlanQueryService;
 
+    @Autowired
+    private UserService userService;
+
     public ShipPlanResource(ShipPlanService shipPlanService, ShipPlanQueryService shipPlanQueryService) {
         this.shipPlanService = shipPlanService;
         this.shipPlanQueryService = shipPlanQueryService;
@@ -86,6 +96,7 @@ public class ShipPlanResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/ship-plans")
+    @PreAuthorize("hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<ShipPlanDTO> updateShipPlan(@Valid @RequestBody ShipPlanDTO shipPlanDTO) throws URISyntaxException {
         log.debug("REST request to update ShipPlan : {}", shipPlanDTO);
         if (shipPlanDTO.getId() == null) {
@@ -116,6 +127,12 @@ public class ShipPlanResource {
             ZonedDateTimeFilter f = new ZonedDateTimeFilter();
             f.setEquals(t.atStartOfDay(ZoneId.systemDefault()));
             criteria.setDeliverTime(f);
+
+            if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.REGION_ADMIN)) {
+                StringFilter deliverPosition = new StringFilter();
+                deliverPosition.setEquals(userService.getUserWithAuthorities().get().getRegion().getName());
+                criteria.setDeliverPosition(deliverPosition);
+            }
         }
         Page<ShipPlanDTO> page = shipPlanQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(uriBuilder.queryParams(queryParams), page);
@@ -153,10 +170,10 @@ public class ShipPlanResource {
      * @param id the id of the shipPlanDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/ship-plans/{id}")
-    public ResponseEntity<Void> deleteShipPlan(@PathVariable Long id) {
-        log.debug("REST request to delete ShipPlan : {}", id);
-        shipPlanService.delete(id);
-        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString())).build();
-    }
+//    @DeleteMapping("/ship-plans/{id}")
+//    public ResponseEntity<Void> deleteShipPlan(@PathVariable Long id) {
+//        log.debug("REST request to delete ShipPlan : {}", id);
+//        shipPlanService.delete(id);
+//        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString())).build();
+//    }
 }

@@ -9,6 +9,7 @@ import com.shield.security.SecurityUtils;
 import com.shield.service.MailService;
 import com.shield.service.UserService;
 import com.shield.service.dto.UserDTO;
+import com.shield.service.util.RandomUtil;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import com.shield.web.rest.errors.EmailAlreadyUsedException;
 import com.shield.web.rest.errors.LoginAlreadyUsedException;
@@ -98,6 +99,7 @@ public class RegionAdminUserResource extends RegionAdminBaseController {
         log.debug("REST request to save User : {}", userDTO);
         Region region = requireGetManagerRegion(null);
         userDTO.setRegionId(region.getId());
+        userDTO.setEmail(RandomUtil.generatePassword() + "@bt.com");
 
         if (userDTO.getId() != null) {
             throw new BadRequestAlertException("A new user cannot already have an ID", "userManagement", "idexists");
@@ -108,7 +110,7 @@ public class RegionAdminUserResource extends RegionAdminBaseController {
             throw new EmailAlreadyUsedException();
         } else {
             User newUser = userService.createUser(userDTO);
-            mailService.sendCreationEmail(newUser);
+//            mailService.sendCreationEmail(newUser);
             return ResponseEntity.created(new URI("/api/users/" + newUser.getLogin()))
                 .headers(HeaderUtil.createAlert(applicationName, "userManagement.created", newUser.getLogin()))
                 .body(newUser);

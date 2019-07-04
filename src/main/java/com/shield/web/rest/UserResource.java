@@ -8,6 +8,7 @@ import com.shield.security.SecurityUtils;
 import com.shield.service.MailService;
 import com.shield.service.UserService;
 import com.shield.service.dto.UserDTO;
+import com.shield.service.util.RandomUtil;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import com.shield.web.rest.errors.EmailAlreadyUsedException;
 import com.shield.web.rest.errors.LoginAlreadyUsedException;
@@ -26,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -96,7 +98,9 @@ public class UserResource {
     @PreAuthorize("hasRole(\"" + AuthoritiesConstants.ADMIN + "\")")
     public ResponseEntity<User> createUser(@Valid @RequestBody UserDTO userDTO) throws URISyntaxException {
         log.debug("REST request to save User : {}", userDTO);
-
+        if (StringUtils.isEmpty(userDTO.getEmail())) {
+            userDTO.setEmail(RandomUtil.generatePassword() + "@bt.com");
+        }
         if (userDTO.getId() != null) {
             throw new BadRequestAlertException("A new user cannot already have an ID", "userManagement", "idexists");
             // Lowercase the user login before comparing with database
@@ -106,7 +110,7 @@ public class UserResource {
             throw new EmailAlreadyUsedException();
         } else {
             User newUser = userService.createUser(userDTO);
-            mailService.sendCreationEmail(newUser);
+//            mailService.sendCreationEmail(newUser);
             return ResponseEntity.created(new URI("/api/users/" + newUser.getLogin()))
                 .headers(HeaderUtil.createAlert(applicationName, "userManagement.created", newUser.getLogin()))
                 .body(newUser);
@@ -155,6 +159,7 @@ public class UserResource {
             User user = userService.getUserWithAuthorities().get();
             if (user.getRegion() != null) {
                 page = userService.getAllManagedUsersByRegionId(pageable, user.getRegion().getId());
+                page.getContent().removeIf(it->!it.getAuthorities().contains(AuthoritiesConstants.APPOINTMENT));
             }
         }
 

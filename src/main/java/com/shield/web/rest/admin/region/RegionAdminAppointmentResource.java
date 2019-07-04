@@ -89,17 +89,17 @@ public class RegionAdminAppointmentResource {
      * or with status {@code 500 (Internal Server Error)} if the appointmentDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
-    @PutMapping("/appointments")
-    public ResponseEntity<AppointmentDTO> updateAppointment(@Valid @RequestBody AppointmentDTO appointmentDTO) throws URISyntaxException {
-        log.debug("REST request to update Appointment : {}", appointmentDTO);
-        if (appointmentDTO.getId() == null) {
-            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
-        }
-        AppointmentDTO result = appointmentService.save(appointmentDTO);
-        return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, appointmentDTO.getId().toString()))
-            .body(result);
-    }
+//    @PutMapping("/appointments")
+//    public ResponseEntity<AppointmentDTO> updateAppointment(@Valid @RequestBody AppointmentDTO appointmentDTO) throws URISyntaxException {
+//        log.debug("REST request to update Appointment : {}", appointmentDTO);
+//        if (appointmentDTO.getId() == null) {
+//            throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+//        }
+//        AppointmentDTO result = appointmentService.save(appointmentDTO);
+//        return ResponseEntity.ok()
+//            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, appointmentDTO.getId().toString()))
+//            .body(result);
+//    }
 
     /**
      * {@code GET  /appointments} : get all the appointments.
@@ -158,10 +158,10 @@ public class RegionAdminAppointmentResource {
      * @param id the id of the appointmentDTO to delete.
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
-    @DeleteMapping("/appointments/{id}")
-    public ResponseEntity<Void> deleteAppointment(@PathVariable Long id) {
-        log.debug("REST request to delete Appointment : {}", id);
-        appointmentService.delete(id);
-        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString())).build();
-    }
+//    @DeleteMapping("/appointments/{id}")
+//    public ResponseEntity<Void> deleteAppointment(@PathVariable Long id) {
+//        log.debug("REST request to delete Appointment : {}", id);
+//        appointmentService.delete(id);
+//        return ResponseEntity.noContent().headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString())).build();
+//    }
 }

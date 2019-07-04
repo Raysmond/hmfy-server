@@ -103,8 +103,24 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Column(name = "truck_number")
     private String truckNumber;
 
+    // 所处公司
     @Column(name = "company")
     private String company;
+
+    // 车辆所属公司
+    @Column(name = "car_company")
+    private String carCompany;
+
+    // 行驶证上荷载量
+    @Column(name = "car_capacity")
+    private Integer carCapacity;
+
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "memo")
+    private String memo;
+
 
     public String getTruckNumber() {
         return truckNumber;
@@ -241,6 +257,38 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     public void setAuthorities(Set<Authority> authorities) {
         this.authorities = authorities;
+    }
+
+    public String getCarCompany() {
+        return carCompany;
+    }
+
+    public void setCarCompany(String carCompany) {
+        this.carCompany = carCompany;
+    }
+
+    public Integer getCarCapacity() {
+        return carCapacity;
+    }
+
+    public void setCarCapacity(Integer carCapacity) {
+        this.carCapacity = carCapacity;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getMemo() {
+        return memo;
+    }
+
+    public void setMemo(String memo) {
+        this.memo = memo;
     }
 
     @Override

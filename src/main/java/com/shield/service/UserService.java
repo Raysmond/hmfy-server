@@ -167,6 +167,10 @@ public class UserService {
         user.setActivated(true);
         user.setTruckNumber(userDTO.getTruckNumber());
         user.setCompany(userDTO.getCompany());
+        user.setCarCompany(userDTO.getCarCompany());
+        user.setCarCapacity(userDTO.getCarCapacity());
+        user.setMemo(userDTO.getMemo());
+        user.setPhone(userDTO.getPhone());
         if (userDTO.getAuthorities() != null) {
             Set<Authority> authorities = userDTO.getAuthorities().stream()
                 .map(authorityRepository::findById)
@@ -242,6 +246,10 @@ public class UserService {
                 }
                 user.setCompany(userDTO.getCompany());
                 user.setTruckNumber(userDTO.getTruckNumber());
+                user.setCarCompany(userDTO.getCarCompany());
+                user.setCarCapacity(userDTO.getCarCapacity());
+                user.setMemo(userDTO.getMemo());
+                user.setPhone(userDTO.getPhone());
                 Set<Authority> managedAuthorities = user.getAuthorities();
                 managedAuthorities.clear();
                 userDTO.getAuthorities().stream()

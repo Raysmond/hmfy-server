@@ -16,16 +16,18 @@
                 </th>
                 <th jhiSortBy="login"><span jhiTranslate="userManagement.login">Login</span>
                 </th>
-                <th jhiSortBy="email"><span jhiTranslate="userManagement.email">Email</span>
-                </th>
+                <!--<th jhiSortBy="email"><span jhiTranslate="userManagement.email">Email</span>-->
+                <!--</th>-->
                 <th></th>
                 <!--<th jhiSortBy="langKey"><span jhiTranslate="userManagement.langKey">Lang Key</span>-->
                 <!--</th>-->
                 <th><span jhiTranslate="userManagement.profiles">Profiles</span></th>
                 <th>绑定区域</th>
-                <th>公司</th>
-                <th jhiSortBy="langKey"><span jhiTranslate="userManagement.truckNumber">Truck Number</span>
-                </th>
+                <th>公司（车队）名称</th>
+                <th ><span jhiTranslate="userManagement.truckNumber">Truck Number</span></th>
+                <th><span jhiTranslate="userManagement.carCompany">Car Company</span></th>
+                <th><span jhiTranslate="userManagement.carCapacity">Car Capacity</span></th>
+                <th>手机号</th>
                 <th>绑定微信账号</th>
                 <th jhiSortBy="createdDate"><span jhiTranslate="userManagement.createdDate">Created Date</span>
                     <!--<fa-icon [icon]="'sort'"></fa-icon>-->
@@ -42,7 +44,7 @@
             <tr *ngFor="let user of users; trackBy: trackIdentity">
                 <td><a [routerLink]="['./', user.login, 'view']">{{user.id}}</a></td>
                 <td>{{user.login}}</td>
-                <td>{{user.email}}</td>
+                <!--<td>{{user.email}}</td>-->
                 <td>
                     <button class="btn btn-danger btn-sm" (click)="setActive(user, true)" *ngIf="!user.activated"
                             jhiTranslate="userManagement.deactivated">Deactivated
@@ -69,6 +71,9 @@
                 </td>
                 <td>{{user.company}}</td>
                 <td>{{user.truckNumber}}</td>
+                <td>{{user.carCompany}}</td>
+                <td>{{user.carCapacity}}</td>
+                <td>{{user.phone}}</td>
                 <td>
                     <div *ngIf="user.userInfo">
                         <img src="{{user.userInfo.avatarUrl}}" style="width: 64px;"/>
