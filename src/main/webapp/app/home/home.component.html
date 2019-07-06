@@ -36,85 +36,105 @@
         </div>
     </div>
     <div class="col-xl-8">
-        <div class="card card-default">
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-lg-4 col-6 text-center">
-                        <p>本部</p>
-                        <div class="text-center py-4">
-                            <div class="easypie-chart easypie-chart-md" data-easypiechart="" data-percent="60"
-                                 data-animate="{duration: 800, enabled: true}" data-bar-color="#23b7e5"
-                                 data-track-Color="#edf2f6" data-scale-Color="false" data-line-width="2"
-                                 data-line-cap="round" data-size="130"><span>60%</span></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-4">
-                                <h4 class="m-0 text-warning">15</h4>
-                                <p class="m-0 text-warning">排队中</p>
-                            </div>
-                            <div class="col-4">
-                                <h4 class="m-0 text-success">32</h4>
-                                <p class="m-0 text-success">预约成功</p>
-                            </div>
-                            <div class="col-4">
-                                <h4 class="m-0 text-info">120</h4>
-                                <p class="m-0 text-info">进厂</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-6 text-center">
-                        <p>四期</p>
-                        <div class="text-center py-4">
-                            <div class="easypie-chart easypie-chart-md" data-easypiechart="" data-percent="30"
-                                 data-animate="{duration: 800, enabled: true}" data-bar-color="#f532e5"
-                                 data-track-Color="#edf2f6" data-scale-Color="false" data-line-width="2"
-                                 data-line-cap="round" data-size="130"><span>30%</span></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-4">
-                                <h4 class="m-0 text-warning">5</h4>
-                                <p class="m-0 text-warning">排队中</p>
-                            </div>
-                            <div class="col-4">
-                                <h4 class="m-0 text-success">16</h4>
-                                <p class="m-0 text-success">预约成功</p>
-                            </div>
-                            <div class="col-4">
-                                <h4 class="m-0 text-info">68</h4>
-                                <p class="m-0 text-info">进厂</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-6 text-center">
-                        <p>五期</p>
-                        <div class="text-center py-4">
-                            <div class="easypie-chart easypie-chart-md" data-easypiechart="" data-percent="50"
-                                 data-animate="{duration: 800, enabled: true}" data-bar-color="#7266ba"
-                                 data-track-Color="#edf2f6" data-scale-Color="false" data-line-width="2"
-                                 data-line-cap="round" data-size="130"><span>50%</span></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-4">
-                                <h4 class="m-0 text-warning">12</h4>
-                                <p class="m-0 text-warning">排队中</p>
-                            </div>
-                            <div class="col-4">
-                                <h4 class="m-0 text-success">16</h4>
-                                <p class="m-0 text-success">预约成功</p>
-                            </div>
-                            <div class="col-4">
-                                <h4 class="m-0 text-info">52</h4>
-                                <p class="m-0 text-info">进厂</p>
-                            </div>
-                        </div>
-                    </div>
+        <!-- START bar chart-->
+        <div class="card" id="cardChart3">
+            <div class="card-header">
+                <!-- START button group-->
+                <div class="float-right btn-group">
+                    <button class="dropdown-toggle dropdown-toggle-nocaret btn btn-secondary btn-sm" type="button"
+                            data-toggle="dropdown">2019-05-17 ~ 2019-06-03
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right-forced fadeInLeft animated" role="menu"><a
+                        class="dropdown-item" href="#">Daily</a><a class="dropdown-item" href="#">Monthly</a><a
+                        class="dropdown-item" href="#">Yearly</a></div>
+                </div><!-- END button group-->
+                <div class="card-title">最近提货计划统计</div>
+            </div>
+            <div class="card-wrapper">
+                <div class="card-body">
+                    <div class="chart-bar-stackedv2 flot-chart"></div>
                 </div>
             </div>
-        </div>
+        </div><!-- END bar chart-->
+        <!--<div class="card card-default">-->
+            <!--<div class="card-body">-->
+                <!--<div class="row mb-3">-->
+                    <!--<div class="col-lg-4 col-6 text-center">-->
+                        <!--<p>本部</p>-->
+                        <!--<div class="text-center py-4">-->
+                            <!--<div class="easypie-chart easypie-chart-md" data-easypiechart="" data-percent="60"-->
+                                 <!--data-animate="{duration: 800, enabled: true}" data-bar-color="#23b7e5"-->
+                                 <!--data-track-Color="#edf2f6" data-scale-Color="false" data-line-width="2"-->
+                                 <!--data-line-cap="round" data-size="130"><span>60%</span></div>-->
+                        <!--</div>-->
+                        <!--<div class="row">-->
+                            <!--<div class="col-4">-->
+                                <!--<h4 class="m-0 text-warning">15</h4>-->
+                                <!--<p class="m-0 text-warning">排队中</p>-->
+                            <!--</div>-->
+                            <!--<div class="col-4">-->
+                                <!--<h4 class="m-0 text-success">32</h4>-->
+                                <!--<p class="m-0 text-success">预约成功</p>-->
+                            <!--</div>-->
+                            <!--<div class="col-4">-->
+                                <!--<h4 class="m-0 text-info">120</h4>-->
+                                <!--<p class="m-0 text-info">进厂</p>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                    <!--<div class="col-lg-4 col-6 text-center">-->
+                        <!--<p>四期</p>-->
+                        <!--<div class="text-center py-4">-->
+                            <!--<div class="easypie-chart easypie-chart-md" data-easypiechart="" data-percent="30"-->
+                                 <!--data-animate="{duration: 800, enabled: true}" data-bar-color="#f532e5"-->
+                                 <!--data-track-Color="#edf2f6" data-scale-Color="false" data-line-width="2"-->
+                                 <!--data-line-cap="round" data-size="130"><span>30%</span></div>-->
+                        <!--</div>-->
+                        <!--<div class="row">-->
+                            <!--<div class="col-4">-->
+                                <!--<h4 class="m-0 text-warning">5</h4>-->
+                                <!--<p class="m-0 text-warning">排队中</p>-->
+                            <!--</div>-->
+                            <!--<div class="col-4">-->
+                                <!--<h4 class="m-0 text-success">16</h4>-->
+                                <!--<p class="m-0 text-success">预约成功</p>-->
+                            <!--</div>-->
+                            <!--<div class="col-4">-->
+                                <!--<h4 class="m-0 text-info">68</h4>-->
+                                <!--<p class="m-0 text-info">进厂</p>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                    <!--<div class="col-lg-4 col-6 text-center">-->
+                        <!--<p>五期</p>-->
+                        <!--<div class="text-center py-4">-->
+                            <!--<div class="easypie-chart easypie-chart-md" data-easypiechart="" data-percent="50"-->
+                                 <!--data-animate="{duration: 800, enabled: true}" data-bar-color="#7266ba"-->
+                                 <!--data-track-Color="#edf2f6" data-scale-Color="false" data-line-width="2"-->
+                                 <!--data-line-cap="round" data-size="130"><span>50%</span></div>-->
+                        <!--</div>-->
+                        <!--<div class="row">-->
+                            <!--<div class="col-4">-->
+                                <!--<h4 class="m-0 text-warning">12</h4>-->
+                                <!--<p class="m-0 text-warning">排队中</p>-->
+                            <!--</div>-->
+                            <!--<div class="col-4">-->
+                                <!--<h4 class="m-0 text-success">16</h4>-->
+                                <!--<p class="m-0 text-success">预约成功</p>-->
+                            <!--</div>-->
+                            <!--<div class="col-4">-->
+                                <!--<h4 class="m-0 text-info">52</h4>-->
+                                <!--<p class="m-0 text-info">进厂</p>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
     </div>
 </div>
 <div class="row">
-    <div class="col-xl-6">
+    <div class="col-xl-12">
         <div class="card card-default">
             <div class="card-header">最新预约记录</div>
             <div class="card-body">
@@ -177,27 +197,6 @@
             </div>
         </div>
     </div>
-    <div class="col-xl-6">
-        <!-- START bar chart-->
-        <div class="card" id="cardChart3">
-            <div class="card-header">
-                <!-- START button group-->
-                <div class="float-right btn-group">
-                    <button class="dropdown-toggle dropdown-toggle-nocaret btn btn-secondary btn-sm" type="button"
-                            data-toggle="dropdown">2019-05-17 ~ 2019-06-03
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-right-forced fadeInLeft animated" role="menu"><a
-                        class="dropdown-item" href="#">Daily</a><a class="dropdown-item" href="#">Monthly</a><a
-                        class="dropdown-item" href="#">Yearly</a></div>
-                </div><!-- END button group-->
-                <div class="card-title">最近两周运行状态</div>
-            </div>
-            <div class="card-wrapper">
-                <div class="card-body">
-                    <div class="chart-bar-stackedv2 flot-chart"></div>
-                </div>
-            </div>
-        </div><!-- END bar chart-->
-    </div>
+
 </div>
 

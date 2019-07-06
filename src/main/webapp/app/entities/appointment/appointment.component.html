@@ -3,9 +3,12 @@
         <span jhiTranslate="shieldApp.appointment.home.title">Appointments</span>
         <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-appointment"
                 [routerLink]="['/appointment/new']">
-            <fa-icon [icon]="'plus'"></fa-icon>
-            <span jhiTranslate="shieldApp.appointment.home.createLabel">
-            Create new Appointment
+            <!--<fa-icon [icon]="'plus'"></fa-icon>-->
+            <!--<span jhiTranslate="shieldApp.appointment.home.createLabel">-->
+            <!--Create new Appointment-->
+            <!--</span>-->
+            <span>
+            VIP 预约
             </span>
         </button>
     </h2>
@@ -26,11 +29,8 @@
                     </div>
                     <div class="col-auto">
                         <div class="form-check mb-2">
-                            <input class="form-check-input" id="autoSizingCheck"
-                                   name="valid" formControlName="valid"
-                                   type="checkbox">
-                            <label class="form-check-label"
-                                   for="autoSizingCheck">有效</label></div>
+                            <input class="form-check-input" id="autoSizingCheck" name="valid" formControlName="valid" type="checkbox">
+                            <label class="form-check-label" for="autoSizingCheck">有效</label></div>
                     </div>
                     <div class="col-auto">
                         <div class="form-select mb-2">

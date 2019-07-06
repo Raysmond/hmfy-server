@@ -65,13 +65,15 @@ export class TopbarComponent implements OnInit {
   }
 
   login() {
-    this.modalRef = this.loginModalService.open();
+    // this.modalRef = this.loginModalService.open();
+    this.router.navigateByUrl('/login');
   }
 
   logout() {
     this.collapseNavbar();
     this.loginService.logout();
-    this.router.navigate(['']);
+    // this.router.navigate(['']);
+    this.router.navigateByUrl('/login');
   }
 
   toggleNavbar() {

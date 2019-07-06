@@ -9,12 +9,14 @@ import { JhiLanguageHelper } from 'app/core';
 })
 export class JhiMainComponent implements OnInit {
   constructor(private jhiLanguageHelper: JhiLanguageHelper, private router: Router) {}
+  title: string;
 
   private getPageTitle(routeSnapshot: ActivatedRouteSnapshot) {
     let title: string = routeSnapshot.data && routeSnapshot.data['pageTitle'] ? routeSnapshot.data['pageTitle'] : 'shieldApp';
     if (routeSnapshot.firstChild) {
       title = this.getPageTitle(routeSnapshot.firstChild) || title;
     }
+    this.title = title;
     return title;
   }
 

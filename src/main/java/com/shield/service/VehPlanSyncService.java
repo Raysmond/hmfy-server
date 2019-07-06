@@ -114,6 +114,10 @@ public class VehPlanSyncService {
                         redisLongTemplate.opsForSet().remove(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, shipPlanId);
                         continue;
                     }
+                    if (!StringUtils.isEmpty(plan.getApplyNumber()) && plan.getApplyNumber().startsWith("FKSN")) {
+                        redisLongTemplate.opsForSet().remove(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, shipPlanId);
+                        continue;
+                    }
                     for (VehDelivPlan vehDelivPlan : vehDelivPlans) {
                         vehDelivPlan.setGateTime(plan.getGateTime());
                         vehDelivPlan.setLeaveTime(plan.getLeaveTime());

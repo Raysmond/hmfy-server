@@ -41,7 +41,7 @@ export class AppointmentUpdateComponent implements OnInit {
     leaveTime: [],
     expireTime: [],
     regionId: [null, Validators.required],
-    userId: [null, Validators.required]
+    userId: []
   });
 
   constructor(
@@ -56,6 +56,11 @@ export class AppointmentUpdateComponent implements OnInit {
   ngOnInit() {
     this.isSaving = false;
     this.activatedRoute.data.subscribe(({ appointment }) => {
+      if (!appointment.id) {
+        appointment.status = 'CREATE';
+        appointment.vip = true;
+        appointment.valid = true;
+      }
       this.updateForm(appointment);
     });
     this.regionService

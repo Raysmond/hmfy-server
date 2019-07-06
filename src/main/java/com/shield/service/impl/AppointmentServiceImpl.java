@@ -307,7 +307,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setUpdateTime(ZonedDateTime.now());
         appointment.setRegion(region);
         appointment.setUser(userService.getUserWithAuthorities().get());
-        appointment.setVip(false);
+        appointment.setVip(appointmentDTO.isVip());
         appointment.setValid(true);
         appointment.setApplyId(appointmentDTO.getApplyId());
         appointment.setStatus(AppointmentStatus.CREATE);
@@ -325,7 +325,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             Region region = appointment.getRegion();
             Long current = appointmentRepository.countAllValidByRegionId(region.getId());
             log.debug("Region {}: [{}] status: {}/{}", region.getId(), region.getName(), current, region.getQuota());
-            if (current < region.getQuota()) {
+            if (current < region.getQuota() || (appointment.isVip() && current < (region.getQuota() + region.getVipQuota()))) {
                 appointment.setStatus(AppointmentStatus.START);
                 appointment.setValid(Boolean.TRUE);
                 appointment.setStartTime(ZonedDateTime.now());
@@ -340,7 +340,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 if (appointment.getApplyId() != null) {
                     List<ShipPlan> plans = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(appointment.getApplyId()));
                     for (ShipPlan plan : plans) {
-                        plan.setAllowInTime(ZonedDateTime.now().plusSeconds(region.getValidTime()));
+                        plan.setAllowInTime(ZonedDateTime.now().plusHours(region.getValidTime()));
                         shipPlanRepository.save(plan);
                         redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
                     }
@@ -360,11 +360,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Scheduled(fixedRate = 60 * 1000)
     public void checkAppointments() {
         for (Region region : regionRepository.findAll()) {
-            Long validSeconds = region.getValidTime().longValue();
+            Long validHours = region.getValidTime().longValue();
             List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.START, Boolean.TRUE, getTodayStartTime());
             for (Appointment appointment : appointments) {
-                if (appointment.getStartTime() == null || appointment.getStartTime().plusSeconds(validSeconds).isBefore(ZonedDateTime.now())) {
-                    log.info("Appointment [{}] expired after {} seconds", appointment.getId(), validSeconds);
+                if (appointment.getStartTime() == null || appointment.getStartTime().plusHours(validHours).isBefore(ZonedDateTime.now())) {
+                    log.info("Appointment [{}] expired after {} hours", appointment.getId(), validHours);
                     appointment.setUpdateTime(ZonedDateTime.now());
                     appointment.setValid(false);
                     appointment.setStatus(AppointmentStatus.EXPIRED);
@@ -378,8 +378,8 @@ public class AppointmentServiceImpl implements AppointmentService {
             List<Appointment> waitingList = appointmentRepository.findWaitingList(region.getId());
             waitingList.sort((Comparator.comparing(Appointment::getCreateTime)));
             for (Appointment appointment : waitingList) {
-                if (region.getQueueValidTime() != null && appointment.getCreateTime().plusSeconds(region.getQueueValidTime()).isBefore(ZonedDateTime.now())) {
-                    log.info("Appointment [{}] queue expired after {} seconds", appointment.getId(), region.getQueueValidTime());
+                if (region.getQueueValidTime() != null && appointment.getCreateTime().plusHours(region.getQueueValidTime()).isBefore(ZonedDateTime.now())) {
+                    log.info("Appointment [{}] queue expired after {} hours", appointment.getId(), region.getQueueValidTime());
                     appointment.setUpdateTime(ZonedDateTime.now());
                     appointment.setValid(false);
                     appointmentRepository.save(appointment);

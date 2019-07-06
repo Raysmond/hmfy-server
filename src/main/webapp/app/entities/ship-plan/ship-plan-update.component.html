@@ -1,7 +1,8 @@
 <div class="row justify-content-center">
     <div class="col-8">
         <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
-            <h2 id="jhi-ship-plan-heading" jhiTranslate="shieldApp.shipPlan.home.createOrEditLabel">Create or edit a Ship Plan</h2>
+            <h2  *ngIf="editForm.get('id').value" >编辑发运计划</h2>
+            <h2  *ngIf="!editForm.get('id').value" >创建发运计划</h2>
             <div>
                 <jhi-alert-error></jhi-alert-error>
                 <div class="form-group" [hidden]="!editForm.get('id').value">
@@ -14,7 +15,7 @@
                     <input type="text" class="form-control" name="company" id="field_company"
                            formControlName="company"/>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.applyId" for="field_applyId">Apply Id</label>
                     <input type="number" class="form-control" name="applyId" id="field_applyId"
                            [readOnly]="editForm.get('id').value"
@@ -30,7 +31,7 @@
                         </small>
                     </div>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.applyNumber" for="field_applyNumber">Apply Number</label>
                     <input type="text" class="form-control" name="applyNumber" id="field_applyNumber"
                            [readOnly]="editForm.get('id').value"
@@ -50,8 +51,14 @@
                 </div>
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.auditStatus" for="field_auditStatus">Audit Status</label>
-                    <input type="number" class="form-control" name="auditStatus" id="field_auditStatus"
-                           formControlName="auditStatus"/>
+                    <!--<input type="number" class="form-control" name="auditStatus" id="field_auditStatus"-->
+                           <!--formControlName="auditStatus"/>-->
+
+                    <select class="form-control"  name="auditStatus" formControlName="auditStatus">
+                    <option [ngValue]="null"></option>
+                    <option [ngValue]="status" *ngFor="let status of allAuditStatus">{{status}}</option>
+                    </select>
+
                     <div *ngIf="editForm.get('auditStatus').invalid && (editForm.get('auditStatus').dirty || editForm.get('auditStatus').touched)">
                         <small class="form-text text-danger"
                                *ngIf="editForm.get('auditStatus').errors.required" jhiTranslate="entity.validation.required">
@@ -75,7 +82,7 @@
                         </small>
                     </div>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value"  class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.deliverPosition" for="field_deliverPosition">Deliver Position</label>
                     <input type="text" class="form-control" name="deliverPosition" id="field_deliverPosition"
                            [readOnly]="editForm.get('id').value"
@@ -87,7 +94,7 @@
                         </small>
                     </div>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.valid" for="field_valid">Valid</label>
                     <input type="checkbox" class="form-control" name="valid" id="field_valid"
                            formControlName="valid"/>
@@ -98,16 +105,20 @@
                         </small>
                     </div>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.gateTime" for="field_gateTime">Gate Time</label>
                     <div class="d-flex">
-                        <input id="field_gateTime" type="datetime-local" class="form-control" name="gateTime" formControlName="gateTime" placeholder="YYYY-MM-DD HH:mm"/>
+                        <input id="field_gateTime"
+                               [readOnly]="editForm.get('id').value"
+                               type="datetime-local" class="form-control" name="gateTime" formControlName="gateTime" placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.leaveTime" for="field_leaveTime">Leave Time</label>
                     <div class="d-flex">
-                        <input id="field_leaveTime" type="datetime-local" class="form-control" name="leaveTime" formControlName="leaveTime" placeholder="YYYY-MM-DD HH:mm"/>
+                        <input id="field_leaveTime"
+                               [readOnly]="editForm.get('id').value"
+                               type="datetime-local" class="form-control" name="leaveTime" formControlName="leaveTime" placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
                 </div>
                 <div class="form-group">
@@ -115,51 +126,53 @@
                     <div class="d-flex">
                         <input id="field_deliverTime" type="datetime-local" class="form-control" name="deliverTime" formControlName="deliverTime"
                                [readOnly]="editForm.get('id').value"
-                               placeholder="YYYY-MM-DD HH:mm"/>
+                               placeholder="YYYY-MM-DD"/>
                     </div>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.allowInTime" for="field_allowInTime">Allow In Time</label>
                     <div class="d-flex">
-                        <input id="field_allowInTime" type="datetime-local" class="form-control" name="allowInTime" formControlName="allowInTime" placeholder="YYYY-MM-DD HH:mm"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.createTime" for="field_createTime">Create Time</label>
-                    <div class="d-flex">
-                        <input id="field_createTime" type="datetime-local" class="form-control" name="createTime"
+                        <input id="field_allowInTime"
                                [readOnly]="editForm.get('id').value"
-                               formControlName="createTime" placeholder="YYYY-MM-DD HH:mm"/>
-                    </div>
-                    <div *ngIf="editForm.get('createTime').invalid && (editForm.get('createTime').dirty || editForm.get('createTime').touched)">
-                        <small class="form-text text-danger"
-                               *ngIf="editForm.get('createTime').errors.required" jhiTranslate="entity.validation.required">
-                        This field is required.
-                        </small>
-                        <small class="form-text text-danger"
-                            [hidden]="!editForm.get('createTime').errors?.ZonedDateTimelocal" jhiTranslate="entity.validation.ZonedDateTimelocal">
-                            This field should be a date and time.
-                        </small>
+                               type="datetime-local" class="form-control" name="allowInTime" formControlName="allowInTime" placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.updateTime" for="field_updateTime">Update Time</label>
-                    <div class="d-flex">
-                        <input id="field_updateTime" type="datetime-local" class="form-control" name="updateTime"
-                               [readOnly]="editForm.get('id').value"
-                               formControlName="updateTime" placeholder="YYYY-MM-DD HH:mm"/>
-                    </div>
-                    <div *ngIf="editForm.get('updateTime').invalid && (editForm.get('updateTime').dirty || editForm.get('updateTime').touched)">
-                        <small class="form-text text-danger"
-                               *ngIf="editForm.get('updateTime').errors.required" jhiTranslate="entity.validation.required">
-                        This field is required.
-                        </small>
-                        <small class="form-text text-danger"
-                            [hidden]="!editForm.get('updateTime').errors?.ZonedDateTimelocal" jhiTranslate="entity.validation.ZonedDateTimelocal">
-                            This field should be a date and time.
-                        </small>
-                    </div>
-                </div>
+                <!--<div *ngIf="editForm.get('id').value" class="form-group">-->
+                    <!--<label class="form-control-label" jhiTranslate="shieldApp.shipPlan.createTime" for="field_createTime">Create Time</label>-->
+                    <!--<div class="d-flex">-->
+                        <!--<input id="field_createTime" type="datetime-local" class="form-control" name="createTime"-->
+                               <!--[readOnly]="editForm.get('id').value"-->
+                               <!--formControlName="createTime" placeholder="YYYY-MM-DD HH:mm"/>-->
+                    <!--</div>-->
+                    <!--<div *ngIf="editForm.get('createTime').invalid && (editForm.get('createTime').dirty || editForm.get('createTime').touched)">-->
+                        <!--<small class="form-text text-danger"-->
+                               <!--*ngIf="editForm.get('createTime').errors.required" jhiTranslate="entity.validation.required">-->
+                        <!--This field is required.-->
+                        <!--</small>-->
+                        <!--<small class="form-text text-danger"-->
+                            <!--[hidden]="!editForm.get('createTime').errors?.ZonedDateTimelocal" jhiTranslate="entity.validation.ZonedDateTimelocal">-->
+                            <!--This field should be a date and time.-->
+                        <!--</small>-->
+                    <!--</div>-->
+                <!--</div>-->
+                <!--<div class="form-group">-->
+                    <!--<label class="form-control-label" jhiTranslate="shieldApp.shipPlan.updateTime" for="field_updateTime">Update Time</label>-->
+                    <!--<div class="d-flex">-->
+                        <!--<input id="field_updateTime" type="datetime-local" class="form-control" name="updateTime"-->
+                               <!--[readOnly]="editForm.get('id').value"-->
+                               <!--formControlName="updateTime" placeholder="YYYY-MM-DD HH:mm"/>-->
+                    <!--</div>-->
+                    <!--<div *ngIf="editForm.get('updateTime').invalid && (editForm.get('updateTime').dirty || editForm.get('updateTime').touched)">-->
+                        <!--<small class="form-text text-danger"-->
+                               <!--*ngIf="editForm.get('updateTime').errors.required" jhiTranslate="entity.validation.required">-->
+                        <!--This field is required.-->
+                        <!--</small>-->
+                        <!--<small class="form-text text-danger"-->
+                            <!--[hidden]="!editForm.get('updateTime').errors?.ZonedDateTimelocal" jhiTranslate="entity.validation.ZonedDateTimelocal">-->
+                            <!--This field should be a date and time.-->
+                        <!--</small>-->
+                    <!--</div>-->
+                <!--</div>-->
                 <!--<div class="form-group">-->
                     <!--<label class="form-control-label" jhiTranslate="shieldApp.shipPlan.syncTime" for="field_syncTime">Sync Time</label>-->
                     <!--<div class="d-flex">-->

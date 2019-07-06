@@ -165,6 +165,10 @@ public class ParkingTcpHandlerService {
                 WhiteListMsgResponse whiteListMsgResponse = objectMapper.readValue(msg, WhiteListMsgResponse.class);
                 handleWhiteListResponse(whiteListMsgResponse);
                 return new ServiceResponse(whiteListMsgResponse.getService(), 0, "成功");
+            case "uploadopenstrobe":
+                // 手动开闸记录上传
+                String recordid = data.get("recordid").getAsString();
+                return new UploadOpenStrobeResponse(data.get("service").getAsString(), 0, "上传成功", recordid);
             default:
                 return new ServiceResponse(data.get("service").getAsString(), 0, "无法处理此消息");
         }

@@ -1,9 +1,11 @@
 package com.shield.web.rest;
 
+import com.shield.domain.User;
 import com.shield.security.AuthoritiesConstants;
 import com.shield.security.SecurityUtils;
 import com.shield.service.ShipPlanService;
 import com.shield.service.UserService;
+import com.shield.service.util.RandomUtil;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import com.shield.service.dto.ShipPlanDTO;
 import com.shield.service.dto.ShipPlanCriteria;
@@ -79,6 +81,25 @@ public class ShipPlanResource {
         log.debug("REST request to save ShipPlan : {}", shipPlanDTO);
         if (shipPlanDTO.getId() != null) {
             throw new BadRequestAlertException("A new shipPlan cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+        if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.REGION_ADMIN)) {
+            User user = userService.getUserWithAuthorities().get();
+            shipPlanDTO.setUserId(user.getId());
+            shipPlanDTO.setCreateTime(ZonedDateTime.now());
+            shipPlanDTO.setUpdateTime(ZonedDateTime.now());
+            ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+            ZonedDateTime tomorrow = today.plusDays(1L);
+            ZonedDateTime d = LocalDate.of(shipPlanDTO.getDeliverTime().getYear(), shipPlanDTO.getDeliverTime().getMonth(), shipPlanDTO.getDeliverTime().getDayOfMonth()).atStartOfDay(ZoneId.systemDefault());
+            if (!(d.equals(today) || d.equals(tomorrow))) {
+                throw new BadRequestAlertException("只能创建今天和明天的计划", ENTITY_NAME, "deliverTimeOnlyTodayAndTomorrow");
+            }
+            shipPlanDTO.setDeliverPosition(user.getRegion().getName());
+            shipPlanDTO.setDeliverTime(d);
+            shipPlanDTO.setValid(true);
+            shipPlanDTO.setApplyId(100000000L + Double.valueOf((Math.random() * 10000000)).longValue());
+            // WJRQKA20190608280042
+            shipPlanDTO.setApplyNumber("FKSN" + ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHMMSS")));
+
         }
         ShipPlanDTO result = shipPlanService.save(shipPlanDTO);
         return ResponseEntity.created(new URI("/api/ship-plans/" + result.getId()))

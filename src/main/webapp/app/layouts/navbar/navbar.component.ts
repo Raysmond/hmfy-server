@@ -46,6 +46,19 @@ export class NavbarComponent implements OnInit {
       this.inProduction = profileInfo.inProduction;
       this.swaggerEnabled = profileInfo.swaggerEnabled;
     });
+
+    let p = this;
+    setInterval(function() {
+      let url = p.router.url;
+      document.querySelectorAll('.sidebar-nav li').forEach(function(li) {
+        let link = li.firstElementChild.getAttribute('routerlink');
+        if (link && '/' + link === url) {
+          li.classList.add('active');
+        } else {
+          li.classList.remove('active');
+        }
+      });
+    }, 1000);
   }
 
   changeLanguage(languageKey: string) {

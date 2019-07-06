@@ -15,6 +15,7 @@ import { ShieldSharedModule } from 'app/shared';
 import { ShieldCoreModule } from 'app/core';
 import { ShieldAppRoutingModule } from './app-routing.module';
 import { ShieldHomeModule } from './home/home.module';
+import { ShieldLoginPageModule } from './login_page/login_page.module';
 import { ShieldAccountModule } from './account/account.module';
 import { ShieldEntityModule } from './entities/entity.module';
 import * as moment from 'moment';
@@ -43,6 +44,7 @@ import {
     ShieldSharedModule.forRoot(),
     ShieldCoreModule,
     ShieldHomeModule,
+    ShieldLoginPageModule,
     ShieldAccountModule,
     // jhipster-needle-angular-add-module JHipster will add new module here
     ShieldEntityModule,

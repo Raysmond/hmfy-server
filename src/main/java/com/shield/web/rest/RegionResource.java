@@ -32,6 +32,7 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -89,6 +90,7 @@ public class RegionResource {
         if (regionDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
+        regionDTO.setUpdateTime(ZonedDateTime.now());
         RegionDTO result = regionService.save(regionDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, regionDTO.getId().toString()))
@@ -97,6 +99,7 @@ public class RegionResource {
 
     @Autowired
     private UserService userService;
+
     @Autowired
     private RegionMapper regionMapper;
 
@@ -115,7 +118,7 @@ public class RegionResource {
             if (user.getRegion() == null) {
                 page = Page.empty();
             } else {
-                page = PageUtil.createPageFromList(Lists.newArrayList(regionMapper.toDto(user.getRegion())), pageable);
+                page = PageUtil.createPageFromList(Lists.newArrayList(regionService.findOne(user.getRegion().getId()).get()), pageable);
             }
         } else {
             page = regionService.findAll(pageable);
@@ -134,6 +137,12 @@ public class RegionResource {
     public ResponseEntity<RegionDTO> getRegion(@PathVariable Long id) {
         log.debug("REST request to get Region : {}", id);
         Optional<RegionDTO> regionDTO = regionService.findOne(id);
+        if (regionDTO.isPresent() && SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.REGION_ADMIN)) {
+            User user = userService.getUserWithAuthorities().get();
+            if (user.getRegion() == null || !user.getRegion().getName().equals(regionDTO.get().getName())) {
+                 regionDTO = Optional.empty();
+            }
+        }
         return ResponseUtil.wrapOrNotFound(regionDTO);
     }
 

@@ -1,9 +1,9 @@
 <div class="wrapper">
     <!-- top navbar-->
-    <header class="topnavbar-wrapper">
+    <header *ngIf="title != 'login.title'" class="topnavbar-wrapper">
         <jhi-topbar></jhi-topbar>
     </header>
-    <aside class="aside-container">
+    <aside *ngIf="title != 'login.title'" class="aside-container">
         <!-- START Sidebar (left)-->
         <div class="aside-inner">
             <router-outlet name="navbar"></router-outlet>
@@ -12,22 +12,6 @@
     <section class="section-container">
         <!-- Page content-->
         <div class="content-wrapper">
-            <!--<div class="content-heading">-->
-            <!--<div>Single View-->
-            <!--<small data-localize="dashboard.WELCOME"></small>-->
-            <!--</div>&lt;!&ndash; START Language list&ndash;&gt;-->
-            <!--<div class="ml-auto">-->
-            <!--<div class="btn-group">-->
-            <!--<button class="btn btn-secondary dropdown-toggle dropdown-toggle-nocaret" type="button"-->
-            <!--data-toggle="dropdown">English-->
-            <!--</button>-->
-            <!--<div class="dropdown-menu dropdown-menu-right-forced animated fadeInUpShort" role="menu"><a-->
-            <!--class="dropdown-item" href="#" data-set-lang="en">English</a><a class="dropdown-item"-->
-            <!--href="#" data-set-lang="es">Spanish</a>-->
-            <!--</div>-->
-            <!--</div>-->
-            <!--</div>&lt;!&ndash; END Language list&ndash;&gt;-->
-            <!--</div>-->
             <div class="row">
                 <div class="col-12">
                     <router-outlet></router-outlet>
@@ -37,5 +21,5 @@
             <!--<jhi-main></jhi-main>-->
         </div>
     </section><!-- Page footer-->
-    <footer class="footer-container"><span>&copy; 2019 - 宝田发运预约排队系统</span></footer>
+    <footer *ngIf="title != 'login.title'" class="footer-container"><span>&copy; 2019 - 宝田发运预约取号系统</span></footer>
 </div><!-- =============== VENDOR SCRIPTS ===============-->

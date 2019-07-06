@@ -82,7 +82,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers("/api/wx/**").authenticated()
             .antMatchers("/api/register").denyAll()
             .antMatchers("/api/account", "/account/change-password").authenticated()
-            .antMatchers("/region-admin/api/**", "/api/ship-plans/**", "/api/regions").hasAnyAuthority(AuthoritiesConstants.REGION_ADMIN, AuthoritiesConstants.ADMIN)
+            .antMatchers("/region-admin/api/**", "/api/ship-plans/**", "/api/regions/**").hasAnyAuthority(AuthoritiesConstants.REGION_ADMIN, AuthoritiesConstants.ADMIN)
             .antMatchers("/api/**").hasAuthority(AuthoritiesConstants.ADMIN)
             .antMatchers("/management/health").permitAll()
             .antMatchers("/management/info").permitAll()

@@ -20,22 +20,24 @@ export class ShipPlanUpdateComponent implements OnInit {
 
   users: IUser[];
 
+  allAuditStatus: any[] = [1, 2, 3];
+
   editForm = this.fb.group({
     id: [],
     company: [],
-    applyId: [null, [Validators.required]],
+    applyId: [],
     applyNumber: [],
     truckNumber: [null, [Validators.required]],
     auditStatus: [null, [Validators.required]],
     productName: [null, [Validators.required]],
-    deliverPosition: [null, [Validators.required]],
-    valid: [null, [Validators.required]],
+    deliverPosition: [],
+    valid: [],
     gateTime: [],
     leaveTime: [],
-    deliverTime: [],
+    deliverTime: [null, [Validators.required]],
     allowInTime: [],
-    createTime: [null, [Validators.required]],
-    updateTime: [null, [Validators.required]],
+    createTime: [],
+    updateTime: [],
     syncTime: [],
     userId: []
   });
@@ -128,7 +130,7 @@ export class ShipPlanUpdateComponent implements OnInit {
   }
 
   protected subscribeToSaveResponse(result: Observable<HttpResponse<IShipPlan>>) {
-    result.subscribe((res: HttpResponse<IShipPlan>) => this.onSaveSuccess(), (res: HttpErrorResponse) => this.onSaveError());
+    result.subscribe((res: HttpResponse<IShipPlan>) => this.onSaveSuccess(), (res: HttpErrorResponse) => this.onSaveError(res));
   }
 
   protected onSaveSuccess() {
@@ -136,9 +138,15 @@ export class ShipPlanUpdateComponent implements OnInit {
     this.previousState();
   }
 
-  protected onSaveError() {
+  protected onSaveError(res) {
+    console.log(res);
     this.isSaving = false;
+    // if (res.title) {
+    //   // this.jhiAlertService.error(res.title, null, null);
+    //   alert(res.title);
+    // }
   }
+
   protected onError(errorMessage: string) {
     this.jhiAlertService.error(errorMessage, null, null);
   }

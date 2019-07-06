@@ -1,7 +1,11 @@
 package com.shield.web.rest.admin.region;
 
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.shield.domain.User;
+import com.shield.domain.enumeration.AppointmentStatus;
+import com.shield.repository.ShipPlanRepository;
 import com.shield.security.AuthoritiesConstants;
 import com.shield.security.SecurityUtils;
 import com.shield.service.AppointmentService;
@@ -15,6 +19,7 @@ import io.github.jhipster.service.filter.LongFilter;
 import io.github.jhipster.web.util.HeaderUtil;
 import io.github.jhipster.web.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
+import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +36,11 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -56,9 +65,40 @@ public class RegionAdminAppointmentResource {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private ShipPlanRepository shipPlanRepository;
+
     public RegionAdminAppointmentResource(AppointmentService appointmentService, AppointmentQueryService appointmentQueryService) {
         this.appointmentService = appointmentService;
         this.appointmentQueryService = appointmentQueryService;
+    }
+
+    @Data
+    static class ShipPlanCount {
+        private Long status1 = 0L;
+        private Long status2 = 0L;
+        private Long status3 = 0L;
+    }
+
+
+    @GetMapping("/appointments/count-by-region")
+    public ResponseEntity<ShipPlanCount> countShipPlan() {
+        User user = userService.getUserWithAuthorities().get();
+        if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.ADMIN)) {
+            ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+            ShipPlanCount result = new ShipPlanCount();
+            result.setStatus1(shipPlanRepository.countAllByDeliverTimeAndAuditStatus(today, 1));
+            result.setStatus2(shipPlanRepository.countAllByDeliverTimeAndAuditStatus(today, 2));
+            result.setStatus3(shipPlanRepository.countAllByDeliverTimeAndAuditStatus(today, 3));
+            return ResponseEntity.ok(result);
+        }
+        String region = user.getRegion().getName();
+        ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+        ShipPlanCount result = new ShipPlanCount();
+        result.setStatus1(shipPlanRepository.countAllByDeliverPositionAndDeliverTimeAndAuditStatus(region, today, 1));
+        result.setStatus2(shipPlanRepository.countAllByDeliverPositionAndDeliverTimeAndAuditStatus(region, today, 2));
+        result.setStatus3(shipPlanRepository.countAllByDeliverPositionAndDeliverTimeAndAuditStatus(region, today, 3));
+        return ResponseEntity.ok(result);
     }
 
     /**
@@ -74,7 +114,13 @@ public class RegionAdminAppointmentResource {
         if (appointmentDTO.getId() != null) {
             throw new BadRequestAlertException("A new appointment cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        AppointmentDTO result = appointmentService.save(appointmentDTO);
+        User user = userService.getUserWithAuthorities().get();
+        appointmentDTO.setRegionId(user.getRegion().getId());
+        appointmentDTO.setVip(true);
+        appointmentDTO.setStatus(AppointmentStatus.CREATE);
+        appointmentDTO.setUserId(user.getId());
+//        AppointmentDTO result = appointmentService.save(appointmentDTO);
+        AppointmentDTO result = appointmentService.makeAppointment(user.getRegion().getId(), appointmentDTO);
         return ResponseEntity.created(new URI("/api/appointments/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);

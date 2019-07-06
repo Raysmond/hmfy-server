@@ -1,7 +1,8 @@
 <div class="row justify-content-center">
     <div class="col-8">
         <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
-            <h2 id="jhi-appointment-heading" jhiTranslate="shieldApp.appointment.home.createOrEditLabel">Create or edit a Appointment</h2>
+            <h2 *ngIf="editForm.get('id').value" id="jhi-appointment-heading" jhiTranslate="shieldApp.appointment.home.createOrEditLabel">Create or edit a Appointment</h2>
+            <h2 *ngIf="!editForm.get('id').value">VIP 预约</h2>
             <div>
                 <jhi-alert-error></jhi-alert-error>
                 <div class="form-group" [hidden]="!editForm.get('id').value">
@@ -13,6 +14,7 @@
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.licensePlateNumber" for="field_licensePlateNumber">License Plate Number</label>
                     <input type="text" class="form-control" name="licensePlateNumber" id="field_licensePlateNumber"
+                           [readOnly]="editForm.get('id').value"
                            formControlName="licensePlateNumber"/>
                     <div *ngIf="editForm.get('licensePlateNumber').invalid && (editForm.get('licensePlateNumber').dirty || editForm.get('licensePlateNumber').touched)">
                         <small class="form-text text-danger"
@@ -33,13 +35,13 @@
                         </small>
                     </div>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.applyId" for="field_applyId">Apply Id</label>
                     <input type="number" class="form-control" name="applyId" id="field_applyId"
                            [readOnly]="editForm.get('id').value"
                            formControlName="applyId"/>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.number" for="field_number">Number</label>
                     <input type="number" class="form-control" name="number" id="field_number"
                            [readOnly]="editForm.get('id').value"
@@ -51,7 +53,7 @@
                         </small>
                     </div>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.valid" for="field_valid">Valid</label>
                     <input type="checkbox" class="form-control" name="valid" id="field_valid"
                            formControlName="valid"/>
@@ -62,9 +64,9 @@
                         </small>
                     </div>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.status" for="field_status">Status</label>
-                    <select class="form-control" name="status" formControlName="status" id="field_status">
+                    <select class="form-control" name="status" formControlName="status" id="field_status" disabled>
                         <option value="CREATE">{{'shieldApp.AppointmentStatus.CREATE' | translate}}</option>
                         <option value="WAIT">{{'shieldApp.AppointmentStatus.WAIT' | translate}}</option>
                         <option value="START">{{'shieldApp.AppointmentStatus.START' | translate}}</option>
@@ -78,14 +80,14 @@
                         </small>
                     </div>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.queueNumber" for="field_queueNumber">Queue Number</label>
                     <input  [readOnly]="editForm.get('id').value" type="number" class="form-control" name="queueNumber" id="field_queueNumber"
                            formControlName="queueNumber"/>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.vip" for="field_vip">Vip</label>
-                    <input type="checkbox" class="form-control" name="vip" id="field_vip"
+                    <input type="checkbox" class="form-control" name="vip" id="field_vip" disabled
                            formControlName="vip"/>
                     <div *ngIf="editForm.get('vip').invalid && (editForm.get('vip').dirty || editForm.get('vip').touched)">
                         <small class="form-text text-danger"
@@ -106,32 +108,32 @@
                         <!--<input id="field_updateTime" type="datetime-local" class="form-control" name="updateTime" formControlName="updateTime" placeholder="YYYY-MM-DD HH:mm"/>-->
                     <!--</div>-->
                 <!--</div>-->
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.startTime" for="field_startTime">Start Time</label>
                     <div class="d-flex">
                         <input [readOnly]="editForm.get('id').value" id="field_startTime" type="datetime-local" class="form-control" name="startTime" formControlName="startTime" placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.enterTime" for="field_enterTime">Enter Time</label>
                     <div class="d-flex">
-                        <input  id="field_enterTime" type="datetime-local" class="form-control" name="enterTime" formControlName="enterTime" placeholder="YYYY-MM-DD HH:mm"/>
+                        <input [readOnly]="editForm.get('id').value"  id="field_enterTime" type="datetime-local" class="form-control" name="enterTime" formControlName="enterTime" placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.leaveTime" for="field_leaveTime">Leave Time</label>
                     <div class="d-flex">
-                        <input id="field_leaveTime" type="datetime-local" class="form-control" name="leaveTime" formControlName="leaveTime" placeholder="YYYY-MM-DD HH:mm"/>
+                        <input [readOnly]="editForm.get('id').value" id="field_leaveTime" type="datetime-local" class="form-control" name="leaveTime" formControlName="leaveTime" placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
                 </div>
-                <div class="form-group">
+                <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.expireTime" for="field_expireTime">Expire Time</label>
                     <div class="d-flex">
                         <input [readOnly]="editForm.get('id').value" id="field_expireTime" type="datetime-local" class="form-control" name="expireTime" formControlName="expireTime" placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div *ngIf="!editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.region" for="field_region">Region</label>
                     <select class="form-control" id="field_region" name="region" formControlName="regionId">
                         <option *ngIf="!editForm.get('regionId').value" [ngValue]="null" selected></option>

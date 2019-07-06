@@ -19,16 +19,16 @@
       "quota": "配额",
       "vipQuota": "VIP配额",
       "queueQuota": "排队配额",
-      "queueValidTime": "最长排队时间(s)",
+      "queueValidTime": "最长排队时间(h)",
       "startTime": "开启时间",
       "endTime": "结束时间",
       "autoAppointment": "自动注册",
       "parkId": "车场ID",
       "days": "开启星期",
-      "open": "开启状态",
+      "open": "开启预约",
       "createTime": "新建时间",
       "updateTime": "更新时间",
-      "validTime": "有效时间(s)"
+      "validTime": "有效时间(h)"
     }
   }
 }

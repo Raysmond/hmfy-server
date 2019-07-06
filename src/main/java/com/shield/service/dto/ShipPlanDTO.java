@@ -13,7 +13,7 @@ public class ShipPlanDTO implements Serializable {
 
     private String company;
 
-    @NotNull
+//    @NotNull
     private Long applyId;
 
     private String applyNumber;
@@ -27,24 +27,25 @@ public class ShipPlanDTO implements Serializable {
     @NotNull
     private String productName;
 
-    @NotNull
+//    @NotNull
     private String deliverPosition;
 
-    @NotNull
+//    @NotNull
     private Boolean valid;
 
     private ZonedDateTime gateTime;
 
     private ZonedDateTime leaveTime;
 
+    @NotNull
     private ZonedDateTime deliverTime;
 
     private ZonedDateTime allowInTime;
 
-    @NotNull
+//    @NotNull
     private ZonedDateTime createTime;
 
-    @NotNull
+//    @NotNull
     private ZonedDateTime updateTime;
 
     private ZonedDateTime syncTime;

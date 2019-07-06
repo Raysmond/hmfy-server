@@ -6,6 +6,7 @@ import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/htt
 import { Observable } from 'rxjs';
 
 import { SERVER_API_URL } from 'app/app.constants';
+import { Router } from '@angular/router';
 
 import { LoginModalService, AccountService, Account } from 'app/core';
 import { HomeService } from './home.service';
@@ -31,13 +32,14 @@ export class HomeComponent implements OnInit {
     protected appointmentService: AppointmentService,
     private eventManager: JhiEventManager,
     private homeService: HomeService,
+    private router: Router,
     private http: HttpClient
   ) {}
 
   loadLatestAppointments() {
     const filterParams = {
       page: 0,
-      size: 4,
+      size: 8,
       sort: ['id,desc']
     };
 
@@ -53,19 +55,38 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
+    // if (!this.accountService.isAuthenticated()) {
+    //   this.router.navigateByUrl("/login");
+    // }
+
     this.accountService.identity().then((account: Account) => {
       this.account = account;
-    });
-    this.registerAuthenticationSuccess();
-
-    this.http.get(`${this.resourceUrl}/region-stats`).subscribe(
-      (res: HttpResponse<any>) => {
-        console.log(res);
-      },
-      (res: HttpErrorResponse) => {
-        console.log(res.message);
+      // console.log('--------');
+      // console.log(this.account);
+      if (!this.account) {
+        this.router.navigateByUrl('/login');
       }
-    );
+    });
+
+    this.registerAuthenticationSuccess();
+    //
+    // this.http.get(`${this.resourceUrl}/region-stats`).subscribe(
+    //   (res: HttpResponse<any>) => {
+    //     console.log(res);
+    //   },
+    //   (res: HttpErrorResponse) => {
+    //     console.log(res.message);
+    //   }
+    // );
+
+    // this.http.get(`${this.appointmentService.getResourceUrl()}/count-by-region`).subscribe(
+    //   (res: HttpResponse<any>) => {
+    //     console.log(res);
+    //   },
+    //   (res: HttpErrorResponse) => {
+    //     console.log(res.message);
+    //   }
+    // );
 
     this.loadLatestAppointments();
   }

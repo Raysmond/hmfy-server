@@ -5,7 +5,7 @@
         <a class="navbar-brand" href="#/">
             <div class="brand-logo">
                 <!--<img class="img-fluid" src="/content/angle/app/img/logo.png" alt="App Logo">-->
-                <span style="color: #fff;">宝田发运预约排队系统</span>
+                <span style="color: #fff;">宝田发运预约取号系统</span>
             </div>
             <div class="brand-logo-collapsed">
                 <img class="img-fluid" src="/content/angle/app/img/logo-single.png"
@@ -14,37 +14,37 @@
     </div><!-- END navbar header-->
     <!-- START Left navbar-->
     <ul class="navbar-nav mr-auto flex-row">
-        <li class="nav-item">
-            <!-- Button used to collapse the left sidebar. Only visible on tablet and desktops--><a
-            class="nav-link d-none d-md-block d-lg-block d-xl-block" href="#" data-trigger-resize=""
-            data-toggle-state="aside-collapsed"><em class="ico`n-bar"></em></a>
-            <!-- Button to show/hide the sidebar on mobile. Visible on mobile only.--><a
-            class="nav-link sidebar-toggle d-md-none" href="#" data-toggle-state="aside-toggled"
-            data-no-persist="true"><em class="icon-bar"></em></a></li><!-- START User avatar toggle-->
-        <li class="nav-item d-none d-md-block">
-            <!-- Button used to collapse the left sidebar. Only visible on tablet and desktops--><a
-            class="nav-link" id="user-block-toggle" href="#user-block" data-toggle="collapse"><em
-            class="icon-user"></em></a></li><!-- END User avatar toggle-->
-        <!-- START lock screen-->
-        <li class="nav-item d-none d-md-block"><a class="nav-link" href="#" title="Lock screen"><em
-            class="icon-lock"></em></a></li><!-- END lock screen-->
+        <!--<li class="nav-item">-->
+            <!--&lt;!&ndash; Button used to collapse the left sidebar. Only visible on tablet and desktops&ndash;&gt;<a-->
+            <!--class="nav-link d-none d-md-block d-lg-block d-xl-block" href="#" data-trigger-resize=""-->
+            <!--data-toggle-state="aside-collapsed"><em class="ico`n-bar"></em></a>-->
+            <!--&lt;!&ndash; Button to show/hide the sidebar on mobile. Visible on mobile only.&ndash;&gt;<a-->
+            <!--class="nav-link sidebar-toggle d-md-none" href="#" data-toggle-state="aside-toggled"-->
+            <!--data-no-persist="true"><i class="fa fa-list"></i></a></li>-->
+        <!-- START User avatar toggle-->
+        <!--<li class="nav-item d-none d-md-block">-->
+            <!--&lt;!&ndash; Button used to collapse the left sidebar. Only visible on tablet and desktops&ndash;&gt;<a-->
+            <!--class="nav-link" id="user-block-toggle" href="#user-block" data-toggle="collapse"><em-->
+            <!--class="icon-user"></em></a></li>&lt;!&ndash; END User avatar toggle&ndash;&gt;-->
+        <!--&lt;!&ndash; START lock screen&ndash;&gt;-->
+        <!--<li class="nav-item d-none d-md-block"><a class="nav-link" href="#" title="Lock screen"><em-->
+            <!--class="icon-lock"></em></a></li>&lt;!&ndash; END lock screen&ndash;&gt;-->
     </ul><!-- END Left navbar-->
     <!-- START Right Navbar-->
     <ul class="navbar-nav flex-row">
         <!--<li class="nav-item d-none d-md-block"><a class="nav-link" href="#" data-toggle-fullscreen=""><em-->
             <!--class="fas fa-expand"></em></a></li>-->
         <li *ngIf="!isAuthenticated()" class="nav-item">
-            <a class="nav-link" (click)="login()"><em class="icon-login"></em> 登录</a></li>
+            <a class="nav-link" routerLink="/login"><em class="icon-login"></em> 登录</a></li>
 
-        <li *ngIf="isAuthenticated()" class="nav-item dropdown dropdown-list">
-            <a class="nav-link dropdown-toggle dropdown-toggle-nocaret"
-               href="#" data-toggle="dropdown">
-                <em class="icon-user"></em> {{account.login}}
+        <li *ngIf="account" class="nav-item dropdown dropdown-list">
+            <!--<a class="nav-link dropdown-toggle dropdown-toggle-nocaret"-->
+            <a class="nav-link" href="#"> <em class="icon-user"></em> {{account.login}}
             </a><!-- START Dropdown menu-->
         </li><!-- END Alert menu-->
 
         <li *ngIf="isAuthenticated()" class="nav-item">
-            <a class="nav-link" (click)="logout()"><em class="icon-logout"></em> 退出</a></li>
+            <a class="nav-link" href="#"  (click)="logout()"><em class="icon-logout"></em> 退出</a></li>
 
         <!-- START Offsidebar button-->
         <!--<li class="nav-item"><a class="nav-link" href="#" data-toggle-state="offsidebar-open"-->
