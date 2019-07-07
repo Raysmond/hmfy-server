@@ -71,7 +71,7 @@ public class UserDTO {
     private String carCompany;
 
     // 行驶证上荷载量
-    private Integer carCapacity;
+    private Double carCapacity;
 
     private String phone;
 
@@ -283,11 +283,11 @@ public class UserDTO {
         this.carCompany = carCompany;
     }
 
-    public Integer getCarCapacity() {
+    public Double getCarCapacity() {
         return carCapacity;
     }
 
-    public void setCarCapacity(Integer carCapacity) {
+    public void setCarCapacity(Double carCapacity) {
         this.carCapacity = carCapacity;
     }
 

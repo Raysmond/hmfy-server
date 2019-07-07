@@ -52,7 +52,7 @@ spring:
     jdbc-url: jdbc:mysql://localhost:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai
     #    jdbc-url: jdbc:mysql://localhost:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
     username: root
-    password:
+    password: 6VDVpiRmeEcFx7Cazpf
     poolName: Hikari
     auto-commit: false
     data-source-properties:
@@ -62,10 +62,9 @@ spring:
       useServerPrepStmts: true
   sqlserver-datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    #      jdbc-url: jdbc:sqlserver://10.41.76.253:22433;databaseName=GateManage
     jdbc-url: jdbc:sqlserver://127.0.0.1:1433;databaseName=GateManage
-    username: Wechat
-    password: QQ@@12345
+    username: sa
+    password: JueYRN{cZh8Uqcd?ftp
     driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
     poolName: Hikari
     auto-commit: false
@@ -84,6 +83,7 @@ spring:
       hibernate.cache.use_second_level_cache: false
       hibernate.cache.use_query_cache: false
       hibernate.generate_statistics: false
+      #      hibernate.ddl-auto: create
       hibernate.jdbc.time_zone: Asia/Shanghai
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect

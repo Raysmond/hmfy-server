@@ -1,13 +1,14 @@
 version: '2'
 services:
   shield-mysql:
-    image: mysql:8.0.16
-    #    image: mysql:5.7.26
-    # volumes:
-    #     - ~/volumes/jhipster/shield/mysql/:/var/lib/mysql/
+    #    image: mysql:8.0.16
+    image: mysql:5.7.26
+    #    volumes:
+    #      - ~/volumes/mysql/:/var/lib/mysql/
     environment:
       - MYSQL_USER=root
-      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_ROOT_PASSWORD=6VDVpiRmeEcFx7Cazpf
+      #      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=shield
       - TZ=Asia/Shanghai
     ports:

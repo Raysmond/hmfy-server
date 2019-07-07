@@ -296,6 +296,17 @@ public class UserService {
         userRepository.saveAll(users);
     }
 
+    public void changePasswordForAllDrivers(Long startUserId) {
+        List<User> users = userRepository.findAll().stream().filter(it -> it.getId() > startUserId).collect(Collectors.toList());
+        for (User user : users) {
+            System.out.println(user.toString());
+            System.out.println("password:" + user.getTruckNumber().substring(3) + user.getPhone().substring(7));
+            user.setPassword(passwordEncoder.encode(user.getTruckNumber().substring(3) + user.getPhone().substring(7)));
+            this.clearUserCaches(user);
+        }
+        userRepository.saveAll(users);
+    }
+
     @Transactional(readOnly = true)
     public Page<UserDTO> getAllManagedUsers(Pageable pageable) {
         return userRepository.findAllByLoginNot(pageable, Constants.ANONYMOUS_USER).map(UserDTO::new);

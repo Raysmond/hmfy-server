@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
@@ -35,6 +36,12 @@ public class TestController {
 //    @GetMapping("/veh-plans")
 //    public List<VehDelivPlan> getVehPlans() {
 //        return vehDelivPlanRepository.findAll();
+//    }
+//
+//    @GetMapping("/set-driver-passwords")
+//    public String updateDriverPassword(@RequestParam Long startId) {
+//        userService.changePasswordForAllDrivers(startId);
+//        return "ok";
 //    }
 
 

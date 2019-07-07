@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { JhiLanguageService } from 'ng-jhipster';
+import { Router } from '@angular/router';
 
 import { EMAIL_ALREADY_USED_TYPE, LOGIN_ALREADY_USED_TYPE } from 'app/shared';
 import { LoginModalService } from 'app/core';
@@ -33,11 +34,13 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     private registerService: Register,
     private elementRef: ElementRef,
     private renderer: Renderer,
+    private router: Router,
     private fb: FormBuilder
   ) {}
 
   ngOnInit() {
     this.success = false;
+    this.router.navigateByUrl('/login');
   }
 
   ngAfterViewInit() {

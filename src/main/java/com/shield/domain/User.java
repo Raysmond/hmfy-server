@@ -113,7 +113,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     // 行驶证上荷载量
     @Column(name = "car_capacity")
-    private Integer carCapacity;
+    private Double carCapacity;
 
     @Column(name = "phone")
     private String phone;
@@ -267,11 +267,11 @@ public class User extends AbstractAuditingEntity implements Serializable {
         this.carCompany = carCompany;
     }
 
-    public Integer getCarCapacity() {
+    public Double getCarCapacity() {
         return carCapacity;
     }
 
-    public void setCarCapacity(Integer carCapacity) {
+    public void setCarCapacity(Double carCapacity) {
         this.carCapacity = carCapacity;
     }
 
