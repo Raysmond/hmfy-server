@@ -8,7 +8,7 @@ services:
     environment:
       - MYSQL_USER=root
       - MYSQL_ROOT_PASSWORD=6VDVpiRmeEcFx7Cazpf
-      #      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      #  - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_DATABASE=shield
       - TZ=Asia/Shanghai
     ports:

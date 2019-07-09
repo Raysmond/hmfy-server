@@ -16,7 +16,7 @@
     <br/>
     <div class="card card-default">
         <div class="card-body">
-            <form name="searchForm" role="form" novalidate (ngSubmit)="search()" [formGroup]="searchForm">
+            <form name="searchForm" style="font-size:14px;" role="form" novalidate (ngSubmit)="search()" [formGroup]="searchForm">
                 <div class="form-row align-items-center">
                     <div class="col-auto">
                         <div class="form-select mb-2">
@@ -63,9 +63,9 @@
                 <table class="table table-striped">
                     <thead>
                     <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
-                        <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span>
-                            <fa-icon [icon]="'sort'"></fa-icon>
-                        </th>
+                        <!--<th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span>-->
+                            <!--<fa-icon [icon]="'sort'"></fa-icon>-->
+                        <!--</th>-->
                         <th><span
                             jhiTranslate="shieldApp.appointment.applyId">Apply ID</span>
                         </th>
@@ -100,14 +100,14 @@
                         <!--</th>-->
                         <th jhiSortBy="regionName"><span jhiTranslate="shieldApp.appointment.region">Region</span>
                         </th>
-                        <th jhiSortBy="userLogin"><span jhiTranslate="shieldApp.appointment.user">User</span>
-                        </th>
+                        <!--<th jhiSortBy="userLogin"><span jhiTranslate="shieldApp.appointment.user">User</span>-->
+                        <!--</th>-->
                         <th></th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr *ngFor="let appointment of appointments ;trackBy: trackId">
-                        <td><a [routerLink]="['/appointment', appointment.id, 'view' ]">{{appointment.id}}</a></td>
+                        <!--<td><a [routerLink]="['/appointment', appointment.id, 'view' ]">{{appointment.id}}</a></td>-->
                         <td>{{appointment.applyId}}</td>
                         <td>{{appointment.licensePlateNumber}}</td>
                         <td>{{appointment.driver}}</td>
@@ -150,9 +150,9 @@
                                 <a [routerLink]="['../region', appointment.regionId , 'view' ]">{{appointment.regionName}}</a>
                             </div>
                         </td>
-                        <td>
-                            {{appointment.userLogin}}
-                        </td>
+                        <!--<td>-->
+                            <!--{{appointment.userLogin}}-->
+                        <!--</td>-->
                         <td class="text-right">
                             <div class="btn-group">
                                 <button type="submit"

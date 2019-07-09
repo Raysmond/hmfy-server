@@ -15,6 +15,7 @@ export interface IWxMaUser {
   createTime?: Moment;
   updateTime?: Moment;
   phone?: string;
+  appId?: string;
   userLogin?: string;
   userId?: number;
 }
@@ -35,6 +36,7 @@ export class WxMaUser implements IWxMaUser {
     public createTime?: Moment,
     public updateTime?: Moment,
     public phone?: string,
+    public appId?: string,
     public userLogin?: string,
     public userId?: number
   ) {}

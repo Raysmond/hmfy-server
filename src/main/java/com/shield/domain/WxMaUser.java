@@ -1,6 +1,4 @@
 package com.shield.domain;
-
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -9,7 +7,6 @@ import javax.validation.constraints.*;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.Objects;
 
 /**
  * A WxMaUser.
@@ -67,8 +64,11 @@ public class WxMaUser implements Serializable {
     @Column(name = "phone")
     private String phone;
 
-    @OneToOne(optional = false)
     @NotNull
+    @Column(name = "app_id", nullable = false)
+    private String appId;
+
+    @OneToOne
     @JoinColumn(unique = true)
     private User user;
 
@@ -250,6 +250,19 @@ public class WxMaUser implements Serializable {
         this.phone = phone;
     }
 
+    public String getAppId() {
+        return appId;
+    }
+
+    public WxMaUser appId(String appId) {
+        this.appId = appId;
+        return this;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
+
     public User getUser() {
         return user;
     }
@@ -297,6 +310,7 @@ public class WxMaUser implements Serializable {
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
             ", phone='" + getPhone() + "'" +
+            ", appId='" + getAppId() + "'" +
             "}";
     }
 }

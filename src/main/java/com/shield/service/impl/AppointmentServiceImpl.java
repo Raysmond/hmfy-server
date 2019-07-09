@@ -13,6 +13,7 @@ import com.shield.repository.ShipPlanRepository;
 import com.shield.service.AppointmentService;
 import com.shield.repository.AppointmentRepository;
 import com.shield.service.UserService;
+import com.shield.service.WxMpMsgService;
 import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.mapper.AppointmentMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -62,6 +63,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Autowired
     private ShipPlanRepository shipPlanRepository;
+
+    @Autowired
+    private WxMpMsgService wxMpMsgService;
 
     @Autowired
     @Qualifier("redisLongTemplate")
@@ -167,7 +171,20 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (currentStatus.equals(AppointmentStatus.START)) {
             redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
             redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
+
+            if (appointment.getApplyId() != null) {
+                List<ShipPlan> plans = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(appointment.getApplyId()));
+                for (ShipPlan plan : plans) {
+                    plan.setAllowInTime(null);
+                    plan.setUpdateTime(ZonedDateTime.now());
+                    shipPlanRepository.save(plan);
+                    redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
+                }
+            }
+
+            wxMpMsgService.sendAppointmentCancelMsg(appointmentMapper.toDto(appointment));
         }
+
         return appointmentMapper.toDto(appointment);
     }
 
@@ -345,6 +362,8 @@ public class AppointmentServiceImpl implements AppointmentService {
                         redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
                     }
                 }
+
+                wxMpMsgService.sendAppointmentSuccessMsg(appointmentMapper.toDto(appointment));
                 return true;
             }
             return false;
@@ -372,6 +391,17 @@ public class AppointmentServiceImpl implements AppointmentService {
 
                     redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
                     redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
+
+                    if (appointment.getApplyId() != null) {
+                        List<ShipPlan> plans = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(appointment.getApplyId()));
+                        for (ShipPlan plan : plans) {
+                            plan.setAllowInTime(ZonedDateTime.now().plusHours(region.getValidTime()));
+                            shipPlanRepository.save(plan);
+                            redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
+                        }
+                    }
+
+                    wxMpMsgService.sendAppointmentExpireMsg(appointmentMapper.toDto(appointment));
                 }
             }
 

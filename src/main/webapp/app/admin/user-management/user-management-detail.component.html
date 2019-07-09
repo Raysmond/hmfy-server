@@ -16,14 +16,14 @@
                 </dd>
                 <dt><span jhiTranslate="userManagement.firstName">First Name</span></dt>
                 <dd>{{user.firstName}}</dd>
-                <dt><span jhiTranslate="userManagement.lastName">Last Name</span></dt>
-                <dd>{{user.lastName}}</dd>
-                <dt><span jhiTranslate="userManagement.email">Email</span></dt>
-                <dd>{{user.email}}</dd>
-                <dt><span jhiTranslate="userManagement.langKey">Lang Key</span></dt>
-                <dd>{{user.langKey}}</dd>
+                <!--<dt><span jhiTranslate="userManagement.lastName">Last Name</span></dt>-->
+                <!--<dd>{{user.lastName}}</dd>-->
+                <!--<dt><span jhiTranslate="userManagement.email">Email</span></dt>-->
+                <!--<dd>{{user.email}}</dd>-->
+                <!--<dt><span jhiTranslate="userManagement.langKey">Lang Key</span></dt>-->
+                <!--<dd>{{user.langKey}}</dd>-->
 
-                <dt><span >绑定区域</span></dt>
+                <dt><span>绑定区域</span></dt>
                 <dd>{{user.regionName}}</dd>
 
                 <dt><span jhiTranslate="userManagement.company">company</span></dt>
@@ -49,9 +49,17 @@
                 <dt><span jhiTranslate="userManagement.profiles">Profiles</span></dt>
                 <dd>
                     <ul class="list-unstyled">
-                        <li *ngFor="let authority of user.authorities">
-                            <span class="badge badge-info">{{authority}}</span>
-                        </li>
+                        <!--<li *ngFor="let authority of user.authorities">-->
+                            <!--<span class="badge badge-info">{{authority}}</span>-->
+                        <!--</li>-->
+
+                        <div *ngFor="let authority of user.authorities">
+                            <!--<span class="badge badge-info" jhiTranslate="{{'userManagement.role.' + authority}}">{{ authority }}</span>-->
+                            <li *ngIf="authority == 'ROLE_ADMIN'" class="badge badge-secondary" jhiTranslate="{{'userManagement.role.' + authority}}">{{ authority }}</li>
+                            <li *ngIf="authority == 'ROLE_USER'" class="badge badge-info" jhiTranslate="{{'userManagement.role.' + authority}}">{{ authority }}</li>
+                            <li *ngIf="authority == 'ROLE_APPOINTMENT'" class="badge badge-success" jhiTranslate="{{'userManagement.role.' + authority}}">{{ authority }}</li>
+                            <li *ngIf="authority == 'ROLE_REGION_ADMIN'" class="badge badge-warning" jhiTranslate="{{'userManagement.role.' + authority}}">{{ authority }}</li>
+                        </div>
                     </ul>
                 </dd>
             </dl>

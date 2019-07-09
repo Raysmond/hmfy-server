@@ -16,7 +16,7 @@ public interface WxMaUserService {
 
     WxMaUserDTO createOrUpdateWxUserInfo(WxMaUserInfo wxMaUserInfo, Long userId);
 
-    Optional<WxMaUserDTO> findByOpenId(String openId);
+    Optional<WxMaUserDTO> findByOpenId(String appId, String openId);
 
     Optional<WxMaUserDTO> findByUserId(Long userId);
 

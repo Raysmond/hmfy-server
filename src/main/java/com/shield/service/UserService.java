@@ -313,6 +313,17 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public Page<UserDTO> searchAllManagedUsers(Pageable pageable, String query) {
+        return userRepository.searchAll("%" + query + "%", pageable).map(UserDTO::new);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UserDTO> searchAllManagedUsersByRegionId(Pageable pageable, String query, Long regionId) {
+        return userRepository.searchAllByRegionId("%" + query + "%", regionId, pageable).map(UserDTO::new);
+    }
+
+
+    @Transactional(readOnly = true)
     public Page<UserDTO> getAllManagedUsersByRegionId(Pageable pageable, Long regionId) {
         return userRepository.findAllByRegionId(pageable, regionId).map(UserDTO::new);
     }

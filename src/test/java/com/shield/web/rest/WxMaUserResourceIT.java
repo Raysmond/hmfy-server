@@ -83,6 +83,9 @@ public class WxMaUserResourceIT {
     private static final String DEFAULT_PHONE = "AAAAAAAAAA";
     private static final String UPDATED_PHONE = "BBBBBBBBBB";
 
+    private static final String DEFAULT_APP_ID = "AAAAAAAAAA";
+    private static final String UPDATED_APP_ID = "BBBBBBBBBB";
+
     @Autowired
     private WxMaUserRepository wxMaUserRepository;
 
@@ -146,12 +149,8 @@ public class WxMaUserResourceIT {
             .watermark(DEFAULT_WATERMARK)
             .createTime(DEFAULT_CREATE_TIME)
             .updateTime(DEFAULT_UPDATE_TIME)
-            .phone(DEFAULT_PHONE);
-        // Add required entity
-        User user = UserResourceIT.createEntity(em);
-        em.persist(user);
-        em.flush();
-        wxMaUser.setUser(user);
+            .phone(DEFAULT_PHONE)
+            .appId(DEFAULT_APP_ID);
         return wxMaUser;
     }
     /**
@@ -174,12 +173,8 @@ public class WxMaUserResourceIT {
             .watermark(UPDATED_WATERMARK)
             .createTime(UPDATED_CREATE_TIME)
             .updateTime(UPDATED_UPDATE_TIME)
-            .phone(UPDATED_PHONE);
-        // Add required entity
-        User user = UserResourceIT.createEntity(em);
-        em.persist(user);
-        em.flush();
-        wxMaUser.setUser(user);
+            .phone(UPDATED_PHONE)
+            .appId(UPDATED_APP_ID);
         return wxMaUser;
     }
 
@@ -217,6 +212,7 @@ public class WxMaUserResourceIT {
         assertThat(testWxMaUser.getCreateTime()).isEqualTo(DEFAULT_CREATE_TIME);
         assertThat(testWxMaUser.getUpdateTime()).isEqualTo(DEFAULT_UPDATE_TIME);
         assertThat(testWxMaUser.getPhone()).isEqualTo(DEFAULT_PHONE);
+        assertThat(testWxMaUser.getAppId()).isEqualTo(DEFAULT_APP_ID);
     }
 
     @Test
@@ -299,6 +295,25 @@ public class WxMaUserResourceIT {
 
     @Test
     @Transactional
+    public void checkAppIdIsRequired() throws Exception {
+        int databaseSizeBeforeTest = wxMaUserRepository.findAll().size();
+        // set the field null
+        wxMaUser.setAppId(null);
+
+        // Create the WxMaUser, which fails.
+        WxMaUserDTO wxMaUserDTO = wxMaUserMapper.toDto(wxMaUser);
+
+        restWxMaUserMockMvc.perform(post("/api/wx-ma-users")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(wxMaUserDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<WxMaUser> wxMaUserList = wxMaUserRepository.findAll();
+        assertThat(wxMaUserList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
     public void getAllWxMaUsers() throws Exception {
         // Initialize the database
         wxMaUserRepository.saveAndFlush(wxMaUser);
@@ -320,7 +335,8 @@ public class WxMaUserResourceIT {
             .andExpect(jsonPath("$.[*].watermark").value(hasItem(DEFAULT_WATERMARK.toString())))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
             .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
-            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE.toString())));
+            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE.toString())))
+            .andExpect(jsonPath("$.[*].appId").value(hasItem(DEFAULT_APP_ID.toString())));
     }
     
     @Test
@@ -346,7 +362,8 @@ public class WxMaUserResourceIT {
             .andExpect(jsonPath("$.watermark").value(DEFAULT_WATERMARK.toString()))
             .andExpect(jsonPath("$.createTime").value(sameInstant(DEFAULT_CREATE_TIME)))
             .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)))
-            .andExpect(jsonPath("$.phone").value(DEFAULT_PHONE.toString()));
+            .andExpect(jsonPath("$.phone").value(DEFAULT_PHONE.toString()))
+            .andExpect(jsonPath("$.appId").value(DEFAULT_APP_ID.toString()));
     }
 
     @Test
@@ -912,9 +929,51 @@ public class WxMaUserResourceIT {
 
     @Test
     @Transactional
+    public void getAllWxMaUsersByAppIdIsEqualToSomething() throws Exception {
+        // Initialize the database
+        wxMaUserRepository.saveAndFlush(wxMaUser);
+
+        // Get all the wxMaUserList where appId equals to DEFAULT_APP_ID
+        defaultWxMaUserShouldBeFound("appId.equals=" + DEFAULT_APP_ID);
+
+        // Get all the wxMaUserList where appId equals to UPDATED_APP_ID
+        defaultWxMaUserShouldNotBeFound("appId.equals=" + UPDATED_APP_ID);
+    }
+
+    @Test
+    @Transactional
+    public void getAllWxMaUsersByAppIdIsInShouldWork() throws Exception {
+        // Initialize the database
+        wxMaUserRepository.saveAndFlush(wxMaUser);
+
+        // Get all the wxMaUserList where appId in DEFAULT_APP_ID or UPDATED_APP_ID
+        defaultWxMaUserShouldBeFound("appId.in=" + DEFAULT_APP_ID + "," + UPDATED_APP_ID);
+
+        // Get all the wxMaUserList where appId equals to UPDATED_APP_ID
+        defaultWxMaUserShouldNotBeFound("appId.in=" + UPDATED_APP_ID);
+    }
+
+    @Test
+    @Transactional
+    public void getAllWxMaUsersByAppIdIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        wxMaUserRepository.saveAndFlush(wxMaUser);
+
+        // Get all the wxMaUserList where appId is not null
+        defaultWxMaUserShouldBeFound("appId.specified=true");
+
+        // Get all the wxMaUserList where appId is null
+        defaultWxMaUserShouldNotBeFound("appId.specified=false");
+    }
+
+    @Test
+    @Transactional
     public void getAllWxMaUsersByUserIsEqualToSomething() throws Exception {
-        // Get already existing entity
-        User user = wxMaUser.getUser();
+        // Initialize the database
+        User user = UserResourceIT.createEntity(em);
+        em.persist(user);
+        em.flush();
+        wxMaUser.setUser(user);
         wxMaUserRepository.saveAndFlush(wxMaUser);
         Long userId = user.getId();
 
@@ -945,7 +1004,8 @@ public class WxMaUserResourceIT {
             .andExpect(jsonPath("$.[*].watermark").value(hasItem(DEFAULT_WATERMARK)))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
             .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
-            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE)));
+            .andExpect(jsonPath("$.[*].phone").value(hasItem(DEFAULT_PHONE)))
+            .andExpect(jsonPath("$.[*].appId").value(hasItem(DEFAULT_APP_ID)));
 
         // Check, that the count call also returns 1
         restWxMaUserMockMvc.perform(get("/api/wx-ma-users/count?sort=id,desc&" + filter))
@@ -1005,7 +1065,8 @@ public class WxMaUserResourceIT {
             .watermark(UPDATED_WATERMARK)
             .createTime(UPDATED_CREATE_TIME)
             .updateTime(UPDATED_UPDATE_TIME)
-            .phone(UPDATED_PHONE);
+            .phone(UPDATED_PHONE)
+            .appId(UPDATED_APP_ID);
         WxMaUserDTO wxMaUserDTO = wxMaUserMapper.toDto(updatedWxMaUser);
 
         restWxMaUserMockMvc.perform(put("/api/wx-ma-users")
@@ -1030,6 +1091,7 @@ public class WxMaUserResourceIT {
         assertThat(testWxMaUser.getCreateTime()).isEqualTo(UPDATED_CREATE_TIME);
         assertThat(testWxMaUser.getUpdateTime()).isEqualTo(UPDATED_UPDATE_TIME);
         assertThat(testWxMaUser.getPhone()).isEqualTo(UPDATED_PHONE);
+        assertThat(testWxMaUser.getAppId()).isEqualTo(UPDATED_APP_ID);
     }
 
     @Test

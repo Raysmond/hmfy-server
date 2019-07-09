@@ -1,4 +1,5 @@
 package com.shield.service.dto;
+
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 
 import java.time.ZonedDateTime;
@@ -42,6 +43,8 @@ public class WxMaUserDTO implements Serializable {
 
     private String phone;
 
+    @NotNull
+    private String appId;
 
     private Long userId;
 
@@ -169,6 +172,14 @@ public class WxMaUserDTO implements Serializable {
         this.phone = phone;
     }
 
+    public String getAppId() {
+        return appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
+
     public Long getUserId() {
         return userId;
     }
@@ -223,6 +234,7 @@ public class WxMaUserDTO implements Serializable {
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
             ", phone='" + getPhone() + "'" +
+            ", appId='" + getAppId() + "'" +
             ", user=" + getUserId() +
             ", user='" + getUserLogin() + "'" +
             "}";

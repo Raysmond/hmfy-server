@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { FormBuilder, Validators } from '@angular/forms';
 
 import { ActivatedRoute, Router } from '@angular/router';
 import { JhiEventManager, JhiParseLinks, JhiAlertService } from 'ng-jhipster';
@@ -28,6 +29,10 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
   previousPage: any;
   reverse: any;
 
+  searchForm = this.fb.group({
+    query: null
+  });
+
   constructor(
     private userService: UserService,
     private alertService: JhiAlertService,
@@ -36,7 +41,8 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private router: Router,
     private eventManager: JhiEventManager,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private fb: FormBuilder
   ) {
     this.itemsPerPage = ITEMS_PER_PAGE;
     this.routeData = this.activatedRoute.data.subscribe(data => {
@@ -101,13 +107,21 @@ export class UserMgmtComponent implements OnInit, OnDestroy {
   }
 
   loadAll() {
+    let filterParams = {
+      page: this.page - 1,
+      size: this.itemsPerPage,
+      sort: this.sort()
+    };
+    if (this.searchForm.get(['query']).value) {
+      filterParams['query'] = this.searchForm.get(['query']).value;
+    }
     this.userService
-      .query({
-        page: this.page - 1,
-        size: this.itemsPerPage,
-        sort: this.sort()
-      })
+      .query(filterParams)
       .subscribe((res: HttpResponse<User[]>) => this.onSuccess(res.body, res.headers), (res: HttpResponse<any>) => this.onError(res.body));
+  }
+
+  search() {
+    this.loadAll();
   }
 
   trackIdentity(index, item: User) {

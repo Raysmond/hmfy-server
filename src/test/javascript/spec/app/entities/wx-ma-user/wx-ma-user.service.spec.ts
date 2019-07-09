@@ -41,6 +41,7 @@ describe('Service Tests', () => {
         'AAAAAAA',
         currentDate,
         currentDate,
+        'AAAAAAA',
         'AAAAAAA'
       );
     });
@@ -104,7 +105,8 @@ describe('Service Tests', () => {
             watermark: 'BBBBBB',
             createTime: currentDate.format(DATE_TIME_FORMAT),
             updateTime: currentDate.format(DATE_TIME_FORMAT),
-            phone: 'BBBBBB'
+            phone: 'BBBBBB',
+            appId: 'BBBBBB'
           },
           elemDefault
         );
@@ -140,7 +142,8 @@ describe('Service Tests', () => {
             watermark: 'BBBBBB',
             createTime: currentDate.format(DATE_TIME_FORMAT),
             updateTime: currentDate.format(DATE_TIME_FORMAT),
-            phone: 'BBBBBB'
+            phone: 'BBBBBB',
+            appId: 'BBBBBB'
           },
           elemDefault
         );

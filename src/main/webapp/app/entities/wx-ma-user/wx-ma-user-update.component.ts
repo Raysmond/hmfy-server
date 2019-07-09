@@ -16,7 +16,6 @@ import { IUser, UserService } from 'app/core';
   templateUrl: './wx-ma-user-update.component.html'
 })
 export class WxMaUserUpdateComponent implements OnInit {
-  wxMaUser: IWxMaUser;
   isSaving: boolean;
 
   users: IUser[];
@@ -36,7 +35,8 @@ export class WxMaUserUpdateComponent implements OnInit {
     createTime: [null, [Validators.required]],
     updateTime: [null, [Validators.required]],
     phone: [],
-    userId: [null, Validators.required]
+    appId: [null, [Validators.required]],
+    userId: []
   });
 
   constructor(
@@ -51,7 +51,6 @@ export class WxMaUserUpdateComponent implements OnInit {
     this.isSaving = false;
     this.activatedRoute.data.subscribe(({ wxMaUser }) => {
       this.updateForm(wxMaUser);
-      this.wxMaUser = wxMaUser;
     });
     this.userService
       .query()
@@ -78,6 +77,7 @@ export class WxMaUserUpdateComponent implements OnInit {
       createTime: wxMaUser.createTime != null ? wxMaUser.createTime.format(DATE_TIME_FORMAT) : null,
       updateTime: wxMaUser.updateTime != null ? wxMaUser.updateTime.format(DATE_TIME_FORMAT) : null,
       phone: wxMaUser.phone,
+      appId: wxMaUser.appId,
       userId: wxMaUser.userId
     });
   }
@@ -115,6 +115,7 @@ export class WxMaUserUpdateComponent implements OnInit {
       updateTime:
         this.editForm.get(['updateTime']).value != null ? moment(this.editForm.get(['updateTime']).value, DATE_TIME_FORMAT) : undefined,
       phone: this.editForm.get(['phone']).value,
+      appId: this.editForm.get(['appId']).value,
       userId: this.editForm.get(['userId']).value
     };
     return entity;

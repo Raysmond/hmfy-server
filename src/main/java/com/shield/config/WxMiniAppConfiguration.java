@@ -12,8 +12,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.chanjar.weixin.common.bean.result.WxMediaUploadResult;
 import me.chanjar.weixin.common.error.WxErrorException;
+import me.chanjar.weixin.mp.api.WxMpInMemoryConfigStorage;
+import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
@@ -49,6 +53,20 @@ public class WxMiniAppConfiguration {
 
         return wxService;
     }
+
+    @Bean
+    public WxMpService wxMpService() {
+        WxMpInMemoryConfigStorage config = new WxMpInMemoryConfigStorage();
+        config.setAppId("wxb862ec87afd34ff1"); // 设置微信公众号的appid
+        config.setSecret("b2b41c90b7e9399895a397f15f3602dd"); // 设置微信公众号的app corpSecret
+//        config.setToken("..."); // 设置微信公众号的token
+//        config.setAesKey("..."); // 设置微信公众号的EncodingAESKey
+//
+        WxMpService wxService = new WxMpServiceImpl();
+        wxService.setWxMpConfigStorage(config);
+        return wxService;
+    }
+
 
     @PostConstruct
     public void init() {

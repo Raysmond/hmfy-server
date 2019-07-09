@@ -10,6 +10,8 @@ import { JhiAlertService } from 'ng-jhipster';
 import { IShipPlan, ShipPlan } from 'app/shared/model/ship-plan.model';
 import { ShipPlanService } from './ship-plan.service';
 import { IUser, UserService } from 'app/core';
+import { IRegion } from 'app/shared/model/region.model';
+import { RegionService } from 'app/entities/region';
 
 @Component({
   selector: 'jhi-ship-plan-update',
@@ -22,6 +24,8 @@ export class ShipPlanUpdateComponent implements OnInit {
 
   allAuditStatus: any[] = [1, 2, 3];
 
+  regions: IRegion[];
+
   editForm = this.fb.group({
     id: [],
     company: [],
@@ -30,7 +34,7 @@ export class ShipPlanUpdateComponent implements OnInit {
     truckNumber: [null, [Validators.required]],
     auditStatus: [null, [Validators.required]],
     productName: [null, [Validators.required]],
-    deliverPosition: [],
+    deliverPosition: [null, [Validators.required]],
     valid: [],
     gateTime: [],
     leaveTime: [],
@@ -46,6 +50,7 @@ export class ShipPlanUpdateComponent implements OnInit {
     protected jhiAlertService: JhiAlertService,
     protected shipPlanService: ShipPlanService,
     protected userService: UserService,
+    protected regionService: RegionService,
     protected activatedRoute: ActivatedRoute,
     private fb: FormBuilder
   ) {}
@@ -55,13 +60,21 @@ export class ShipPlanUpdateComponent implements OnInit {
     this.activatedRoute.data.subscribe(({ shipPlan }) => {
       this.updateForm(shipPlan);
     });
-    this.userService
+    // this.userService
+    //   .query()
+    //   .pipe(
+    //     filter((mayBeOk: HttpResponse<IUser[]>) => mayBeOk.ok),
+    //     map((response: HttpResponse<IUser[]>) => response.body)
+    //   )
+    //   .subscribe((res: IUser[]) => (this.users = res), (res: HttpErrorResponse) => this.onError(res.message));
+
+    this.regionService
       .query()
       .pipe(
-        filter((mayBeOk: HttpResponse<IUser[]>) => mayBeOk.ok),
-        map((response: HttpResponse<IUser[]>) => response.body)
+        filter((mayBeOk: HttpResponse<IRegion[]>) => mayBeOk.ok),
+        map((response: HttpResponse<IRegion[]>) => response.body)
       )
-      .subscribe((res: IUser[]) => (this.users = res), (res: HttpErrorResponse) => this.onError(res.message));
+      .subscribe((res: IRegion[]) => (this.regions = res), (res: HttpErrorResponse) => this.onError(res.message));
   }
 
   updateForm(shipPlan: IShipPlan) {

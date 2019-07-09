@@ -6,9 +6,6 @@
             "relationshipName": "user",
             "otherEntityName": "user",
             "relationshipType": "one-to-one",
-            "relationshipValidateRules": [
-                "required"
-            ],
             "otherEntityField": "login",
             "ownerSide": true,
             "otherEntityRelationshipName": "wxMaUser"
@@ -75,6 +72,13 @@
         {
             "fieldName": "phone",
             "fieldType": "String"
+        },
+        {
+          "fieldName": "appId",
+          "fieldType": "String",
+          "fieldValidateRules": [
+            "required"
+          ]
         }
     ],
     "changelogDate": "20190527081813",

@@ -128,6 +128,9 @@ public class WxMaUserQueryService extends QueryService<WxMaUser> {
             if (criteria.getPhone() != null) {
                 specification = specification.and(buildStringSpecification(criteria.getPhone(), WxMaUser_.phone));
             }
+            if (criteria.getAppId() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getAppId(), WxMaUser_.appId));
+            }
             if (criteria.getUserId() != null) {
                 specification = specification.and(buildSpecification(criteria.getUserId(),
                     root -> root.join(WxMaUser_.user, JoinType.LEFT).get(User_.id)));

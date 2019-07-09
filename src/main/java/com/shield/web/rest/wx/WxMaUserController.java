@@ -104,14 +104,14 @@ public class WxMaUserController {
             WxMaJscode2SessionResult session = wxService.getUserService().getSessionInfo(loginVm.code);
             logger.info("WeChat user openid: {} login, session_key: {}, unionid: {}", session.getOpenid(), session.getSessionKey(), session.getUnionid());
 
-            String unionId = null;
-            if (StringUtils.isNotBlank(loginVm.encryptedData)) {
+            String unionId = session.getUnionid();
+            if (StringUtils.isBlank(unionId) && StringUtils.isNotBlank(loginVm.encryptedData)) {
                 WxMaUserInfo wxMaUserInfo = wxService.getUserService().getUserInfo(session.getSessionKey(), loginVm.getEncryptedData(), loginVm.getIv());
                 logger.info("Wechat userInfo from encryptedData: openid: {}, unionid: {}", wxMaUserInfo.getOpenId(), wxMaUserInfo.getUnionId());
                 unionId = wxMaUserInfo.getUnionId();
             }
 
-            Optional<WxMaUserDTO> wxMaUser = wxMaUserService.findByOpenId(session.getOpenid());
+            Optional<WxMaUserDTO> wxMaUser = wxMaUserService.findByOpenId(appid, session.getOpenid());
             User user;
             Authentication authentication;
             if (wxMaUser.isPresent()) {
@@ -120,7 +120,10 @@ public class WxMaUserController {
                 user = userService.getUserWithAuthorities(userId).get();
                 wxMaUserDTO.setUpdateTime(ZonedDateTime.now());
                 wxMaUserDTO.updateWithWxUserInfo(loginVm.userInfo);
-                wxMaUserDTO.setUnionId(unionId);
+                if (StringUtils.isNotBlank(unionId)) {
+                    wxMaUserDTO.setUnionId(unionId);
+                }
+                wxMaUserDTO.setAppId(appid);
                 wxMaUserService.save(wxMaUserDTO);
                 userService.clearUserCaches(user);
 
@@ -138,6 +141,7 @@ public class WxMaUserController {
                 wxMaUserDTO.setUpdateTime(ZonedDateTime.now());
                 user = userService.getUserWithAuthoritiesByLogin(loginVm.login).get();
                 wxMaUserDTO.setUserId(user.getId());
+                wxMaUserDTO.setAppId(appid);
                 wxMaUserService.save(wxMaUserDTO);
                 userService.clearUserCaches(user);
             } else {

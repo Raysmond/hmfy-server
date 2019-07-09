@@ -4,7 +4,8 @@
       "home": {
         "title": "Wx Ma Users",
         "createLabel": "Create a new Wx Ma User",
-        "createOrEditLabel": "Create or edit a Wx Ma User"
+        "createOrEditLabel": "Create or edit a Wx Ma User",
+        "notFound": "No Wx Ma User found"
       },
       "created": "A new Wx Ma User is created with identifier {{ param }}",
       "updated": "A Wx Ma User is updated with identifier {{ param }}",
@@ -28,6 +29,7 @@
       "createTime": "Create Time",
       "updateTime": "Update Time",
       "phone": "Phone",
+      "appId": "App Id",
       "user": "User"
     }
   }

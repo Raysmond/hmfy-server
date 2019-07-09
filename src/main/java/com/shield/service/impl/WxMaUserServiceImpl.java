@@ -62,9 +62,8 @@ public class WxMaUserServiceImpl implements WxMaUserService {
     }
 
     @Override
-    public Optional<WxMaUserDTO> findByOpenId(String openId) {
-        log.debug("Request to get WxMaUser openid: {}", openId);
-        return wxMaUserRepository.findByOpenId(openId)
+    public Optional<WxMaUserDTO> findByOpenId(String appId, String openId) {
+        return wxMaUserRepository.findByAppIdAndOpenId(appId, openId)
             .map(wxMaUserMapper::toDto);
     }
 

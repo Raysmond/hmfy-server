@@ -85,9 +85,10 @@ public class WxAppointmentApi {
 
         AppointmentDTO appointmentDTO = new AppointmentDTO();
         appointmentDTO.setLicensePlateNumber(user.getTruckNumber());
-        appointmentDTO.setDriver(user.getLogin());
+        appointmentDTO.setDriver(user.getFirstName());
         appointmentDTO.setRegionId(region.getId());
         appointmentDTO.setApplyId(plan.getPlan().getApplyId());
+        appointmentDTO.setVip(false);
         AppointmentDTO appointment = appointmentService.makeAppointment(region.getId(), appointmentDTO);
 
         plan.setAppointment(appointment);
@@ -186,12 +187,13 @@ public class WxAppointmentApi {
             return ResponseEntity.notFound().build();
         }
         regionDTO.setOpen(Boolean.FALSE);
+        regionDTO.setRemainQuota(0);
         if (regionService.isRegionOpen(regionDTO.getId())) {
             regionDTO.setOpen(Boolean.TRUE);
             Integer appointmentsCount = appointmentService.countAppointmentOfRegionId(regionDTO.getId()).intValue();
             regionDTO.setRemainQuota(regionDTO.getQuota() - appointmentsCount);
 
-            if ((regionDTO.getQuota() - appointmentsCount) <= 0) {
+            if (regionDTO.getQueueQuota() > 0 && (regionDTO.getQuota() - appointmentsCount) <= 0) {
                 Integer waitingCount = appointmentService.countAllWaitByRegionId(regionDTO.getId()).intValue();
                 regionDTO.setQueueQuota(regionDTO.getQueueQuota() - waitingCount);
             }

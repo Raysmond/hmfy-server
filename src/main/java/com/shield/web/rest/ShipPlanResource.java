@@ -19,9 +19,11 @@ import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -62,6 +64,12 @@ public class ShipPlanResource {
     private final ShipPlanQueryService shipPlanQueryService;
 
     @Autowired
+    @Qualifier("redisLongTemplate")
+    private RedisTemplate<String, Long> redisLongTemplate;
+
+    private static final String REDIS_KEY_CUSTOM_APPLY_ID_INC = "auto_inc_apply_id";
+
+    @Autowired
     private UserService userService;
 
     public ShipPlanResource(ShipPlanService shipPlanService, ShipPlanQueryService shipPlanQueryService) {
@@ -82,24 +90,32 @@ public class ShipPlanResource {
         if (shipPlanDTO.getId() != null) {
             throw new BadRequestAlertException("A new shipPlan cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.REGION_ADMIN)) {
-            User user = userService.getUserWithAuthorities().get();
-            shipPlanDTO.setUserId(user.getId());
-            shipPlanDTO.setCreateTime(ZonedDateTime.now());
-            shipPlanDTO.setUpdateTime(ZonedDateTime.now());
-            ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
-            ZonedDateTime tomorrow = today.plusDays(1L);
-            ZonedDateTime d = LocalDate.of(shipPlanDTO.getDeliverTime().getYear(), shipPlanDTO.getDeliverTime().getMonth(), shipPlanDTO.getDeliverTime().getDayOfMonth()).atStartOfDay(ZoneId.systemDefault());
-            if (!(d.equals(today) || d.equals(tomorrow))) {
-                throw new BadRequestAlertException("只能创建今天和明天的计划", ENTITY_NAME, "deliverTimeOnlyTodayAndTomorrow");
-            }
-            shipPlanDTO.setDeliverPosition(user.getRegion().getName());
-            shipPlanDTO.setDeliverTime(d);
-            shipPlanDTO.setValid(true);
-            shipPlanDTO.setApplyId(100000000L + Double.valueOf((Math.random() * 10000000)).longValue());
-            // WJRQKA20190608280042
-            shipPlanDTO.setApplyNumber("FKSN" + ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHMMSS")));
+        shipPlanDTO.setCreateTime(ZonedDateTime.now());
+        shipPlanDTO.setUpdateTime(ZonedDateTime.now());
+        ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+        ZonedDateTime tomorrow = today.plusDays(1L);
+        shipPlanDTO.setDeliverTime(shipPlanDTO.getDeliverTime().withZoneSameInstant(ZoneId.systemDefault()));
+        ZonedDateTime d = LocalDate.of(shipPlanDTO.getDeliverTime().getYear(), shipPlanDTO.getDeliverTime().getMonth(), shipPlanDTO.getDeliverTime().getDayOfMonth()).atStartOfDay(ZoneId.systemDefault());
+        if (!(d.equals(today) || d.equals(tomorrow))) {
+            throw new BadRequestAlertException("只能创建今天和明天的计划", ENTITY_NAME, "deliverTimeOnlyTodayAndTomorrow");
+        }
+        shipPlanDTO.setDeliverTime(d);
+        shipPlanDTO.setValid(true);
+        if (!redisLongTemplate.hasKey(REDIS_KEY_CUSTOM_APPLY_ID_INC)) {
+            redisLongTemplate.opsForValue().increment(REDIS_KEY_CUSTOM_APPLY_ID_INC, 10000L);
+        }
+        shipPlanDTO.setApplyId(100000000L + redisLongTemplate.opsForValue().increment(REDIS_KEY_CUSTOM_APPLY_ID_INC, 1L));
+        // WJRQKA20190608280042
+        shipPlanDTO.setApplyNumber("FKSN" + ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHMMSS")));
 
+        User user = userService.getUserWithAuthorities().get();
+        shipPlanDTO.setUserId(user.getId());
+        if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.REGION_ADMIN)) {
+            shipPlanDTO.setDeliverPosition(user.getRegion().getName());
+        } else {
+            if (org.apache.commons.lang3.StringUtils.isBlank(shipPlanDTO.getDeliverPosition())) {
+                throw new BadRequestAlertException("请选择区域", ENTITY_NAME, "");
+            }
         }
         ShipPlanDTO result = shipPlanService.save(shipPlanDTO);
         return ResponseEntity.created(new URI("/api/ship-plans/" + result.getId()))

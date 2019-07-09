@@ -53,6 +53,8 @@ public class WxMaUserCriteria implements Serializable, Criteria {
 
     private StringFilter phone;
 
+    private StringFilter appId;
+
     private LongFilter userId;
 
     public WxMaUserCriteria(){
@@ -73,6 +75,7 @@ public class WxMaUserCriteria implements Serializable, Criteria {
         this.createTime = other.createTime == null ? null : other.createTime.copy();
         this.updateTime = other.updateTime == null ? null : other.updateTime.copy();
         this.phone = other.phone == null ? null : other.phone.copy();
+        this.appId = other.appId == null ? null : other.appId.copy();
         this.userId = other.userId == null ? null : other.userId.copy();
     }
 
@@ -193,6 +196,14 @@ public class WxMaUserCriteria implements Serializable, Criteria {
         this.phone = phone;
     }
 
+    public StringFilter getAppId() {
+        return appId;
+    }
+
+    public void setAppId(StringFilter appId) {
+        this.appId = appId;
+    }
+
     public LongFilter getUserId() {
         return userId;
     }
@@ -226,6 +237,7 @@ public class WxMaUserCriteria implements Serializable, Criteria {
             Objects.equals(createTime, that.createTime) &&
             Objects.equals(updateTime, that.updateTime) &&
             Objects.equals(phone, that.phone) &&
+            Objects.equals(appId, that.appId) &&
             Objects.equals(userId, that.userId);
     }
 
@@ -246,6 +258,7 @@ public class WxMaUserCriteria implements Serializable, Criteria {
         createTime,
         updateTime,
         phone,
+        appId,
         userId
         );
     }
@@ -267,6 +280,7 @@ public class WxMaUserCriteria implements Serializable, Criteria {
                 (createTime != null ? "createTime=" + createTime + ", " : "") +
                 (updateTime != null ? "updateTime=" + updateTime + ", " : "") +
                 (phone != null ? "phone=" + phone + ", " : "") +
+                (appId != null ? "appId=" + appId + ", " : "") +
                 (userId != null ? "userId=" + userId + ", " : "") +
             "}";
     }

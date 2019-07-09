@@ -4,7 +4,8 @@
       "home": {
         "title": "Wx Ma Users",
         "createLabel": "创建新 Wx Ma User",
-        "createOrEditLabel": "创建或编辑 Wx Ma User"
+        "createOrEditLabel": "创建或编辑 Wx Ma User",
+        "notFound": "No Wx Ma User found"
       },
       "created": "Wx Ma User {{ param }} 创建成功",
       "updated": "Wx Ma User {{ param }} 更新成功",
@@ -28,6 +29,7 @@
       "createTime": "Create Time",
       "updateTime": "Update Time",
       "phone": "Phone",
+      "appId": "App Id",
       "user": "User"
     }
   }

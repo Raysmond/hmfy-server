@@ -4,6 +4,7 @@ import com.shield.domain.WxMaUser;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.DoubleStream;
 
@@ -16,7 +17,11 @@ import java.util.stream.DoubleStream;
 public interface WxMaUserRepository extends JpaRepository<WxMaUser, Long>, JpaSpecificationExecutor<WxMaUser> {
     WxMaUser findOneByUserId(Long userId);
 
-    Optional<WxMaUser> findByOpenId(String openId);
+    Optional<WxMaUser> findByAppIdAndOpenId(String appId, String openId);
+
+    Optional<WxMaUser> findByAppIdAndUnionId(String appId, String unionId);
 
     Optional<WxMaUser> findByUserId(Long userId);
+
+    List<WxMaUser> findByUnionId(String unionId);
 }

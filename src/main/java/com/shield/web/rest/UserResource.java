@@ -150,16 +150,26 @@ public class UserResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body all users.
      */
     @GetMapping("/users")
-    public ResponseEntity<List<UserDTO>> getAllUsers(@RequestParam MultiValueMap<String, String> queryParams, UriComponentsBuilder uriBuilder, Pageable pageable) {
+    public ResponseEntity<List<UserDTO>> getAllUsers(@RequestParam(required = false) String query,
+                                                     @RequestParam MultiValueMap<String, String> queryParams,
+                                                     UriComponentsBuilder uriBuilder, Pageable pageable) {
         Page<UserDTO> page = Page.empty(pageable);
 
         if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.ADMIN)) {
-            page = userService.getAllManagedUsers(pageable);
+            if (StringUtils.isEmpty(query)) {
+                page = userService.getAllManagedUsers(pageable);
+            } else {
+                page = userService.searchAllManagedUsers(pageable, query);
+            }
         } else if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.REGION_ADMIN)) {
             User user = userService.getUserWithAuthorities().get();
             if (user.getRegion() != null) {
-                page = userService.getAllManagedUsersByRegionId(pageable, user.getRegion().getId());
-                page.getContent().removeIf(it->!it.getAuthorities().contains(AuthoritiesConstants.APPOINTMENT));
+                if (StringUtils.isEmpty(query)) {
+                    page = userService.getAllManagedUsersByRegionId(pageable, user.getRegion().getId());
+                } else {
+                    page = userService.searchAllManagedUsersByRegionId(pageable, query, user.getRegion().getId());
+                }
+                page.getContent().removeIf(it -> !it.getAuthorities().contains(AuthoritiesConstants.APPOINTMENT));
             }
         }
 

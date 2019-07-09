@@ -1,6 +1,8 @@
 package com.shield.web.rest;
 
+import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.service.AppointmentService;
+import com.shield.service.UserService;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.dto.AppointmentCriteria;
@@ -11,6 +13,7 @@ import io.github.jhipster.web.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,6 +49,9 @@ public class AppointmentResource {
 
     private final AppointmentQueryService appointmentQueryService;
 
+    @Autowired
+    private UserService userService;
+
     public AppointmentResource(AppointmentService appointmentService, AppointmentQueryService appointmentQueryService) {
         this.appointmentService = appointmentService;
         this.appointmentQueryService = appointmentQueryService;
@@ -64,7 +70,13 @@ public class AppointmentResource {
         if (appointmentDTO.getId() != null) {
             throw new BadRequestAlertException("A new appointment cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        AppointmentDTO result = appointmentService.save(appointmentDTO);
+        if (appointmentDTO.getRegionId() == null) {
+            throw new BadRequestAlertException("请选择区域", ENTITY_NAME, "regionRequired");
+        }
+        appointmentDTO.setUserId(userService.getUserWithAuthorities().get().getId());
+        appointmentDTO.setVip(true);
+        appointmentDTO.setStatus(AppointmentStatus.CREATE);
+        AppointmentDTO result = appointmentService.makeAppointment(appointmentDTO.getRegionId(), appointmentDTO);
         return ResponseEntity.created(new URI("/api/appointments/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
