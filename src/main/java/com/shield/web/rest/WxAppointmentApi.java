@@ -186,6 +186,7 @@ public class WxAppointmentApi {
         if (regionDTO == null) {
             return ResponseEntity.notFound().build();
         }
+        log.info("request to get region {}", regionName);
         regionDTO.setOpen(Boolean.FALSE);
         regionDTO.setRemainQuota(0);
         if (regionService.isRegionOpen(regionDTO.getId())) {

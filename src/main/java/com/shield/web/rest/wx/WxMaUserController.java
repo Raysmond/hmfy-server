@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.shield.config.WxMiniAppConfiguration;
 import com.shield.domain.User;
 import com.shield.domain.WxMaUser;
+import com.shield.security.SecurityUtils;
 import com.shield.security.jwt.JWTFilter;
 import com.shield.security.jwt.TokenProvider;
 import com.shield.service.UserService;
@@ -39,6 +40,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -98,7 +100,11 @@ public class WxMaUserController {
 
     @PostMapping("/login")
     public ResponseEntity<JWTToken> login(@PathVariable String appid, @Valid @RequestBody LoginVm loginVm) {
+        logger.info("Wechat user login: {}", loginVm.toString());
         final WxMaService wxService = WxMiniAppConfiguration.getMaService(appid);
+        if (SecurityUtils.isAuthenticated()) {
+            return ResponseEntity.badRequest().body(new JWTToken(null, "您已登录!"));
+        }
 
         try {
             WxMaJscode2SessionResult session = wxService.getUserService().getSessionInfo(loginVm.code);
@@ -111,41 +117,47 @@ public class WxMaUserController {
                 unionId = wxMaUserInfo.getUnionId();
             }
 
-            Optional<WxMaUserDTO> wxMaUser = wxMaUserService.findByOpenId(appid, session.getOpenid());
+            List<WxMaUserDTO> wxMaUsers = wxMaUserService.findAllByOpenId(appid, session.getOpenid());
+            WxMaUserDTO wxMaUser = wxMaUsers.isEmpty() ? null : wxMaUsers.get(0);
             User user;
             Authentication authentication;
-            if (wxMaUser.isPresent()) {
-                Long userId = wxMaUser.get().getUserId();
-                WxMaUserDTO wxMaUserDTO = wxMaUser.get();
-                user = userService.getUserWithAuthorities(userId).get();
-                wxMaUserDTO.setUpdateTime(ZonedDateTime.now());
-                wxMaUserDTO.updateWithWxUserInfo(loginVm.userInfo);
+            if (wxMaUser != null && wxMaUser.getUserId() != null) {
+                // 微信号已经绑定预约员，自动登录
+                user = userService.getUserWithAuthorities(wxMaUser.getUserId()).get();
+                wxMaUser.setUpdateTime(ZonedDateTime.now());
+                wxMaUser.updateWithWxUserInfo(loginVm.userInfo);
                 if (StringUtils.isNotBlank(unionId)) {
-                    wxMaUserDTO.setUnionId(unionId);
+                    wxMaUser.setUnionId(unionId);
                 }
-                wxMaUserDTO.setAppId(appid);
-                wxMaUserService.save(wxMaUserDTO);
+                wxMaUser.setAppId(appid);
+                wxMaUserService.save(wxMaUser);
                 userService.clearUserCaches(user);
-
                 UserDetails userDetails = userDetailsService.loadUserByUsername(user.getLogin());
                 authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             } else if (StringUtils.isNotBlank(loginVm.login) && StringUtils.isNotBlank(loginVm.password)) {
                 UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(loginVm.login, loginVm.password);
                 authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-                WxMaUserDTO wxMaUserDTO = new WxMaUserDTO();
-                wxMaUserDTO.updateWithWxUserInfo(loginVm.userInfo);
-                wxMaUserDTO.setOpenId(session.getOpenid());
-                wxMaUserDTO.setUnionId(unionId);
-                wxMaUserDTO.setCreateTime(ZonedDateTime.now());
-                wxMaUserDTO.setUpdateTime(ZonedDateTime.now());
                 user = userService.getUserWithAuthoritiesByLogin(loginVm.login).get();
-                wxMaUserDTO.setUserId(user.getId());
-                wxMaUserDTO.setAppId(appid);
-                wxMaUserService.save(wxMaUserDTO);
-                userService.clearUserCaches(user);
+                if (user.getWxMaUser() != null) {
+                    // 预约员已被其他人绑定
+                    userService.cancelWeChatAccountBind(user);
+                }
+                if (wxMaUser == null) {
+                    wxMaUser = new WxMaUserDTO();
+                }
+                if (StringUtils.isNotBlank(unionId)) {
+                    wxMaUser.setUnionId(unionId);
+                }
+                wxMaUser.setOpenId(session.getOpenid());
+                wxMaUser.setAppId(appid);
+                wxMaUser.setUserId(user.getId());
+                wxMaUser.updateWithWxUserInfo(loginVm.userInfo);
+                wxMaUser.setCreateTime(ZonedDateTime.now());
+                wxMaUser.setUpdateTime(ZonedDateTime.now());
+                userService.bindWeChatAccount(user, wxMaUser);
             } else {
-                return new ResponseEntity<>(new JWTToken(null, "请先绑定预约员账号！"), HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(new JWTToken(null, "请先登录！"), HttpStatus.UNAUTHORIZED);
             }
 
             SecurityContextHolder.getContext().setAuthentication(authentication);

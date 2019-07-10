@@ -7,6 +7,7 @@ import com.shield.service.dto.WxMaUserDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -17,6 +18,8 @@ public interface WxMaUserService {
     WxMaUserDTO createOrUpdateWxUserInfo(WxMaUserInfo wxMaUserInfo, Long userId);
 
     Optional<WxMaUserDTO> findByOpenId(String appId, String openId);
+
+    List<WxMaUserDTO> findAllByOpenId(String appId, String openId);
 
     Optional<WxMaUserDTO> findByUserId(Long userId);
 

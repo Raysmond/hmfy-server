@@ -19,6 +19,8 @@ public interface WxMaUserRepository extends JpaRepository<WxMaUser, Long>, JpaSp
 
     Optional<WxMaUser> findByAppIdAndOpenId(String appId, String openId);
 
+    List<WxMaUser> findAllByAppIdAndOpenId(String appId, String openId);
+
     Optional<WxMaUser> findByAppIdAndUnionId(String appId, String unionId);
 
     Optional<WxMaUser> findByUserId(Long userId);

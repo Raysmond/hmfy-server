@@ -12,6 +12,8 @@ import com.shield.repository.WxMaUserRepository;
 import com.shield.security.AuthoritiesConstants;
 import com.shield.security.SecurityUtils;
 import com.shield.service.dto.UserDTO;
+import com.shield.service.dto.WxMaUserDTO;
+import com.shield.service.mapper.WxMaUserMapper;
 import com.shield.service.util.RandomUtil;
 import com.shield.web.rest.errors.*;
 
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -51,6 +54,13 @@ public class UserService {
 
     @Autowired
     private WxMaUserRepository wxMaUserRepository;
+
+    @Autowired
+    private WxMaUserService wxMaUserService;
+
+    @Autowired
+    private WxMaUserMapper wxMaUserMapper;
+
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthorityRepository authorityRepository, CacheManager cacheManager) {
         this.userRepository = userRepository;
@@ -374,10 +384,26 @@ public class UserService {
     }
 
     public void cancelWeChatAccountBind(User user) {
-        WxMaUser wxMaUser = user.getWxMaUser();
-        user.setWxMaUser(null);
+        if (user.getWxMaUser() != null) {
+            log.info("unbind wx ma user openid: {}, user_id: {}, login: {}", user.getWxMaUser().getOpenId(), user.getId(), user.getLogin());
+            WxMaUser wxMaUser = user.getWxMaUser();
+            user.setWxMaUser(null);
+            userRepository.save(user);
+            wxMaUser.setUser(null);
+            wxMaUser.setUpdateTime(ZonedDateTime.now());
+            wxMaUserRepository.save(wxMaUser);
+            this.clearUserCaches(user);
+        }
+    }
+
+    public void bindWeChatAccount(User user, WxMaUserDTO wxMaUserDTO) {
+        log.info("bind wx ma user openid: {}, user_id: {}, login: {}", wxMaUserDTO.getOpenId(), user.getId(), user.getLogin());
+        wxMaUserDTO.setUserId(user.getId());
+        wxMaUserDTO.setUserLogin(user.getLogin());
+        WxMaUser wxMaUser = wxMaUserMapper.toEntity(wxMaUserDTO);
+        wxMaUser = wxMaUserRepository.save(wxMaUser);
+        user.setWxMaUser(wxMaUser);
         userRepository.save(user);
-        wxMaUserRepository.delete(wxMaUser);
         this.clearUserCaches(user);
     }
 }

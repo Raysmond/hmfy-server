@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service Implementation for managing {@link WxMaUser}.
@@ -65,6 +67,12 @@ public class WxMaUserServiceImpl implements WxMaUserService {
     public Optional<WxMaUserDTO> findByOpenId(String appId, String openId) {
         return wxMaUserRepository.findByAppIdAndOpenId(appId, openId)
             .map(wxMaUserMapper::toDto);
+    }
+
+    @Override
+    public List<WxMaUserDTO> findAllByOpenId(String appId, String openId) {
+        return wxMaUserRepository.findAllByAppIdAndOpenId(appId, openId)
+            .stream().map(wxMaUserMapper::toDto).collect(Collectors.toList());
     }
 
     @Override

@@ -31,7 +31,7 @@ import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_SHIP
 
 @Service
 @Slf4j
-//@Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
+@Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
 public class VehPlanSyncService {
 
     @Autowired
