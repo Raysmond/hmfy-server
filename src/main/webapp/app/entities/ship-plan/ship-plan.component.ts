@@ -74,7 +74,7 @@ export class ShipPlanComponent implements OnInit, OnDestroy {
       filterParams['auditStatus.equals'] = this.searchForm.get(['auditStatus']).value;
     }
     if (this.searchForm.get(['truckNumber']).value) {
-      filterParams['truckNumber.equals'] = this.searchForm.get(['truckNumber']).value;
+      filterParams['truckNumber.contains'] = this.searchForm.get(['truckNumber']).value;
     }
     if (this.searchForm.get(['deliverPosition']).value) {
       filterParams['deliverPosition.equals'] = this.searchForm.get(['deliverPosition']).value;

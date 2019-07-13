@@ -60,7 +60,6 @@ spring:
   sqlserver-datasource:
     type: com.zaxxer.hikari.HikariDataSource
     jdbc-url: jdbc:sqlserver://10.41.76.253:1433;databaseName=GateManage
-    #      jdbc-url: jdbc:sqlserver://127.0.0.1:22433;databaseName=GateManage
     username: Wechat
     password: QQ@@12345
     driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
@@ -74,7 +73,7 @@ spring:
   sqlserver-jpa:
     database-platform: org.hibernate.dialect.SQLServer2012Dialect
     database: SQL_SERVER
-    show-sql: true
+    show-sql: false
     properties:
       hibernate.id.new_generator_mappings: true
       hibernate.connection.provider_disables_autocommit: true
@@ -90,6 +89,30 @@ spring:
       hibernate.id.new_generator_mappings: true
       hibernate.connection.provider_disables_autocommit: true
       hibernate.cache.use_second_level_cache: true
+      hibernate.cache.use_query_cache: false
+      hibernate.generate_statistics: false
+      hibernate.jdbc.time_zone: Asia/Shanghai
+  chepaipark-sqlserver-datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    jdbc-url: jdbc:sqlserver://10.41.65.247:1433;databaseName=ChePaiPark
+    username: sa
+    password: 123
+    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    poolName: Hikari
+    auto-commit: false
+    data-source-properties:
+      cachePrepStmts: true
+      prepStmtCacheSize: 250
+      prepStmtCacheSqlLimit: 2048
+      useServerPrepStmts: true
+  chepaipark-sqlserver-jpa:
+    database-platform: org.hibernate.dialect.SQLServer2012Dialect
+    database: SQL_SERVER
+    show-sql: true
+    properties:
+      hibernate.id.new_generator_mappings: true
+      hibernate.connection.provider_disables_autocommit: true
+      hibernate.cache.use_second_level_cache: false
       hibernate.cache.use_query_cache: false
       hibernate.generate_statistics: false
       hibernate.jdbc.time_zone: Asia/Shanghai

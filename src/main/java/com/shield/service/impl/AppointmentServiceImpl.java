@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.shield.chepaipark.service.CarWhiteListService;
 import com.shield.domain.Appointment;
 import com.shield.domain.Region;
 import com.shield.domain.ShipPlan;
@@ -66,6 +67,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Autowired
     private WxMpMsgService wxMpMsgService;
+
+    @Autowired
+    private CarWhiteListService carWhiteListService;
 
     @Autowired
     @Qualifier("redisLongTemplate")
@@ -364,6 +368,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 }
 
                 wxMpMsgService.sendAppointmentSuccessMsg(appointmentMapper.toDto(appointment));
+                carWhiteListService.registerCarWhiteListByAppointmentId(appointment.getId());
                 return true;
             }
             return false;
