@@ -368,7 +368,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 }
 
                 wxMpMsgService.sendAppointmentSuccessMsg(appointmentMapper.toDto(appointment));
-                carWhiteListService.registerCarWhiteListByAppointmentId(appointment.getId());
+                // carWhiteListService.registerCarWhiteListByAppointmentId(appointment.getId());
                 return true;
             }
             return false;

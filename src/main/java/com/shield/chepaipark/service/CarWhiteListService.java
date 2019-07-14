@@ -1,8 +1,10 @@
 package com.shield.chepaipark.service;
 
 
+import com.shield.chepaipark.domain.CardValidDateRange;
 import com.shield.chepaipark.domain.ParkCard;
 import com.shield.chepaipark.domain.SameBarriarCard;
+import com.shield.chepaipark.repository.CardValidDateRangeRepository;
 import com.shield.chepaipark.repository.ParkCardRepository;
 import com.shield.chepaipark.repository.SameBarriarCardRepository;
 import com.shield.domain.Appointment;
@@ -41,6 +43,9 @@ public class CarWhiteListService {
     private AppointmentRepository appointmentRepository;
     @Autowired
     private RegionRepository regionRepository;
+
+    @Autowired
+    private CardValidDateRangeRepository cardValidDateRangeRepository;
 
 
     public UploadCarWhiteListMsg generateUploadCarWhiteListMsg(Long appointmentId) {
@@ -81,6 +86,32 @@ public class CarWhiteListService {
         }
     }
 
+    public void testRegisterCarWhiteLis(String truckNumber) {
+        UploadCarWhiteListMsg carWhiteListMsg = new UploadCarWhiteListMsg();
+        String now = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        carWhiteListMsg.setParkid("20180001");
+        carWhiteListMsg.setCar_number(truckNumber);
+        carWhiteListMsg.setCarusername("测试");
+        carWhiteListMsg.setOperate_type(1);
+        carWhiteListMsg.setStartdate(now);
+        carWhiteListMsg.setValiddate(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).plusDays(1).minusSeconds(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        carWhiteListMsg.setCreate_time(now);
+        carWhiteListMsg.setModify_time(now);
+        registerCarWhiteList(carWhiteListMsg);
+    }
+
+    public void testDeleteCarWhiteList(String truckNumber) {
+        List<ParkCard> parkCards = parkCardRepository.findByCardNo(truckNumber);
+        if (!parkCards.isEmpty()) {
+            parkCardRepository.deleteAll(parkCards);
+        }
+
+        List<CardValidDateRange> validDateRanges = cardValidDateRangeRepository.findByCardNo(truckNumber);
+        if (!validDateRanges.isEmpty()) {
+            cardValidDateRangeRepository.deleteAll(validDateRanges);
+        }
+    }
+
     @Async
     public void registerCarWhiteListByAppointmentId(Long appointmentId) {
         log.error("Start to register car white list for appointment : {}", appointmentId);
@@ -97,7 +128,6 @@ public class CarWhiteListService {
     public void registerCarWhiteList(UploadCarWhiteListMsg uploadCarWhiteListMsg) {
         String truckNumber = uploadCarWhiteListMsg.getCar_number();
         SameBarriarCard barriarCard = findOrCreateBarriarCardByTruckNumber(truckNumber);
-
         List<ParkCard> parkCards = parkCardRepository.findByCardNo(truckNumber);
         if (!parkCards.isEmpty()) {
             parkCardRepository.deleteAll(parkCards);
@@ -134,6 +164,17 @@ public class CarWhiteListService {
         }
 
         parkCardRepository.save(parkCard);
+
+        List<CardValidDateRange> validDateRanges = cardValidDateRangeRepository.findByCardNo(truckNumber);
+        if (!validDateRanges.isEmpty()) {
+            cardValidDateRangeRepository.deleteAll(validDateRanges);
+        }
+        CardValidDateRange validDateRange = new CardValidDateRange();
+        validDateRange.setCardNo(truckNumber);
+        validDateRange.setCreateTime(ZonedDateTime.now());
+        validDateRange.setStartDate(ZonedDateTime.now());
+        validDateRange.setEndDate(ZonedDateTime.now().plusHours(2));
+        cardValidDateRangeRepository.save(validDateRange);
     }
 
     public void deleteCarWhiteList() {

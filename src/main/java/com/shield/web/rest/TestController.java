@@ -4,6 +4,7 @@ import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl;
 import cn.binarywang.wx.miniapp.config.WxMaInMemoryConfig;
 import com.google.common.collect.Lists;
+import com.shield.chepaipark.service.CarWhiteListService;
 import com.shield.config.WxMiniAppConfiguration;
 import com.shield.service.UserService;
 import com.shield.sqlserver.repository.VehDelivPlanRepository;
@@ -33,6 +34,9 @@ public class TestController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private CarWhiteListService carWhiteListService;
+
 //    @GetMapping("/veh-plans")
 //    public List<VehDelivPlan> getVehPlans() {
 //        return vehDelivPlanRepository.findAll();
@@ -44,6 +48,17 @@ public class TestController {
 //        return "ok";
 //    }
 
+    @GetMapping("/whitelist/register")
+    public String registerCarWhiteList(@RequestParam String truckNumber) {
+        carWhiteListService.testRegisterCarWhiteLis(truckNumber);
+        return "ok";
+    }
+
+    @GetMapping("/whitelist/delete")
+    public String deleteCarWhiteList(@RequestParam String truckNumber) {
+        carWhiteListService.testDeleteCarWhiteList(truckNumber);
+        return "ok";
+    }
 
     @GetMapping("/socket")
     public String testSocket() throws IOException, InterruptedException {

@@ -14,7 +14,7 @@ import java.util.Objects;
 public class ParkCard implements Serializable {
     @Id
     @Column(name = "CID")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long cid;
 
     // 司机
