@@ -156,13 +156,15 @@ public class CarWhiteListService {
         parkCard.setZMCarLocateCount(0);
         parkCard.setZMUsedLocateCount(0);
 
-        List<ParkCard> lastParkCard = parkCardRepository.findLastParkCard(PageRequest.of(0, 1, Sort.Direction.DESC, "cid"));
-        if (lastParkCard.isEmpty()) {
-            parkCard.setCid(1L);
-        } else {
-            parkCard.setCid(lastParkCard.get(0).getCid() + 1L);
-        }
+//        List<ParkCard> lastParkCard = parkCardRepository.findLastParkCard(PageRequest.of(0, 1, Sort.Direction.DESC, "cid"));
+//        if (lastParkCard.isEmpty()) {
+//            parkCard.setCid(1L);
+//        } else {
+//            parkCard.setCid(lastParkCard.get(0).getCid() + 1L);
+//        }
 
+        Long maxCid = parkCardRepository.findMaxCid();
+        parkCard.setCid(maxCid + 1L);
         parkCardRepository.save(parkCard);
 
         List<CardValidDateRange> validDateRanges = cardValidDateRangeRepository.findByCardNo(truckNumber);

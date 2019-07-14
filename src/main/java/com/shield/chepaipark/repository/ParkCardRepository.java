@@ -13,4 +13,7 @@ public interface ParkCardRepository extends JpaRepository<ParkCard, Long> {
 
     @Query("select c from ParkCard c")
     List<ParkCard> findLastParkCard(Pageable pageable);
+
+    @Query("select max(c.cid) from ParkCard c")
+    Long findMaxCid();
 }
