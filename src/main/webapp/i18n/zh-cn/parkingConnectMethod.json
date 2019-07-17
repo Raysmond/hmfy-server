@@ -1,0 +1,9 @@
+{
+  "shieldApp": {
+    "ParkingConnectMethod": {
+      "null": "",
+      "TCP": "TCP",
+      "DATABASE": "DATABASE"
+    }
+  }
+}

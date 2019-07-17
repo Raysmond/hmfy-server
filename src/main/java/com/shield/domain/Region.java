@@ -1,4 +1,5 @@
 package com.shield.domain;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -7,6 +8,8 @@ import javax.validation.constraints.*;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+
+import com.shield.domain.enumeration.ParkingConnectMethod;
 
 /**
  * A Region.
@@ -50,6 +53,10 @@ public class Region implements Serializable {
 
     @Column(name = "auto_appointment")
     private Boolean autoAppointment;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "parking_connect_method")
+    private ParkingConnectMethod parkingConnectMethod;
 
     @Column(name = "park_id")
     private String parkId;
@@ -188,6 +195,22 @@ public class Region implements Serializable {
         this.autoAppointment = autoAppointment;
     }
 
+    public ParkingConnectMethod getParkingConnectMethod() {
+        if (parkingConnectMethod == null) {
+            return ParkingConnectMethod.TCP;
+        }
+        return parkingConnectMethod;
+    }
+
+    public Region parkingConnectMethod(ParkingConnectMethod parkingConnectMethod) {
+        this.parkingConnectMethod = parkingConnectMethod;
+        return this;
+    }
+
+    public void setParkingConnectMethod(ParkingConnectMethod parkingConnectMethod) {
+        this.parkingConnectMethod = parkingConnectMethod;
+    }
+
     public String getParkId() {
         return parkId;
     }
@@ -295,6 +318,7 @@ public class Region implements Serializable {
             ", days='" + getDays() + "'" +
             ", open='" + isOpen() + "'" +
             ", autoAppointment='" + isAutoAppointment() + "'" +
+            ", parkingConnectMethod='" + getParkingConnectMethod() + "'" +
             ", parkId='" + getParkId() + "'" +
             ", validTime=" + getValidTime() +
             ", queueQuota=" + getQueueQuota() +

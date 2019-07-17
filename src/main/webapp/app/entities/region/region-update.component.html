@@ -116,6 +116,19 @@
                            formControlName="autoAppointment"/>
                 </div>
                 <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.region.parkingConnectMethod" for="field_parkingConnectMethod">Parking Connect Method</label>
+                    <select class="form-control" name="parkingConnectMethod" formControlName="parkingConnectMethod" id="field_parkingConnectMethod">
+                        <option value="TCP">{{'shieldApp.ParkingConnectMethod.TCP' | translate}}</option>
+                        <option value="DATABASE">{{'shieldApp.ParkingConnectMethod.DATABASE' | translate}}</option>
+                    </select>
+                    <div *ngIf="editForm.get('parkingConnectMethod').invalid && (editForm.get('parkingConnectMethod').dirty || editForm.get('parkingConnectMethod').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('parkingConnectMethod').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.region.parkId" for="field_parkId">Park Id</label>
                     <input type="text" class="form-control" name="parkId" id="field_parkId"
                            formControlName="parkId"/>

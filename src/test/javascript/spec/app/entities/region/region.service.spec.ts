@@ -7,7 +7,7 @@ import { take, map } from 'rxjs/operators';
 import * as moment from 'moment';
 import { DATE_TIME_FORMAT } from 'app/shared/constants/input.constants';
 import { RegionService } from 'app/entities/region/region.service';
-import { IRegion, Region } from 'app/shared/model/region.model';
+import { IRegion, Region, ParkingConnectMethod } from 'app/shared/model/region.model';
 
 describe('Service Tests', () => {
   describe('Region Service', () => {
@@ -37,6 +37,7 @@ describe('Service Tests', () => {
         'AAAAAAA',
         false,
         false,
+        ParkingConnectMethod.TCP,
         'AAAAAAA',
         0,
         0,
@@ -101,6 +102,7 @@ describe('Service Tests', () => {
             days: 'BBBBBB',
             open: true,
             autoAppointment: true,
+            parkingConnectMethod: 'BBBBBB',
             parkId: 'BBBBBB',
             validTime: 1,
             queueQuota: 1,
@@ -138,6 +140,7 @@ describe('Service Tests', () => {
             days: 'BBBBBB',
             open: true,
             autoAppointment: true,
+            parkingConnectMethod: 'BBBBBB',
             parkId: 'BBBBBB',
             validTime: 1,
             queueQuota: 1,

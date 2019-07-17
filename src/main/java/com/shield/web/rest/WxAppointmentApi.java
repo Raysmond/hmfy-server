@@ -28,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -191,7 +192,9 @@ public class WxAppointmentApi {
         regionDTO.setRemainQuota(0);
         if (regionService.isRegionOpen(regionDTO.getId())) {
             regionDTO.setOpen(Boolean.TRUE);
-            Integer appointmentsCount = appointmentService.countAppointmentOfRegionId(regionDTO.getId()).intValue();
+            Integer appointmentsCount = appointmentService.countAppointmentOfRegionIdAndCreateTime(
+                regionDTO.getId(),
+                ZonedDateTime.now().minusHours(24)).intValue();
             regionDTO.setRemainQuota(regionDTO.getQuota() - appointmentsCount);
 
             if (regionDTO.getQueueQuota() > 0 && (regionDTO.getQuota() - appointmentsCount) <= 0) {

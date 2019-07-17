@@ -9,6 +9,7 @@ import com.shield.domain.Appointment;
 import com.shield.domain.Region;
 import com.shield.domain.ShipPlan;
 import com.shield.domain.enumeration.AppointmentStatus;
+import com.shield.domain.enumeration.ParkingConnectMethod;
 import com.shield.repository.RegionRepository;
 import com.shield.repository.ShipPlanRepository;
 import com.shield.service.AppointmentService;
@@ -41,9 +42,6 @@ import java.util.stream.Collectors;
 
 import static com.shield.service.ParkingTcpHandlerService.*;
 
-/**
- * Service Implementation for managing {@link Appointment}.
- */
 @Service
 @Transactional
 public class AppointmentServiceImpl implements AppointmentService {
@@ -292,6 +290,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    public Long countAppointmentOfRegionIdAndCreateTime(Long regionId, ZonedDateTime begin) {
+        return appointmentRepository.countAllValidByRegionIdAndCreateTime(regionId, begin);
+    }
+
+    @Override
     public Long countAllWaitByRegionId(Long regionId) {
         return appointmentRepository.countAllWaitByRegionId(regionId);
     }
@@ -344,7 +347,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private boolean tryMakeAppointment(Appointment appointment) {
         synchronized (this) {
             Region region = appointment.getRegion();
-            Long current = appointmentRepository.countAllValidByRegionId(region.getId());
+            Long current = appointmentRepository.countAllValidByRegionIdAndCreateTime(region.getId(), ZonedDateTime.now().minusHours(24));
             log.debug("Region {}: [{}] status: {}/{}", region.getId(), region.getName(), current, region.getQuota());
             if (current < region.getQuota() || (appointment.isVip() && current < (region.getQuota() + region.getVipQuota()))) {
                 appointment.setStatus(AppointmentStatus.START);
@@ -356,8 +359,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                 log.info("Appointment [{}] made success at region ({}, {}), number: {}, truckNumber: {}",
                     appointment.getId(), region.getId(), region.getName(), appointment.getNumber(), appointment.getLicensePlateNumber());
 
-                redisLongTemplate.opsForSet().add(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
-
                 if (appointment.getApplyId() != null) {
                     List<ShipPlan> plans = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(appointment.getApplyId()));
                     for (ShipPlan plan : plans) {
@@ -367,8 +368,12 @@ public class AppointmentServiceImpl implements AppointmentService {
                     }
                 }
 
+                if (region.isOpen() && region.getParkingConnectMethod() != null && region.getParkingConnectMethod().equals(ParkingConnectMethod.DATABASE)) {
+                    carWhiteListService.registerCarWhiteListByAppointmentId(appointment.getId());
+                } else {
+                    redisLongTemplate.opsForSet().add(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
+                }
                 wxMpMsgService.sendAppointmentSuccessMsg(appointmentMapper.toDto(appointment));
-                // carWhiteListService.registerCarWhiteListByAppointmentId(appointment.getId());
                 return true;
             }
             return false;

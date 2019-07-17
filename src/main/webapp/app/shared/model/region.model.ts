@@ -1,5 +1,10 @@
 import { Moment } from 'moment';
 
+export const enum ParkingConnectMethod {
+  TCP = 'TCP',
+  DATABASE = 'DATABASE'
+}
+
 export interface IRegion {
   id?: number;
   name?: string;
@@ -10,6 +15,7 @@ export interface IRegion {
   days?: string;
   open?: boolean;
   autoAppointment?: boolean;
+  parkingConnectMethod?: ParkingConnectMethod;
   parkId?: string;
   validTime?: number;
   queueQuota?: number;
@@ -29,6 +35,7 @@ export class Region implements IRegion {
     public days?: string,
     public open?: boolean,
     public autoAppointment?: boolean,
+    public parkingConnectMethod?: ParkingConnectMethod,
     public parkId?: string,
     public validTime?: number,
     public queueQuota?: number,

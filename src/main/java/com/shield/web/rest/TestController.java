@@ -1,23 +1,9 @@
 package com.shield.web.rest;
 
-import cn.binarywang.wx.miniapp.api.WxMaService;
-import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl;
-import cn.binarywang.wx.miniapp.config.WxMaInMemoryConfig;
-import com.google.common.collect.Lists;
 import com.shield.chepaipark.service.CarWhiteListService;
-import com.shield.config.WxMiniAppConfiguration;
 import com.shield.service.UserService;
 import com.shield.sqlserver.repository.VehDelivPlanRepository;
-import me.chanjar.weixin.common.bean.menu.WxMenu;
-import me.chanjar.weixin.common.bean.menu.WxMenuButton;
-import me.chanjar.weixin.common.error.WxErrorException;
-import me.chanjar.weixin.mp.api.WxMpInMemoryConfigStorage;
-import me.chanjar.weixin.mp.api.WxMpService;
-import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
-import me.chanjar.weixin.mp.bean.menu.WxMpMenu;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,20 +34,20 @@ public class TestController {
 //        return "ok";
 //    }
 
-    @GetMapping("/whitelist/register")
-    public String registerCarWhiteList(@RequestParam String truckNumber) {
-        carWhiteListService.testRegisterCarWhiteLis(truckNumber);
-        return "ok";
-    }
+//    @GetMapping("/whitelist/register")
+//    public String registerCarWhiteList(@RequestParam String truckNumber) {
+//        carWhiteListService.testRegisterCarWhiteLis(truckNumber);
+//        return "ok";
+//    }
+//
+//    @GetMapping("/whitelist/delete")
+//    public String deleteCarWhiteList(@RequestParam String truckNumber) {
+//        carWhiteListService.deleteCarWhiteList(truckNumber);
+//        return "ok";
+//    }
 
-    @GetMapping("/whitelist/delete")
-    public String deleteCarWhiteList(@RequestParam String truckNumber) {
-        carWhiteListService.testDeleteCarWhiteList(truckNumber);
-        return "ok";
-    }
-
-    @GetMapping("/socket")
-    public String testSocket() throws IOException, InterruptedException {
+//    @GetMapping("/socket")
+//    public String testSocket() throws IOException, InterruptedException {
 //        Socket socket = SocketFactory.getDefault().createSocket("localhost", 9981);
 //        socket.getOutputStream().write(("from remote:" + Math.random() + "\r\n").getBytes());
 //        Thread.sleep(1000 );
@@ -92,8 +78,8 @@ public class TestController {
 //
 //        socket.close();
 
-        return "ok";
-    }
+//        return "ok";
+//    }
 
 //    @GetMapping("/get-menu")
 //    public String getMenu() throws WxErrorException {

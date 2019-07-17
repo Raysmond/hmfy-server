@@ -1,4 +1,6 @@
 package com.shield.service.dto;
+import com.shield.domain.enumeration.ParkingConnectMethod;
+
 import java.time.ZonedDateTime;
 import javax.validation.constraints.*;
 import java.io.Serializable;
@@ -36,6 +38,8 @@ public class RegionDTO implements Serializable {
 
     private Integer remainQuota;
     private Integer drivers = 0;
+
+    private ParkingConnectMethod parkingConnectMethod;
 
     @NotNull
     @Min(value = 0)
@@ -187,6 +191,14 @@ public class RegionDTO implements Serializable {
 
     public void setUpdateTime(ZonedDateTime updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public ParkingConnectMethod getParkingConnectMethod() {
+        return parkingConnectMethod;
+    }
+
+    public void setParkingConnectMethod(ParkingConnectMethod parkingConnectMethod) {
+        this.parkingConnectMethod = parkingConnectMethod;
     }
 
     @Override

@@ -88,6 +88,7 @@ export class AppointmentComponent implements OnInit, OnDestroy {
   }
 
   search() {
+    this.page = 1;
     this.loadAll();
   }
 

@@ -49,6 +49,14 @@
       "fieldType": "Boolean"
     },
     {
+      "fieldName": "parkingConnectMethod",
+      "fieldValues": "TCP,DATABASE",
+      "fieldType": "ParkingConnectMethod",
+      "fieldValidateRules": [
+        "required"
+      ]
+    },
+    {
       "fieldName": "parkId",
       "fieldType": "String"
     },

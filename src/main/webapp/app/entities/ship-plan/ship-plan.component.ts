@@ -112,6 +112,7 @@ export class ShipPlanComponent implements OnInit, OnDestroy {
   }
 
   search() {
+    this.page = 1;
     this.loadAll();
   }
 

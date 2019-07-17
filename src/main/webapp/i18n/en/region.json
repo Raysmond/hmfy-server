@@ -24,6 +24,7 @@
       "days": "Days",
       "open": "Open",
       "autoAppointment": "Auto Appointment",
+      "parkingConnectMethod": "Parking Connect Method",
       "parkId": "Park Id",
       "validTime": "Valid Time",
       "queueQuota": "Queue Quota",
