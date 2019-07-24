@@ -254,26 +254,26 @@ public class ParkingTcpHandlerService {
             return;
         }
         log.info("Find {} register car number msg ids, check if need resending", registerMsgIds.size());
-        for (Long msgId : registerMsgIds) {
-            Optional<ParkMsgDTO> parkMsg = parkMsgService.findOne(msgId);
-            if (parkMsg.isPresent()) {
-                ParkMsgDTO msg = parkMsg.get();
-                if (msg.getSendTimes() != null && msg.getSendTimes().equals(Integer.valueOf(3))) {
-                    log.error("Resend msg reach max times, msgId: {}, body: {}", msg.getId(), msg.getBody());
-                    redisLongTemplate.opsForSet().remove(REDIS_KEY_CHECK_REGISTER_WHITELIST_TRUCK_NUMBER_QUEUE, msg.getId());
-                    continue;
-                }
-                if (msg.getSendTime().plusSeconds(60).isAfter(ZonedDateTime.now())) {
-                    continue;
-                }
-                log.info("Start to resend msg, msgId: {}, body: {}", msg.getId(), msg.getBody());
-                if (sendMessageToClient(msg.getBody(), msg.getParkid())) {
-                    msg.setSendTime(ZonedDateTime.now());
-                    msg.setSendTimes(msg.getSendTimes() == null ? 2 : msg.getSendTimes() + 1);
-                    parkMsgService.save(msg);
-                }
-            }
-        }
+//        for (Long msgId : registerMsgIds) {
+//            Optional<ParkMsgDTO> parkMsg = parkMsgService.findOne(msgId);
+//            if (parkMsg.isPresent()) {
+//                ParkMsgDTO msg = parkMsg.get();
+//                if (msg.getSendTimes() != null && msg.getSendTimes().equals(Integer.valueOf(3))) {
+//                    log.error("Resend msg reach max times, msgId: {}, body: {}", msg.getId(), msg.getBody());
+//                    redisLongTemplate.opsForSet().remove(REDIS_KEY_CHECK_REGISTER_WHITELIST_TRUCK_NUMBER_QUEUE, msg.getId());
+//                    continue;
+//                }
+//                if (msg.getSendTime().plusSeconds(60).isAfter(ZonedDateTime.now())) {
+//                    continue;
+//                }
+//                log.info("Start to resend msg, msgId: {}, body: {}", msg.getId(), msg.getBody());
+//                if (sendMessageToClient(msg.getBody(), msg.getParkid())) {
+//                    msg.setSendTime(ZonedDateTime.now());
+//                    msg.setSendTimes(msg.getSendTimes() == null ? 2 : msg.getSendTimes() + 1);
+//                    parkMsgService.save(msg);
+//                }
+//            }
+//        }
     }
 
 
@@ -395,7 +395,7 @@ public class ParkingTcpHandlerService {
     private boolean isRegionParkingTcpConnected(String regionParkId) {
         Set<String> openConnectionIds = Sets.newHashSet(cf.getOpenConnectionIds());
         if (parkId2ConnectionId.containsKey(regionParkId)
-            && parkId2ConnectionId.get(regionParkId) == null
+            && parkId2ConnectionId.get(regionParkId) != null
             && openConnectionIds.contains(parkId2ConnectionId.get(regionParkId))) {
             return true;
         } else {

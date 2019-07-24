@@ -102,6 +102,9 @@ public class ParkCard implements Serializable {
     @Column(name = "IOState")
     private Integer ioState = 0;
 
+    @Column(name = "PreviousIOState")
+    private Integer previousIoState;
+
     @Column(name = "HCardNo")
     private String hcardNo; // 190713210155473
 
@@ -110,6 +113,9 @@ public class ParkCard implements Serializable {
 
     @Column(name = "AreaID")
     private Integer areaId = -1;
+
+    @Column(name = "bluetoothstate")
+    private Integer bluetoothstate = 1;
 
     @Column(name = "ZMCarLocateCount")
     private Integer zMCarLocateCount = 0;
@@ -124,7 +130,7 @@ public class ParkCard implements Serializable {
     private Integer uploaded = 0;
 
     @Column(name = "UploadedComm")
-    private Integer uploadedComm = 0;
+    private Integer uploadedComm = 1;
 
 
     @Override

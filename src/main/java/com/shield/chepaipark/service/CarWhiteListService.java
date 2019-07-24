@@ -19,8 +19,10 @@ import com.shield.domain.enumeration.ParkingConnectMethod;
 import com.shield.repository.AppointmentRepository;
 import com.shield.repository.RegionRepository;
 import com.shield.repository.ShipPlanRepository;
+import com.shield.service.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,6 +36,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -165,20 +169,20 @@ public class CarWhiteListService {
         parkCard.setCtid(1);
         parkCard.setFctCode(1);
         parkCard.setCardState(1);
-        parkCard.setStartDate(startTime);
-        parkCard.setValidDate(validTime);
-        parkCard.setRegisterDate(ZonedDateTime.now());
-        parkCard.setLastTime(ZonedDateTime.now());
-        parkCard.setCDate(ZonedDateTime.now());
-        parkCard.setCUser("服务器");
+        parkCard.setStartDate(startTime.truncatedTo(ChronoUnit.SECONDS));
+        parkCard.setValidDate(validTime.truncatedTo(ChronoUnit.SECONDS));
+        parkCard.setRegisterDate(ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+        parkCard.setLastTime(ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS).plusSeconds(3));
+        parkCard.setCDate(ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+        parkCard.setCUser("管理员");
         parkCard.setCardMoney(0.0);
         parkCard.setDriveNo("NO000000000");
         parkCard.setCarLocate("A-1-10");
-        parkCard.setRemark("服务器数据导入");
+        parkCard.setRemark("（通用接口新增）");
         parkCard.setFeePeriod("月");
         parkCard.setLimitDayType(0);
         parkCard.setAreaId(-1);
-        parkCard.setHcardNo(ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHMMSS")) + String.valueOf(generateUniqueHcardNo()));
+        parkCard.setHcardNo(ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHMMSS")) + RandomStringUtils.randomNumeric(3));
         parkCard.setZMCarLocateCount(0);
         parkCard.setZMUsedLocateCount(0);
 
@@ -193,9 +197,9 @@ public class CarWhiteListService {
         }
         CardValidDateRange validDateRange = new CardValidDateRange();
         validDateRange.setCardNo(truckNumber);
-        validDateRange.setCreateTime(ZonedDateTime.now());
-        validDateRange.setStartDate(startTime);
-        validDateRange.setEndDate(validTime);
+        validDateRange.setCreateTime(ZonedDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+        validDateRange.setStartDate(startTime.truncatedTo(ChronoUnit.SECONDS));
+        validDateRange.setEndDate(validTime.truncatedTo(ChronoUnit.SECONDS));
         cardValidDateRangeRepository.save(validDateRange);
 
         putTruckNumber2CardId(truckNumber, parkCard.getHcardNo());
@@ -206,6 +210,7 @@ public class CarWhiteListService {
         if (cardList.isEmpty()) {
             SameBarriarCard card = new SameBarriarCard();
             card.setCardNo(truckNumber);
+
             card.setCreateTime(ZonedDateTime.now());
             card.setLastTime(ZonedDateTime.now());
             card = sameBarriarCardRepository.save(card);
