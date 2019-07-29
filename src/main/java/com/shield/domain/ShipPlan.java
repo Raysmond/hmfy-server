@@ -65,6 +65,12 @@ public class ShipPlan implements Serializable {
     @Column(name = "allow_in_time")
     private ZonedDateTime allowInTime;
 
+    @Column(name = "loading_start_time")
+    private ZonedDateTime loadingStartTime;
+
+    @Column(name = "loading_end_time")
+    private ZonedDateTime loadingEndTime;
+
     @NotNull
     @Column(name = "create_time", nullable = false)
     private ZonedDateTime createTime;
@@ -245,6 +251,32 @@ public class ShipPlan implements Serializable {
         this.allowInTime = allowInTime;
     }
 
+    public ZonedDateTime getLoadingStartTime() {
+        return loadingStartTime;
+    }
+
+    public ShipPlan loadingStartTime(ZonedDateTime loadingStartTime) {
+        this.loadingStartTime = loadingStartTime;
+        return this;
+    }
+
+    public void setLoadingStartTime(ZonedDateTime loadingStartTime) {
+        this.loadingStartTime = loadingStartTime;
+    }
+
+    public ZonedDateTime getLoadingEndTime() {
+        return loadingEndTime;
+    }
+
+    public ShipPlan loadingEndTime(ZonedDateTime loadingEndTime) {
+        this.loadingEndTime = loadingEndTime;
+        return this;
+    }
+
+    public void setLoadingEndTime(ZonedDateTime loadingEndTime) {
+        this.loadingEndTime = loadingEndTime;
+    }
+
     public ZonedDateTime getCreateTime() {
         return createTime;
     }
@@ -296,6 +328,7 @@ public class ShipPlan implements Serializable {
     public void setUser(User user) {
         this.user = user;
     }
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override
@@ -330,6 +363,8 @@ public class ShipPlan implements Serializable {
             ", leaveTime='" + getLeaveTime() + "'" +
             ", deliverTime='" + getDeliverTime() + "'" +
             ", allowInTime='" + getAllowInTime() + "'" +
+            ", loadingStartTime='" + getLoadingStartTime() + "'" +
+            ", loadingEndTime='" + getLoadingEndTime() + "'" +
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
             ", syncTime='" + getSyncTime() + "'" +

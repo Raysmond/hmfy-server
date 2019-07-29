@@ -125,6 +125,12 @@ public class ShipPlanQueryService extends QueryService<ShipPlan> {
             if (criteria.getAllowInTime() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getAllowInTime(), ShipPlan_.allowInTime));
             }
+            if (criteria.getLoadingStartTime() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getLoadingStartTime(), ShipPlan_.loadingStartTime));
+            }
+            if (criteria.getLoadingEndTime() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getLoadingEndTime(), ShipPlan_.loadingEndTime));
+            }
             if (criteria.getCreateTime() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getCreateTime(), ShipPlan_.createTime));
             }

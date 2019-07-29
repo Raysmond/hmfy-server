@@ -28,6 +28,8 @@
       "leaveTime": "Leave Time",
       "deliverTime": "Deliver Time",
       "allowInTime": "Allow In Time",
+      "loadingStartTime": "Loading Start Time",
+      "loadingEndTime": "Loading End Time",
       "createTime": "Create Time",
       "updateTime": "Update Time",
       "syncTime": "Sync Time",

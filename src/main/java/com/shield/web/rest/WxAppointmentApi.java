@@ -194,7 +194,7 @@ public class WxAppointmentApi {
             regionDTO.setOpen(Boolean.TRUE);
             Integer appointmentsCount = appointmentService.countAppointmentOfRegionIdAndCreateTime(
                 regionDTO.getId(),
-                ZonedDateTime.now().minusHours(24)).intValue();
+                ZonedDateTime.now().minusHours(12)).intValue();
             regionDTO.setRemainQuota(regionDTO.getQuota() - appointmentsCount);
 
             if (regionDTO.getQueueQuota() > 0 && (regionDTO.getQuota() - appointmentsCount) <= 0) {

@@ -11,13 +11,13 @@ import com.shield.chepaipark.service.CarWhiteListService;
 import com.shield.domain.Appointment;
 import com.shield.domain.ParkMsg;
 import com.shield.domain.Region;
+import com.shield.domain.User;
+import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.domain.enumeration.ParkMsgType;
 import com.shield.domain.enumeration.ParkingConnectMethod;
 import com.shield.repository.ParkMsgRepository;
-import com.shield.service.dto.AppointmentDTO;
-import com.shield.service.dto.ParkMsgDTO;
-import com.shield.service.dto.RegionDTO;
-import com.shield.service.dto.ShipPlanDTO;
+import com.shield.security.AuthoritiesConstants;
+import com.shield.service.dto.*;
 import com.shield.service.tcp.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -89,7 +89,13 @@ public class ParkingTcpHandlerService {
     private static Map<String, String> connectionId2ParkId = Maps.newHashMap();
 
     @Autowired
+    private WxMpMsgService wxMpMsgService;
+
+    @Autowired
     private ShipPlanService shipPlanService;
+
+    @Autowired
+    private UserService userService;
 
     public static final String AUTO_REGISTERED_PLAN_IDS = "set_auto_registered_ship_plan_ids";
     public static final String AUTO_REGISTERED_DELETE_PLAN_IDS = "set_auto_deleted_ship_plan_ids";
@@ -384,11 +390,54 @@ public class ParkingTcpHandlerService {
                         "need to remove car whitelist, add to delete queue, leaveTime is null and after 1 hour",
                     plan.getId(), plan.getAuditStatus(), plan.getTruckNumber(), plan.getApplyId());
                 shouldDelete = true;
+
+                sendAlertMsgToWxUser(plan);
             }
 
             if (shouldDelete) {
                 redisLongTemplate.opsForSet().add(AUTO_DELETE_PLAN_ID_QUEUE, plan.getId());
             }
+        }
+    }
+
+    private void sendAlertMsgToWxUser(ShipPlanDTO delayedPlan) {
+        try {
+            AppointmentDTO appointmentDTO = appointmentService.findLastByApplyId(delayedPlan.getApplyId());
+            if (appointmentDTO != null && appointmentDTO.getUserId() != null && Boolean.FALSE.equals(appointmentDTO.isVip()) && appointmentDTO.getStatus().equals(AppointmentStatus.ENTER)) {
+                String remark;
+                if (delayedPlan.getLoadingEndTime() != null) {
+                    remark = String.format("进厂时间：%s，提货时间：%s", delayedPlan.getGateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), delayedPlan.getLoadingEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+                } else {
+                    remark = String.format("进厂时间：%s", delayedPlan.getGateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+                }
+
+                wxMpMsgService.sendAlertMsg(appointmentDTO.getUserId(), null,
+                    String.format("您好，您的提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
+                    String.format("车牌%s在%s提货之后1小时未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                    remark);
+
+                if (appointmentDTO.getRegionId() != null) {
+                    Page<UserDTO> users = userService.getAllManagedUsersByRegionId(PageRequest.of(0, 1000), appointmentDTO.getRegionId());
+                    for (UserDTO user : users.getContent()) {
+                        if (user.getAuthorities().contains(AuthoritiesConstants.REGION_ADMIN)) {
+                            wxMpMsgService.sendAlertMsg(user.getId(), null,
+                                String.format("提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
+                                String.format("车牌%s在%s提货之后1小时未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                                remark);
+                        }
+                    }
+                }
+
+                for (String openid : Lists.newArrayList("oZBny01fYBk-P1zpYZH00vm3uFQI", "oZBny09ivtl8EN8IVcdQKxyfA65c")) {
+                    wxMpMsgService.sendAlertMsg(null, openid,
+                        String.format("提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
+                        String.format("车牌%s在%s提货之后1小时未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                        remark);
+                }
+
+            }
+        } catch (Exception e) {
+            log.error("failed to send alert msg sendAlertMsgToWxUser() {}", e.getMessage());
         }
     }
 

@@ -162,6 +162,15 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    public AppointmentDTO findLastByApplyId(Long applyId) {
+        Map<Long, AppointmentDTO> result = findLastByApplyIdIn(Lists.newArrayList(applyId));
+        if (result.containsKey(applyId)) {
+            return result.get(applyId);
+        }
+        return null;
+    }
+
+    @Override
     public AppointmentDTO cancelAppointment(Long appointmentId) {
         Appointment appointment = appointmentRepository.getOne(appointmentId);
         AppointmentStatus currentStatus = appointment.getStatus();
@@ -347,7 +356,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private boolean tryMakeAppointment(Appointment appointment) {
         synchronized (this) {
             Region region = appointment.getRegion();
-            Long current = appointmentRepository.countAllValidByRegionIdAndCreateTime(region.getId(), ZonedDateTime.now().minusHours(24));
+            Long current = appointmentRepository.countAllValidByRegionIdAndCreateTime(region.getId(), ZonedDateTime.now().minusHours(12));
             log.debug("Region {}: [{}] status: {}/{}", region.getId(), region.getName(), current, region.getQuota());
             if (current < region.getQuota() || (appointment.isVip() && current < (region.getQuota() + region.getVipQuota()))) {
                 appointment.setStatus(AppointmentStatus.START);

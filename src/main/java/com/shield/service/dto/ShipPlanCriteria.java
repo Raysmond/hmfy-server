@@ -51,6 +51,10 @@ public class ShipPlanCriteria implements Serializable, Criteria {
 
     private ZonedDateTimeFilter allowInTime;
 
+    private ZonedDateTimeFilter loadingStartTime;
+
+    private ZonedDateTimeFilter loadingEndTime;
+
     private ZonedDateTimeFilter createTime;
 
     private ZonedDateTimeFilter updateTime;
@@ -76,6 +80,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.leaveTime = other.leaveTime == null ? null : other.leaveTime.copy();
         this.deliverTime = other.deliverTime == null ? null : other.deliverTime.copy();
         this.allowInTime = other.allowInTime == null ? null : other.allowInTime.copy();
+        this.loadingStartTime = other.loadingStartTime == null ? null : other.loadingStartTime.copy();
+        this.loadingEndTime = other.loadingEndTime == null ? null : other.loadingEndTime.copy();
         this.createTime = other.createTime == null ? null : other.createTime.copy();
         this.updateTime = other.updateTime == null ? null : other.updateTime.copy();
         this.syncTime = other.syncTime == null ? null : other.syncTime.copy();
@@ -191,6 +197,22 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.allowInTime = allowInTime;
     }
 
+    public ZonedDateTimeFilter getLoadingStartTime() {
+        return loadingStartTime;
+    }
+
+    public void setLoadingStartTime(ZonedDateTimeFilter loadingStartTime) {
+        this.loadingStartTime = loadingStartTime;
+    }
+
+    public ZonedDateTimeFilter getLoadingEndTime() {
+        return loadingEndTime;
+    }
+
+    public void setLoadingEndTime(ZonedDateTimeFilter loadingEndTime) {
+        this.loadingEndTime = loadingEndTime;
+    }
+
     public ZonedDateTimeFilter getCreateTime() {
         return createTime;
     }
@@ -247,6 +269,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
             Objects.equals(leaveTime, that.leaveTime) &&
             Objects.equals(deliverTime, that.deliverTime) &&
             Objects.equals(allowInTime, that.allowInTime) &&
+            Objects.equals(loadingStartTime, that.loadingStartTime) &&
+            Objects.equals(loadingEndTime, that.loadingEndTime) &&
             Objects.equals(createTime, that.createTime) &&
             Objects.equals(updateTime, that.updateTime) &&
             Objects.equals(syncTime, that.syncTime) &&
@@ -269,6 +293,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         leaveTime,
         deliverTime,
         allowInTime,
+        loadingStartTime,
+        loadingEndTime,
         createTime,
         updateTime,
         syncTime,
@@ -292,6 +318,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
                 (leaveTime != null ? "leaveTime=" + leaveTime + ", " : "") +
                 (deliverTime != null ? "deliverTime=" + deliverTime + ", " : "") +
                 (allowInTime != null ? "allowInTime=" + allowInTime + ", " : "") +
+                (loadingStartTime != null ? "loadingStartTime=" + loadingStartTime + ", " : "") +
+                (loadingEndTime != null ? "loadingEndTime=" + loadingEndTime + ", " : "") +
                 (createTime != null ? "createTime=" + createTime + ", " : "") +
                 (updateTime != null ? "updateTime=" + updateTime + ", " : "") +
                 (syncTime != null ? "syncTime=" + syncTime + ", " : "") +

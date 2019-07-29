@@ -1,4 +1,5 @@
 package com.shield.service.dto;
+
 import java.time.ZonedDateTime;
 import javax.validation.constraints.*;
 import java.io.Serializable;
@@ -13,7 +14,7 @@ public class ShipPlanDTO implements Serializable {
 
     private String company;
 
-//    @NotNull
+    //    @NotNull
     private Long applyId;
 
     private String applyNumber;
@@ -27,11 +28,15 @@ public class ShipPlanDTO implements Serializable {
     @NotNull
     private String productName;
 
-//    @NotNull
+    //    @NotNull
     private String deliverPosition;
 
-//    @NotNull
+    //    @NotNull
     private Boolean valid;
+
+    private ZonedDateTime loadingStartTime;
+
+    private ZonedDateTime loadingEndTime;
 
     private ZonedDateTime gateTime;
 
@@ -42,14 +47,13 @@ public class ShipPlanDTO implements Serializable {
 
     private ZonedDateTime allowInTime;
 
-//    @NotNull
+    //    @NotNull
     private ZonedDateTime createTime;
 
-//    @NotNull
+    //    @NotNull
     private ZonedDateTime updateTime;
 
     private ZonedDateTime syncTime;
-
 
     private Long userId;
 
@@ -199,6 +203,22 @@ public class ShipPlanDTO implements Serializable {
         this.userLogin = userLogin;
     }
 
+    public ZonedDateTime getLoadingStartTime() {
+        return loadingStartTime;
+    }
+
+    public void setLoadingStartTime(ZonedDateTime loadingStartTime) {
+        this.loadingStartTime = loadingStartTime;
+    }
+
+    public ZonedDateTime getLoadingEndTime() {
+        return loadingEndTime;
+    }
+
+    public void setLoadingEndTime(ZonedDateTime loadingEndTime) {
+        this.loadingEndTime = loadingEndTime;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -236,6 +256,8 @@ public class ShipPlanDTO implements Serializable {
             ", leaveTime='" + getLeaveTime() + "'" +
             ", deliverTime='" + getDeliverTime() + "'" +
             ", allowInTime='" + getAllowInTime() + "'" +
+            ", loadingStartTime='" + getLoadingStartTime() + "'" +
+            ", loadingEndTime='" + getLoadingEndTime() + "'" +
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
             ", syncTime='" + getSyncTime() + "'" +

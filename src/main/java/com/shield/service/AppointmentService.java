@@ -57,6 +57,8 @@ public interface AppointmentService {
 
     Map<Long, AppointmentDTO> findLastByApplyIdIn(List<Long> applyIds);
 
+    AppointmentDTO findLastByApplyId(Long applyId);
+
     AppointmentDTO cancelAppointment(Long appointmentId);
 
 

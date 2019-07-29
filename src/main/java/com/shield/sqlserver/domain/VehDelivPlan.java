@@ -51,4 +51,10 @@ public class VehDelivPlan {
     @Column(name = "fd_LeaveTime")
     private ZonedDateTime leaveTime;
 
+    @Column(name = "fd_TareTime")
+    private ZonedDateTime tareTime;
+
+    @Column(name = "fd_WeightTime")
+    private ZonedDateTime weightTime;
+
 }

@@ -78,6 +78,9 @@ export class AppointmentComponent implements OnInit, OnDestroy {
     if (this.searchForm.get(['regionId']).value) {
       filterParams['regionId.equals'] = this.searchForm.get(['regionId']).value;
     }
+    if (this.searchForm.get(['query']).value) {
+      filterParams['licensePlateNumber.contains'] = this.searchForm.get(['query']).value;
+    }
 
     this.appointmentService
       .query(filterParams)

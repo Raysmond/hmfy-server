@@ -79,6 +79,14 @@
             "fieldType": "ZonedDateTime"
         },
         {
+          "fieldName": "loadingStartTime",
+          "fieldType": "ZonedDateTime"
+        },
+        {
+          "fieldName": "loadingEndTime",
+          "fieldType": "ZonedDateTime"
+        },
+        {
             "fieldName": "createTime",
             "fieldType": "ZonedDateTime",
             "fieldValidateRules": [

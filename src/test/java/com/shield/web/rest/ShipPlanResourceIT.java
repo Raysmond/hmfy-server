@@ -80,6 +80,12 @@ public class ShipPlanResourceIT {
     private static final ZonedDateTime DEFAULT_ALLOW_IN_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
     private static final ZonedDateTime UPDATED_ALLOW_IN_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
 
+    private static final ZonedDateTime DEFAULT_LOADING_START_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
+    private static final ZonedDateTime UPDATED_LOADING_START_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+
+    private static final ZonedDateTime DEFAULT_LOADING_END_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
+    private static final ZonedDateTime UPDATED_LOADING_END_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+
     private static final ZonedDateTime DEFAULT_CREATE_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
     private static final ZonedDateTime UPDATED_CREATE_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
 
@@ -152,6 +158,8 @@ public class ShipPlanResourceIT {
             .leaveTime(DEFAULT_LEAVE_TIME)
             .deliverTime(DEFAULT_DELIVER_TIME)
             .allowInTime(DEFAULT_ALLOW_IN_TIME)
+            .loadingStartTime(DEFAULT_LOADING_START_TIME)
+            .loadingEndTime(DEFAULT_LOADING_END_TIME)
             .createTime(DEFAULT_CREATE_TIME)
             .updateTime(DEFAULT_UPDATE_TIME)
             .syncTime(DEFAULT_SYNC_TIME);
@@ -177,6 +185,8 @@ public class ShipPlanResourceIT {
             .leaveTime(UPDATED_LEAVE_TIME)
             .deliverTime(UPDATED_DELIVER_TIME)
             .allowInTime(UPDATED_ALLOW_IN_TIME)
+            .loadingStartTime(UPDATED_LOADING_START_TIME)
+            .loadingEndTime(UPDATED_LOADING_END_TIME)
             .createTime(UPDATED_CREATE_TIME)
             .updateTime(UPDATED_UPDATE_TIME)
             .syncTime(UPDATED_SYNC_TIME);
@@ -216,6 +226,8 @@ public class ShipPlanResourceIT {
         assertThat(testShipPlan.getLeaveTime()).isEqualTo(DEFAULT_LEAVE_TIME);
         assertThat(testShipPlan.getDeliverTime()).isEqualTo(DEFAULT_DELIVER_TIME);
         assertThat(testShipPlan.getAllowInTime()).isEqualTo(DEFAULT_ALLOW_IN_TIME);
+        assertThat(testShipPlan.getLoadingStartTime()).isEqualTo(DEFAULT_LOADING_START_TIME);
+        assertThat(testShipPlan.getLoadingEndTime()).isEqualTo(DEFAULT_LOADING_END_TIME);
         assertThat(testShipPlan.getCreateTime()).isEqualTo(DEFAULT_CREATE_TIME);
         assertThat(testShipPlan.getUpdateTime()).isEqualTo(DEFAULT_UPDATE_TIME);
         assertThat(testShipPlan.getSyncTime()).isEqualTo(DEFAULT_SYNC_TIME);
@@ -417,6 +429,8 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.[*].leaveTime").value(hasItem(sameInstant(DEFAULT_LEAVE_TIME))))
             .andExpect(jsonPath("$.[*].deliverTime").value(hasItem(sameInstant(DEFAULT_DELIVER_TIME))))
             .andExpect(jsonPath("$.[*].allowInTime").value(hasItem(sameInstant(DEFAULT_ALLOW_IN_TIME))))
+            .andExpect(jsonPath("$.[*].loadingStartTime").value(hasItem(sameInstant(DEFAULT_LOADING_START_TIME))))
+            .andExpect(jsonPath("$.[*].loadingEndTime").value(hasItem(sameInstant(DEFAULT_LOADING_END_TIME))))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
             .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
             .andExpect(jsonPath("$.[*].syncTime").value(hasItem(sameInstant(DEFAULT_SYNC_TIME))));
@@ -445,6 +459,8 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.leaveTime").value(sameInstant(DEFAULT_LEAVE_TIME)))
             .andExpect(jsonPath("$.deliverTime").value(sameInstant(DEFAULT_DELIVER_TIME)))
             .andExpect(jsonPath("$.allowInTime").value(sameInstant(DEFAULT_ALLOW_IN_TIME)))
+            .andExpect(jsonPath("$.loadingStartTime").value(sameInstant(DEFAULT_LOADING_START_TIME)))
+            .andExpect(jsonPath("$.loadingEndTime").value(sameInstant(DEFAULT_LOADING_END_TIME)))
             .andExpect(jsonPath("$.createTime").value(sameInstant(DEFAULT_CREATE_TIME)))
             .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)))
             .andExpect(jsonPath("$.syncTime").value(sameInstant(DEFAULT_SYNC_TIME)));
@@ -1082,6 +1098,138 @@ public class ShipPlanResourceIT {
 
     @Test
     @Transactional
+    public void getAllShipPlansByLoadingStartTimeIsEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where loadingStartTime equals to DEFAULT_LOADING_START_TIME
+        defaultShipPlanShouldBeFound("loadingStartTime.equals=" + DEFAULT_LOADING_START_TIME);
+
+        // Get all the shipPlanList where loadingStartTime equals to UPDATED_LOADING_START_TIME
+        defaultShipPlanShouldNotBeFound("loadingStartTime.equals=" + UPDATED_LOADING_START_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByLoadingStartTimeIsInShouldWork() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where loadingStartTime in DEFAULT_LOADING_START_TIME or UPDATED_LOADING_START_TIME
+        defaultShipPlanShouldBeFound("loadingStartTime.in=" + DEFAULT_LOADING_START_TIME + "," + UPDATED_LOADING_START_TIME);
+
+        // Get all the shipPlanList where loadingStartTime equals to UPDATED_LOADING_START_TIME
+        defaultShipPlanShouldNotBeFound("loadingStartTime.in=" + UPDATED_LOADING_START_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByLoadingStartTimeIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where loadingStartTime is not null
+        defaultShipPlanShouldBeFound("loadingStartTime.specified=true");
+
+        // Get all the shipPlanList where loadingStartTime is null
+        defaultShipPlanShouldNotBeFound("loadingStartTime.specified=false");
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByLoadingStartTimeIsGreaterThanOrEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where loadingStartTime greater than or equals to DEFAULT_LOADING_START_TIME
+        defaultShipPlanShouldBeFound("loadingStartTime.greaterOrEqualThan=" + DEFAULT_LOADING_START_TIME);
+
+        // Get all the shipPlanList where loadingStartTime greater than or equals to UPDATED_LOADING_START_TIME
+        defaultShipPlanShouldNotBeFound("loadingStartTime.greaterOrEqualThan=" + UPDATED_LOADING_START_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByLoadingStartTimeIsLessThanSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where loadingStartTime less than or equals to DEFAULT_LOADING_START_TIME
+        defaultShipPlanShouldNotBeFound("loadingStartTime.lessThan=" + DEFAULT_LOADING_START_TIME);
+
+        // Get all the shipPlanList where loadingStartTime less than or equals to UPDATED_LOADING_START_TIME
+        defaultShipPlanShouldBeFound("loadingStartTime.lessThan=" + UPDATED_LOADING_START_TIME);
+    }
+
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByLoadingEndTimeIsEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where loadingEndTime equals to DEFAULT_LOADING_END_TIME
+        defaultShipPlanShouldBeFound("loadingEndTime.equals=" + DEFAULT_LOADING_END_TIME);
+
+        // Get all the shipPlanList where loadingEndTime equals to UPDATED_LOADING_END_TIME
+        defaultShipPlanShouldNotBeFound("loadingEndTime.equals=" + UPDATED_LOADING_END_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByLoadingEndTimeIsInShouldWork() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where loadingEndTime in DEFAULT_LOADING_END_TIME or UPDATED_LOADING_END_TIME
+        defaultShipPlanShouldBeFound("loadingEndTime.in=" + DEFAULT_LOADING_END_TIME + "," + UPDATED_LOADING_END_TIME);
+
+        // Get all the shipPlanList where loadingEndTime equals to UPDATED_LOADING_END_TIME
+        defaultShipPlanShouldNotBeFound("loadingEndTime.in=" + UPDATED_LOADING_END_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByLoadingEndTimeIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where loadingEndTime is not null
+        defaultShipPlanShouldBeFound("loadingEndTime.specified=true");
+
+        // Get all the shipPlanList where loadingEndTime is null
+        defaultShipPlanShouldNotBeFound("loadingEndTime.specified=false");
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByLoadingEndTimeIsGreaterThanOrEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where loadingEndTime greater than or equals to DEFAULT_LOADING_END_TIME
+        defaultShipPlanShouldBeFound("loadingEndTime.greaterOrEqualThan=" + DEFAULT_LOADING_END_TIME);
+
+        // Get all the shipPlanList where loadingEndTime greater than or equals to UPDATED_LOADING_END_TIME
+        defaultShipPlanShouldNotBeFound("loadingEndTime.greaterOrEqualThan=" + UPDATED_LOADING_END_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByLoadingEndTimeIsLessThanSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where loadingEndTime less than or equals to DEFAULT_LOADING_END_TIME
+        defaultShipPlanShouldNotBeFound("loadingEndTime.lessThan=" + DEFAULT_LOADING_END_TIME);
+
+        // Get all the shipPlanList where loadingEndTime less than or equals to UPDATED_LOADING_END_TIME
+        defaultShipPlanShouldBeFound("loadingEndTime.lessThan=" + UPDATED_LOADING_END_TIME);
+    }
+
+
+    @Test
+    @Transactional
     public void getAllShipPlansByCreateTimeIsEqualToSomething() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
@@ -1316,6 +1464,8 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.[*].leaveTime").value(hasItem(sameInstant(DEFAULT_LEAVE_TIME))))
             .andExpect(jsonPath("$.[*].deliverTime").value(hasItem(sameInstant(DEFAULT_DELIVER_TIME))))
             .andExpect(jsonPath("$.[*].allowInTime").value(hasItem(sameInstant(DEFAULT_ALLOW_IN_TIME))))
+            .andExpect(jsonPath("$.[*].loadingStartTime").value(hasItem(sameInstant(DEFAULT_LOADING_START_TIME))))
+            .andExpect(jsonPath("$.[*].loadingEndTime").value(hasItem(sameInstant(DEFAULT_LOADING_END_TIME))))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
             .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
             .andExpect(jsonPath("$.[*].syncTime").value(hasItem(sameInstant(DEFAULT_SYNC_TIME))));
@@ -1378,6 +1528,8 @@ public class ShipPlanResourceIT {
             .leaveTime(UPDATED_LEAVE_TIME)
             .deliverTime(UPDATED_DELIVER_TIME)
             .allowInTime(UPDATED_ALLOW_IN_TIME)
+            .loadingStartTime(UPDATED_LOADING_START_TIME)
+            .loadingEndTime(UPDATED_LOADING_END_TIME)
             .createTime(UPDATED_CREATE_TIME)
             .updateTime(UPDATED_UPDATE_TIME)
             .syncTime(UPDATED_SYNC_TIME);
@@ -1404,6 +1556,8 @@ public class ShipPlanResourceIT {
         assertThat(testShipPlan.getLeaveTime()).isEqualTo(UPDATED_LEAVE_TIME);
         assertThat(testShipPlan.getDeliverTime()).isEqualTo(UPDATED_DELIVER_TIME);
         assertThat(testShipPlan.getAllowInTime()).isEqualTo(UPDATED_ALLOW_IN_TIME);
+        assertThat(testShipPlan.getLoadingStartTime()).isEqualTo(UPDATED_LOADING_START_TIME);
+        assertThat(testShipPlan.getLoadingEndTime()).isEqualTo(UPDATED_LOADING_END_TIME);
         assertThat(testShipPlan.getCreateTime()).isEqualTo(UPDATED_CREATE_TIME);
         assertThat(testShipPlan.getUpdateTime()).isEqualTo(UPDATED_UPDATE_TIME);
         assertThat(testShipPlan.getSyncTime()).isEqualTo(UPDATED_SYNC_TIME);

@@ -73,6 +73,33 @@ public class WxMpMsgService {
     }
 
     @Async
+    public void sendAlertMsg(Long userId, String openId, String title, String content, String remark) {
+        try {
+            if (StringUtils.isBlank(openId)) {
+                openId = getMpUserOpenIdByUserId(userId);
+                if (StringUtils.isBlank(openId)) {
+                    log.info("Cannot find openId for userId: {}", userId);
+                    return;
+                }
+            }
+            WxMpTemplateMessage msg = new WxMpTemplateMessage();
+            msg.setTemplateId("dGYzobbYF9PPIOjTouDmtw_aZrbSAVHdxtMCRYBX3Fk");
+            msg.setToUser(openId);
+            msg.setMiniProgram(new WxMpTemplateMessage.MiniProgram(MINI_PROGRAM_APP_ID, "pages/index/index", true));
+            List<WxMpTemplateData> data = Lists.newArrayList();
+            data.add(new WxMpTemplateData("first", title));
+            data.add(new WxMpTemplateData("keyword1", content));
+            data.add(new WxMpTemplateData("keyword2", ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))));
+            data.add(new WxMpTemplateData("remark", remark));
+            msg.setData(data);
+            wxMpService.getTemplateMsgService().sendTemplateMsg(msg);
+        } catch (Exception e) {
+            log.error("failed to send alert msg, userId: {}, title: {}, content: {}, remark: {}", userId, title, content, remark);
+            e.printStackTrace();
+        }
+    }
+
+    @Async
     public void sendAppointmentSuccessMsg(AppointmentDTO appointment) {
         if (appointment.getUserId() == null || (appointment.isVip() != null && appointment.isVip())) {
             return;
