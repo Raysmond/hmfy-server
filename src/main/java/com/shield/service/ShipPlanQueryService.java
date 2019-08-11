@@ -140,6 +140,12 @@ public class ShipPlanQueryService extends QueryService<ShipPlan> {
             if (criteria.getSyncTime() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getSyncTime(), ShipPlan_.syncTime));
             }
+            if (criteria.getTareAlert() != null) {
+                specification = specification.and(buildSpecification(criteria.getTareAlert(), ShipPlan_.tareAlert));
+            }
+            if (criteria.getLeaveAlert() != null) {
+                specification = specification.and(buildSpecification(criteria.getLeaveAlert(), ShipPlan_.leaveAlert));
+            }
             if (criteria.getUserId() != null) {
                 specification = specification.and(buildSpecification(criteria.getUserId(),
                     root -> root.join(ShipPlan_.user, JoinType.LEFT).get(User_.id)));

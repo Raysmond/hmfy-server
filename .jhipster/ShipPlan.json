@@ -103,6 +103,20 @@
         {
             "fieldName": "syncTime",
             "fieldType": "ZonedDateTime"
+        },
+        {
+          "fieldName": "tareAlert",
+          "fieldType": "Boolean",
+          "fieldValidateRules": [
+            "required"
+          ]
+        },
+        {
+          "fieldName": "leaveAlert",
+          "fieldType": "Boolean",
+          "fieldValidateRules": [
+            "required"
+          ]
         }
     ],
     "changelogDate": "20190601171803",

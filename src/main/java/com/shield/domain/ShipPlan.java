@@ -82,6 +82,14 @@ public class ShipPlan implements Serializable {
     @Column(name = "sync_time")
     private ZonedDateTime syncTime;
 
+    @NotNull
+    @Column(name = "tare_alert", nullable = false)
+    private Boolean tareAlert = false;
+
+    @NotNull
+    @Column(name = "leave_alert", nullable = false)
+    private Boolean leaveAlert = false;
+
     @ManyToOne
     @JsonIgnoreProperties("shipPlans")
     private User user;
@@ -316,6 +324,32 @@ public class ShipPlan implements Serializable {
         this.syncTime = syncTime;
     }
 
+    public Boolean isTareAlert() {
+        return tareAlert;
+    }
+
+    public ShipPlan tareAlert(Boolean tareAlert) {
+        this.tareAlert = tareAlert;
+        return this;
+    }
+
+    public void setTareAlert(Boolean tareAlert) {
+        this.tareAlert = tareAlert;
+    }
+
+    public Boolean isLeaveAlert() {
+        return leaveAlert;
+    }
+
+    public ShipPlan leaveAlert(Boolean leaveAlert) {
+        this.leaveAlert = leaveAlert;
+        return this;
+    }
+
+    public void setLeaveAlert(Boolean leaveAlert) {
+        this.leaveAlert = leaveAlert;
+    }
+
     public User getUser() {
         return user;
     }
@@ -328,7 +362,6 @@ public class ShipPlan implements Serializable {
     public void setUser(User user) {
         this.user = user;
     }
-
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override
@@ -368,6 +401,8 @@ public class ShipPlan implements Serializable {
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
             ", syncTime='" + getSyncTime() + "'" +
+            ", tareAlert='" + isTareAlert() + "'" +
+            ", leaveAlert='" + isLeaveAlert() + "'" +
             "}";
     }
 }

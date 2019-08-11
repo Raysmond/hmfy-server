@@ -29,6 +29,8 @@
       "allowInTime": "最晚准入时间",
       "loadingStartTime": "上磅时间",
       "loadingEndTime": "下磅时间",
+      "tareAlert": "上磅告警",
+      "leaveAlert": "下磅告警",
       "createTime": "创建时间",
       "updateTime": "更新时间",
       "user": "创建者",

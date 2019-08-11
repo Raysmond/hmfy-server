@@ -3,17 +3,15 @@ package com.shield.service.impl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.shield.domain.Appointment;
+import com.shield.domain.Region;
 import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.repository.AppointmentRepository;
-import com.shield.service.AppointmentService;
-import com.shield.service.RegionService;
-import com.shield.service.ShipPlanService;
+import com.shield.repository.RegionRepository;
+import com.shield.security.AuthoritiesConstants;
+import com.shield.service.*;
 import com.shield.domain.ShipPlan;
 import com.shield.repository.ShipPlanRepository;
-import com.shield.service.dto.AppointmentDTO;
-import com.shield.service.dto.PlanDTO;
-import com.shield.service.dto.RegionDTO;
-import com.shield.service.dto.ShipPlanDTO;
+import com.shield.service.dto.*;
 import com.shield.service.mapper.ShipPlanMapper;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import io.github.jhipster.web.util.PageUtil;
@@ -23,8 +21,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -61,8 +61,18 @@ public class ShipPlanServiceImpl implements ShipPlanService {
     private RegionService regionService;
 
     @Autowired
+    private RegionRepository regionRepository;
+
+    @Autowired
     @Qualifier("redisLongTemplate")
     private RedisTemplate<String, Long> redisLongTemplate;
+
+    @Autowired
+    private WxMpMsgService wxMpMsgService;
+
+    @Autowired
+    private UserService userService;
+
 
     public ShipPlanServiceImpl(ShipPlanRepository shipPlanRepository, ShipPlanMapper shipPlanMapper) {
         this.shipPlanRepository = shipPlanRepository;
@@ -258,4 +268,57 @@ public class ShipPlanServiceImpl implements ShipPlanService {
         return uniqueShipPlans.stream().filter(it -> !it.getAuditStatus().equals(Integer.valueOf(1))).map(shipPlanMapper::toDto).collect(Collectors.toList());
     }
 
+
+    @Scheduled(fixedRate = 60 * 1000)
+    public void checkAndAlert() {
+        for (Region region : regionRepository.findAll()) {
+            if (region.isOpen()) {
+                List<ShipPlan> plans = shipPlanRepository.findAllByGateTime(ZonedDateTime.now().minusHours(3), region.getName());
+                for (ShipPlan plan : plans) {
+                    if (!plan.isTareAlert() && plan.getGateTime() != null
+                        && (plan.getLoadingStartTime() == null && plan.getGateTime().plusHours(3L).isBefore(ZonedDateTime.now())
+                        || plan.getLoadingStartTime() != null && plan.getGateTime().plusHours(3L).isBefore(plan.getLoadingStartTime()))) {
+                        plan.setTareAlert(true);
+                        shipPlanRepository.save(plan);
+                        sendAlertMsgToWxUser(plan);
+                    }
+                }
+            }
+        }
+    }
+
+    private void sendAlertMsgToWxUser(ShipPlan delayedPlan) {
+        try {
+            AppointmentDTO appointmentDTO = appointmentService.findLastByApplyId(delayedPlan.getApplyId());
+            if (appointmentDTO != null && appointmentDTO.getUserId() != null && Boolean.FALSE.equals(appointmentDTO.isVip()) && appointmentDTO.getStatus().equals(AppointmentStatus.ENTER)) {
+                String remark = String.format("进厂时间：%s", delayedPlan.getGateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+
+                wxMpMsgService.sendAlertMsg(appointmentDTO.getUserId(), null,
+                    String.format("您好，您的提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
+                    String.format("车牌%s在%s进厂之后三小时还未上磅提货！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                    remark);
+
+                if (appointmentDTO.getRegionId() != null) {
+                    Page<UserDTO> users = userService.getAllManagedUsersByRegionId(PageRequest.of(0, 1000), appointmentDTO.getRegionId());
+                    for (UserDTO user : users.getContent()) {
+                        if (user.getAuthorities().contains(AuthoritiesConstants.REGION_ADMIN)) {
+                            wxMpMsgService.sendAlertMsg(user.getId(), null,
+                                String.format("提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
+                                String.format("车牌%s在%s进厂之后三小时还未上磅提货！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                                remark);
+                        }
+                    }
+                }
+
+                for (String openid : Lists.newArrayList("oZBny01fYBk-P1zpYZH00vm3uFQI", "oZBny09ivtl8EN8IVcdQKxyfA65c")) {
+                    wxMpMsgService.sendAlertMsg(null, openid,
+                        String.format("提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
+                        String.format("车牌%s在%s进厂之后三小时还未上磅提货！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                        remark);
+                }
+            }
+        } catch (Exception e) {
+            log.error("failed to send alert msg sendAlertMsgToWxUser() {}", e.getMessage());
+        }
+    }
 }

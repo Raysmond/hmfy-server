@@ -19,7 +19,6 @@ import com.shield.domain.enumeration.ParkingConnectMethod;
 import com.shield.repository.AppointmentRepository;
 import com.shield.repository.RegionRepository;
 import com.shield.repository.ShipPlanRepository;
-import com.shield.service.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -28,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -37,14 +37,14 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.shield.service.ParkingTcpHandlerService.*;
+import static com.shield.service.ParkingTcpHandlerService.AUTO_DELETE_PLAN_ID_QUEUE;
+import static com.shield.service.ParkingTcpHandlerService.REDIS_KEY_TRUCK_NUMBER_CARD_ID;
 import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
 
 @Service
@@ -79,19 +79,14 @@ public class CarWhiteListService {
     @Autowired
     private ShipPlanRepository shipPlanRepository;
 
+    @Autowired
+    private ThreadPoolTaskScheduler threadPoolTaskScheduler;
+
     private static final String REDIS_KEY_MAX_PARK_CARD_CID = "next_park_card_cid";
     private static final String REDIS_KEY_MAX_PARK_HCARD_NO = "next_park_h_card_no";
     private static final Long INITIAL_PARK_CARD_CID = 10000000L;
     private static final Long INITIAL_PARK_HCARD_NO = 10000L;
 
-    public void testRegisterCarWhiteLis(String truckNumber) {
-        registerCarWhiteList(
-            truckNumber,
-            ZonedDateTime.now(),
-            ZonedDateTime.now().plusHours(2L),
-            "测试"
-        );
-    }
 
     public void deleteCarWhiteList(String truckNumber) {
         List<ParkCard> parkCards = parkCardRepository.findByCardNo(truckNumber);
@@ -135,14 +130,19 @@ public class CarWhiteListService {
             return;
         }
 
-        log.error("Start to register car white list for appointment : {}, truckNumber: {}", appointmentId, appointment.getLicensePlateNumber());
+        log.info("Start to register car white list for appointment : {}, truckNumber: {}", appointmentId, appointment.getLicensePlateNumber());
         try {
+//            ZonedDateTime validTime = appointment.getStartTime().plusHours(region.getValidTime());
+            ZonedDateTime validTime = appointment.getStartTime().plusHours(6);
+            if (appointment.isVip() != null && appointment.isVip()) {
+                validTime = appointment.getStartTime().plusHours(12);
+            }
             registerCarWhiteList(
                 appointment.getLicensePlateNumber(),
                 appointment.getStartTime(),
-                appointment.getStartTime().plusHours(region.getValidTime()),
+                validTime,
                 appointment.getUser() != null ? appointment.getUser().getFirstName() : appointment.getLicensePlateNumber());
-            log.error("Succeed to register car white list for appointment : {}, truckNumber: {}", appointmentId, appointment.getLicensePlateNumber());
+            log.info("Succeed to register car white list for appointment : {}, truckNumber: {}", appointmentId, appointment.getLicensePlateNumber());
         } catch (Exception e) {
             log.error("failed to register car white list for appointment : {}, truckNumber: {}", appointmentId, appointment.getLicensePlateNumber());
         }
@@ -220,7 +220,7 @@ public class CarWhiteListService {
     }
 
     private static ZonedDateTime lastSyncTime = ZonedDateTime.now().minusHours(1);
-    private static Map<Long, GateIO> lastProcessedGateIO = Maps.newHashMap();
+    private static Map<Long, GateIO> lastProcessedGateIO = Maps.newConcurrentMap();
 
     @Scheduled(fixedRate = 5 * 1000)
     public void syncCarGateIOEvents() {
@@ -306,7 +306,8 @@ public class CarWhiteListService {
                     plan.setUpdateTime(ZonedDateTime.now());
                     shipPlanRepository.save(plan);
                     log.info("update ShipPlan {} gateTime: {}, truckNumber: {}", plan.getApplyId(), inTime, truckNumber);
-                    redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
+//                    redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
+                    delayPutSyncShipPlanIdQueue(plan.getId());
                 }
             } else {
                 log.error("Cannot find ShipPlan for truckNumber {}, uploadcarin gateTime: {}", truckNumber, inTime);
@@ -318,7 +319,7 @@ public class CarWhiteListService {
                 outTime = ZonedDateTime.now();
             }
             List<ShipPlan> shipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today)
-                .stream().filter(it -> it.getAuditStatus().equals(Integer.valueOf(3)) || (it.getLeaveTime() == null && it.getGateTime() != null))
+                .stream().filter(it -> it.getAuditStatus().equals(Integer.valueOf(3)) || (it.getGateTime() != null))
                 .sorted(Comparator.comparing(ShipPlan::getApplyId).reversed())
                 .collect(Collectors.toList());
             // 取未出场的，最近一个提货完成的计划
@@ -332,8 +333,11 @@ public class CarWhiteListService {
                 plan.setUpdateTime(ZonedDateTime.now());
                 shipPlanRepository.save(plan);
                 log.info("update ShipPlan {} leaveTime: {}, truckNumber: {}", plan.getApplyId(), outTime, truckNumber);
-                redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
-                redisLongTemplate.opsForSet().add(AUTO_DELETE_PLAN_ID_QUEUE, plan.getId());
+
+//                redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
+//                redisLongTemplate.opsForSet().add(AUTO_DELETE_PLAN_ID_QUEUE, plan.getId());
+                delayPutSyncShipPlanIdQueue(plan.getId());
+                delayPutDeleteShipPlanIdQueue(plan.getId());
             } else {
                 log.error("Cannot find ShipPlan for truckNumber {}, uploadcarout gateTime: {}, leaveTime: {}", truckNumber, inTime, outTime);
             }
@@ -354,7 +358,7 @@ public class CarWhiteListService {
                     appointment.setLeaveTime(outTime);
                     appointment.setStatus(AppointmentStatus.LEAVE);
                     save = true;
-                    redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
+                    // redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
                 }
             }
 
@@ -365,5 +369,30 @@ public class CarWhiteListService {
                     appointment.getId(), appointment.getStatus(), inTime, outTime, truckNumber);
             }
         }
+    }
+
+
+    /**
+     * 延时一分钟将出入场时间同步到发运
+     *
+     * @param shipPlanId
+     */
+    public void delayPutSyncShipPlanIdQueue(Long shipPlanId) {
+        threadPoolTaskScheduler.getScheduledExecutor().schedule(() -> {
+            log.info("Delayed 60s to put ShipPlan id {} to sync queue {}", shipPlanId, REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN);
+            redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, shipPlanId);
+        }, 60L, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 出场后延时三分钟删除白名单
+     *
+     * @param shipPlanId
+     */
+    public void delayPutDeleteShipPlanIdQueue(Long shipPlanId) {
+        threadPoolTaskScheduler.getScheduledExecutor().schedule(() -> {
+            log.info("Delayed 180s to put ShipPlan id {} to delete car whitelist queue {}", shipPlanId, AUTO_DELETE_PLAN_ID_QUEUE);
+            redisLongTemplate.opsForSet().add(AUTO_DELETE_PLAN_ID_QUEUE, shipPlanId);
+        }, 180L, TimeUnit.SECONDS);
     }
 }

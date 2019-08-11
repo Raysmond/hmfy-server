@@ -57,7 +57,10 @@ export class ShipPlanService {
       allowInTime: shipPlan.allowInTime != null && shipPlan.allowInTime.isValid() ? shipPlan.allowInTime.toJSON() : null,
       createTime: shipPlan.createTime != null && shipPlan.createTime.isValid() ? shipPlan.createTime.toJSON() : null,
       updateTime: shipPlan.updateTime != null && shipPlan.updateTime.isValid() ? shipPlan.updateTime.toJSON() : null,
-      syncTime: shipPlan.syncTime != null && shipPlan.syncTime.isValid() ? shipPlan.syncTime.toJSON() : null
+      syncTime: shipPlan.syncTime != null && shipPlan.syncTime.isValid() ? shipPlan.syncTime.toJSON() : null,
+      loadingStartTime:
+        shipPlan.loadingStartTime != null && shipPlan.loadingStartTime.isValid() ? shipPlan.loadingStartTime.toJSON() : null,
+      loadingEndTime: shipPlan.loadingEndTime != null && shipPlan.loadingEndTime.isValid() ? shipPlan.loadingEndTime.toJSON() : null
     });
     return copy;
   }
@@ -71,6 +74,8 @@ export class ShipPlanService {
       res.body.createTime = res.body.createTime != null ? moment(res.body.createTime) : null;
       res.body.updateTime = res.body.updateTime != null ? moment(res.body.updateTime) : null;
       res.body.syncTime = res.body.syncTime != null ? moment(res.body.syncTime) : null;
+      res.body.loadingStartTime = res.body.loadingStartTime != null ? moment(res.body.loadingStartTime) : null;
+      res.body.loadingEndTime = res.body.loadingEndTime != null ? moment(res.body.loadingEndTime) : null;
     }
     return res;
   }
@@ -85,6 +90,8 @@ export class ShipPlanService {
         shipPlan.createTime = shipPlan.createTime != null ? moment(shipPlan.createTime) : null;
         shipPlan.updateTime = shipPlan.updateTime != null ? moment(shipPlan.updateTime) : null;
         shipPlan.syncTime = shipPlan.syncTime != null ? moment(shipPlan.syncTime) : null;
+        shipPlan.loadingStartTime = shipPlan.loadingStartTime != null ? moment(shipPlan.loadingStartTime) : null;
+        shipPlan.loadingEndTime = shipPlan.loadingEndTime != null ? moment(shipPlan.loadingEndTime) : null;
       });
     }
     return res;

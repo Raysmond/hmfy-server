@@ -23,6 +23,12 @@ public class TestController {
     @Autowired
     private CarWhiteListService carWhiteListService;
 
+    @GetMapping("/")
+    public String test() {
+        carWhiteListService.delayPutSyncShipPlanIdQueue(109000L);
+        return "ok";
+    }
+
 //    @GetMapping("/veh-plans")
 //    public List<VehDelivPlan> getVehPlans() {
 //        return vehDelivPlanRepository.findAll();

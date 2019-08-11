@@ -19,6 +19,8 @@ export interface IShipPlan {
   createTime?: Moment;
   updateTime?: Moment;
   syncTime?: Moment;
+  tareAlert?: boolean;
+  leaveAlert?: boolean;
   userLogin?: string;
   userId?: number;
 }
@@ -43,9 +45,13 @@ export class ShipPlan implements IShipPlan {
     public createTime?: Moment,
     public updateTime?: Moment,
     public syncTime?: Moment,
+    public tareAlert?: boolean,
+    public leaveAlert?: boolean,
     public userLogin?: string,
     public userId?: number
   ) {
     this.valid = this.valid || false;
+    this.tareAlert = this.tareAlert || false;
+    this.leaveAlert = this.leaveAlert || false;
   }
 }

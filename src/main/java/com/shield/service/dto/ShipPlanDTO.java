@@ -59,6 +59,26 @@ public class ShipPlanDTO implements Serializable {
 
     private String userLogin;
 
+    private Boolean tareAlert;
+
+    private Boolean leaveAlert;
+
+    public Boolean getTareAlert() {
+        return tareAlert;
+    }
+
+    public void setTareAlert(Boolean tareAlert) {
+        this.tareAlert = tareAlert;
+    }
+
+    public Boolean getLeaveAlert() {
+        return leaveAlert;
+    }
+
+    public void setLeaveAlert(Boolean leaveAlert) {
+        this.leaveAlert = leaveAlert;
+    }
+
     public Long getId() {
         return id;
     }
@@ -218,6 +238,8 @@ public class ShipPlanDTO implements Serializable {
     public void setLoadingEndTime(ZonedDateTime loadingEndTime) {
         this.loadingEndTime = loadingEndTime;
     }
+
+
 
     @Override
     public boolean equals(Object o) {

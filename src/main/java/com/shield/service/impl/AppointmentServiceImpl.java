@@ -347,8 +347,15 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointmentRepository.save(appointment);
 
         if (!tryMakeAppointment(appointment)) {
-            appointment.setStatus(AppointmentStatus.WAIT);
-            appointment.setQueueNumber(generateQueueNumber(regionId));
+            if (region.getQueueQuota() != null
+                && region.getQueueQuota() > 0
+                && region.getQueueQuota() > appointmentRepository.countAllWaitByRegionIdAndCreateTime(regionId, ZonedDateTime.now().minusHours(12))) {
+                appointment.setStatus(AppointmentStatus.WAIT);
+                appointment.setQueueNumber(generateQueueNumber(regionId));
+            } else {
+                appointment.setValid(false);
+                appointmentRepository.save(appointment);
+            }
         }
         return appointmentMapper.toDto(appointment);
     }
@@ -434,6 +441,28 @@ public class AppointmentServiceImpl implements AppointmentService {
                     appointmentRepository.save(appointment);
                 } else if (!this.tryMakeAppointment(appointment)) {
                     break;
+                }
+            }
+
+            // 进厂之后，有可能拿不到出场时间，会一直占好
+            appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.ENTER, Boolean.TRUE, getTodayStartTime());
+            for (Appointment appointment : appointments) {
+                if (appointment.getApplyId() != null) {
+                    List<ShipPlan> plans = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(appointment.getApplyId()));
+                    if (!CollectionUtils.isEmpty(plans)) {
+                        ShipPlan plan = plans.get(0);
+                        if (plan.getLoadingEndTime() != null && plan.getLoadingEndTime().plusHours(1).isBefore(ZonedDateTime.now())) {
+                            log.info("[AUTO] set appointment [id={}] status to LEAVE , 1 hour after weight time {}, ShipPlan {}, truckNumber: {}",
+                                appointment.getId(),
+                                plan.getLoadingStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:MM:SS")),
+                                plan.getApplyId(),
+                                plan.getTruckNumber());
+
+                            appointment.setStatus(AppointmentStatus.LEAVE);
+                            appointment.setUpdateTime(ZonedDateTime.now());
+                            appointmentRepository.save(appointment);
+                        }
+                    }
                 }
             }
         }

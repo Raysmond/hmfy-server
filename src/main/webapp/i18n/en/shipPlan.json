@@ -33,6 +33,8 @@
       "createTime": "Create Time",
       "updateTime": "Update Time",
       "syncTime": "Sync Time",
+      "tareAlert": "Tare Alert",
+      "leaveAlert": "Leave Alert",
       "user": "User"
     }
   }

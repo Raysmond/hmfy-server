@@ -61,6 +61,10 @@ public class ShipPlanCriteria implements Serializable, Criteria {
 
     private ZonedDateTimeFilter syncTime;
 
+    private BooleanFilter tareAlert;
+
+    private BooleanFilter leaveAlert;
+
     private LongFilter userId;
 
     public ShipPlanCriteria(){
@@ -85,6 +89,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.createTime = other.createTime == null ? null : other.createTime.copy();
         this.updateTime = other.updateTime == null ? null : other.updateTime.copy();
         this.syncTime = other.syncTime == null ? null : other.syncTime.copy();
+        this.tareAlert = other.tareAlert == null ? null : other.tareAlert.copy();
+        this.leaveAlert = other.leaveAlert == null ? null : other.leaveAlert.copy();
         this.userId = other.userId == null ? null : other.userId.copy();
     }
 
@@ -237,6 +243,22 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.syncTime = syncTime;
     }
 
+    public BooleanFilter getTareAlert() {
+        return tareAlert;
+    }
+
+    public void setTareAlert(BooleanFilter tareAlert) {
+        this.tareAlert = tareAlert;
+    }
+
+    public BooleanFilter getLeaveAlert() {
+        return leaveAlert;
+    }
+
+    public void setLeaveAlert(BooleanFilter leaveAlert) {
+        this.leaveAlert = leaveAlert;
+    }
+
     public LongFilter getUserId() {
         return userId;
     }
@@ -274,6 +296,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
             Objects.equals(createTime, that.createTime) &&
             Objects.equals(updateTime, that.updateTime) &&
             Objects.equals(syncTime, that.syncTime) &&
+            Objects.equals(tareAlert, that.tareAlert) &&
+            Objects.equals(leaveAlert, that.leaveAlert) &&
             Objects.equals(userId, that.userId);
     }
 
@@ -298,6 +322,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         createTime,
         updateTime,
         syncTime,
+        tareAlert,
+        leaveAlert,
         userId
         );
     }
@@ -323,6 +349,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
                 (createTime != null ? "createTime=" + createTime + ", " : "") +
                 (updateTime != null ? "updateTime=" + updateTime + ", " : "") +
                 (syncTime != null ? "syncTime=" + syncTime + ", " : "") +
+                (tareAlert != null ? "tareAlert=" + tareAlert + ", " : "") +
+                (leaveAlert != null ? "leaveAlert=" + leaveAlert + ", " : "") +
                 (userId != null ? "userId=" + userId + ", " : "") +
             "}";
     }

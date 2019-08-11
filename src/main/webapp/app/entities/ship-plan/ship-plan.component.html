@@ -69,7 +69,7 @@
             </form>
 
             <div class="table-responsive" *ngIf="shipPlans">
-                <table class="table table-striped">
+                <table class="table table-striped" style="font-size: 14px;">
                     <thead>
                     <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
                         <!--<th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span>-->
@@ -102,15 +102,19 @@
                             <span jhiTranslate="shieldApp.shipPlan.loadingStartTime">loadingStartTime</span>
                             <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
-
+                        <th>
+                            <span>上磅告警</span>
+                        </th>
                         <th jhiSortBy="loadingEndTime">
                             <span jhiTranslate="shieldApp.shipPlan.loadingEndTime">loadingEndTime</span>
                             <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
-
                         <th jhiSortBy="leaveTime">
                             <span jhiTranslate="shieldApp.shipPlan.leaveTime">Leave Time</span>
                             <fa-icon [icon]="'sort'"></fa-icon>
+                        </th>
+                        <th>
+                            <span>离厂告警</span>
                         </th>
                         <!--<th jhiSortBy="deliverTime">-->
                         <!--<span jhiTranslate="shieldApp.shipPlan.deliverTime">Deliver Time</span>-->
@@ -134,20 +138,26 @@
                         <td>{{shipPlan.applyId}}</td>
                         <!--<td>{{shipPlan.applyNumber}}</td>-->
                         <td>{{shipPlan.truckNumber}}</td>
-
                         <td>
                             <!--{{shipPlan.auditStatus}}-->
                             <span class="badge badge-success" *ngIf="shipPlan.auditStatus==1">待提货</span>
                             <span class="badge badge-warning" *ngIf="shipPlan.auditStatus==2">已取消</span>
                             <span class="badge badge-info" *ngIf="shipPlan.auditStatus==3">已提货</span>
                         </td>
-
                         <td>{{shipPlan.productName}}</td>
                         <td>{{shipPlan.deliverPosition}}</td>
                         <td>{{shipPlan.gateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
                         <td>{{shipPlan.loadingStartTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                        <td>
+                            <span class="badge badge-danger" *ngIf="shipPlan.tareAlert">超时</span>
+                            <span class="badge badge-success" *ngIf="shipPlan.loadingStartTime && !shipPlan.tareAlert">正常</span>
+                        </td>
                         <td>{{shipPlan.loadingEndTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
                         <td>{{shipPlan.leaveTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                        <td>
+                            <span class="badge badge-danger" *ngIf="shipPlan.leaveAlert">超时</span>
+                            <span class="badge badge-success" *ngIf="shipPlan.loadingEndTime && !shipPlan.leaveAlert">正常</span>
+                        </td>
                         <!--<td>{{shipPlan.deliverTime | date:'yyyy-MM-dd'}}</td>-->
                         <!--<td>{{shipPlan.allowInTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->
                         <!--<td>{{shipPlan.createTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>-->

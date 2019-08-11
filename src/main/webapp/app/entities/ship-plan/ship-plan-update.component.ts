@@ -42,6 +42,8 @@ export class ShipPlanUpdateComponent implements OnInit {
     allowInTime: [],
     createTime: [],
     updateTime: [],
+    loadingStartTime: [],
+    loadingEndTime: [],
     syncTime: [],
     userId: []
   });
@@ -95,6 +97,8 @@ export class ShipPlanUpdateComponent implements OnInit {
       createTime: shipPlan.createTime != null ? shipPlan.createTime.format(DATE_TIME_FORMAT) : null,
       updateTime: shipPlan.updateTime != null ? shipPlan.updateTime.format(DATE_TIME_FORMAT) : null,
       syncTime: shipPlan.syncTime != null ? shipPlan.syncTime.format(DATE_TIME_FORMAT) : null,
+      loadingStartTime: shipPlan.loadingStartTime != null ? shipPlan.loadingStartTime.format(DATE_TIME_FORMAT) : null,
+      loadingEndTime: shipPlan.loadingEndTime != null ? shipPlan.loadingEndTime.format(DATE_TIME_FORMAT) : null,
       userId: shipPlan.userId
     });
   }
@@ -137,6 +141,14 @@ export class ShipPlanUpdateComponent implements OnInit {
       updateTime:
         this.editForm.get(['updateTime']).value != null ? moment(this.editForm.get(['updateTime']).value, DATE_TIME_FORMAT) : undefined,
       syncTime: this.editForm.get(['syncTime']).value != null ? moment(this.editForm.get(['syncTime']).value, DATE_TIME_FORMAT) : undefined,
+      loadingEndTime:
+        this.editForm.get(['loadingEndTime']).value != null
+          ? moment(this.editForm.get(['loadingEndTime']).value, DATE_TIME_FORMAT)
+          : undefined,
+      loadingStartTime:
+        this.editForm.get(['loadingStartTime']).value != null
+          ? moment(this.editForm.get(['loadingStartTime']).value, DATE_TIME_FORMAT)
+          : undefined,
       userId: this.editForm.get(['userId']).value
     };
     return entity;

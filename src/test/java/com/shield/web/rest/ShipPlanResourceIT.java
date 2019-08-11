@@ -95,6 +95,12 @@ public class ShipPlanResourceIT {
     private static final ZonedDateTime DEFAULT_SYNC_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
     private static final ZonedDateTime UPDATED_SYNC_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
 
+    private static final Boolean DEFAULT_TARE_ALERT = false;
+    private static final Boolean UPDATED_TARE_ALERT = true;
+
+    private static final Boolean DEFAULT_LEAVE_ALERT = false;
+    private static final Boolean UPDATED_LEAVE_ALERT = true;
+
     @Autowired
     private ShipPlanRepository shipPlanRepository;
 
@@ -162,7 +168,9 @@ public class ShipPlanResourceIT {
             .loadingEndTime(DEFAULT_LOADING_END_TIME)
             .createTime(DEFAULT_CREATE_TIME)
             .updateTime(DEFAULT_UPDATE_TIME)
-            .syncTime(DEFAULT_SYNC_TIME);
+            .syncTime(DEFAULT_SYNC_TIME)
+            .tareAlert(DEFAULT_TARE_ALERT)
+            .leaveAlert(DEFAULT_LEAVE_ALERT);
         return shipPlan;
     }
     /**
@@ -189,7 +197,9 @@ public class ShipPlanResourceIT {
             .loadingEndTime(UPDATED_LOADING_END_TIME)
             .createTime(UPDATED_CREATE_TIME)
             .updateTime(UPDATED_UPDATE_TIME)
-            .syncTime(UPDATED_SYNC_TIME);
+            .syncTime(UPDATED_SYNC_TIME)
+            .tareAlert(UPDATED_TARE_ALERT)
+            .leaveAlert(UPDATED_LEAVE_ALERT);
         return shipPlan;
     }
 
@@ -231,6 +241,8 @@ public class ShipPlanResourceIT {
         assertThat(testShipPlan.getCreateTime()).isEqualTo(DEFAULT_CREATE_TIME);
         assertThat(testShipPlan.getUpdateTime()).isEqualTo(DEFAULT_UPDATE_TIME);
         assertThat(testShipPlan.getSyncTime()).isEqualTo(DEFAULT_SYNC_TIME);
+        assertThat(testShipPlan.isTareAlert()).isEqualTo(DEFAULT_TARE_ALERT);
+        assertThat(testShipPlan.isLeaveAlert()).isEqualTo(DEFAULT_LEAVE_ALERT);
     }
 
     @Test
@@ -408,6 +420,44 @@ public class ShipPlanResourceIT {
 
     @Test
     @Transactional
+    public void checkTareAlertIsRequired() throws Exception {
+        int databaseSizeBeforeTest = shipPlanRepository.findAll().size();
+        // set the field null
+        shipPlan.setTareAlert(null);
+
+        // Create the ShipPlan, which fails.
+        ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(shipPlan);
+
+        restShipPlanMockMvc.perform(post("/api/ship-plans")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(shipPlanDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<ShipPlan> shipPlanList = shipPlanRepository.findAll();
+        assertThat(shipPlanList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
+    public void checkLeaveAlertIsRequired() throws Exception {
+        int databaseSizeBeforeTest = shipPlanRepository.findAll().size();
+        // set the field null
+        shipPlan.setLeaveAlert(null);
+
+        // Create the ShipPlan, which fails.
+        ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(shipPlan);
+
+        restShipPlanMockMvc.perform(post("/api/ship-plans")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(shipPlanDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<ShipPlan> shipPlanList = shipPlanRepository.findAll();
+        assertThat(shipPlanList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
     public void getAllShipPlans() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
@@ -433,7 +483,9 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.[*].loadingEndTime").value(hasItem(sameInstant(DEFAULT_LOADING_END_TIME))))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
             .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
-            .andExpect(jsonPath("$.[*].syncTime").value(hasItem(sameInstant(DEFAULT_SYNC_TIME))));
+            .andExpect(jsonPath("$.[*].syncTime").value(hasItem(sameInstant(DEFAULT_SYNC_TIME))))
+            .andExpect(jsonPath("$.[*].tareAlert").value(hasItem(DEFAULT_TARE_ALERT.booleanValue())))
+            .andExpect(jsonPath("$.[*].leaveAlert").value(hasItem(DEFAULT_LEAVE_ALERT.booleanValue())));
     }
     
     @Test
@@ -463,7 +515,9 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.loadingEndTime").value(sameInstant(DEFAULT_LOADING_END_TIME)))
             .andExpect(jsonPath("$.createTime").value(sameInstant(DEFAULT_CREATE_TIME)))
             .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)))
-            .andExpect(jsonPath("$.syncTime").value(sameInstant(DEFAULT_SYNC_TIME)));
+            .andExpect(jsonPath("$.syncTime").value(sameInstant(DEFAULT_SYNC_TIME)))
+            .andExpect(jsonPath("$.tareAlert").value(DEFAULT_TARE_ALERT.booleanValue()))
+            .andExpect(jsonPath("$.leaveAlert").value(DEFAULT_LEAVE_ALERT.booleanValue()));
     }
 
     @Test
@@ -1428,6 +1482,84 @@ public class ShipPlanResourceIT {
 
     @Test
     @Transactional
+    public void getAllShipPlansByTareAlertIsEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where tareAlert equals to DEFAULT_TARE_ALERT
+        defaultShipPlanShouldBeFound("tareAlert.equals=" + DEFAULT_TARE_ALERT);
+
+        // Get all the shipPlanList where tareAlert equals to UPDATED_TARE_ALERT
+        defaultShipPlanShouldNotBeFound("tareAlert.equals=" + UPDATED_TARE_ALERT);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByTareAlertIsInShouldWork() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where tareAlert in DEFAULT_TARE_ALERT or UPDATED_TARE_ALERT
+        defaultShipPlanShouldBeFound("tareAlert.in=" + DEFAULT_TARE_ALERT + "," + UPDATED_TARE_ALERT);
+
+        // Get all the shipPlanList where tareAlert equals to UPDATED_TARE_ALERT
+        defaultShipPlanShouldNotBeFound("tareAlert.in=" + UPDATED_TARE_ALERT);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByTareAlertIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where tareAlert is not null
+        defaultShipPlanShouldBeFound("tareAlert.specified=true");
+
+        // Get all the shipPlanList where tareAlert is null
+        defaultShipPlanShouldNotBeFound("tareAlert.specified=false");
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByLeaveAlertIsEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where leaveAlert equals to DEFAULT_LEAVE_ALERT
+        defaultShipPlanShouldBeFound("leaveAlert.equals=" + DEFAULT_LEAVE_ALERT);
+
+        // Get all the shipPlanList where leaveAlert equals to UPDATED_LEAVE_ALERT
+        defaultShipPlanShouldNotBeFound("leaveAlert.equals=" + UPDATED_LEAVE_ALERT);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByLeaveAlertIsInShouldWork() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where leaveAlert in DEFAULT_LEAVE_ALERT or UPDATED_LEAVE_ALERT
+        defaultShipPlanShouldBeFound("leaveAlert.in=" + DEFAULT_LEAVE_ALERT + "," + UPDATED_LEAVE_ALERT);
+
+        // Get all the shipPlanList where leaveAlert equals to UPDATED_LEAVE_ALERT
+        defaultShipPlanShouldNotBeFound("leaveAlert.in=" + UPDATED_LEAVE_ALERT);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByLeaveAlertIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where leaveAlert is not null
+        defaultShipPlanShouldBeFound("leaveAlert.specified=true");
+
+        // Get all the shipPlanList where leaveAlert is null
+        defaultShipPlanShouldNotBeFound("leaveAlert.specified=false");
+    }
+
+    @Test
+    @Transactional
     public void getAllShipPlansByUserIsEqualToSomething() throws Exception {
         // Initialize the database
         User user = UserResourceIT.createEntity(em);
@@ -1468,7 +1600,9 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.[*].loadingEndTime").value(hasItem(sameInstant(DEFAULT_LOADING_END_TIME))))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
             .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
-            .andExpect(jsonPath("$.[*].syncTime").value(hasItem(sameInstant(DEFAULT_SYNC_TIME))));
+            .andExpect(jsonPath("$.[*].syncTime").value(hasItem(sameInstant(DEFAULT_SYNC_TIME))))
+            .andExpect(jsonPath("$.[*].tareAlert").value(hasItem(DEFAULT_TARE_ALERT.booleanValue())))
+            .andExpect(jsonPath("$.[*].leaveAlert").value(hasItem(DEFAULT_LEAVE_ALERT.booleanValue())));
 
         // Check, that the count call also returns 1
         restShipPlanMockMvc.perform(get("/api/ship-plans/count?sort=id,desc&" + filter))
@@ -1532,7 +1666,9 @@ public class ShipPlanResourceIT {
             .loadingEndTime(UPDATED_LOADING_END_TIME)
             .createTime(UPDATED_CREATE_TIME)
             .updateTime(UPDATED_UPDATE_TIME)
-            .syncTime(UPDATED_SYNC_TIME);
+            .syncTime(UPDATED_SYNC_TIME)
+            .tareAlert(UPDATED_TARE_ALERT)
+            .leaveAlert(UPDATED_LEAVE_ALERT);
         ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(updatedShipPlan);
 
         restShipPlanMockMvc.perform(put("/api/ship-plans")
@@ -1561,6 +1697,8 @@ public class ShipPlanResourceIT {
         assertThat(testShipPlan.getCreateTime()).isEqualTo(UPDATED_CREATE_TIME);
         assertThat(testShipPlan.getUpdateTime()).isEqualTo(UPDATED_UPDATE_TIME);
         assertThat(testShipPlan.getSyncTime()).isEqualTo(UPDATED_SYNC_TIME);
+        assertThat(testShipPlan.isTareAlert()).isEqualTo(UPDATED_TARE_ALERT);
+        assertThat(testShipPlan.isLeaveAlert()).isEqualTo(UPDATED_LEAVE_ALERT);
     }
 
     @Test

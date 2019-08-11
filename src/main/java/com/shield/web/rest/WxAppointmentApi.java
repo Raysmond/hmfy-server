@@ -56,7 +56,7 @@ public class WxAppointmentApi {
      * 预约排队接口
      */
     @PostMapping("/ship_plans/{id}/make_appointment")
-    public ResponseEntity<PlanDTO> makeAppointment(
+    public synchronized ResponseEntity<PlanDTO> makeAppointment(
         @PathVariable String appid,
         @PathVariable Long id) {
         log.debug("REST request to make appointment with ship plan id : {}", id);
@@ -91,6 +91,11 @@ public class WxAppointmentApi {
         appointmentDTO.setApplyId(plan.getPlan().getApplyId());
         appointmentDTO.setVip(false);
         AppointmentDTO appointment = appointmentService.makeAppointment(region.getId(), appointmentDTO);
+
+        if (!appointment.isValid()) {
+            appointmentService.delete(appointment.getId());
+            throw new BadRequestAlertException("当前已无预约额度", ENTITY_NAME, "");
+        }
 
         plan.setAppointment(appointment);
         if (appointment.getStatus().equals(AppointmentStatus.START)) {

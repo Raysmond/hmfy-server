@@ -155,6 +155,21 @@
                     </div>
                 </div>
 
+                <div *ngIf="editForm.get('id').value" class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.loadingStartTime">Allow In Time</label>
+                    <div class="d-flex">
+                        <input
+                               type="datetime-local" class="form-control" name="loadingStartTime" formControlName="loadingStartTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                </div>
+
+                <div *ngIf="editForm.get('id').value" class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.loadingEndTime">Allow In Time</label>
+                    <div class="d-flex">
+                        <input
+                            type="datetime-local" class="form-control" name="loadingEndTime" formControlName="loadingEndTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                </div>
 
                 <!--<div *ngIf="editForm.get('id').value" class="form-group">-->
                     <!--<label class="form-control-label" jhiTranslate="shieldApp.shipPlan.createTime" for="field_createTime">Create Time</label>-->

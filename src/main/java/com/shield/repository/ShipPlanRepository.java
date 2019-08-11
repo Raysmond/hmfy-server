@@ -43,5 +43,12 @@ public interface ShipPlanRepository extends JpaRepository<ShipPlan, Long>, JpaSp
     List<ShipPlan> findByDeliverTime(ZonedDateTime beginDeliverTime, ZonedDateTime endBeginDeliverTime);
 
     Long countAllByDeliverPositionAndDeliverTimeAndAuditStatus(String deliverPosition, ZonedDateTime deliverTime, Integer auditStatus);
+
     Long countAllByDeliverTimeAndAuditStatus(ZonedDateTime deliverTime, Integer auditStatus);
+
+    @Query("select p from ShipPlan p where p.gateTime > ?1 and p.deliverPosition = ?2")
+    List<ShipPlan> findAllByGateTime(ZonedDateTime gateTime, String regionName);
+
+    @Query("select p from ShipPlan p where p.loadingEndTime > ?1 and p.deliverPosition = ?2")
+    List<ShipPlan> findAllByLoadingEndTime(ZonedDateTime loadingEndTime, String regionName);
 }

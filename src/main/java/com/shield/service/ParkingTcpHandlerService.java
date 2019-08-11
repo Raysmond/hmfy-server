@@ -382,16 +382,27 @@ public class ParkingTcpHandlerService {
                         plan.getId(), plan.getAuditStatus(), plan.getTruckNumber(), plan.getApplyId());
                     shouldDelete = true;
                 }
+                if (!plan.getLeaveAlert() && plan.getLoadingEndTime() != null && plan.getLoadingEndTime().plusMinutes(30).isBefore(plan.getLeaveTime())) {
+                    plan.setLeaveAlert(Boolean.TRUE);
+                    shipPlanService.save(plan);
+                    // 拿到了出场纪录，但是超过30m，报警
+                    sendAlertMsgToWxUser(plan);
+                }
             } else if (plan.getLeaveTime() == null
                 && plan.getAuditStatus().equals(Integer.valueOf(3))
-                && plan.getUpdateTime().plusHours(1).isBefore(ZonedDateTime.now())) {
-                // 装完货，再过1h，才将白名单删除
+                && plan.getLoadingEndTime() != null && plan.getLoadingEndTime().plusMinutes(30).isBefore(ZonedDateTime.now())) {
+                // 装完货，再过30m，才将白名单删除
                 log.info("[AUTO] ShipPlan id={} auditStatus = {}, truckNumber: {}, apply_id: {} " +
-                        "need to remove car whitelist, add to delete queue, leaveTime is null and after 1 hour",
+                        "need to remove car whitelist, add to delete queue, leaveTime is null and after 30 minutes",
                     plan.getId(), plan.getAuditStatus(), plan.getTruckNumber(), plan.getApplyId());
                 shouldDelete = true;
 
-                sendAlertMsgToWxUser(plan);
+                // 未拿到出场纪录，超过30m，自动设置出场时间，并且删除白名单
+                plan.setLeaveTime(plan.getLoadingEndTime().plusMinutes(29));
+                shipPlanService.save(plan);
+                carWhiteListService.delayPutSyncShipPlanIdQueue(plan.getId());
+                log.info("ShipPlan id={} truckNumber: {}, apply_id: {}, set leaveTime to {} automatically",
+                    plan.getId(),plan.getTruckNumber(), plan.getApplyId(), plan.getLeaveTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:MM:SS")));
             }
 
             if (shouldDelete) {
@@ -413,7 +424,7 @@ public class ParkingTcpHandlerService {
 
                 wxMpMsgService.sendAlertMsg(appointmentDTO.getUserId(), null,
                     String.format("您好，您的提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
-                    String.format("车牌%s在%s提货之后1小时未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                    String.format("车牌%s在%s提货之后半小时未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
                     remark);
 
                 if (appointmentDTO.getRegionId() != null) {
@@ -422,7 +433,7 @@ public class ParkingTcpHandlerService {
                         if (user.getAuthorities().contains(AuthoritiesConstants.REGION_ADMIN)) {
                             wxMpMsgService.sendAlertMsg(user.getId(), null,
                                 String.format("提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
-                                String.format("车牌%s在%s提货之后1小时未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                                String.format("车牌%s在%s提货之后半小时未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
                                 remark);
                         }
                     }
@@ -431,10 +442,9 @@ public class ParkingTcpHandlerService {
                 for (String openid : Lists.newArrayList("oZBny01fYBk-P1zpYZH00vm3uFQI", "oZBny09ivtl8EN8IVcdQKxyfA65c")) {
                     wxMpMsgService.sendAlertMsg(null, openid,
                         String.format("提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
-                        String.format("车牌%s在%s提货之后1小时未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                        String.format("车牌%s在%s提货之后半小时未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
                         remark);
                 }
-
             }
         } catch (Exception e) {
             log.error("failed to send alert msg sendAlertMsgToWxUser() {}", e.getMessage());
@@ -510,10 +520,11 @@ public class ParkingTcpHandlerService {
                     Thread.sleep(5000);
                 } else {
                     try {
-                        log.info("start to delete car whitelist for truckNumber: {}, ShipPlan id: {}", plan.getTruckNumber(), plan.getId());
+                        log.info("[DB] start to delete car whitelist for truckNumber: {}, ShipPlan id: {}", plan.getTruckNumber(), plan.getId());
                         carWhiteListService.deleteCarWhiteList(plan.getTruckNumber());
                     } catch (Exception e) {
-                        log.error("failed to invoke carWhiteListService.deleteCarWhiteList(), truckNumber: {}, ShipPlan id: {}", plan.getTruckNumber(), plan.getId(), e);
+                        log.error("[DB] failed to invoke carWhiteListService.deleteCarWhiteList(), truckNumber: {}, ShipPlan id: {}", plan.getTruckNumber(), plan.getId(), e);
+                        e.printStackTrace();
                     }
                     redisLongTemplate.opsForSet().add(AUTO_REGISTERED_DELETE_PLAN_IDS, plan.getId());
                     redisLongTemplate.opsForSet().remove(AUTO_DELETE_PLAN_ID_QUEUE, plan.getId());
