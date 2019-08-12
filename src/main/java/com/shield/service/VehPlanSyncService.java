@@ -142,6 +142,7 @@ public class VehPlanSyncService {
         ShipPlan newShipPlan = new ShipPlan();
         newShipPlan.setApplyId(plan.getApplyId());
         newShipPlan.setApplyNumber(plan.getApplyNumber());
+        newShipPlan.setCompany(plan.getCustomer());
         newShipPlan.setTruckNumber(plan.getTruckNumber());
         newShipPlan.setDeliverPosition(plan.getDeliverPosition());
         newShipPlan.setDeliverTime(plan.getDeliverTime());

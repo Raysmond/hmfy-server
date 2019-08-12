@@ -24,6 +24,9 @@ public class VehDelivPlan {
     @Column(name = "fd_ApplyNumber")
     private String applyNumber;
 
+    @Column(name = "fd_Customer")
+    private String customer;
+
     @Column(name = "fd_TruckNumber")
     private String truckNumber;
 

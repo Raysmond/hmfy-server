@@ -58,6 +58,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("select u from User u where u.login <> 'anonymoususer' and (u.truckNumber like ?1 or u.firstName like ?1 or u.phone like ?1)")
     Page<User> searchAll(String query, Pageable pageable);
 
+    List<User> findByTruckNumber(String truckNumber);
+
     @Query("select u from User u where u.region.id = ?2 and u.login <> 'anonymoususer' and (u.truckNumber like ?1 or u.firstName like ?1 or u.phone like ?1)")
     Page<User> searchAllByRegionId(String query, Long regionId, Pageable pageable);
 }

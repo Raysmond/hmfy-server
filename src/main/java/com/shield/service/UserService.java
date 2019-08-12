@@ -369,6 +369,10 @@ public class UserService {
             });
     }
 
+    List<User> findByTruckNumber(String truckNumber) {
+        return userRepository.findByTruckNumber(truckNumber);
+    }
+
     /**
      * Gets a list of all the authorities.
      *

@@ -8,10 +8,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.shield.chepaipark.service.CarWhiteListService;
-import com.shield.domain.Appointment;
-import com.shield.domain.ParkMsg;
-import com.shield.domain.Region;
-import com.shield.domain.User;
+import com.shield.domain.*;
 import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.domain.enumeration.ParkMsgType;
 import com.shield.domain.enumeration.ParkingConnectMethod;
@@ -47,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -354,6 +352,56 @@ public class ParkingTcpHandlerService {
         }
     }
 
+    private static final Set<String> VIP_CUSTOMER_COMPANIES = Sets.newHashSet("上海宝龙建材有限公司");
+
+    /**
+     * 自动预约VIP计划
+     */
+    @Scheduled(fixedRate = 60 * 1000)
+    public void autoRegisterVipPlans() {
+        ZonedDateTime beginTime = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+        ZonedDateTime endTime = ZonedDateTime.now();
+        List<RegionDTO> regions = regionService.findAll(PageRequest.of(0, 10000)).getContent();
+
+        for (RegionDTO region : regions) {
+            if (region.isOpen() && StringUtils.isNotBlank(region.getParkId())) {
+                List<ShipPlanDTO> shipPlanDTOS = shipPlanService
+                    .findAllByDeliverTime(region.getName(), beginTime, endTime, 1)
+                    .stream().filter(it -> it.getCompany() != null && VIP_CUSTOMER_COMPANIES.contains(it.getCompany()))
+                    .collect(Collectors.toList());
+                if (CollectionUtils.isEmpty(shipPlanDTOS)) {
+                    continue;
+                }
+                List<Long> applyIds = shipPlanDTOS.stream().map(ShipPlanDTO::getApplyId).collect(Collectors.toList());
+                Map<Long, AppointmentDTO> appointments = appointmentService.findLastByApplyIdIn(applyIds);
+                List<Long> newApplyIds = applyIds.stream().filter(it -> !appointments.containsKey(it) || !appointments.get(it).isValid()).collect(Collectors.toList());
+                if (CollectionUtils.isEmpty(newApplyIds)) {
+                    continue;
+                }
+                log.info("Find {} apply_ids need to make vip appointment...", newApplyIds.size());
+                shipPlanDTOS = shipPlanDTOS.stream().filter(it -> newApplyIds.contains(it.getApplyId())).collect(Collectors.toList());
+                for (ShipPlanDTO planDTO : shipPlanDTOS) {
+                    log.info("ShipPlan apply_id={}, truckNumber: {}, company: {}, need to make vip appointment...", planDTO.getApplyId(), planDTO.getTruckNumber(), planDTO.getCompany());
+                    List<User> users = userService.findByTruckNumber(planDTO.getTruckNumber());
+                    AppointmentDTO appointmentDTO = new AppointmentDTO();
+                    appointmentDTO.setLicensePlateNumber(planDTO.getTruckNumber());
+                    appointmentDTO.setDriver(users.size() > 0 ? users.get(0).getFirstName() : planDTO.getTruckNumber());
+                    appointmentDTO.setRegionId(region.getId());
+                    appointmentDTO.setApplyId(planDTO.getApplyId());
+                    appointmentDTO.setVip(true);
+                    AppointmentDTO appointment = appointmentService.makeAppointment(region.getId(), appointmentDTO);
+                    if (!appointment.isValid() || !appointment.getStatus().equals(AppointmentStatus.START)) {
+                        log.info("Failed to make vip appointment, not enough quota..");
+                        appointmentService.delete(appointment.getId());
+                        break;
+                    } else {
+                        log.info("ShipPlan apply_id={}, truckNumber: {}, company: {}, made vip appointment successfully", planDTO.getApplyId(), planDTO.getTruckNumber(), planDTO.getCompany());
+                    }
+                }
+            }
+        }
+    }
+
 
     @Scheduled(fixedRate = 60 * 1000)
     public void putAutoDeleteRegisterCarWhiteList() throws InterruptedException {
@@ -402,7 +450,7 @@ public class ParkingTcpHandlerService {
                 shipPlanService.save(plan);
                 carWhiteListService.delayPutSyncShipPlanIdQueue(plan.getId());
                 log.info("ShipPlan id={} truckNumber: {}, apply_id: {}, set leaveTime to {} automatically",
-                    plan.getId(),plan.getTruckNumber(), plan.getApplyId(), plan.getLeaveTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:MM:SS")));
+                    plan.getId(), plan.getTruckNumber(), plan.getApplyId(), plan.getLeaveTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:MM:SS")));
             }
 
             if (shouldDelete) {
