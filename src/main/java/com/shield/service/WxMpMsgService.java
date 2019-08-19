@@ -194,7 +194,7 @@ public class WxMpMsgService {
                 + appointment.getStartTime().plusHours(getRegionValidTime(appointment.getRegionId())).format(DateTimeFormatter.ofPattern("HH:mm"));
 
             data.add(
-                new WxMpTemplateData("first", String.format("您在%s %s 提货预约已过期，被系统自动取消入场资格。如需入场，请重新取号预约。",
+                new WxMpTemplateData("first", String.format("您在%s %s 提货预约已过期，被系统自动取消入场资格。如需入场，请在一小时之后重新取号预约。",
                     appointment.getStartTime().format(DateTimeFormatter.ofPattern("MM月dd日")),
                     allowPeriod
                 )));

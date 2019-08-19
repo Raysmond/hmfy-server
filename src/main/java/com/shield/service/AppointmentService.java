@@ -64,4 +64,8 @@ public interface AppointmentService {
 
     void updateCarInAndOutTime(String parkId, String truckNumber, String service, String carInTime, String carOutTime);
 
+    boolean isUserInCancelPenalty(Long userId);
+
+    boolean isUserInExpirePenalty(Long userId);
+
 }

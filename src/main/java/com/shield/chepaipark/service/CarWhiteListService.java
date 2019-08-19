@@ -135,7 +135,7 @@ public class CarWhiteListService {
 //            ZonedDateTime validTime = appointment.getStartTime().plusHours(region.getValidTime());
             ZonedDateTime validTime = appointment.getStartTime().plusHours(6);
             if (appointment.isVip() != null && appointment.isVip()) {
-                validTime = appointment.getStartTime().plusHours(12);
+                validTime = appointment.getStartTime().plusHours(24);
             }
             registerCarWhiteList(
                 appointment.getLicensePlateNumber(),

@@ -389,6 +389,7 @@ public class ParkingTcpHandlerService {
                     appointmentDTO.setRegionId(region.getId());
                     appointmentDTO.setApplyId(planDTO.getApplyId());
                     appointmentDTO.setVip(true);
+                    appointmentDTO.setUserId(users.size() > 0 ? users.get(0).getId() : 3L);
                     AppointmentDTO appointment = appointmentService.makeAppointment(region.getId(), appointmentDTO);
                     if (!appointment.isValid() || !appointment.getStatus().equals(AppointmentStatus.START)) {
                         log.info("Failed to make vip appointment, not enough quota..");

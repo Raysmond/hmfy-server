@@ -8,6 +8,7 @@ import com.shield.chepaipark.service.CarWhiteListService;
 import com.shield.domain.Appointment;
 import com.shield.domain.Region;
 import com.shield.domain.ShipPlan;
+import com.shield.domain.User;
 import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.domain.enumeration.ParkingConnectMethod;
 import com.shield.repository.RegionRepository;
@@ -38,6 +39,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.shield.service.ParkingTcpHandlerService.*;
@@ -72,11 +74,23 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Autowired
     @Qualifier("redisLongTemplate")
     private RedisTemplate<String, Long> redisLongTemplate;
+
+    @Autowired
+    RedisTemplate<String, String> redisTemplate;
+
     private static final String APPOINTMENT_NUMBER_KEY = "appointment_%s_%s";
     private static final String QUEUE_NUMBER_KEY = "queue_number_%s_%s";
     private static final Long INITIAL_APPOINTMENT_NUMBER = 10000L;
     private static final Long INITIAL_QUEUE_NUMBER = 100L;
     public static final String REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN = "sync_ship_plan_ids";
+
+    // 预约取消后，10min之内不能重新预约
+    private static final Long PENALTY_TIME_MINUTES_CANCEL = 10L;
+    private static final String PENALTY_TIME_MINUTES_CANCEL_USER_ID_KEY = "penalty_cancel_user_id:%d";
+
+    // 自动过期的，60min之内不能重新预约
+    private static final Long PENALTY_TIME_MINUTES_EXPIRE = 60L;
+    private static final String PENALTY_TIME_MINUTES_EXPIRE_USER_ID_KEY = "penalty_expire_user_id:%d";
 
     private static final Set<AppointmentStatus> ACTIVE_STATUS = Sets.newHashSet(
         AppointmentStatus.START,
@@ -170,6 +184,33 @@ public class AppointmentServiceImpl implements AppointmentService {
         return null;
     }
 
+
+    @Override
+    public boolean isUserInCancelPenalty(Long userId) {
+        String k = String.format(PENALTY_TIME_MINUTES_CANCEL_USER_ID_KEY, userId);
+        return redisLongTemplate.hasKey(k);
+    }
+
+    private void putUserInCancelPenalty(Long userId) {
+        String k = String.format(PENALTY_TIME_MINUTES_CANCEL_USER_ID_KEY, userId);
+        redisTemplate.opsForValue().set(k, "1");
+        redisTemplate.expire(k, PENALTY_TIME_MINUTES_CANCEL, TimeUnit.MINUTES);
+        log.info("Put userId {} in cancel penalty", userId);
+    }
+
+    @Override
+    public boolean isUserInExpirePenalty(Long userId) {
+        String k = String.format(PENALTY_TIME_MINUTES_EXPIRE_USER_ID_KEY, userId);
+        return redisLongTemplate.hasKey(k);
+    }
+
+    private void putUserInExpirePenalty(Long userId) {
+        String k = String.format(PENALTY_TIME_MINUTES_EXPIRE_USER_ID_KEY, userId);
+        redisTemplate.opsForValue().set(k, "1");
+        redisTemplate.expire(k, PENALTY_TIME_MINUTES_EXPIRE, TimeUnit.MINUTES);
+        log.info("Put userId {} in expire penalty", userId);
+    }
+
     @Override
     public AppointmentDTO cancelAppointment(Long appointmentId) {
         Appointment appointment = appointmentRepository.getOne(appointmentId);
@@ -191,6 +232,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                     shipPlanRepository.save(plan);
                     redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
                 }
+            }
+
+            if (!appointment.isVip() && appointment.getUser() != null) {
+                putUserInCancelPenalty(appointment.getUser().getId());
             }
 
             wxMpMsgService.sendAppointmentCancelMsg(appointmentMapper.toDto(appointment));
@@ -339,7 +384,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setCreateTime(ZonedDateTime.now());
         appointment.setUpdateTime(ZonedDateTime.now());
         appointment.setRegion(region);
-        appointment.setUser(userService.getUserWithAuthorities().get());
+        if (appointmentDTO.getUserId() != null) {
+            appointment.setUser(userService.getUserWithAuthorities(appointmentDTO.getUserId()).get());
+        } else {
+            Optional<User> user = userService.getUserWithAuthorities();
+            user.ifPresent(appointment::setUser);
+        }
         appointment.setVip(appointmentDTO.isVip());
         appointment.setValid(true);
         appointment.setApplyId(appointmentDTO.getApplyId());
@@ -408,7 +458,8 @@ public class AppointmentServiceImpl implements AppointmentService {
             Long validHours = region.getValidTime().longValue();
             List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.START, Boolean.TRUE, getTodayStartTime());
             for (Appointment appointment : appointments) {
-                if (appointment.getStartTime() == null || appointment.getStartTime().plusHours(validHours).isBefore(ZonedDateTime.now())) {
+                if (!appointment.isVip() && (appointment.getStartTime() == null || appointment.getStartTime().plusHours(validHours).isBefore(ZonedDateTime.now()))) {
+                    // vip 的不过期
                     log.info("Appointment [{}] expired after {} hours", appointment.getId(), validHours);
                     appointment.setUpdateTime(ZonedDateTime.now());
                     appointment.setValid(false);
@@ -424,6 +475,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                             plan.setAllowInTime(ZonedDateTime.now().plusHours(region.getValidTime()));
                             shipPlanRepository.save(plan);
                             redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
+                        }
+
+                        if (appointment.getUser() != null) {
+                            putUserInExpirePenalty(appointment.getUser().getId());
                         }
                     }
 

@@ -67,6 +67,14 @@ public class WxAppointmentApi {
             throw new BadRequestAlertException("不具备预约员权限", ENTITY_NAME, "");
         }
 
+        if (appointmentService.isUserInCancelPenalty(user.getId())) {
+            throw new BadRequestAlertException("取消预约后，10分钟之内无法预约！", ENTITY_NAME, "");
+        }
+
+        if (appointmentService.isUserInExpirePenalty(user.getId())) {
+            throw new BadRequestAlertException("预约过期后，一小时之内无法预约！", ENTITY_NAME, "");
+        }
+
         Pageable page = PageRequest.of(0, 1, Sort.Direction.DESC, "deliverTime");
         Page<PlanDTO> result = shipPlanService.getAllByTruckNumber(page, user.getTruckNumber(), id);
         if (result.getContent().isEmpty()) {

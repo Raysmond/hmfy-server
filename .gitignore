@@ -145,4 +145,5 @@ Desktop.ini
 .eslintcache
 
 
+build.gradle-e
 src/main/docker/certificates
