@@ -27,6 +27,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
     @Query("select count(a.id) from Appointment a where a.region.id = ?1 and a.createTime > ?2 and a.valid = true and a.status in ('START', 'ENTER')")
     Long countAllValidByRegionIdAndCreateTime(Long regionId, ZonedDateTime begin);
 
+    @Query("select count(a.id) from Appointment a where a.region.id = ?1 and a.createTime > ?2 and a.valid = true and a.vip = true and a.status in ('START', 'ENTER')")
+    Long countAllVipValidByRegionIdAndCreateTime(Long regionId, ZonedDateTime begin);
+
     @Query("select count(a.id) from Appointment a where a.region.id = ?1 and a.valid = true and a.status = 'WAIT'")
     Long countAllWaitByRegionId(Long regionId);
 

@@ -101,6 +101,12 @@ public class ShipPlanResourceIT {
     private static final Boolean DEFAULT_LEAVE_ALERT = false;
     private static final Boolean UPDATED_LEAVE_ALERT = true;
 
+    private static final Double DEFAULT_NET_WEIGHT = 1D;
+    private static final Double UPDATED_NET_WEIGHT = 2D;
+
+    private static final String DEFAULT_WEIGHER_NO = "AAAAAAAAAA";
+    private static final String UPDATED_WEIGHER_NO = "BBBBBBBBBB";
+
     @Autowired
     private ShipPlanRepository shipPlanRepository;
 
@@ -170,7 +176,9 @@ public class ShipPlanResourceIT {
             .updateTime(DEFAULT_UPDATE_TIME)
             .syncTime(DEFAULT_SYNC_TIME)
             .tareAlert(DEFAULT_TARE_ALERT)
-            .leaveAlert(DEFAULT_LEAVE_ALERT);
+            .leaveAlert(DEFAULT_LEAVE_ALERT)
+            .netWeight(DEFAULT_NET_WEIGHT)
+            .weigherNo(DEFAULT_WEIGHER_NO);
         return shipPlan;
     }
     /**
@@ -199,7 +207,9 @@ public class ShipPlanResourceIT {
             .updateTime(UPDATED_UPDATE_TIME)
             .syncTime(UPDATED_SYNC_TIME)
             .tareAlert(UPDATED_TARE_ALERT)
-            .leaveAlert(UPDATED_LEAVE_ALERT);
+            .leaveAlert(UPDATED_LEAVE_ALERT)
+            .netWeight(UPDATED_NET_WEIGHT)
+            .weigherNo(UPDATED_WEIGHER_NO);
         return shipPlan;
     }
 
@@ -243,6 +253,8 @@ public class ShipPlanResourceIT {
         assertThat(testShipPlan.getSyncTime()).isEqualTo(DEFAULT_SYNC_TIME);
         assertThat(testShipPlan.isTareAlert()).isEqualTo(DEFAULT_TARE_ALERT);
         assertThat(testShipPlan.isLeaveAlert()).isEqualTo(DEFAULT_LEAVE_ALERT);
+        assertThat(testShipPlan.getNetWeight()).isEqualTo(DEFAULT_NET_WEIGHT);
+        assertThat(testShipPlan.getWeigherNo()).isEqualTo(DEFAULT_WEIGHER_NO);
     }
 
     @Test
@@ -485,7 +497,9 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
             .andExpect(jsonPath("$.[*].syncTime").value(hasItem(sameInstant(DEFAULT_SYNC_TIME))))
             .andExpect(jsonPath("$.[*].tareAlert").value(hasItem(DEFAULT_TARE_ALERT.booleanValue())))
-            .andExpect(jsonPath("$.[*].leaveAlert").value(hasItem(DEFAULT_LEAVE_ALERT.booleanValue())));
+            .andExpect(jsonPath("$.[*].leaveAlert").value(hasItem(DEFAULT_LEAVE_ALERT.booleanValue())))
+            .andExpect(jsonPath("$.[*].netWeight").value(hasItem(DEFAULT_NET_WEIGHT.doubleValue())))
+            .andExpect(jsonPath("$.[*].weigherNo").value(hasItem(DEFAULT_WEIGHER_NO.toString())));
     }
     
     @Test
@@ -517,7 +531,9 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)))
             .andExpect(jsonPath("$.syncTime").value(sameInstant(DEFAULT_SYNC_TIME)))
             .andExpect(jsonPath("$.tareAlert").value(DEFAULT_TARE_ALERT.booleanValue()))
-            .andExpect(jsonPath("$.leaveAlert").value(DEFAULT_LEAVE_ALERT.booleanValue()));
+            .andExpect(jsonPath("$.leaveAlert").value(DEFAULT_LEAVE_ALERT.booleanValue()))
+            .andExpect(jsonPath("$.netWeight").value(DEFAULT_NET_WEIGHT.doubleValue()))
+            .andExpect(jsonPath("$.weigherNo").value(DEFAULT_WEIGHER_NO.toString()));
     }
 
     @Test
@@ -1560,6 +1576,84 @@ public class ShipPlanResourceIT {
 
     @Test
     @Transactional
+    public void getAllShipPlansByNetWeightIsEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where netWeight equals to DEFAULT_NET_WEIGHT
+        defaultShipPlanShouldBeFound("netWeight.equals=" + DEFAULT_NET_WEIGHT);
+
+        // Get all the shipPlanList where netWeight equals to UPDATED_NET_WEIGHT
+        defaultShipPlanShouldNotBeFound("netWeight.equals=" + UPDATED_NET_WEIGHT);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByNetWeightIsInShouldWork() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where netWeight in DEFAULT_NET_WEIGHT or UPDATED_NET_WEIGHT
+        defaultShipPlanShouldBeFound("netWeight.in=" + DEFAULT_NET_WEIGHT + "," + UPDATED_NET_WEIGHT);
+
+        // Get all the shipPlanList where netWeight equals to UPDATED_NET_WEIGHT
+        defaultShipPlanShouldNotBeFound("netWeight.in=" + UPDATED_NET_WEIGHT);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByNetWeightIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where netWeight is not null
+        defaultShipPlanShouldBeFound("netWeight.specified=true");
+
+        // Get all the shipPlanList where netWeight is null
+        defaultShipPlanShouldNotBeFound("netWeight.specified=false");
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByWeigherNoIsEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where weigherNo equals to DEFAULT_WEIGHER_NO
+        defaultShipPlanShouldBeFound("weigherNo.equals=" + DEFAULT_WEIGHER_NO);
+
+        // Get all the shipPlanList where weigherNo equals to UPDATED_WEIGHER_NO
+        defaultShipPlanShouldNotBeFound("weigherNo.equals=" + UPDATED_WEIGHER_NO);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByWeigherNoIsInShouldWork() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where weigherNo in DEFAULT_WEIGHER_NO or UPDATED_WEIGHER_NO
+        defaultShipPlanShouldBeFound("weigherNo.in=" + DEFAULT_WEIGHER_NO + "," + UPDATED_WEIGHER_NO);
+
+        // Get all the shipPlanList where weigherNo equals to UPDATED_WEIGHER_NO
+        defaultShipPlanShouldNotBeFound("weigherNo.in=" + UPDATED_WEIGHER_NO);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByWeigherNoIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where weigherNo is not null
+        defaultShipPlanShouldBeFound("weigherNo.specified=true");
+
+        // Get all the shipPlanList where weigherNo is null
+        defaultShipPlanShouldNotBeFound("weigherNo.specified=false");
+    }
+
+    @Test
+    @Transactional
     public void getAllShipPlansByUserIsEqualToSomething() throws Exception {
         // Initialize the database
         User user = UserResourceIT.createEntity(em);
@@ -1602,7 +1696,9 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
             .andExpect(jsonPath("$.[*].syncTime").value(hasItem(sameInstant(DEFAULT_SYNC_TIME))))
             .andExpect(jsonPath("$.[*].tareAlert").value(hasItem(DEFAULT_TARE_ALERT.booleanValue())))
-            .andExpect(jsonPath("$.[*].leaveAlert").value(hasItem(DEFAULT_LEAVE_ALERT.booleanValue())));
+            .andExpect(jsonPath("$.[*].leaveAlert").value(hasItem(DEFAULT_LEAVE_ALERT.booleanValue())))
+            .andExpect(jsonPath("$.[*].netWeight").value(hasItem(DEFAULT_NET_WEIGHT.doubleValue())))
+            .andExpect(jsonPath("$.[*].weigherNo").value(hasItem(DEFAULT_WEIGHER_NO)));
 
         // Check, that the count call also returns 1
         restShipPlanMockMvc.perform(get("/api/ship-plans/count?sort=id,desc&" + filter))
@@ -1668,7 +1764,9 @@ public class ShipPlanResourceIT {
             .updateTime(UPDATED_UPDATE_TIME)
             .syncTime(UPDATED_SYNC_TIME)
             .tareAlert(UPDATED_TARE_ALERT)
-            .leaveAlert(UPDATED_LEAVE_ALERT);
+            .leaveAlert(UPDATED_LEAVE_ALERT)
+            .netWeight(UPDATED_NET_WEIGHT)
+            .weigherNo(UPDATED_WEIGHER_NO);
         ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(updatedShipPlan);
 
         restShipPlanMockMvc.perform(put("/api/ship-plans")
@@ -1699,6 +1797,8 @@ public class ShipPlanResourceIT {
         assertThat(testShipPlan.getSyncTime()).isEqualTo(UPDATED_SYNC_TIME);
         assertThat(testShipPlan.isTareAlert()).isEqualTo(UPDATED_TARE_ALERT);
         assertThat(testShipPlan.isLeaveAlert()).isEqualTo(UPDATED_LEAVE_ALERT);
+        assertThat(testShipPlan.getNetWeight()).isEqualTo(UPDATED_NET_WEIGHT);
+        assertThat(testShipPlan.getWeigherNo()).isEqualTo(UPDATED_WEIGHER_NO);
     }
 
     @Test

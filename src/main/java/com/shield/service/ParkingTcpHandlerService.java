@@ -430,6 +430,7 @@ public class ParkingTcpHandlerService {
                             "need to remove car whitelist, add to delete queue",
                         plan.getId(), plan.getAuditStatus(), plan.getTruckNumber(), plan.getApplyId());
                     shouldDelete = true;
+                    appointmentService.updateStatusAfterCancelShipPlan(plan.getId());
                 }
                 if (!plan.getLeaveAlert() && plan.getLoadingEndTime() != null && plan.getLoadingEndTime().plusMinutes(30).isBefore(plan.getLeaveTime())) {
                     plan.setLeaveAlert(Boolean.TRUE);

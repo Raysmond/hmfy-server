@@ -72,11 +72,23 @@ public class VehPlanSyncService {
                 .findFirst()
                 .map(it -> {
                     if (!it.getAuditStatus().equals(plan.getAuditStatus())
+                        || (it.getNetWeight() == null && plan.getNetWeight() != null)
+                        || (it.getWeigherNo() == null && plan.getWeigherNo() != null)
                         || (it.getLoadingStartTime() == null && plan.getTareTime() != null)
-                        || (it.getLoadingEndTime() == null && plan.getWeightTime() != null) ) {
+                        || (it.getLoadingEndTime() == null && plan.getWeightTime() != null)) {
+                        if (it.getLoadingStartTime() == null) {
+                            it.setLoadingStartTime(plan.getTareTime());
+                        }
+                        if (it.getLoadingEndTime() == null) {
+                            it.setLoadingEndTime(plan.getWeightTime());
+                        }
+                        if (it.getNetWeight() == null) {
+                            it.setNetWeight(plan.getNetWeight());
+                        }
+                        if (it.getWeigherNo() == null) {
+                            it.setWeigherNo(plan.getWeigherNo());
+                        }
                         it.setAuditStatus(plan.getAuditStatus());
-                        it.setLoadingStartTime(plan.getTareTime());
-                        it.setLoadingEndTime(plan.getWeightTime());
                         it.setUpdateTime(ZonedDateTime.now());
                         changedApplyIds.add(plan.getApplyId());
                     }

@@ -65,6 +65,10 @@ public class ShipPlanCriteria implements Serializable, Criteria {
 
     private BooleanFilter leaveAlert;
 
+    private DoubleFilter netWeight;
+
+    private StringFilter weigherNo;
+
     private LongFilter userId;
 
     public ShipPlanCriteria(){
@@ -91,6 +95,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.syncTime = other.syncTime == null ? null : other.syncTime.copy();
         this.tareAlert = other.tareAlert == null ? null : other.tareAlert.copy();
         this.leaveAlert = other.leaveAlert == null ? null : other.leaveAlert.copy();
+        this.netWeight = other.netWeight == null ? null : other.netWeight.copy();
+        this.weigherNo = other.weigherNo == null ? null : other.weigherNo.copy();
         this.userId = other.userId == null ? null : other.userId.copy();
     }
 
@@ -259,6 +265,22 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.leaveAlert = leaveAlert;
     }
 
+    public DoubleFilter getNetWeight() {
+        return netWeight;
+    }
+
+    public void setNetWeight(DoubleFilter netWeight) {
+        this.netWeight = netWeight;
+    }
+
+    public StringFilter getWeigherNo() {
+        return weigherNo;
+    }
+
+    public void setWeigherNo(StringFilter weigherNo) {
+        this.weigherNo = weigherNo;
+    }
+
     public LongFilter getUserId() {
         return userId;
     }
@@ -298,6 +320,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
             Objects.equals(syncTime, that.syncTime) &&
             Objects.equals(tareAlert, that.tareAlert) &&
             Objects.equals(leaveAlert, that.leaveAlert) &&
+            Objects.equals(netWeight, that.netWeight) &&
+            Objects.equals(weigherNo, that.weigherNo) &&
             Objects.equals(userId, that.userId);
     }
 
@@ -324,6 +348,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         syncTime,
         tareAlert,
         leaveAlert,
+        netWeight,
+        weigherNo,
         userId
         );
     }
@@ -351,6 +377,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
                 (syncTime != null ? "syncTime=" + syncTime + ", " : "") +
                 (tareAlert != null ? "tareAlert=" + tareAlert + ", " : "") +
                 (leaveAlert != null ? "leaveAlert=" + leaveAlert + ", " : "") +
+                (netWeight != null ? "netWeight=" + netWeight + ", " : "") +
+                (weigherNo != null ? "weigherNo=" + weigherNo + ", " : "") +
                 (userId != null ? "userId=" + userId + ", " : "") +
             "}";
     }

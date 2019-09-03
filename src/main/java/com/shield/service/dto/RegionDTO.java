@@ -36,7 +36,7 @@ public class RegionDTO implements Serializable {
 
     private String parkId;
 
-    private Integer remainQuota;
+    private Integer remainQuota = 0;
     private Integer drivers = 0;
 
     private ParkingConnectMethod parkingConnectMethod;

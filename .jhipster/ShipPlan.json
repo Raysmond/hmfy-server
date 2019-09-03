@@ -117,6 +117,14 @@
           "fieldValidateRules": [
             "required"
           ]
+        },
+        {
+          "fieldName": "netWeight",
+          "fieldType": "Double"
+        },
+        {
+          "fieldName": "weigherNo",
+          "fieldType": "String"
         }
     ],
     "changelogDate": "20190601171803",

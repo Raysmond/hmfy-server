@@ -79,6 +79,10 @@ public class ShipPlanDTO implements Serializable {
         this.leaveAlert = leaveAlert;
     }
 
+    private Double netWeight;
+
+    private String weigherNo;
+
     public Long getId() {
         return id;
     }
@@ -239,7 +243,21 @@ public class ShipPlanDTO implements Serializable {
         this.loadingEndTime = loadingEndTime;
     }
 
+    public Double getNetWeight() {
+        return netWeight;
+    }
 
+    public void setNetWeight(Double netWeight) {
+        this.netWeight = netWeight;
+    }
+
+    public String getWeigherNo() {
+        return weigherNo;
+    }
+
+    public void setWeigherNo(String weigherNo) {
+        this.weigherNo = weigherNo;
+    }
 
     @Override
     public boolean equals(Object o) {

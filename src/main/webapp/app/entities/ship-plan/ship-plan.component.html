@@ -46,9 +46,16 @@
                     </div>
                     <div class="col-auto">
                         <div class="form-group mb-2">
-                            <label class="form-control-label">提货日期</label>
+                            <label class="form-control-label">提货开始日期</label>
                             <input id="field_deliverTimeBegin" type="date" class="form-control" name="deliverTimeBegin"
                                    formControlName="deliverTimeBegin" placeholder="YYYY-MM-DD"/>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="form-group mb-2">
+                            <label class="form-control-label">提货截止日期</label>
+                            <input id="field_deliverTimeEnd" type="date" class="form-control" name="deliverTimeEnd"
+                                   formControlName="deliverTimeEnd" placeholder="YYYY-MM-DD"/>
                         </div>
                     </div>
                     <!--<div class="col-auto">-->
@@ -92,6 +99,7 @@
                             <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
                         <th><span jhiTranslate="shieldApp.shipPlan.productName">Product Name</span></th>
+                        <th><span jhiTranslate="shieldApp.shipPlan.netWeight">Net Weight</span></th>
                         <th><span jhiTranslate="shieldApp.shipPlan.deliverPosition">Deliver Position</span></th>
                         <th jhiSortBy="gateTime">
                             <span jhiTranslate="shieldApp.shipPlan.gateTime">Gate Time</span>
@@ -102,6 +110,7 @@
                             <span jhiTranslate="shieldApp.shipPlan.loadingStartTime">loadingStartTime</span>
                             <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
+                        <th><span jhiTranslate="shieldApp.shipPlan.weigherNo">Weigher No</span></th>
                         <th>
                             <span>上磅告警</span>
                         </th>
@@ -145,9 +154,13 @@
                             <span class="badge badge-info" *ngIf="shipPlan.auditStatus==3">已提货</span>
                         </td>
                         <td>{{shipPlan.productName}}</td>
+                        <td>
+                            <span *ngIf="shipPlan.netWeight">{{shipPlan.netWeight}}吨</span>
+                        </td>
                         <td>{{shipPlan.deliverPosition}}</td>
                         <td>{{shipPlan.gateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
                         <td>{{shipPlan.loadingStartTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                        <td>{{shipPlan.weigherNo}}</td>
                         <td>
                             <span class="badge badge-danger" *ngIf="shipPlan.tareAlert">超时</span>
                             <span class="badge badge-success" *ngIf="shipPlan.loadingStartTime && !shipPlan.tareAlert">正常</span>

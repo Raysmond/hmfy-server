@@ -21,6 +21,8 @@ export interface IShipPlan {
   syncTime?: Moment;
   tareAlert?: boolean;
   leaveAlert?: boolean;
+  netWeight?: number;
+  weigherNo?: string;
   userLogin?: string;
   userId?: number;
 }
@@ -47,6 +49,8 @@ export class ShipPlan implements IShipPlan {
     public syncTime?: Moment,
     public tareAlert?: boolean,
     public leaveAlert?: boolean,
+    public netWeight?: number,
+    public weigherNo?: string,
     public userLogin?: string,
     public userId?: number
   ) {

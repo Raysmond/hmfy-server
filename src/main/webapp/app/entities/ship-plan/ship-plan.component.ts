@@ -38,7 +38,7 @@ export class ShipPlanComponent implements OnInit, OnDestroy {
     auditStatus: null,
     deliverPosition: null,
     deliverTimeBegin: this.formatDate(new Date()),
-    deliverTimeEnd: null
+    deliverTimeEnd: this.formatDate(new Date())
   });
 
   regions: IRegion[];

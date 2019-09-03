@@ -18,7 +18,9 @@ import com.shield.repository.AppointmentRepository;
 import com.shield.service.UserService;
 import com.shield.service.WxMpMsgService;
 import com.shield.service.dto.AppointmentDTO;
+import com.shield.service.dto.RegionDTO;
 import com.shield.service.mapper.AppointmentMapper;
+import com.shield.service.mapper.RegionMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Autowired
     private AppointmentMapper appointmentMapper;
+
+    @Autowired
+    private RegionMapper regionMapper;
 
     @Autowired
     private RegionRepository regionRepository;
@@ -202,6 +207,24 @@ public class AppointmentServiceImpl implements AppointmentService {
     public boolean isUserInExpirePenalty(Long userId) {
         String k = String.format(PENALTY_TIME_MINUTES_EXPIRE_USER_ID_KEY, userId);
         return redisLongTemplate.hasKey(k);
+    }
+
+    /**
+     * 如果计划取消了，还未进厂，则将预约作废
+     */
+    @Override
+    public void updateStatusAfterCancelShipPlan(Long applyId) {
+        List<Appointment> appointments = appointmentRepository.findByApplyIdIn(Lists.newArrayList(applyId));
+        if (!CollectionUtils.isEmpty(appointments)) {
+            appointments.sort(Comparator.comparing(Appointment::getCreateTime).reversed());
+            Appointment appointment = appointments.get(0);
+            if (appointment.isValid() && appointment.getStatus() == AppointmentStatus.START) {
+                appointment.setValid(Boolean.FALSE);
+                appointmentRepository.save(appointment);
+                log.info("Set appointment[id={}], truckNumber: {} valid=false after ShipPlan[applyId={}] is canceled",
+                    appointment.getId(), appointment.getLicensePlateNumber(), applyId);
+            }
+        }
     }
 
     private void putUserInExpirePenalty(Long userId) {
@@ -410,12 +433,34 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentMapper.toDto(appointment);
     }
 
+    /**
+     * 统计剩余取号名额
+     *
+     * @param region
+     * @param isVip
+     */
+    @Override
+    public void countRemainQuota(RegionDTO region, boolean isVip) {
+        // 统计剩余取号名额
+        ZonedDateTime startTime = ZonedDateTime.now().minusHours(12);
+        long current = appointmentRepository.countAllValidByRegionIdAndCreateTime(region.getId(), startTime);
+        long curVip = appointmentRepository.countAllVipValidByRegionIdAndCreateTime(region.getId(), startTime);
+        long total = region.getQuota();
+        if (isVip) {
+            total = region.getQuota() + region.getVipQuota();
+        } else if (curVip > 0) {
+            // vip 额度在不超额时，不侵占普通取号名额
+            total = Math.min(curVip + region.getQuota(), region.getQuota() + region.getVipQuota());
+        }
+        region.setRemainQuota((int) (total - current));
+        region.setQuota((int) total);
+    }
+
     private boolean tryMakeAppointment(Appointment appointment) {
         synchronized (this) {
-            Region region = appointment.getRegion();
-            Long current = appointmentRepository.countAllValidByRegionIdAndCreateTime(region.getId(), ZonedDateTime.now().minusHours(12));
-            log.debug("Region {}: [{}] status: {}/{}", region.getId(), region.getName(), current, region.getQuota());
-            if (current < region.getQuota() || (appointment.isVip() && current < (region.getQuota() + region.getVipQuota()))) {
+            RegionDTO region = regionMapper.toDto(appointment.getRegion());
+            this.countRemainQuota(region, appointment.isVip());
+            if (region.getRemainQuota() > 0) {
                 appointment.setStatus(AppointmentStatus.START);
                 appointment.setValid(Boolean.TRUE);
                 appointment.setStartTime(ZonedDateTime.now());

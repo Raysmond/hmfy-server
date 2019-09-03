@@ -60,4 +60,9 @@ public class VehDelivPlan {
     @Column(name = "fd_WeightTime")
     private ZonedDateTime weightTime;
 
+    @Column(name = "fd_NetWeight")
+    private Double netWeight;
+
+    @Column(name = "fd_WeigherNo")
+    private String weigherNo;
 }

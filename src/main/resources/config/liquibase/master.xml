@@ -32,6 +32,7 @@
     <include file="config/liquibase/changelog/20190712101804_changelog.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20190724101804_changelog.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20190730101804_changelog.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190903230919_changelog.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <include file="config/liquibase/changelog/20190524171913_added_entity_constraints_Car.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20190524173744_added_entity_constraints_Appointment.xml" relativeToChangelogFile="false"/>

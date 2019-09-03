@@ -90,6 +90,12 @@ public class ShipPlan implements Serializable {
     @Column(name = "leave_alert", nullable = false)
     private Boolean leaveAlert = false;
 
+    @Column(name = "net_weight")
+    private Double netWeight;
+
+    @Column(name = "weigher_no")
+    private String weigherNo;
+
     @ManyToOne
     @JsonIgnoreProperties("shipPlans")
     private User user;
@@ -350,6 +356,32 @@ public class ShipPlan implements Serializable {
         this.leaveAlert = leaveAlert;
     }
 
+    public Double getNetWeight() {
+        return netWeight;
+    }
+
+    public ShipPlan netWeight(Double netWeight) {
+        this.netWeight = netWeight;
+        return this;
+    }
+
+    public void setNetWeight(Double netWeight) {
+        this.netWeight = netWeight;
+    }
+
+    public String getWeigherNo() {
+        return weigherNo;
+    }
+
+    public ShipPlan weigherNo(String weigherNo) {
+        this.weigherNo = weigherNo;
+        return this;
+    }
+
+    public void setWeigherNo(String weigherNo) {
+        this.weigherNo = weigherNo;
+    }
+
     public User getUser() {
         return user;
     }
@@ -403,6 +435,8 @@ public class ShipPlan implements Serializable {
             ", syncTime='" + getSyncTime() + "'" +
             ", tareAlert='" + isTareAlert() + "'" +
             ", leaveAlert='" + isLeaveAlert() + "'" +
+            ", netWeight=" + getNetWeight() +
+            ", weigherNo='" + getWeigherNo() + "'" +
             "}";
     }
 }

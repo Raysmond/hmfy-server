@@ -155,21 +155,25 @@ public class ShipPlanResource {
     @GetMapping("/ship-plans")
     public ResponseEntity<List<ShipPlanDTO>> getAllShipPlans(ShipPlanCriteria criteria, Pageable pageable,
                                                              @RequestParam MultiValueMap<String, String> queryParams,
-                                                             @RequestParam(required = false) String deliverTimeBegin,
+                                                             @RequestParam(required = true) String deliverTimeBegin,
                                                              @RequestParam(required = false) String deliverTimeEnd,
                                                              UriComponentsBuilder uriBuilder) {
         log.debug("REST request to get ShipPlans by criteria: {}", criteria);
         if (!StringUtils.isEmpty(deliverTimeBegin)) {
             LocalDate t = LocalDate.parse(deliverTimeBegin, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             ZonedDateTimeFilter f = new ZonedDateTimeFilter();
-            f.setEquals(t.atStartOfDay(ZoneId.systemDefault()));
-            criteria.setDeliverTime(f);
-
-            if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.REGION_ADMIN)) {
-                StringFilter deliverPosition = new StringFilter();
-                deliverPosition.setEquals(userService.getUserWithAuthorities().get().getRegion().getName());
-                criteria.setDeliverPosition(deliverPosition);
+//            f.setEquals(t.atStartOfDay(ZoneId.systemDefault()));
+            f.setGreaterOrEqualThan(t.atStartOfDay(ZoneId.systemDefault()));
+            if (!StringUtils.isEmpty(deliverTimeEnd)) {
+                LocalDate end = LocalDate.parse(deliverTimeEnd, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                f.setLessOrEqualThan(end.atStartOfDay(ZoneId.systemDefault()));
             }
+            criteria.setDeliverTime(f);
+        }
+        if (SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.REGION_ADMIN)) {
+            StringFilter deliverPosition = new StringFilter();
+            deliverPosition.setEquals(userService.getUserWithAuthorities().get().getRegion().getName());
+            criteria.setDeliverPosition(deliverPosition);
         }
         Page<ShipPlanDTO> page = shipPlanQueryService.findByCriteria(criteria, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(uriBuilder.queryParams(queryParams), page);

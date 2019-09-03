@@ -3,6 +3,7 @@ package com.shield.service;
 import com.shield.domain.Appointment;
 import com.shield.service.dto.AppointmentDTO;
 
+import com.shield.service.dto.RegionDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -49,6 +50,8 @@ public interface AppointmentService {
 
     Long countAllWaitByRegionId(Long regionId);
 
+    void countRemainQuota(RegionDTO region, boolean isVip);
+
     Long countAppointmentOfRegionIdAndCreateTime(Long regionId, ZonedDateTime begin);
 
     AppointmentDTO makeAppointment(Long regionId, AppointmentDTO appointmentDTO);
@@ -68,4 +71,5 @@ public interface AppointmentService {
 
     boolean isUserInExpirePenalty(Long userId);
 
+    void updateStatusAfterCancelShipPlan(Long applyId);
 }

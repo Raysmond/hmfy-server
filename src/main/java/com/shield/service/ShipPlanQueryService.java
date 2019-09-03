@@ -146,6 +146,12 @@ public class ShipPlanQueryService extends QueryService<ShipPlan> {
             if (criteria.getLeaveAlert() != null) {
                 specification = specification.and(buildSpecification(criteria.getLeaveAlert(), ShipPlan_.leaveAlert));
             }
+            if (criteria.getNetWeight() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getNetWeight(), ShipPlan_.netWeight));
+            }
+            if (criteria.getWeigherNo() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getWeigherNo(), ShipPlan_.weigherNo));
+            }
             if (criteria.getUserId() != null) {
                 specification = specification.and(buildSpecification(criteria.getUserId(),
                     root -> root.join(ShipPlan_.user, JoinType.LEFT).get(User_.id)));

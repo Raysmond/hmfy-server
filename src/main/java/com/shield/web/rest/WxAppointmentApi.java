@@ -194,28 +194,24 @@ public class WxAppointmentApi {
         return ResponseEntity.badRequest().body(null);
     }
 
+    /**
+     * 统计区域取号额度
+     */
     @GetMapping("/region/{regionName}")
     public ResponseEntity<RegionDTO> getRegion(@PathVariable String appid, @PathVariable String regionName) {
-        RegionDTO regionDTO = regionService.findByName(regionName);
-        if (regionDTO == null) {
+        RegionDTO region = regionService.findByName(regionName);
+        if (region == null) {
             return ResponseEntity.notFound().build();
         }
-        log.info("request to get region {}", regionName);
-        regionDTO.setOpen(Boolean.FALSE);
-        regionDTO.setRemainQuota(0);
-        if (regionService.isRegionOpen(regionDTO.getId())) {
-            regionDTO.setOpen(Boolean.TRUE);
-            Integer appointmentsCount = appointmentService.countAppointmentOfRegionIdAndCreateTime(
-                regionDTO.getId(),
-                ZonedDateTime.now().minusHours(12)).intValue();
-            regionDTO.setRemainQuota(regionDTO.getQuota() - appointmentsCount);
-
-            if (regionDTO.getQueueQuota() > 0 && (regionDTO.getQuota() - appointmentsCount) <= 0) {
-                Integer waitingCount = appointmentService.countAllWaitByRegionId(regionDTO.getId()).intValue();
-                regionDTO.setQueueQuota(regionDTO.getQueueQuota() - waitingCount);
-            }
+        log.info("Get region stat {}", regionName);
+        if (regionService.isRegionOpen(region.getId())) {
+            region.setOpen(Boolean.TRUE);
+            appointmentService.countRemainQuota(region, false);
+        } else {
+            region.setOpen(Boolean.FALSE);
+            region.setRemainQuota(0);
         }
-        return ResponseEntity.ok(regionDTO);
+        return ResponseEntity.ok(region);
     }
 
 }
