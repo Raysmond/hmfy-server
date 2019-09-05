@@ -1,6 +1,7 @@
 package com.shield.web.rest;
 
 import com.shield.chepaipark.service.CarWhiteListService;
+import com.shield.service.AppointmentService;
 import com.shield.service.UserService;
 import com.shield.sqlserver.repository.VehDelivPlanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,11 @@ public class TestController {
     @Autowired
     private CarWhiteListService carWhiteListService;
 
+    @Autowired
+    private AppointmentService appointmentService;
+
     @GetMapping("/")
     public String test() {
-        carWhiteListService.delayPutSyncShipPlanIdQueue(109000L);
         return "ok";
     }
 

@@ -1,4 +1,5 @@
 package com.shield.service.dto;
+
 import com.shield.domain.enumeration.ParkingConnectMethod;
 
 import java.time.ZonedDateTime;
@@ -38,6 +39,10 @@ public class RegionDTO implements Serializable {
 
     private Integer remainQuota = 0;
     private Integer drivers = 0;
+    private Integer nextQuotaWaitTime = 0;
+    private Long statusStart = 0L;
+    private Long statusEnter = 0L;
+    private Integer nextQuotaNumber = 0;
 
     private ParkingConnectMethod parkingConnectMethod;
 
@@ -199,6 +204,38 @@ public class RegionDTO implements Serializable {
 
     public void setParkingConnectMethod(ParkingConnectMethod parkingConnectMethod) {
         this.parkingConnectMethod = parkingConnectMethod;
+    }
+
+    public Integer getNextQuotaWaitTime() {
+        return nextQuotaWaitTime;
+    }
+
+    public void setNextQuotaWaitTime(Integer nextQuotaWaitTime) {
+        this.nextQuotaWaitTime = nextQuotaWaitTime;
+    }
+
+    public Long getStatusStart() {
+        return statusStart;
+    }
+
+    public void setStatusStart(Long statusStart) {
+        this.statusStart = statusStart;
+    }
+
+    public Long getStatusEnter() {
+        return statusEnter;
+    }
+
+    public void setStatusEnter(Long statusEnter) {
+        this.statusEnter = statusEnter;
+    }
+
+    public Integer getNextQuotaNumber() {
+        return nextQuotaNumber;
+    }
+
+    public void setNextQuotaNumber(Integer nextQuotaNumber) {
+        this.nextQuotaNumber = nextQuotaNumber;
     }
 
     @Override

@@ -47,7 +47,6 @@ public class VehPlanSyncService {
     @Qualifier("redisLongTemplate")
     private RedisTemplate<String, Long> redisLongTemplate;
 
-
     @Scheduled(fixedRate = 60 * 1000)
     public void syncVehPlans() {
         ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());

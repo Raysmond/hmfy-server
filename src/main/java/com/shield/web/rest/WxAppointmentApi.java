@@ -2,6 +2,7 @@ package com.shield.web.rest;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.shield.config.WxMiniAppConfiguration;
 import com.shield.domain.User;
 import com.shield.domain.enumeration.AppointmentStatus;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/wx/{appid}")
@@ -108,7 +110,9 @@ public class WxAppointmentApi {
         plan.setAppointment(appointment);
         if (appointment.getStatus().equals(AppointmentStatus.START)) {
             plan.setStatus("预约成功");
-            plan.setMaxAllowInTime(appointment.getStartTime().plusSeconds(region.getValidTime()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+//            plan.setMaxAllowInTime(appointment.getStartTime().plusSeconds(region.getValidTime()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+            plan.setMaxAllowInTime(appointment.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                + " - " + appointment.getStartTime().plusHours(region.getValidTime()).format(DateTimeFormatter.ofPattern("HH:mm")));
         } else {
             plan.setStatus("排队中");
         }
@@ -194,11 +198,19 @@ public class WxAppointmentApi {
         return ResponseEntity.badRequest().body(null);
     }
 
+    private Map<String, RegionDTO> regionStatCache = Maps.newHashMap();
+    private Map<String, ZonedDateTime> regionStatCacheTime = Maps.newHashMap();
+
     /**
      * 统计区域取号额度
      */
     @GetMapping("/region/{regionName}")
     public ResponseEntity<RegionDTO> getRegion(@PathVariable String appid, @PathVariable String regionName) {
+        if (regionStatCache.containsKey(regionName)
+            && ZonedDateTime.now().toEpochSecond() - regionStatCacheTime.get(regionName).toEpochSecond() < 10) {
+            // 10s 内不重复计算
+            return ResponseEntity.ok(regionStatCache.get(regionName));
+        }
         RegionDTO region = regionService.findByName(regionName);
         if (region == null) {
             return ResponseEntity.notFound().build();
@@ -206,11 +218,26 @@ public class WxAppointmentApi {
         log.info("Get region stat {}", regionName);
         if (regionService.isRegionOpen(region.getId())) {
             region.setOpen(Boolean.TRUE);
+            region.setNextQuotaNumber(appointmentService.getNextAppointmentNumber(region.getId()));
             appointmentService.countRemainQuota(region, false);
+            if (region.getRemainQuota() == 0) {
+                try {
+                    Integer waitime = appointmentService.calcNextQuotaWaitingTime(region.getId());
+                    if (waitime < 60) {
+                        waitime = 60;
+                    }
+                    Integer waitTimeInMinutes = waitime / 60 + (waitime % 60 > 0 ? 1 : 0);
+                    region.setNextQuotaWaitTime(waitTimeInMinutes);
+                } catch (Exception e) {
+                    log.error("failed to calc average quota waiting time", e);
+                }
+            }
         } else {
             region.setOpen(Boolean.FALSE);
             region.setRemainQuota(0);
         }
+        regionStatCache.put(regionName, region);
+        regionStatCacheTime.put(regionName, ZonedDateTime.now());
         return ResponseEntity.ok(region);
     }
 

@@ -72,4 +72,8 @@ public interface AppointmentService {
     boolean isUserInExpirePenalty(Long userId);
 
     void updateStatusAfterCancelShipPlan(Long applyId);
+
+    Integer calcNextQuotaWaitingTime(Long regionId);
+
+    Integer getNextAppointmentNumber(Long regionId);
 }

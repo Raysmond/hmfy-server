@@ -1,6 +1,7 @@
 package com.shield.service.impl;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -21,6 +22,7 @@ import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.dto.RegionDTO;
 import com.shield.service.mapper.AppointmentMapper;
 import com.shield.service.mapper.RegionMapper;
+import com.shield.utils.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +30,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -387,6 +391,14 @@ public class AppointmentServiceImpl implements AppointmentService {
         return redisLongTemplate.opsForValue().increment(key, 1L).intValue();
     }
 
+    public Integer getNextAppointmentNumber(Long regionId) {
+        String key = "unique_appointment_number";
+        if (redisLongTemplate.hasKey(key) == Boolean.TRUE) {
+            return 1 + redisLongTemplate.opsForValue().increment(key, 0).intValue();
+        }
+        return 0;
+    }
+
     public Integer generateQueueNumber(Long regionId) {
         String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
 //        String key = String.format(QUEUE_NUMBER_KEY, regionId, today);
@@ -442,9 +454,15 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public void countRemainQuota(RegionDTO region, boolean isVip) {
         // 统计剩余取号名额
-        ZonedDateTime startTime = ZonedDateTime.now().minusHours(12);
-        long current = appointmentRepository.countAllValidByRegionIdAndCreateTime(region.getId(), startTime);
-        long curVip = appointmentRepository.countAllVipValidByRegionIdAndCreateTime(region.getId(), startTime);
+        List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), ZonedDateTime.now().minusHours(12), ZonedDateTime.now());
+        appointments = appointments.stream()
+            .filter(it -> it.isValid() && (it.getStatus() == AppointmentStatus.START || it.getStatus() == AppointmentStatus.ENTER))
+            .collect(Collectors.toList());
+
+//        long current = appointmentRepository.countAllValidByRegionIdAndCreateTime(region.getId(), startTime);
+//        long curVip = appointmentRepository.countAllVipValidByRegionIdAndCreateTime(region.getId(), startTime);
+        long current = appointments.size();
+        long curVip = appointments.stream().filter(Appointment::isVip).count();
         long total = region.getQuota();
         if (isVip) {
             total = region.getQuota() + region.getVipQuota();
@@ -452,8 +470,13 @@ public class AppointmentServiceImpl implements AppointmentService {
             // vip 额度在不超额时，不侵占普通取号名额
             total = Math.min(curVip + region.getQuota(), region.getQuota() + region.getVipQuota());
         }
-        region.setRemainQuota((int) (total - current));
+        if (total - current < 0) {
+            log.error("remain quota is less than zero, total: {}, current: {}, vip: {}", total, current, curVip);
+        }
+        region.setRemainQuota(Math.max((int) (total - current), 0));
         region.setQuota((int) total);
+        region.setStatusStart(appointments.stream().filter(it -> it.getStatus() == AppointmentStatus.START).count());
+        region.setStatusEnter(appointments.stream().filter(it -> it.getStatus() == AppointmentStatus.ENTER).count());
     }
 
     private boolean tryMakeAppointment(Appointment appointment) {
@@ -491,6 +514,109 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 
+    Map<Long, Map<Integer, Double>> averageQuotaStayTime = Maps.newHashMap();
+    Map<Long, Double> latestAverageStayTime = Maps.newHashMap();
+
+    /**
+     * 取号满额时，估计下一个号释放的时间
+     */
+    @Override
+    public Integer calcNextQuotaWaitingTime(Long regionId) {
+        Page<Appointment> appointments = appointmentRepository.findLastValid(regionId,
+            ZonedDateTime.now().minusHours(2), PageRequest.of(0, 1, Sort.Direction.ASC, "startTime"));
+        if (appointments.isEmpty()) {
+            return -1;
+        }
+        Double stay = appointments.stream()
+            .filter(it -> it.isValid() && it.getStatus() != AppointmentStatus.START && it.getStatus().equals(AppointmentStatus.START))
+            .map(it -> ZonedDateTime.now().toEpochSecond() - it.getStartTime().toEpochSecond())
+            .mapToInt(Long::intValue)
+            .average().orElse(Double.NaN);
+
+        if (averageQuotaStayTime.containsKey(regionId) && averageQuotaStayTime.get(regionId).containsKey(ZonedDateTime.now().getHour())) {
+            Double stay7 = averageQuotaStayTime.get(regionId).get(ZonedDateTime.now().getHour());
+            Double latestStay = latestAverageStayTime.get(regionId);
+            if (!stay7.isNaN() && latestStay != null && !latestStay.isNaN()) {
+                Double averageStay = stay7 * 0.3 + latestStay * 7;
+                return (int) (averageStay - stay);
+            }
+        }
+        return -1;
+    }
+
+    @Scheduled(fixedRate = 3600 * 10000)
+    public void updateQuotaStayTime() {
+        LocalDate today = LocalDate.now();
+        LocalTime time = LocalTime.MIN;
+        ZonedDateTime startTime = ZonedDateTime.of(today, time, ZoneId.systemDefault());
+        Map<Long, Map<Integer, Double>> stat = Maps.newHashMap();
+        for (Region region : regionRepository.findAll()) {
+            if (region.isOpen()) {
+                Map<Integer, Double> regionStat = Maps.newHashMap();
+                for (int hour = 0; hour < 24; hour++) {
+                    Double seconds = calcAverageStayTime(region.getId(), startTime.minusDays(7), ZonedDateTime.now(), hour);
+                    regionStat.put(hour, seconds);
+                }
+                stat.put(region.getId(), regionStat);
+            }
+        }
+        this.averageQuotaStayTime = stat;
+        log.info("Update average stay time in the past 7 days, {}", JsonUtils.toJson(stat));
+    }
+
+    @Scheduled(fixedRate = 60 * 1000)
+    public void updateLatestQuotaStayTime() {
+        for (Region region : regionRepository.findAll()) {
+            Double seconds = calcAverageStayTime(region.getId(), ZonedDateTime.now().minusHours(1), ZonedDateTime.now(), null);
+            latestAverageStayTime.put(region.getId(), seconds);
+        }
+        log.info("Update average stay time in the past 1 hours, {}", JsonUtils.toJson(this.latestAverageStayTime));
+    }
+
+    public void testCalcNextQuotaStayTime(Long regionId) {
+        LocalDate today = LocalDate.now();
+        LocalTime time = LocalTime.MIN;
+        ZonedDateTime startTime = ZonedDateTime.of(today, time, ZoneId.systemDefault()).minusDays(1);
+        String out = "过去7天\n";
+        for (int hour = 0; hour < 24; hour++) {
+            out += ("" + hour + "\t" + calcAverageStayTime(regionId, startTime.minusDays(7), ZonedDateTime.now(), hour) + "\n");
+        }
+        out += ("-----------\n");
+        out += ("过去1天\n");
+        for (int hour = 0; hour < 24; hour++) {
+            out += ("" + hour + "\t" + calcAverageStayTime(regionId, startTime, ZonedDateTime.now(), hour) + "\n");
+        }
+        out += ("-----------\n");
+
+        System.out.println(out);
+    }
+
+    public Double calcAverageStayTime(Long regionId, ZonedDateTime startTime, ZonedDateTime endTime, Integer hour) {
+        List<Appointment> appointments = appointmentRepository.findAllByRegionIdAndUpdateTime(regionId, startTime, endTime);
+        List<Long> times = Lists.newArrayList();
+        for (Appointment appointment : appointments) {
+            if (appointment.getStatus() == AppointmentStatus.LEAVE && appointment.getEnterTime() != null && appointment.getLeaveTime() != null) {
+                if (hour != null && appointment.getLeaveTime().getHour() != hour) {
+                    continue;
+                }
+                times.add(appointment.getLeaveTime().toEpochSecond() - appointment.getEnterTime().toEpochSecond());
+            }
+            if (appointment.getStatus() == AppointmentStatus.EXPIRED && appointment.getExpireTime() != null) {
+                if (hour != null && appointment.getExpireTime().getHour() != hour) {
+                    continue;
+                }
+                times.add(appointment.getExpireTime().toEpochSecond() - appointment.getStartTime().toEpochSecond());
+            }
+            if (appointment.getStatus() == AppointmentStatus.CANCELED) {
+                if (hour != null && appointment.getUpdateTime().getHour() != hour) {
+                    continue;
+                }
+                times.add(appointment.getUpdateTime().toEpochSecond() - appointment.getStartTime().toEpochSecond());
+            }
+        }
+        return times.stream().mapToInt(Long::intValue).average().orElse(Double.NaN);
+    }
+
     private ZonedDateTime getTodayStartTime() {
         LocalDate today = LocalDate.now();
         LocalTime time = LocalTime.MIN;
@@ -509,6 +635,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     appointment.setUpdateTime(ZonedDateTime.now());
                     appointment.setValid(false);
                     appointment.setStatus(AppointmentStatus.EXPIRED);
+                    appointment.setExpireTime(ZonedDateTime.now());
                     appointmentRepository.save(appointment);
 
                     redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());

@@ -2,6 +2,8 @@ package com.shield.repository;
 
 import com.shield.domain.Appointment;
 import com.shield.domain.enumeration.AppointmentStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
@@ -20,6 +22,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
 
     @Query("select a from Appointment a where a.region.id = ?1 and a.createTime >= ?2 and a.createTime  < ?3")
     List<Appointment> findAllByRegionId(Long regionId, ZonedDateTime startTime, ZonedDateTime endTime);
+
+    @Query("select a from Appointment a where a.region.id = ?1 and a.updateTime >= ?2 and a.updateTime < ?3")
+    List<Appointment> findAllByRegionIdAndUpdateTime(Long regionId, ZonedDateTime startTime, ZonedDateTime endTime);
 
     @Query("select count(a.id) from Appointment a where a.region.id = ?1 and a.valid = true and a.status in ('START', 'ENTER')")
     Long countAllValidByRegionId(Long regionId);
@@ -41,6 +46,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
 
     @Query("select a from Appointment a where a.region.id = ?1 and a.status = ?2 and a.valid = ?3 and a.createTime > ?4")
     List<Appointment> findAllByRegionId(Long regionId, AppointmentStatus status, Boolean valid, ZonedDateTime beginTime);
+
+
+    @Query("select a from Appointment a where a.region.id = ?1 and a.valid = true and a.status in ('START', 'ENTER') and a.startTime >= ?2")
+    Page<Appointment> findLastValid(Long regionId, ZonedDateTime beginTime, Pageable pageable);
 
     @Query("select a from Appointment a where a.applyId in ?1 and a.createTime > ?2 and a.valid = true")
     List<Appointment> findByApplyIdIn(List<Long> applyIds, ZonedDateTime beginTime);

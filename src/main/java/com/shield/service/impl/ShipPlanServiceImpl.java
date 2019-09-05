@@ -225,7 +225,9 @@ public class ShipPlanServiceImpl implements ShipPlanService {
                 AppointmentStatus status = item.getAppointment().getStatus();
                 RegionDTO regionDTO = regionService.findOne(item.getAppointment().getRegionId()).get();
                 if (item.getAppointment().getStartTime() != null) {
-                    item.setMaxAllowInTime(item.getAppointment().getStartTime().plusSeconds(regionDTO.getValidTime()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+//                    item.setMaxAllowInTime(item.getAppointment().getStartTime().plusSeconds(regionDTO.getValidTime()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+                    item.setMaxAllowInTime(item.getAppointment().getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                        + " - " + item.getAppointment().getStartTime().plusHours(regionDTO.getValidTime()).format(DateTimeFormatter.ofPattern("HH:mm")));
                 }
                 if (!item.getAppointment().isValid()) {
                     item.setStatus("预约过期");
