@@ -522,29 +522,57 @@ public class AppointmentServiceImpl implements AppointmentService {
      */
     @Override
     public Integer calcNextQuotaWaitingTime(Long regionId) {
-        Page<Appointment> appointments = appointmentRepository.findLastValid(regionId,
-            ZonedDateTime.now().minusHours(2), PageRequest.of(0, 1, Sort.Direction.ASC, "startTime"));
-        if (appointments.isEmpty()) {
-            return -1;
-        }
-        Double stay = appointments.stream()
-            .filter(it -> it.isValid() && it.getStatus() != AppointmentStatus.START && it.getStatus().equals(AppointmentStatus.START))
-            .map(it -> ZonedDateTime.now().toEpochSecond() - it.getStartTime().toEpochSecond())
-            .mapToInt(Long::intValue)
-            .average().orElse(Double.NaN);
-
-        if (averageQuotaStayTime.containsKey(regionId) && averageQuotaStayTime.get(regionId).containsKey(ZonedDateTime.now().getHour())) {
-            Double stay7 = averageQuotaStayTime.get(regionId).get(ZonedDateTime.now().getHour());
-            Double latestStay = latestAverageStayTime.get(regionId);
-            if (!stay7.isNaN() && latestStay != null && !latestStay.isNaN()) {
-                Double averageStay = stay7 * 0.3 + latestStay * 7;
-                return (int) (averageStay - stay);
+        List<Appointment> appointments = appointmentRepository.findAllByRegionIdAndUpdateTime(regionId, ZonedDateTime.now().minusHours(2), ZonedDateTime.now());
+        appointments.sort(Comparator.comparing(Appointment::getUpdateTime));
+        List<Long> times = Lists.newArrayList();
+        List<ZonedDateTime> outTimes = Lists.newArrayList();
+        for (Appointment appointment : appointments) {
+            if (appointment.getStatus() == AppointmentStatus.LEAVE && appointment.getStartTime() != null && appointment.getLeaveTime() != null) {
+                outTimes.add(appointment.getLeaveTime());
+            }
+            if (appointment.getStatus() == AppointmentStatus.EXPIRED && appointment.getExpireTime() != null) {
+                outTimes.add(appointment.getExpireTime());
+            }
+            if (appointment.getStatus() == AppointmentStatus.CANCELED) {
+                outTimes.add(appointment.getUpdateTime());
             }
         }
-        return -1;
+        if (outTimes.size() <= 1) {
+            return -1;
+        }
+        for (int i = 1; i < outTimes.size(); i++) {
+            times.add(outTimes.get(i).toEpochSecond() - outTimes.get(i - 1).toEpochSecond());
+        }
+        Double avg = times.stream().mapToInt(Long::intValue).average().orElse(Double.NaN);
+        Integer avgGap = avg.intValue();
+        Integer lastOutGap = (int) (ZonedDateTime.now().toEpochSecond() - outTimes.get(outTimes.size() - 1).toEpochSecond());
+        log.info("Calc avg wait time: {}, avg leave gap: {}, size: {}, last leave time: {}, gap: {}",
+            avgGap - lastOutGap, avgGap, outTimes.size(), outTimes.get(outTimes.size() - 1), lastOutGap);
+        return avgGap - lastOutGap;
+
+//        Page<Appointment> appointments = appointmentRepository.findLastValid(regionId,
+//            ZonedDateTime.now().minusHours(2), PageRequest.of(0, 1, Sort.Direction.ASC, "startTime"));
+//        if (appointments.isEmpty()) {
+//            return -1;
+//        }
+//        Double stay = appointments.stream()
+//            .filter(it -> it.isValid() && it.getStatus() != AppointmentStatus.START && it.getStatus().equals(AppointmentStatus.START))
+//            .map(it -> ZonedDateTime.now().toEpochSecond() - it.getStartTime().toEpochSecond())
+//            .mapToInt(Long::intValue)
+//            .average().orElse(Double.NaN);
+//
+//        if (averageQuotaStayTime.containsKey(regionId) && averageQuotaStayTime.get(regionId).containsKey(ZonedDateTime.now().getHour())) {
+//            Double stay7 = averageQuotaStayTime.get(regionId).get(ZonedDateTime.now().getHour());
+//            Double latestStay = latestAverageStayTime.get(regionId);
+//            if (!stay7.isNaN() && latestStay != null && !latestStay.isNaN()) {
+//                Double averageStay = stay7 * 0.3 + latestStay * 7;
+//                return (int) (averageStay - stay);
+//            }
+//        }
+//        return -1;
     }
 
-    @Scheduled(fixedRate = 3600 * 10000)
+    //    @Scheduled(fixedRate = 3600 * 1000)
     public void updateQuotaStayTime() {
         LocalDate today = LocalDate.now();
         LocalTime time = LocalTime.MIN;
@@ -564,7 +592,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         log.info("Update average stay time in the past 7 days, {}", JsonUtils.toJson(stat));
     }
 
-    @Scheduled(fixedRate = 60 * 1000)
+    //    @Scheduled(fixedRate = 60 * 1000)
     public void updateLatestQuotaStayTime() {
         for (Region region : regionRepository.findAll()) {
             Double seconds = calcAverageStayTime(region.getId(), ZonedDateTime.now().minusHours(1), ZonedDateTime.now(), null);
@@ -595,11 +623,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         List<Appointment> appointments = appointmentRepository.findAllByRegionIdAndUpdateTime(regionId, startTime, endTime);
         List<Long> times = Lists.newArrayList();
         for (Appointment appointment : appointments) {
-            if (appointment.getStatus() == AppointmentStatus.LEAVE && appointment.getEnterTime() != null && appointment.getLeaveTime() != null) {
+            if (appointment.getStatus() == AppointmentStatus.LEAVE && appointment.getStartTime() != null && appointment.getLeaveTime() != null) {
                 if (hour != null && appointment.getLeaveTime().getHour() != hour) {
                     continue;
                 }
-                times.add(appointment.getLeaveTime().toEpochSecond() - appointment.getEnterTime().toEpochSecond());
+                times.add(appointment.getLeaveTime().toEpochSecond() - appointment.getStartTime().toEpochSecond());
             }
             if (appointment.getStatus() == AppointmentStatus.EXPIRED && appointment.getExpireTime() != null) {
                 if (hour != null && appointment.getExpireTime().getHour() != hour) {
