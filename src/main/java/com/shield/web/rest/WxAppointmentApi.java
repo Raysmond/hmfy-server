@@ -155,8 +155,8 @@ public class WxAppointmentApi {
 
 
     @GetMapping("/ship_plans/available")
-    public ResponseEntity<List<PlanDTO>> getUserShipPlans(@PathVariable String appid, @RequestParam String regionName) {
-        RegionDTO regionDTO = regionService.findByName(regionName);
+    public ResponseEntity<List<PlanDTO>> getUserShipPlans(@PathVariable String appid, @RequestParam String regionName, @RequestParam(required = false) Long regionId) {
+        RegionDTO regionDTO = regionId != null ? regionService.findOne(regionId).orElse(null) : regionService.findByName(regionName);
         if (regionDTO == null) {
             return ResponseEntity.notFound().build();
         }
