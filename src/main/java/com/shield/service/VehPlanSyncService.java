@@ -2,16 +2,22 @@ package com.shield.service;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.shield.chepaipark.domain.GateIO;
 import com.shield.domain.ShipPlan;
 import com.shield.repository.ShipPlanRepository;
 import com.shield.service.dto.ShipPlanDTO;
 import com.shield.sqlserver.domain.VehDelivPlan;
+import com.shield.sqlserver.domain.VipGateLog;
 import com.shield.sqlserver.repository.VehDelivPlanRepository;
+import com.shield.sqlserver.repository.VipGateLogRepository;
 import io.github.jhipster.config.JHipsterConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -27,6 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.shield.service.ParkingTcpHandlerService.VIP_CUSTOMER_COMPANIES;
 import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
 
 @Service
@@ -38,7 +45,7 @@ public class VehPlanSyncService {
     private VehDelivPlanRepository vehDelivPlanRepository;
 
     @Autowired
-    private ShipPlanService shipPlanService;
+    private VipGateLogRepository vipGateLogRepository;
 
     @Autowired
     private ShipPlanRepository shipPlanRepository;
@@ -144,7 +151,38 @@ public class VehPlanSyncService {
 
                     plan.setSyncTime(ZonedDateTime.now());
                     shipPlanRepository.save(plan);
+
+                    // 保存VIP出入场记录到单独的表
+                    if (plan.getCompany() != null && VIP_CUSTOMER_COMPANIES.contains(plan.getCompany())) {
+                        try {
+                            syncVipGateLog(plan);
+                        } catch (Exception e) {
+                            log.info("Failed to sync ShipPlan[apply_id={}, truckNumber={}, gateTime={}, leaveTime={}] to last VipGateLog, exception: {}",
+                                plan.getApplyId(), plan.getTruckNumber(), plan.getGateTime(), plan.getLeaveTime(), e);
+                        }
+                    }
                 }
+            }
+        }
+    }
+
+    private void syncVipGateLog(ShipPlan plan) {
+        if (plan.getGateTime() != null || plan.getLeaveTime() != null) {
+            Page<VipGateLog> gateLogs = vipGateLogRepository.findByTruckNumber(plan.getTruckNumber(), PageRequest.of(0, 1, Sort.Direction.DESC, "rowId"));
+            VipGateLog lastGateLog = gateLogs.getContent().isEmpty() ? null : gateLogs.getContent().get(0);
+            if (lastGateLog != null && lastGateLog.getInTime() != null && lastGateLog.getInTime().equals(plan.getGateTime())) {
+                lastGateLog.setOutTime(plan.getLeaveTime());
+                vipGateLogRepository.save(lastGateLog);
+                log.info("Sync ShipPlan[apply_id={}, truckNumber={}, gateTime={}, leaveTime={}] to last VipGateLog[rowId={}, inTime={}]",
+                    plan.getApplyId(), plan.getTruckNumber(), plan.getGateTime(), plan.getLeaveTime(), lastGateLog.getRowId(), lastGateLog.getInTime());
+            } else {
+                VipGateLog newLog = new VipGateLog();
+                newLog.setInTime(plan.getGateTime());
+                newLog.setOutTime(plan.getLeaveTime());
+                newLog.setTruckNumber(plan.getTruckNumber());
+                vipGateLogRepository.save(newLog);
+                log.info("Sync ShipPlan[apply_id={}, truckNumber={}, gateTime={}, leaveTime={}] to new VipGateLog",
+                    plan.getApplyId(), plan.getTruckNumber(), plan.getGateTime(), plan.getLeaveTime());
             }
         }
     }

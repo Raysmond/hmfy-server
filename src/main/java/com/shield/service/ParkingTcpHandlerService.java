@@ -352,7 +352,7 @@ public class ParkingTcpHandlerService {
         }
     }
 
-    private static final Set<String> VIP_CUSTOMER_COMPANIES = Sets.newHashSet("上海宝龙建材有限公司");
+    public static final Set<String> VIP_CUSTOMER_COMPANIES = Sets.newHashSet("上海宝龙建材有限公司");
 
     /**
      * 自动预约VIP计划

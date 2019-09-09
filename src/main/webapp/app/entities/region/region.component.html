@@ -22,13 +22,13 @@
                         <th><span jhiTranslate="shieldApp.region.parkId">Park ID</span> </th>
                         <th jhiSortBy="quota"><span jhiTranslate="shieldApp.region.quota">Quota</span> </th>
                         <th jhiSortBy="vipQuota"><span jhiTranslate="shieldApp.region.vipQuota">Vip Quota</span> </th>
-                        <th jhiSortBy="queueQuota"><span jhiTranslate="shieldApp.region.queueQuota">Queue Quota</span> </th>
+                        <!--<th jhiSortBy="queueQuota"><span jhiTranslate="shieldApp.region.queueQuota">Queue Quota</span> </th>-->
                         <th jhiSortBy="startTime"><span jhiTranslate="shieldApp.region.startTime">Start Time</span> </th>
                         <th jhiSortBy="endTime"><span jhiTranslate="shieldApp.region.endTime">End Time</span></th>
                         <th jhiSortBy="days"><span jhiTranslate="shieldApp.region.days">Days</span> </th>
                         <th jhiSortBy="open"><span jhiTranslate="shieldApp.region.open">Open</span> </th>
                         <th jhiSortBy="validTime"><span jhiTranslate="shieldApp.region.validTime">Valid Time</span> </th>
-                        <th jhiSortBy="queueValidTime"><span jhiTranslate="shieldApp.region.queueValidTime">Queue Valid Time</span></th>
+                        <!--<th jhiSortBy="queueValidTime"><span jhiTranslate="shieldApp.region.queueValidTime">Queue Valid Time</span></th>-->
                         <!--<th jhiSortBy="createTime"><span jhiTranslate="shieldApp.region.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
                         <th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.region.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
                         <!--<th>预约员</th>-->
@@ -42,7 +42,7 @@
                         <td>{{region.parkId}}</td>
                         <td>{{region.quota}}</td>
                         <td>{{region.vipQuota}}</td>
-                        <td>{{region.queueQuota}}</td>
+                        <!--<td>{{region.queueQuota}}</td>-->
                         <td>{{region.startTime}}</td>
                         <td>{{region.endTime}}</td>
                         <td>{{region.days}}</td>
@@ -52,7 +52,7 @@
                             <span *ngIf="!region.open" class="badge badge-secondary">关闭</span>
                         </td>
                         <td>{{region.validTime}}</td>
-                        <td>{{region.queueValidTime}}</td>
+                        <!--<td>{{region.queueValidTime}}</td>-->
                         <!--<td>{{region.drivers}}</td>-->
                         <!--<td>{{region.createTime | date:'medium'}}</td>-->
                         <td>{{region.updateTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
