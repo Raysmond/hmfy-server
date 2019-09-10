@@ -22,6 +22,9 @@ public class VipGateLog {
     @Column(name = "fd_TruckNumber")
     private String truckNumber;
 
+    @Column(name = "fd_PlateColor")
+    private String plateColor = "黄";
+
     @Column(name = "fd_Intime")
     private ZonedDateTime inTime;
 
