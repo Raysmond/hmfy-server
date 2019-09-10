@@ -3,7 +3,9 @@ package com.shield.service;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.shield.chepaipark.domain.GateIO;
+import com.shield.domain.Appointment;
 import com.shield.domain.ShipPlan;
+import com.shield.repository.AppointmentRepository;
 import com.shield.repository.ShipPlanRepository;
 import com.shield.service.dto.ShipPlanDTO;
 import com.shield.sqlserver.domain.VehDelivPlan;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 
 import static com.shield.service.ParkingTcpHandlerService.VIP_CUSTOMER_COMPANIES;
 import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
+import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS;
 
 @Service
 @Slf4j
@@ -53,6 +56,9 @@ public class VehPlanSyncService {
     @Autowired
     @Qualifier("redisLongTemplate")
     private RedisTemplate<String, Long> redisLongTemplate;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
 
     @Scheduled(fixedRate = 60 * 1000)
     public void syncVehPlans() {
@@ -151,40 +157,43 @@ public class VehPlanSyncService {
 
                     plan.setSyncTime(ZonedDateTime.now());
                     shipPlanRepository.save(plan);
-
-                    // 保存VIP出入场记录到单独的表
-                    if (plan.getCompany() != null && VIP_CUSTOMER_COMPANIES.contains(plan.getCompany())) {
-                        try {
-                            syncVipGateLog(plan);
-                        } catch (Exception e) {
-                            log.info("Failed to sync ShipPlan[apply_id={}, truckNumber={}, gateTime={}, leaveTime={}] to last VipGateLog, exception: {}",
-                                plan.getApplyId(), plan.getTruckNumber(), plan.getGateTime(), plan.getLeaveTime(), e);
-                        }
-                    }
                 }
             }
         }
     }
 
-    private void syncVipGateLog(ShipPlan plan) {
-        if (plan.getGateTime() != null || plan.getLeaveTime() != null) {
-            Page<VipGateLog> gateLogs = vipGateLogRepository.findByTruckNumber(plan.getTruckNumber(), PageRequest.of(0, 1, Sort.Direction.DESC, "rowId"));
-            VipGateLog lastGateLog = gateLogs.getContent().isEmpty() ? null : gateLogs.getContent().get(0);
-            if (lastGateLog != null && lastGateLog.getInTime() != null && lastGateLog.getInTime().equals(plan.getGateTime())) {
-                lastGateLog.setOutTime(plan.getLeaveTime());
-                vipGateLogRepository.save(lastGateLog);
-                log.info("Sync ShipPlan[apply_id={}, truckNumber={}, gateTime={}, leaveTime={}] to last VipGateLog[rowId={}, inTime={}]",
-                    plan.getApplyId(), plan.getTruckNumber(), plan.getGateTime(), plan.getLeaveTime(), lastGateLog.getRowId(), lastGateLog.getInTime());
-            } else {
-                VipGateLog newLog = new VipGateLog();
-                newLog.setInTime(plan.getGateTime());
-                newLog.setOutTime(plan.getLeaveTime());
-                newLog.setTruckNumber(plan.getTruckNumber());
-                vipGateLogRepository.save(newLog);
-                log.info("Sync ShipPlan[apply_id={}, truckNumber={}, gateTime={}, leaveTime={}] to new VipGateLog",
-                    plan.getApplyId(), plan.getTruckNumber(), plan.getGateTime(), plan.getLeaveTime());
+    @Scheduled(fixedRate = 30 * 1000)
+    private void syncVipGateLog() {
+        Set<Long> appointmentIds = redisLongTemplate.opsForSet().members(REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS);
+        if (appointmentIds != null && appointmentIds.size() > 0) {
+            for (Long appointmentId : appointmentIds) {
+                Appointment ap = appointmentRepository.findById(appointmentId).orElse(null);
+                if (ap == null) {
+                    redisLongTemplate.opsForSet().remove(REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS, appointmentId);
+                    continue;
+                }
+                Page<VipGateLog> gateLogs = vipGateLogRepository.findByTruckNumber(ap.getLicensePlateNumber(), PageRequest.of(0, 1, Sort.Direction.DESC, "rowId"));
+                VipGateLog lastGateLog = gateLogs.getContent().isEmpty() ? null : gateLogs.getContent().get(0);
+                log.info("[START] Sync Appointment to VipGateLog [id={}, truckNumber={}, gateTime={}, leaveTime={}]",
+                    appointmentId, ap.getLicensePlateNumber(), ap.getEnterTime(), ap.getLeaveTime());
+                if (lastGateLog != null && lastGateLog.getInTime() != null && lastGateLog.getInTime().equals(ap.getLeaveTime())) {
+                    lastGateLog.setOutTime(ap.getLeaveTime());
+                    vipGateLogRepository.save(lastGateLog);
+                    log.info("[UPDATE] Sync Appointment to VipGateLog [id={}, truckNumber={}, gateTime={}, leaveTime={}] to last VipGateLog[rowId={}, inTime={}]",
+                        appointmentId, ap.getLicensePlateNumber(), ap.getEnterTime(), ap.getLeaveTime(), lastGateLog.getRowId(), lastGateLog.getInTime());
+                } else {
+                    VipGateLog newLog = new VipGateLog();
+                    newLog.setInTime(ap.getEnterTime());
+                    newLog.setOutTime(ap.getLeaveTime());
+                    newLog.setTruckNumber(ap.getLicensePlateNumber());
+                    vipGateLogRepository.save(newLog);
+                    log.info("[NEW] Sync Appointment to VipGateLog [id={}, truckNumber={}, gateTime={}, leaveTime={}] ",
+                        appointmentId, ap.getLicensePlateNumber(), ap.getEnterTime(), ap.getLeaveTime());
+                }
+                redisLongTemplate.opsForSet().remove(REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS, appointmentId);
             }
         }
+
     }
 
     private ShipPlan generateShipPlanFromVehPlan(VehDelivPlan plan) {

@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 import static com.shield.service.ParkingTcpHandlerService.AUTO_DELETE_PLAN_ID_QUEUE;
 import static com.shield.service.ParkingTcpHandlerService.REDIS_KEY_TRUCK_NUMBER_CARD_ID;
 import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
+import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS;
 
 @Service
 @Slf4j
@@ -367,6 +368,10 @@ public class CarWhiteListService {
                 appointmentRepository.save(appointment);
                 log.info("Update appointment [{}] status: {}, inTime: {}, outTime: {}, truckNumber: {}",
                     appointment.getId(), appointment.getStatus(), inTime, outTime, truckNumber);
+
+                if (appointment.isVip() && appointment.getApplyId() == null) {
+                    this.deplyPutSyncVipAppointmentGateLog(appointment.getId());
+                }
             }
         }
     }
@@ -394,5 +399,15 @@ public class CarWhiteListService {
             log.info("Delayed 180s to put ShipPlan id {} to delete car whitelist queue {}", shipPlanId, AUTO_DELETE_PLAN_ID_QUEUE);
             redisLongTemplate.opsForSet().add(AUTO_DELETE_PLAN_ID_QUEUE, shipPlanId);
         }, 180L, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 同步手动VIP预约的出入场记录
+     */
+    public void deplyPutSyncVipAppointmentGateLog(Long appointmentId) {
+        threadPoolTaskScheduler.getScheduledExecutor().schedule(() -> {
+            log.info("Delayed 60s to put Appointment[id={}] to syc vip gate log queue {}", appointmentId, REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS);
+            redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS, appointmentId);
+        }, 60L, TimeUnit.SECONDS);
     }
 }

@@ -93,6 +93,9 @@ public class AppointmentServiceImpl implements AppointmentService {
     private static final Long INITIAL_QUEUE_NUMBER = 100L;
     public static final String REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN = "sync_ship_plan_ids";
 
+    // 手动VIP的预约 把出入场记录写到单独的表中
+    public static final String REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS = "sync_vip_gate_log_appointment_ids";
+
     // 预约取消后，10min之内不能重新预约
     private static final Long PENALTY_TIME_MINUTES_CANCEL = 10L;
     private static final String PENALTY_TIME_MINUTES_CANCEL_USER_ID_KEY = "penalty_cancel_user_id:%d";
@@ -361,6 +364,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                 appointmentRepository.save(appointment);
                 log.info("Update appointment [{}] status: {}, inTime: {}, outTime: {}, truckNumber: {}",
                     appointment.getId(), appointment.getStatus(), carInTime, carOutTime, truckNumber);
+
+                if (appointment.isVip() && appointment.getApplyId() == null) {
+                    carWhiteListService.deplyPutSyncVipAppointmentGateLog(appointment.getId());
+                }
             }
         }
     }
