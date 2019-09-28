@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.shield.service.impl.AppointmentServiceImpl.REGION_ID_HUACHAN;
 
 /**
  * Service Implementation for managing {@link Region}.
@@ -132,6 +135,14 @@ public class RegionServiceImpl implements RegionService {
         log.debug("Request to get all Regions");
         return regionRepository.findAll(pageable)
             .map(regionMapper::toDto);
+    }
+
+    @Override
+    public List<RegionDTO> findAllConnectParkingSystem() {
+        return regionRepository.findAll().stream()
+            .filter(it -> StringUtils.isNotBlank(it.getParkId()) && !it.getParkId().equals("NA") && !it.getId().equals(REGION_ID_HUACHAN))
+            .map(regionMapper::toDto)
+            .collect(Collectors.toList());
     }
 
 

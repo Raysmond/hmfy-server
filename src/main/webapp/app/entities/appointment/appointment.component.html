@@ -124,6 +124,8 @@
                                   jhiTranslate="{{'shieldApp.AppointmentStatus.CREATE'}}">{{appointment.status}}</span>
                             <span class="badge badge-warning" *ngIf="appointment.status=='WAIT'"
                                   jhiTranslate="{{'shieldApp.AppointmentStatus.WAIT'}}">{{appointment.status}}</span>
+                            <span class="badge badge-warning" *ngIf="appointment.status=='START_CHECK'"
+                                  jhiTranslate="{{'shieldApp.AppointmentStatus.START_CHECK'}}">{{appointment.status}}</span>
                             <span class="badge badge-success" *ngIf="appointment.status=='START'"
                                   jhiTranslate="{{'shieldApp.AppointmentStatus.START'}}">{{appointment.status}}</span>
                             <span class="badge badge-primary" *ngIf="appointment.status=='ENTER'"

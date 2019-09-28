@@ -8,7 +8,8 @@
       "ENTER": "进厂",
       "LEAVE": "离厂",
       "CANCELED": "已取消",
-      "EXPIRED": "预约过期"
+      "EXPIRED": "预约过期",
+      "START_CHECK": "预约中"
     }
   }
 }

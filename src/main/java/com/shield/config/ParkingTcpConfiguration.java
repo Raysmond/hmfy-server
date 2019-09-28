@@ -1,6 +1,6 @@
 package com.shield.config;
 
-import com.shield.service.ParkingTcpHandlerService;
+import com.shield.service.ParkingHandlerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +25,7 @@ import org.springframework.messaging.MessageChannel;
 @Slf4j
 public class ParkingTcpConfiguration {
     @Autowired
-    private ParkingTcpHandlerService parkingTcpHandlerService;
+    private ParkingHandlerService ParkingHandlerService;
 
     @Bean
     public TcpNetServerConnectionFactory cf() {
@@ -73,7 +73,7 @@ public class ParkingTcpConfiguration {
 
     @ServiceActivator(inputChannel = "serviceChannel", outputChannel = "tcpOut")
     public String service(Message<String> msg) {
-        return parkingTcpHandlerService.handle(msg);
+        return ParkingHandlerService.handle(msg);
     }
 
 }

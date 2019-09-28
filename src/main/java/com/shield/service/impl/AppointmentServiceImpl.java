@@ -48,7 +48,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.shield.service.ParkingTcpHandlerService.*;
+import static com.shield.service.ParkingHandlerService.*;
 
 @Service
 @Transactional
@@ -104,9 +104,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     private static final Long PENALTY_TIME_MINUTES_EXPIRE = 60L;
     private static final String PENALTY_TIME_MINUTES_EXPIRE_USER_ID_KEY = "penalty_expire_user_id:%d";
 
-    private static final Set<AppointmentStatus> ACTIVE_STATUS = Sets.newHashSet(
-        AppointmentStatus.START,
-        AppointmentStatus.ENTER);
+    // 对接门禁系统的区域ID
+    public static final Set<Long> REGION_CONNECT_PARKING = Sets.newHashSet(1L, 3L);
+
+    // 四期区域ID
+    public static final Long REGION_ID_HUACHAN = 2L;
 
     /**
      * Save a appointment.
@@ -491,7 +493,11 @@ public class AppointmentServiceImpl implements AppointmentService {
             RegionDTO region = regionMapper.toDto(appointment.getRegion());
             this.countRemainQuota(region, appointment.isVip());
             if (region.getRemainQuota() > 0) {
-                appointment.setStatus(AppointmentStatus.START);
+                if (region.getId().equals(REGION_ID_HUACHAN)) {
+                    appointment.setStatus(AppointmentStatus.START_CHECK);
+                } else {
+                    appointment.setStatus(AppointmentStatus.START);
+                }
                 appointment.setValid(Boolean.TRUE);
                 appointment.setStartTime(ZonedDateTime.now());
                 appointment.setUpdateTime(ZonedDateTime.now());
@@ -509,12 +515,14 @@ public class AppointmentServiceImpl implements AppointmentService {
                     }
                 }
 
-                if (region.isOpen() && region.getParkingConnectMethod() != null && region.getParkingConnectMethod().equals(ParkingConnectMethod.DATABASE)) {
-                    carWhiteListService.registerCarWhiteListByAppointmentId(appointment.getId());
-                } else {
-                    redisLongTemplate.opsForSet().add(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
+                if (!region.getId().equals(REGION_ID_HUACHAN)) {
+                    if (region.isOpen() && region.getParkingConnectMethod() != null && region.getParkingConnectMethod().equals(ParkingConnectMethod.DATABASE)) {
+                        carWhiteListService.registerCarWhiteListByAppointmentId(appointment.getId());
+                    } else {
+                        redisLongTemplate.opsForSet().add(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
+                    }
+                    wxMpMsgService.sendAppointmentSuccessMsg(appointmentMapper.toDto(appointment));
                 }
-                wxMpMsgService.sendAppointmentSuccessMsg(appointmentMapper.toDto(appointment));
                 return true;
             }
             return false;
@@ -608,24 +616,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         log.info("Update average stay time in the past 1 hours, {}", JsonUtils.toJson(this.latestAverageStayTime));
     }
 
-    public void testCalcNextQuotaStayTime(Long regionId) {
-        LocalDate today = LocalDate.now();
-        LocalTime time = LocalTime.MIN;
-        ZonedDateTime startTime = ZonedDateTime.of(today, time, ZoneId.systemDefault()).minusDays(1);
-        String out = "过去7天\n";
-        for (int hour = 0; hour < 24; hour++) {
-            out += ("" + hour + "\t" + calcAverageStayTime(regionId, startTime.minusDays(7), ZonedDateTime.now(), hour) + "\n");
-        }
-        out += ("-----------\n");
-        out += ("过去1天\n");
-        for (int hour = 0; hour < 24; hour++) {
-            out += ("" + hour + "\t" + calcAverageStayTime(regionId, startTime, ZonedDateTime.now(), hour) + "\n");
-        }
-        out += ("-----------\n");
-
-        System.out.println(out);
-    }
-
     public Double calcAverageStayTime(Long regionId, ZonedDateTime startTime, ZonedDateTime endTime, Integer hour) {
         List<Appointment> appointments = appointmentRepository.findAllByRegionIdAndUpdateTime(regionId, startTime, endTime);
         List<Long> times = Lists.newArrayList();
@@ -673,8 +663,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                     appointment.setExpireTime(ZonedDateTime.now());
                     appointmentRepository.save(appointment);
 
-                    redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
-                    redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
+                    if (!region.getId().equals(REGION_ID_HUACHAN)) {
+                        redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
+                        redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
+                    }
 
                     if (appointment.getApplyId() != null) {
                         List<ShipPlan> plans = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(appointment.getApplyId()));

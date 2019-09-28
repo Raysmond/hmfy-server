@@ -34,7 +34,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -46,9 +45,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.shield.service.impl.AppointmentServiceImpl.REGION_ID_HUACHAN;
+
 @Service
 @Slf4j
-public class ParkingTcpHandlerService {
+public class ParkingHandlerService {
     @Autowired
     private ParkMsgService parkMsgService;
 
@@ -108,6 +109,9 @@ public class ParkingTcpHandlerService {
 
     // 注册/删除 固定车辆白名单 检查队列 根据客户端返回消息进行确认
     public static final String REDIS_KEY_CHECK_REGISTER_WHITELIST_TRUCK_NUMBER_QUEUE = "set_check_register_msg_id_queue";
+
+    public static final Set<String> VIP_CUSTOMER_COMPANIES = Sets.newHashSet("上海宝龙建材有限公司");
+
 
     public String handle(Message<String> msg) {
         log.info("Receive TCP msg: {}", msg.getPayload());
@@ -291,8 +295,7 @@ public class ParkingTcpHandlerService {
             return;
         }
         ZonedDateTime todayBegin = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
-        List<RegionDTO> regions = regionService.findAll(PageRequest.of(0, 10000)).getContent();
-
+        List<RegionDTO> regions = regionService.findAllConnectParkingSystem();
         for (RegionDTO region : regions) {
             if (region.isOpen() && region.isAutoAppointment() != null && region.isAutoAppointment() && StringUtils.isNotBlank(region.getParkId())) {
                 // 自动注册白名单开启
@@ -352,8 +355,6 @@ public class ParkingTcpHandlerService {
         }
     }
 
-    public static final Set<String> VIP_CUSTOMER_COMPANIES = Sets.newHashSet("上海宝龙建材有限公司");
-
     /**
      * 自动预约VIP计划
      */
@@ -361,7 +362,7 @@ public class ParkingTcpHandlerService {
     public void autoRegisterVipPlans() {
         ZonedDateTime beginTime = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
         ZonedDateTime endTime = ZonedDateTime.now();
-        List<RegionDTO> regions = regionService.findAll(PageRequest.of(0, 10000)).getContent();
+        List<RegionDTO> regions = regionService.findAllConnectParkingSystem();
 
         for (RegionDTO region : regions) {
             if (region.isOpen() && StringUtils.isNotBlank(region.getParkId())) {
@@ -414,10 +415,12 @@ public class ParkingTcpHandlerService {
             if (region == null || !region.isOpen()) {
                 continue;
             }
+            if (region.getId().equals(REGION_ID_HUACHAN)) {
+                continue;
+            }
             if (redisLongTemplate.opsForSet().isMember(AUTO_REGISTERED_DELETE_PLAN_IDS, plan.getId())) {
                 continue;
             }
-
             boolean shouldDelete = false;
             if (plan.getAuditStatus().equals(Integer.valueOf(2))) {
                 log.info("[AUTO] ShipPlan id={} auditStatus = {}, truckNumber: {}, apply_id: {} " +
@@ -514,7 +517,7 @@ public class ParkingTcpHandlerService {
     }
 
     /**
-     * 自动删除固定车白名单
+     * 删除固定车白名单
      */
     @Scheduled(fixedRate = 30 * 1000)
     public void deleteRegisterCarWhiteList() throws JsonProcessingException, InterruptedException {
@@ -616,6 +619,12 @@ public class ParkingTcpHandlerService {
                         continue;
                     }
 
+                    if (region.getId().equals(REGION_ID_HUACHAN)) {
+                        // 四期使用接口进行预约注册白名单
+                        redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointmentId);
+                        continue;
+                    }
+
                     if (region.getParkingConnectMethod() == null || region.getParkingConnectMethod().equals(ParkingConnectMethod.TCP)) {
                         if (isRegionParkingTcpConnected(region.getParkId())) {
                             UploadCarWhiteListMsg whiteListMsg = generateUploadCarWhiteListMsg(appointmentId);
@@ -654,6 +663,12 @@ public class ParkingTcpHandlerService {
                         || (region.isAutoAppointment() != null && region.isAutoAppointment())) {
                         log.warn("no need to upload car whitelist for appointment of region: {}, name: {}", region.getId(), region.getName());
                         redisLongTemplate.opsForSet().remove(REDIS_KEY_DELETE_CAR_WHITELIST, appointmentId);
+                        continue;
+                    }
+
+                    if (region.getId().equals(REGION_ID_HUACHAN)) {
+                        // 四期使用接口进行预约注册白名单
+                        redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointmentId);
                         continue;
                     }
 

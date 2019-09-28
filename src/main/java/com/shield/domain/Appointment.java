@@ -1,4 +1,5 @@
 package com.shield.domain;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -36,7 +37,7 @@ public class Appointment implements Serializable {
     @Column(name = "apply_id")
     private Long applyId;
 
-    
+
     @Column(name = "number", unique = true)
     private Integer number;
 
@@ -83,6 +84,9 @@ public class Appointment implements Serializable {
     @NotNull
     @JsonIgnoreProperties("appointments")
     private User user;
+
+    @Column(name = "hs_code")
+    private String hsCode;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -300,6 +304,15 @@ public class Appointment implements Serializable {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public String getHsCode() {
+        return hsCode;
+    }
+
+    public void setHsCode(String hsCode) {
+        this.hsCode = hsCode;
+    }
+
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override

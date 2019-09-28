@@ -55,6 +55,8 @@ public class AppointmentDTO implements Serializable {
 
     private String userLogin;
 
+    private String hsCode;
+
     public Long getId() {
         return id;
     }
@@ -205,6 +207,14 @@ public class AppointmentDTO implements Serializable {
 
     public void setUserLogin(String userLogin) {
         this.userLogin = userLogin;
+    }
+
+    public String getHsCode() {
+        return hsCode;
+    }
+
+    public void setHsCode(String hsCode) {
+        this.hsCode = hsCode;
     }
 
     @Override

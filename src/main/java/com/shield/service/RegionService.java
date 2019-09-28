@@ -6,6 +6,7 @@ import com.shield.web.rest.vm.RegionStatDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -36,6 +37,9 @@ public interface RegionService {
      */
     Page<RegionDTO> findAll(Pageable pageable);
 
+
+    // 获取所有和门禁对接的区域
+    List<RegionDTO> findAllConnectParkingSystem();
 
     /**
      * Get the "id" region.

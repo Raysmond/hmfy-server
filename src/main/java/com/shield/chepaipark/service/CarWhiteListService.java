@@ -43,8 +43,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.shield.service.ParkingTcpHandlerService.AUTO_DELETE_PLAN_ID_QUEUE;
-import static com.shield.service.ParkingTcpHandlerService.REDIS_KEY_TRUCK_NUMBER_CARD_ID;
+import static com.shield.service.ParkingHandlerService.AUTO_DELETE_PLAN_ID_QUEUE;
+import static com.shield.service.ParkingHandlerService.REDIS_KEY_TRUCK_NUMBER_CARD_ID;
 import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
 import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS;
 
