@@ -120,6 +120,7 @@
                     <select class="form-control" name="parkingConnectMethod" formControlName="parkingConnectMethod" id="field_parkingConnectMethod" readonly>
                         <option value="TCP">{{'shieldApp.ParkingConnectMethod.TCP' | translate}}</option>
                         <option value="DATABASE">{{'shieldApp.ParkingConnectMethod.DATABASE' | translate}}</option>
+                        <option value="HUA_CHAN_API">{{'shieldApp.ParkingConnectMethod.HUA_CHAN_API' | translate}}</option>
                     </select>
                     <div *ngIf="editForm.get('parkingConnectMethod').invalid && (editForm.get('parkingConnectMethod').dirty || editForm.get('parkingConnectMethod').touched)">
                         <small class="form-text text-danger"

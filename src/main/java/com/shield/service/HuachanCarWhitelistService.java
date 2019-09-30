@@ -15,10 +15,12 @@ import com.shield.repository.RegionRepository;
 import com.shield.repository.ShipPlanRepository;
 import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.mapper.AppointmentMapper;
+import io.github.jhipster.config.JHipsterConstants;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.MessageDigestPasswordEncoder;
@@ -39,6 +41,7 @@ import static com.shield.service.impl.AppointmentServiceImpl.REGION_ID_HUACHAN;
 
 @Service
 @Slf4j
+@Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
 public class HuachanCarWhitelistService {
     private String token = null;
     private ZonedDateTime tokenIssueTime;

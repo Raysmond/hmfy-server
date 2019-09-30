@@ -15,8 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -36,6 +34,9 @@ import java.util.stream.Collectors;
 import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
 import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS;
 
+/**
+ * 发运计划管理
+ */
 @Service
 @Slf4j
 @Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
@@ -57,6 +58,11 @@ public class VehPlanSyncService {
     @Autowired
     private AppointmentRepository appointmentRepository;
 
+    /**
+     * 同步发运计划
+     * <p>
+     * SQLSERVER --> MySQL
+     */
     @Scheduled(fixedRate = 60 * 1000)
     public void syncVehPlans() {
         ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
@@ -120,7 +126,12 @@ public class VehPlanSyncService {
         log.info("Synchronized {} veh plans", updateShipPlans.size());
     }
 
-    @Scheduled(fixedRate = 10 * 1000)
+    /**
+     * 同步出入场时间 到 发运计划
+     * <p>
+     * MySQL --> SQLSERVER
+     */
+    @Scheduled(fixedRate = 60 * 1000)
     public void syncShipPlan() {
         ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
         Set<Long> shipPlanIds = redisLongTemplate.opsForSet().members(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN);
@@ -159,7 +170,10 @@ public class VehPlanSyncService {
         }
     }
 
-    @Scheduled(fixedRate = 30 * 1000)
+    /**
+     * 同步手动设置的 VIP 预约 出入场时间 到 SQLSERVER
+     */
+    @Scheduled(fixedRate = 300 * 1000)
     private void syncVipGateLog() {
         Set<Long> appointmentIds = redisLongTemplate.opsForSet().members(REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS);
         if (appointmentIds != null && appointmentIds.size() > 0) {
@@ -169,15 +183,16 @@ public class VehPlanSyncService {
                     redisLongTemplate.opsForSet().remove(REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS, appointmentId);
                     continue;
                 }
-                Page<VipGateLog> gateLogs = vipGateLogRepository.findByTruckNumber(ap.getLicensePlateNumber(), PageRequest.of(0, 10000));
-                List<VipGateLog> logs = gateLogs.getContent();
+                List<VipGateLog> logs = vipGateLogRepository.findByTruckNumber(ap.getLicensePlateNumber());
                 VipGateLog lastGateLog = null;
                 if (logs.size() > 0) {
                     logs.sort(Comparator.comparing(VipGateLog::getRowId).reversed());
                     lastGateLog = logs.get(0);
                 }
+
                 log.info("[START] Sync Appointment to VipGateLog [id={}, truckNumber={}, gateTime={}, leaveTime={}]",
                     appointmentId, ap.getLicensePlateNumber(), ap.getEnterTime(), ap.getLeaveTime());
+
                 if (lastGateLog != null && lastGateLog.getInTime() != null && lastGateLog.getInTime().equals(ap.getLeaveTime())) {
                     lastGateLog.setOutTime(ap.getLeaveTime());
                     vipGateLogRepository.save(lastGateLog);
@@ -185,6 +200,7 @@ public class VehPlanSyncService {
                         appointmentId, ap.getLicensePlateNumber(), ap.getEnterTime(), ap.getLeaveTime(), lastGateLog.getRowId(), lastGateLog.getInTime());
                 } else {
                     VipGateLog newLog = new VipGateLog();
+                    newLog.setRowId(vipGateLogRepository.findMaxRowId());
                     newLog.setInTime(ap.getEnterTime());
                     newLog.setOutTime(ap.getLeaveTime());
                     newLog.setTruckNumber(ap.getLicensePlateNumber());

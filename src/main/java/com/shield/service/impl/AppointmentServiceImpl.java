@@ -1,7 +1,6 @@
 package com.shield.service.impl;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -22,7 +21,6 @@ import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.dto.RegionDTO;
 import com.shield.service.mapper.AppointmentMapper;
 import com.shield.service.mapper.RegionMapper;
-import com.shield.utils.JsonUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -40,7 +36,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -87,8 +82,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Autowired
     RedisTemplate<String, String> redisTemplate;
 
-    private static final String APPOINTMENT_NUMBER_KEY = "appointment_%s_%s";
-    private static final String QUEUE_NUMBER_KEY = "queue_number_%s_%s";
     private static final Long INITIAL_APPOINTMENT_NUMBER = 10000L;
     private static final Long INITIAL_QUEUE_NUMBER = 100L;
     public static final String REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN = "sync_ship_plan_ids";
@@ -103,9 +96,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     // 自动过期的，60min之内不能重新预约
     private static final Long PENALTY_TIME_MINUTES_EXPIRE = 60L;
     private static final String PENALTY_TIME_MINUTES_EXPIRE_USER_ID_KEY = "penalty_expire_user_id:%d";
-
-    // 对接门禁系统的区域ID
-    public static final Set<Long> REGION_CONNECT_PARKING = Sets.newHashSet(1L, 3L);
 
     // 四期区域ID
     public static final Long REGION_ID_HUACHAN = 2L;
@@ -236,6 +226,10 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 
+    /**
+     * 如果用户预约过期未进厂，则罚时 60min 之内不能抢号
+     * @param userId
+     */
     private void putUserInExpirePenalty(Long userId) {
         String k = String.format(PENALTY_TIME_MINUTES_EXPIRE_USER_ID_KEY, userId);
         redisTemplate.opsForValue().set(k, "1");
@@ -488,6 +482,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         region.setStatusEnter(appointments.stream().filter(it -> it.getStatus() == AppointmentStatus.ENTER).count());
     }
 
+    /**
+     * 尝试预约抢号
+     * @param appointment
+     * @return
+     */
     private boolean tryMakeAppointment(Appointment appointment) {
         synchronized (this) {
             RegionDTO region = regionMapper.toDto(appointment.getRegion());
@@ -503,8 +502,9 @@ public class AppointmentServiceImpl implements AppointmentService {
                 appointment.setUpdateTime(ZonedDateTime.now());
                 appointment.setNumber(generateAppointmentNumber(region.getId()));
                 appointmentRepository.save(appointment);
-                log.info("Appointment [{}] made success at region ({}, {}), number: {}, truckNumber: {}",
-                    appointment.getId(), region.getId(), region.getName(), appointment.getNumber(), appointment.getLicensePlateNumber());
+
+                log.info("Appointment [{}] made success at region ({}, {}), number: {}, queue number: {}, truckNumber: {}",
+                    appointment.getId(), region.getId(), region.getName(), appointment.getNumber(), appointment.getQueueNumber(), appointment.getLicensePlateNumber());
 
                 if (appointment.getApplyId() != null) {
                     List<ShipPlan> plans = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(appointment.getApplyId()));
@@ -529,8 +529,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 
-    Map<Long, Map<Integer, Double>> averageQuotaStayTime = Maps.newHashMap();
-    Map<Long, Double> latestAverageStayTime = Maps.newHashMap();
 
     /**
      * 取号满额时，估计下一个号释放的时间
@@ -564,95 +562,45 @@ public class AppointmentServiceImpl implements AppointmentService {
         log.info("Calc avg wait time: {}, avg leave gap: {}, size: {}, last leave time: {}, gap: {}",
             avgGap - lastOutGap, avgGap, outTimes.size(), outTimes.get(outTimes.size() - 1), lastOutGap);
         return avgGap - lastOutGap;
-
-//        Page<Appointment> appointments = appointmentRepository.findLastValid(regionId,
-//            ZonedDateTime.now().minusHours(2), PageRequest.of(0, 1, Sort.Direction.ASC, "startTime"));
-//        if (appointments.isEmpty()) {
-//            return -1;
-//        }
-//        Double stay = appointments.stream()
-//            .filter(it -> it.isValid() && it.getStatus() != AppointmentStatus.START && it.getStatus().equals(AppointmentStatus.START))
-//            .map(it -> ZonedDateTime.now().toEpochSecond() - it.getStartTime().toEpochSecond())
-//            .mapToInt(Long::intValue)
-//            .average().orElse(Double.NaN);
-//
-//        if (averageQuotaStayTime.containsKey(regionId) && averageQuotaStayTime.get(regionId).containsKey(ZonedDateTime.now().getHour())) {
-//            Double stay7 = averageQuotaStayTime.get(regionId).get(ZonedDateTime.now().getHour());
-//            Double latestStay = latestAverageStayTime.get(regionId);
-//            if (!stay7.isNaN() && latestStay != null && !latestStay.isNaN()) {
-//                Double averageStay = stay7 * 0.3 + latestStay * 7;
-//                return (int) (averageStay - stay);
-//            }
-//        }
-//        return -1;
     }
 
-    //    @Scheduled(fixedRate = 3600 * 1000)
-    public void updateQuotaStayTime() {
-        LocalDate today = LocalDate.now();
-        LocalTime time = LocalTime.MIN;
-        ZonedDateTime startTime = ZonedDateTime.of(today, time, ZoneId.systemDefault());
-        Map<Long, Map<Integer, Double>> stat = Maps.newHashMap();
+    /**
+     * 排队自动抢号
+     */
+    @Scheduled(fixedRate = 5 * 1000)
+    public void autoMakeAppointmentForWaitingUsers() {
         for (Region region : regionRepository.findAll()) {
-            if (region.isOpen()) {
-                Map<Integer, Double> regionStat = Maps.newHashMap();
-                for (int hour = 0; hour < 24; hour++) {
-                    Double seconds = calcAverageStayTime(region.getId(), startTime.minusDays(7), ZonedDateTime.now(), hour);
-                    regionStat.put(hour, seconds);
+            if (region.isOpen() && region.getQueueQuota() != null && region.getQueueQuota() > 0) {
+                List<Appointment> waitingList = appointmentRepository.findWaitingList(region.getId(), ZonedDateTime.now().minusHours(24));
+                waitingList.sort((Comparator.comparing(Appointment::getCreateTime)));
+                for (Appointment appointment : waitingList) {
+                    if (region.getQueueValidTime() != null && appointment.getCreateTime().plusHours(region.getQueueValidTime()).isBefore(ZonedDateTime.now())) {
+                        log.info("Appointment [{}] queue expired after {} hours", appointment.getId(), region.getQueueValidTime());
+                        appointment.setUpdateTime(ZonedDateTime.now());
+                        appointment.setValid(false);
+                        appointmentRepository.save(appointment);
+                    } else if (!this.tryMakeAppointment(appointment)) {
+                        break;
+                    }
                 }
-                stat.put(region.getId(), regionStat);
             }
         }
-        this.averageQuotaStayTime = stat;
-        log.info("Update average stay time in the past 7 days, {}", JsonUtils.toJson(stat));
     }
 
-    //    @Scheduled(fixedRate = 60 * 1000)
-    public void updateLatestQuotaStayTime() {
-        for (Region region : regionRepository.findAll()) {
-            Double seconds = calcAverageStayTime(region.getId(), ZonedDateTime.now().minusHours(1), ZonedDateTime.now(), null);
-            latestAverageStayTime.put(region.getId(), seconds);
-        }
-        log.info("Update average stay time in the past 1 hours, {}", JsonUtils.toJson(this.latestAverageStayTime));
-    }
-
-    public Double calcAverageStayTime(Long regionId, ZonedDateTime startTime, ZonedDateTime endTime, Integer hour) {
-        List<Appointment> appointments = appointmentRepository.findAllByRegionIdAndUpdateTime(regionId, startTime, endTime);
-        List<Long> times = Lists.newArrayList();
-        for (Appointment appointment : appointments) {
-            if (appointment.getStatus() == AppointmentStatus.LEAVE && appointment.getStartTime() != null && appointment.getLeaveTime() != null) {
-                if (hour != null && appointment.getLeaveTime().getHour() != hour) {
-                    continue;
-                }
-                times.add(appointment.getLeaveTime().toEpochSecond() - appointment.getStartTime().toEpochSecond());
-            }
-            if (appointment.getStatus() == AppointmentStatus.EXPIRED && appointment.getExpireTime() != null) {
-                if (hour != null && appointment.getExpireTime().getHour() != hour) {
-                    continue;
-                }
-                times.add(appointment.getExpireTime().toEpochSecond() - appointment.getStartTime().toEpochSecond());
-            }
-            if (appointment.getStatus() == AppointmentStatus.CANCELED) {
-                if (hour != null && appointment.getUpdateTime().getHour() != hour) {
-                    continue;
-                }
-                times.add(appointment.getUpdateTime().toEpochSecond() - appointment.getStartTime().toEpochSecond());
-            }
-        }
-        return times.stream().mapToInt(Long::intValue).average().orElse(Double.NaN);
-    }
-
-    private ZonedDateTime getTodayStartTime() {
-        LocalDate today = LocalDate.now();
-        LocalTime time = LocalTime.MIN;
-        return ZonedDateTime.of(today, time, ZoneId.systemDefault()).minusDays(2L);
-    }
-
-    @Scheduled(fixedRate = 60 * 1000)
+    /**
+     * 检查预约状态
+     *
+     * 1. 预约过期：START --> EXPIRED
+     * 2. 拿不到出场时间失效：下磅之后1h，还没有拿到出场时间，则设置出场时间为当前系统时间，并且valid=FALSE
+     */
+    @Scheduled(fixedRate = 30 * 1000)
     public void checkAppointments() {
         for (Region region : regionRepository.findAll()) {
-            Long validHours = region.getValidTime().longValue();
-            List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.START, Boolean.TRUE, getTodayStartTime());
+            if (!region.isOpen()) {
+                return;
+            }
+            long validHours = region.getValidTime().longValue();
+            List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.START, Boolean.TRUE, ZonedDateTime.now().minusHours(12));
             for (Appointment appointment : appointments) {
                 if (!appointment.isVip() && (appointment.getStartTime() == null || appointment.getStartTime().plusHours(validHours).isBefore(ZonedDateTime.now()))) {
                     // vip 的不过期
@@ -685,21 +633,8 @@ public class AppointmentServiceImpl implements AppointmentService {
                 }
             }
 
-            List<Appointment> waitingList = appointmentRepository.findWaitingList(region.getId());
-            waitingList.sort((Comparator.comparing(Appointment::getCreateTime)));
-            for (Appointment appointment : waitingList) {
-                if (region.getQueueValidTime() != null && appointment.getCreateTime().plusHours(region.getQueueValidTime()).isBefore(ZonedDateTime.now())) {
-                    log.info("Appointment [{}] queue expired after {} hours", appointment.getId(), region.getQueueValidTime());
-                    appointment.setUpdateTime(ZonedDateTime.now());
-                    appointment.setValid(false);
-                    appointmentRepository.save(appointment);
-                } else if (!this.tryMakeAppointment(appointment)) {
-                    break;
-                }
-            }
-
             // 进厂之后，有可能拿不到出场时间，会一直占好
-            appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.ENTER, Boolean.TRUE, getTodayStartTime());
+            appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.ENTER, Boolean.TRUE, ZonedDateTime.now().minusHours(12));
             for (Appointment appointment : appointments) {
                 if (appointment.getApplyId() != null) {
                     List<ShipPlan> plans = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(appointment.getApplyId()));

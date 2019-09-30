@@ -10,34 +10,34 @@
     <property name="floatType" value="float4" dbms="postgresql, h2"/>
     <property name="floatType" value="float" dbms="mysql, oracle, mssql, mariadb"/>
 
-    <include file="config/liquibase/changelog/00000000000000_initial_schema.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190524165041_added_entity_Region.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190524171913_added_entity_Car.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190524173744_added_entity_Appointment.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190527081813_added_entity_WxMaUser.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190601171803_added_entity_ShipPlan.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190602224721_changelog.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190625221804_changelog.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190628121804_changelog.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190628221804_changelog.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190629122402_added_entity_ParkMsg.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190629221804_changelog.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190701001804_changelog.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190702231804_changelog.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190702331804_changelog.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190703161804_changelog.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190704231804_changelog.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190707231804_changelog.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190709101804_changelog.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190712101804_changelog.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190724101804_changelog.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190730101804_changelog.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190903230919_changelog.xml" relativeToChangelogFile="false"/>
+    <!--<include file="config/liquibase/changelog/00000000000000_initial_schema.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190524165041_added_entity_Region.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190524171913_added_entity_Car.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190524173744_added_entity_Appointment.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190527081813_added_entity_WxMaUser.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190601171803_added_entity_ShipPlan.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190602224721_changelog.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190625221804_changelog.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190628121804_changelog.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190628221804_changelog.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190629122402_added_entity_ParkMsg.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190629221804_changelog.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190701001804_changelog.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190702231804_changelog.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190702331804_changelog.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190703161804_changelog.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190704231804_changelog.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190707231804_changelog.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190709101804_changelog.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190712101804_changelog.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190724101804_changelog.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190730101804_changelog.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190903230919_changelog.xml" relativeToChangelogFile="false"/>-->
     <include file="config/liquibase/changelog/20190927230919_changelog.xml" relativeToChangelogFile="false"/>
-    <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
-    <include file="config/liquibase/changelog/20190524171913_added_entity_constraints_Car.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190524173744_added_entity_constraints_Appointment.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190527081813_added_entity_constraints_WxMaUser.xml" relativeToChangelogFile="false"/>
-    <include file="config/liquibase/changelog/20190601171803_added_entity_constraints_ShipPlan.xml" relativeToChangelogFile="false"/>
+    <!--&lt;!&ndash; jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here &ndash;&gt;-->
+    <!--<include file="config/liquibase/changelog/20190524171913_added_entity_constraints_Car.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190524173744_added_entity_constraints_Appointment.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190527081813_added_entity_constraints_WxMaUser.xml" relativeToChangelogFile="false"/>-->
+    <!--<include file="config/liquibase/changelog/20190601171803_added_entity_constraints_ShipPlan.xml" relativeToChangelogFile="false"/>-->
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
 </databaseChangeLog>

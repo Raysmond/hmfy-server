@@ -3,7 +3,8 @@
     "ParkingConnectMethod": {
       "null": "",
       "TCP": "TCP",
-      "DATABASE": "DATABASE"
+      "DATABASE": "数据库",
+      "HUA_CHAN_API": "化产接口"
     }
   }
 }

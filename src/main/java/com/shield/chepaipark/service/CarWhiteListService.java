@@ -48,6 +48,9 @@ import static com.shield.service.ParkingHandlerService.REDIS_KEY_TRUCK_NUMBER_CA
 import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
 import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS;
 
+/**
+ * 数据库对接停车场门禁
+ */
 @Service
 @Slf4j
 public class CarWhiteListService {
@@ -84,9 +87,9 @@ public class CarWhiteListService {
     private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
     private static final String REDIS_KEY_MAX_PARK_CARD_CID = "next_park_card_cid";
-    private static final String REDIS_KEY_MAX_PARK_HCARD_NO = "next_park_h_card_no";
     private static final Long INITIAL_PARK_CARD_CID = 10000000L;
-    private static final Long INITIAL_PARK_HCARD_NO = 10000L;
+    private static final long DEFAULT_WHITELIST_VALID_HOURS = 6;
+    private static final long DEFAULT_VIP_WHITELIST_VALID_HOURS = 24;
 
 
     public void deleteCarWhiteList(String truckNumber) {
@@ -109,11 +112,8 @@ public class CarWhiteListService {
         return redisLongTemplate.opsForValue().increment(REDIS_KEY_MAX_PARK_CARD_CID, 1L);
     }
 
-    private Long generateUniqueHcardNo() {
-        if (redisLongTemplate.hasKey(REDIS_KEY_MAX_PARK_HCARD_NO) == Boolean.FALSE) {
-            redisLongTemplate.opsForValue().increment(REDIS_KEY_MAX_PARK_HCARD_NO, INITIAL_PARK_HCARD_NO);
-        }
-        return redisLongTemplate.opsForValue().increment(REDIS_KEY_MAX_PARK_HCARD_NO, 1L);
+    private String generateUniqueHcardNo() {
+        return ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHMMSS")) + RandomStringUtils.randomNumeric(3);
     }
 
     @Transactional
@@ -133,10 +133,9 @@ public class CarWhiteListService {
 
         log.info("Start to register car white list for appointment : {}, truckNumber: {}", appointmentId, appointment.getLicensePlateNumber());
         try {
-//            ZonedDateTime validTime = appointment.getStartTime().plusHours(region.getValidTime());
-            ZonedDateTime validTime = appointment.getStartTime().plusHours(6);
+            ZonedDateTime validTime = appointment.getStartTime().plusHours(DEFAULT_WHITELIST_VALID_HOURS);
             if (appointment.isVip() != null && appointment.isVip()) {
-                validTime = appointment.getStartTime().plusHours(24);
+                validTime = appointment.getStartTime().plusHours(DEFAULT_VIP_WHITELIST_VALID_HOURS);
             }
             registerCarWhiteList(
                 appointment.getLicensePlateNumber(),
@@ -183,7 +182,7 @@ public class CarWhiteListService {
         parkCard.setFeePeriod("月");
         parkCard.setLimitDayType(0);
         parkCard.setAreaId(-1);
-        parkCard.setHcardNo(ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHMMSS")) + RandomStringUtils.randomNumeric(3));
+        parkCard.setHcardNo(generateUniqueHcardNo());
         parkCard.setZMCarLocateCount(0);
         parkCard.setZMUsedLocateCount(0);
 
@@ -225,14 +224,11 @@ public class CarWhiteListService {
 
     @Scheduled(fixedRate = 5 * 1000)
     public void syncCarGateIOEvents() {
-        List<Region> regions = regionRepository.findAll();
-        Map<String, Region> regionsEnableDBConnection = Maps.newHashMap();
-        for (Region region : regions) {
-            if (region.isOpen() && region.getParkingConnectMethod() != null && region.getParkingConnectMethod().equals(ParkingConnectMethod.DATABASE)) {
-                regionsEnableDBConnection.put(region.getName(), region);
-            }
-        }
-        if (regionsEnableDBConnection.isEmpty()) {
+        Map<String, Region> regions = regionRepository.findAll()
+            .stream()
+            .filter(it -> it.isOpen() && it.getParkingConnectMethod() != null && it.getParkingConnectMethod().equals(ParkingConnectMethod.DATABASE))
+            .collect(Collectors.toMap(Region::getName, it -> it));
+        if (regions.isEmpty()) {
             return;
         }
         List<GateIO> gates = gateIORepository.findAllNewerThan(lastSyncTime.minusMinutes(5));
@@ -254,9 +250,9 @@ public class CarWhiteListService {
                 gate.getRecordId(), gate.getCardNo(), gate.getGateInTime(), gate.getGateOutTime(), gate.getAreaName());
             Region region = null;
             if (gate.getAreaName().equals("宝田本部")) {
-                region = regionsEnableDBConnection.getOrDefault("宝田", null);
+                region = regions.getOrDefault("宝田", null);
             } else {
-                region = regionsEnableDBConnection.getOrDefault(gate.getAreaName(), null);
+                region = regions.getOrDefault(gate.getAreaName(), null);
             }
             if (region != null) {
                 if (region.getParkingConnectMethod() != null && region.getParkingConnectMethod().equals(ParkingConnectMethod.DATABASE)) {
@@ -307,7 +303,6 @@ public class CarWhiteListService {
                     plan.setUpdateTime(ZonedDateTime.now());
                     shipPlanRepository.save(plan);
                     log.info("update ShipPlan {} gateTime: {}, truckNumber: {}", plan.getApplyId(), inTime, truckNumber);
-//                    redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
                     delayPutSyncShipPlanIdQueue(plan.getId());
                 }
             } else {
@@ -335,8 +330,6 @@ public class CarWhiteListService {
                 shipPlanRepository.save(plan);
                 log.info("update ShipPlan {} leaveTime: {}, truckNumber: {}", plan.getApplyId(), outTime, truckNumber);
 
-//                redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
-//                redisLongTemplate.opsForSet().add(AUTO_DELETE_PLAN_ID_QUEUE, plan.getId());
                 delayPutSyncShipPlanIdQueue(plan.getId());
                 delayPutDeleteShipPlanIdQueue(plan.getId());
             } else {
