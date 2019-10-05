@@ -176,7 +176,8 @@ public class ShipPlanServiceImpl implements ShipPlanService {
         if (!CollectionUtils.isEmpty(plans)) {
             List<Long> applyIds = plans.stream().map(ShipPlan::getApplyId).collect(Collectors.toList());
             List<Appointment> appointments = appointmentRepository.findByApplyIdIn(applyIds, begin);
-            Set<Long> takenApplyIds = appointments.stream().filter(it -> it.getStatus().equals(AppointmentStatus.LEAVE)).map(Appointment::getApplyId).collect(Collectors.toSet());
+            Set<Long> takenApplyIds = appointments.stream().filter(it -> it.getStatus().equals(AppointmentStatus.LEAVE))
+                .map(Appointment::getApplyId).collect(Collectors.toSet());
             plans = plans.stream().filter(it -> !takenApplyIds.contains(it.getApplyId())).collect(Collectors.toList());
         }
 
