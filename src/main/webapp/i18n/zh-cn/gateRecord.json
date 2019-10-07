@@ -1,0 +1,29 @@
+{
+  "shieldApp": {
+    "gateRecord": {
+      "home": {
+        "title": "Gate Records",
+        "createLabel": "创建新 Gate Record",
+        "createOrEditLabel": "创建或编辑 Gate Record",
+        "notFound": "No Gate Record found"
+      },
+      "created": "Gate Record {{ param }} 创建成功",
+      "updated": "Gate Record {{ param }} 更新成功",
+      "deleted": "Gate Record {{ param }} 删除成功",
+      "delete": {
+        "question": "你确定要删除 Gate Record {{ id }} 吗？"
+      },
+      "detail": {
+        "title": "Gate Record"
+      },
+      "recordType": "Record Type",
+      "truckNumber": "Truck Number",
+      "recordTime": "Record Time",
+      "data": "Data",
+      "rid": "Rid",
+      "createTime": "Create Time",
+      "regionId": "Region Id",
+      "dataMd5": "Data Md 5"
+    }
+  }
+}

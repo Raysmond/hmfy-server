@@ -107,6 +107,10 @@ import { RouterModule } from '@angular/router';
       {
         path: 'park-msg',
         loadChildren: './park-msg/park-msg.module#ShieldParkMsgModule'
+      },
+      {
+        path: 'gate-record',
+        loadChildren: './gate-record/gate-record.module#ShieldGateRecordModule'
       }
       /* jhipster-needle-add-entity-route - JHipster will add entity modules routes here */
     ])

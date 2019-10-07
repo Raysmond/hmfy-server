@@ -2,6 +2,7 @@ package com.shield.web.rest;
 
 import com.shield.chepaipark.service.CarWhiteListService;
 import com.shield.service.AppointmentService;
+import com.shield.service.HuachanCarWhitelistService;
 import com.shield.service.UserService;
 import com.shield.sqlserver.repository.VehDelivPlanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,13 @@ public class TestController {
     @Autowired
     private AppointmentService appointmentService;
 
+    @Autowired
+    private HuachanCarWhitelistService huachanCarWhitelistService;
+
     @GetMapping("/")
     public String test() {
+//        huachanCarWhitelistService.loginAndGetSessionId();
+//        huachanCarWhitelistService.syncCarInOutRecords();
         return "ok";
     }
 

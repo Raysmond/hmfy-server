@@ -13,6 +13,7 @@
         "wxMaUser": "Wx Ma User",
         "shipPlan": "Ship Plan",
         "parkMsg": "Park Msg",
+        "gateRecord": "Gate Record",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },
       "account": {

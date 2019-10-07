@@ -1,0 +1,9 @@
+{
+  "shieldApp": {
+    "RecordType": {
+      "null": "",
+      "IN": "IN",
+      "OUT": "OUT"
+    }
+  }
+}

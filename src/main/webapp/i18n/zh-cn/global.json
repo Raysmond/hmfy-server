@@ -13,6 +13,7 @@
         "wxMaUser": "绑定微信账户",
         "shipPlan": "发运计划",
         "parkMsg": "门禁消息",
+        "gateRecord": "Gate Record",
         "jhipster-needle-menu-add-entry": "JHipster will add additional entities here (do not translate!)"
       },
       "account": {

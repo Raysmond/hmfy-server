@@ -1,0 +1,68 @@
+{
+    "fluentMethods": true,
+    "clientRootFolder": "",
+    "relationships": [],
+    "fields": [
+        {
+            "fieldName": "recordType",
+            "fieldType": "RecordType",
+            "fieldValues": "IN,OUT",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "truckNumber",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "recordTime",
+            "fieldType": "ZonedDateTime",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "data",
+            "fieldType": "byte[]",
+            "fieldTypeBlobContent": "text"
+        },
+        {
+            "fieldName": "rid",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required",
+                "unique"
+            ]
+        },
+        {
+            "fieldName": "createTime",
+            "fieldType": "ZonedDateTime",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "regionId",
+            "fieldType": "Long",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "dataMd5",
+            "fieldType": "String"
+        }
+    ],
+    "changelogDate": "20191007134631",
+    "dto": "mapstruct",
+    "searchEngine": false,
+    "service": "serviceClass",
+    "entityTableName": "gate_record",
+    "databaseType": "sql",
+    "jpaMetamodelFiltering": true,
+    "pagination": "pagination"
+}

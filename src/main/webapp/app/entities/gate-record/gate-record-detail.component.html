@@ -1,0 +1,55 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div *ngIf="gateRecord">
+            <h2><span jhiTranslate="shieldApp.gateRecord.detail.title">Gate Record</span> {{gateRecord.id}}</h2>
+            <hr>
+            <jhi-alert-error></jhi-alert-error>
+            <dl class="row-md jh-entity-details">
+                <dt><span jhiTranslate="shieldApp.gateRecord.recordType">Record Type</span></dt>
+                <dd>
+                    <span jhiTranslate="{{'shieldApp.RecordType.' + gateRecord.recordType}}">{{gateRecord.recordType}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.gateRecord.truckNumber">Truck Number</span></dt>
+                <dd>
+                    <span>{{gateRecord.truckNumber}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.gateRecord.recordTime">Record Time</span></dt>
+                <dd>
+                    <span>{{gateRecord.recordTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.gateRecord.data">Data</span></dt>
+                <dd>
+                    <span>{{gateRecord.data}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.gateRecord.rid">Rid</span></dt>
+                <dd>
+                    <span>{{gateRecord.rid}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.gateRecord.createTime">Create Time</span></dt>
+                <dd>
+                    <span>{{gateRecord.createTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.gateRecord.regionId">Region Id</span></dt>
+                <dd>
+                    <span>{{gateRecord.regionId}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.gateRecord.dataMd5">Data Md 5</span></dt>
+                <dd>
+                    <span>{{gateRecord.dataMd5}}</span>
+                </dd>
+            </dl>
+
+            <button type="submit"
+                    (click)="previousState()"
+                    class="btn btn-info">
+                <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+            </button>
+
+            <button type="button"
+                    [routerLink]="['/gate-record', gateRecord.id, 'edit']"
+                    class="btn btn-primary">
+                <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+            </button>
+        </div>
+    </div>
+</div>

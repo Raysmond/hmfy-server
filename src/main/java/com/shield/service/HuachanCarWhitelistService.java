@@ -1,16 +1,20 @@
 package com.shield.service;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gson.annotations.SerializedName;
-import com.shield.domain.Appointment;
-import com.shield.domain.Region;
-import com.shield.domain.ShipPlan;
-import com.shield.domain.User;
+import com.google.common.collect.Sets;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.shield.chepaipark.service.CarWhiteListService;
+import com.shield.domain.*;
+import com.shield.domain.enumeration.RecordType;
 import com.shield.repository.AppointmentRepository;
+import com.shield.repository.GateRecordRepository;
 import com.shield.repository.RegionRepository;
 import com.shield.repository.ShipPlanRepository;
 import com.shield.service.dto.AppointmentDTO;
@@ -21,23 +25,29 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.shield.domain.enumeration.AppointmentStatus.START;
-import static com.shield.domain.enumeration.AppointmentStatus.START_CHECK;
+import static com.shield.domain.enumeration.AppointmentStatus.*;
 import static com.shield.service.impl.AppointmentServiceImpl.REGION_ID_HUACHAN;
 
+/**
+ * 化产区域的出入场数据管理
+ */
 @Service
 @Slf4j
 @Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
@@ -76,6 +86,15 @@ public class HuachanCarWhitelistService {
 
     @Autowired
     private WxMpMsgService wxMpMsgService;
+
+    @Autowired
+    private Environment env;
+
+    @Autowired
+    private GateRecordRepository gateRecordRepository;
+
+    @Autowired
+    private CarWhiteListService carWhiteListService;
 
     public HuachanCarWhitelistService() {
         this.restTemplate = new RestTemplate();
@@ -292,19 +311,27 @@ public class HuachanCarWhitelistService {
         }
     }
 
+    private ZonedDateTime loginTime;
+    private String loginSessionId = null;
 
     /**
      * 获取出入场数据接口 登录
      */
     public String loginAndGetSessionId() {
+        if (StringUtils.isNotBlank(loginSessionId) && loginTime.plusHours(1).isAfter(ZonedDateTime.now())) {
+            return loginSessionId;
+        }
         String api = "http://10.70.16.101/MIOS.Web/account/login";
-        String data =
-            "{" +
-                "\"fromurl\" => \"http://10.80.16.101/MIOS.Web\"," +
-                "\"LoginAccount\" => \"550843\"," +
-                "\"LoginPwd\" => \"3d0355d20070e21744e9d081bca314fe\"," +
-                "\"IsAutoLogin\" => false" +
-                "}";
+        if (env.acceptsProfiles(Profiles.of("dev"))) {
+            // 本地测试用
+            api = "http://127.0.0.1:10180/MIOS.Web/account/login";
+        }
+        String data = "{" +
+            "\"fromurl\" : \"http://10.80.16.101/MIOS.Web\"," +
+            "\"LoginAccount\" : \"550843\"," +
+            "\"LoginPwd\" : \"3d0355d20070e21744e9d081bca314fe\"," +
+            "\"IsAutoLogin\" : false" +
+            "}";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -318,41 +345,47 @@ public class HuachanCarWhitelistService {
         headers.add("X-Requested-With", "XMLHttpRequest");
         headers.add("Referer", "http://10.70.16.101/MIOS.Web/account/login?fromurl=http%3a%2f%2f10.70.16.101%2fMIOS.Web%2f");
         headers.add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
+
         log.info("Start to login and get session id, api: {}", api);
         HttpEntity<String> request = new HttpEntity<>(data, headers);
-        ResponseEntity<String> result = restTemplate.postForEntity(REGISTER_CAR_API, request, String.class);
-        log.error("Login response, api:{}, status code: {}, response: {}", api, result.getStatusCode(), result.getBody());
+        ResponseEntity<String> result = restTemplate.exchange(api, HttpMethod.POST, request, String.class);
+        log.info("Login response, api:{}, status code: {}, response: {}", api, result.getStatusCode(), result.getBody());
         if (result.getStatusCode() == HttpStatus.OK) {
-//            JSONObject res = new JSONObject(result.getBody());
-//            if (res.getString("state").equals("success")) {
-//                List<String> cookies = result.getHeaders().get("Set-Cookie");
-//                for (String cookie : cookies.get(0).split(";")) {
-//                    if (cookie.split("=")[0].equals("ASP.NET_SessionId")) {
-//                        return cookie.split("=")[1];
-//                    }
-//                }
-//            }
+            JsonObject res = new JsonParser().parse(result.getBody()).getAsJsonObject();
+            if (res.has("state") && res.get("state").getAsString().equals("success")) {
+                List<String> cookies = result.getHeaders().get("Set-Cookie");
+                for (String cookie : cookies.get(0).split(";")) {
+                    if (cookie.split("=")[0].equals("ASP.NET_SessionId")) {
+                        String sessionId = cookie.split("=")[1];
+                        log.info("ASP.NET_SessionId: {}", sessionId);
+                        loginSessionId = sessionId;
+                        loginTime = ZonedDateTime.now();
+                        return sessionId;
+                    }
+                }
+            }
         }
         return null;
     }
 
     @Data
     public static class CarInOutResponse {
-        @SerializedName("@odata.context")
+        @JsonProperty("@odata.context")
         private String context;
 
-        @SerializedName("@odata.count")
+        @JsonProperty("@odata.count")
         private String count;
 
-        private List<CarInOutData> value = Lists.newArrayList();
+        private List<JsonObject> value = Lists.newArrayList();
     }
 
     @Data
     public static class CarInOutData {
+        @JsonProperty("ID")
         private String ID;
         private String CAR_COLOR;
         private String CAR_NO;
-        private String Car_TYPE;
+        private String CAR_TYPE;
         private String CERT_CODE;
         private String CER_TYPE_CODE;
         private String CER_TYPE_NAME;
@@ -393,45 +426,164 @@ public class HuachanCarWhitelistService {
         private String REC_RECORD_ID;
         private String REC_RECORD_TYPE;
         private Integer REC_SPEED;
-        private ZonedDateTime REC_TIME;
+        private String REC_TIME;
         private String REC_VENDOR_CODE;
         private String REMARK;
         private Integer ROAD_NO;
         private String TOKEN_INFO;
     }
 
+
+    /**
+     * 从本地MySQL中拿化产区域车辆的出入场数据，并更新预约/计划的状态，出入场时间
+     */
+    @Scheduled(fixedRate = 30 * 1000)
+    public void updateAppointmentStatusByGateRecords() {
+        List<Appointment> appointments = appointmentRepository.findAllByRegionId(REGION_ID_HUACHAN, START, true, ZonedDateTime.now().minusHours(24));
+        if (!CollectionUtils.isEmpty(appointments)) {
+            log.info("Start to check appointment GateRecord for {} cars in START status", appointments.size());
+            for (Appointment appointment : appointments) {
+                List<GateRecord> records = gateRecordRepository.findByTruckNumber(REGION_ID_HUACHAN, RecordType.IN, appointment.getLicensePlateNumber(), appointment.getStartTime());
+                if (!records.isEmpty()) {
+                    GateRecord record = records.get(0);
+                    log.info("Find appointment [id={}, truckNumber={}] GateRecord IN, id={}, recordTime={}", appointment.getId(), appointment.getLicensePlateNumber(), record.getId(), record.getRecordTime());
+                    appointment.setEnterTime(record.getRecordTime());
+                    appointment.setStatus(ENTER);
+                    appointment.setUpdateTime(ZonedDateTime.now());
+                    appointmentRepository.save(appointment);
+
+                    if (appointment.getApplyId() != null) {
+                        ShipPlan shipPlan = shipPlanRepository.findOneByApplyId(appointment.getApplyId());
+                        if (shipPlan != null) {
+                            shipPlan.setGateTime(appointment.getEnterTime());
+                            shipPlan.setUpdateTime(ZonedDateTime.now());
+                            shipPlanRepository.save(shipPlan);
+
+                            carWhiteListService.delayPutSyncShipPlanIdQueue(shipPlan.getId());
+                        }
+                    }
+                }
+            }
+        }
+
+        List<Appointment> enterAppointments = appointmentRepository.findAllByRegionId(REGION_ID_HUACHAN, ENTER, true, ZonedDateTime.now().minusHours(24));
+        if (!CollectionUtils.isEmpty(enterAppointments)) {
+            log.info("Start to check appointment GateRecord for {} cars in ENTER status", enterAppointments.size());
+            for (Appointment appointment : enterAppointments) {
+                List<GateRecord> records = gateRecordRepository.findByTruckNumber(REGION_ID_HUACHAN, RecordType.OUT, appointment.getLicensePlateNumber(), appointment.getEnterTime());
+                if (!records.isEmpty()) {
+                    GateRecord record = records.get(0);
+                    log.info("Find appointment [id={}, truckNumber={}] GateRecord OUT, id={}, recordTime={}", appointment.getId(), appointment.getLicensePlateNumber(), record.getId(), record.getRecordTime());
+                    appointment.setLeaveTime(record.getRecordTime());
+                    appointment.setStatus(LEAVE);
+                    appointment.setUpdateTime(ZonedDateTime.now());
+                    appointmentRepository.save(appointment);
+
+                    if (appointment.getApplyId() != null) {
+                        ShipPlan shipPlan = shipPlanRepository.findOneByApplyId(appointment.getApplyId());
+                        if (shipPlan != null) {
+                            shipPlan.setLeaveTime(appointment.getLeaveTime());
+                            shipPlan.setUpdateTime(ZonedDateTime.now());
+                            shipPlanRepository.save(shipPlan);
+
+                            carWhiteListService.delayPutSyncShipPlanIdQueue(shipPlan.getId());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    private static Set<String> SAVED_RECORD_IDS = Sets.newHashSet();
+
     /**
      * 获取出入场数据接口
      */
-    public void getCarInOutRecords() {
-        String api = "http://10.70.16.101/MIOS.Web/odata/MIOS/T_MIO_CAR_RECORDEntity" +
-            "?%24top=100&%24count=true&%24skip=#{skip}&%24orderby=MODIFY_TIME+desc&%24" +
-            "filter=IS_DELETE+eq+false+and+contains(CAR_NO%2C%27%E6%B2%AABQ4663%27)+" +
-            "and+RECORD_YMD+ge+20191001+" +
-            "and+RECORD_YMD+le+20191006" +
-            "&_=" + ZonedDateTime.now().toEpochSecond();
-        String data =
-            "{" +
-                "\"fromurl\" => \"http://10.80.16.101/MIOS.Web\"," +
-                "\"LoginAccount\" => \"550843\"," +
-                "\"LoginPwd\" => \"3d0355d20070e21744e9d081bca314fe\"," +
-                "\"IsAutoLogin\" => false" +
-                "}";
+    @Scheduled(fixedRate = 60 * 1000)
+    public void syncCarInOutRecords() {
+        String api = "http://10.70.16.101/MIOS.Web/odata/MIOS/T_MIO_CAR_RECORDEntity";
+        if (env.acceptsProfiles(Profiles.of("dev"))) {
+            // 本地测试用
+            api = "http://127.0.0.1:10180/MIOS.Web/odata/MIOS/T_MIO_CAR_RECORDEntity";
+        }
+        String today = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String yestoday = ZonedDateTime.now().minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+//        String param =
+//            "?$top=10" +
+//                "&$count=true" +
+//                "&$skip=0" +
+//                "&$orderby=MODIFY_TIME+asc" +
+//                "&$filter=IS_DELETE+eq+false+" +
+//                "and+RECORD_YMD+ge+" + yestoday + "+" +
+//                "and+RECORD_YMD+le+" + today +
+//                "&_=" + ZonedDateTime.now().toEpochSecond();
+
+        String param =
+            "?&$count=true" +
+                "&$skip=0" +
+                "&$orderby=MODIFY_TIME+asc" +
+                "&$filter=IS_DELETE+eq+false+" +
+                "and+RECORD_YMD+ge+" + yestoday + "+" +
+                "and+RECORD_YMD+le+" + today +
+                "&_=" + ZonedDateTime.now().toEpochSecond();
+
+        api += param;
+
+        String cookie = loginAndGetSessionId();
+        if (cookie == null) {
+            return;
+        }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Accept", "application/json");
-        headers.add("Cookie", "");
-        headers.add("Referer", "http://10.70.16.101/MIOS.Web/mio/passrecord/passrecord_qry");
         headers.setContentType(MediaType.APPLICATION_JSON);
-        log.info("Start to login and get session id, api: {}", api);
-        HttpEntity<String> request = new HttpEntity<>(data, headers);
-        ResponseEntity<String> result = restTemplate.postForEntity(REGISTER_CAR_API, request, String.class);
-        log.error("Login response, api:{}, status code: {}, response: {}", api, result.getStatusCode(), result.getBody());
+        headers.add("Cookie", String.format("ASP.NET_SessionId=%s", cookie));
+        headers.add("Referer", "http://10.70.16.101/MIOS.Web/mio/passrecord/passrecord_qry");
+        headers.add("Accept", "application/json, text/javascript, */*; q=0.01");
+        headers.add("Host", "10.70.16.101");
+        headers.add("Connection", "keep-alive");
+        headers.add("Origin", "http://10.70.16.101");
+        headers.add("Accept-Encoding", "gzip, deflate");
+        headers.add("Accept-Language", "en-US,en;q=0.9");
+        headers.add("X-Requested-With", "XMLHttpRequest");
+        headers.add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
 
-        try {
-            CarInOutResponse carInOutResponse = objectMapper.readValue(result.getBody(), CarInOutResponse.class);
-        } catch (IOException e) {
-            e.printStackTrace();
+        log.info("Start to query car IN/OUT records: {}", api);
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<String> result = restTemplate.exchange(api, HttpMethod.GET, request, String.class);
+        log.info("response, status code: {}, response: {}", result.getStatusCode(), result.getBody());
+
+        if (SAVED_RECORD_IDS.isEmpty()) {
+            List<GateRecord> records = gateRecordRepository.findAllByRegionIdAndRecordTimeGreaterThanEqual(REGION_ID_HUACHAN, ZonedDateTime.now().minusDays(2));
+            for (GateRecord record : records) {
+                SAVED_RECORD_IDS.add(record.getRid());
+            }
+        }
+
+        JsonObject json = new JsonParser().parse(result.getBody()).getAsJsonObject();
+        List<GateRecord> newRecords = Lists.newArrayList();
+        for (JsonElement ele : json.getAsJsonArray("value")) {
+            JsonObject log = ele.getAsJsonObject();
+            GateRecord gateRecord = new GateRecord();
+            gateRecord.setRid(log.get("ID").getAsString());
+            if (SAVED_RECORD_IDS.contains(gateRecord.getRid())) {
+                continue;
+            }
+            gateRecord.setRegionId(REGION_ID_HUACHAN);
+            gateRecord.setTruckNumber(log.get("CAR_NO").getAsString());
+            gateRecord.setCreateTime(ZonedDateTime.now());
+            gateRecord.setRecordType(log.get("INOUT_TYPE").getAsString().equals("IN") ? RecordType.IN : RecordType.OUT);
+            gateRecord.setRecordTime(ZonedDateTime.parse(log.get("REC_TIME").getAsString().substring(0, 19), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault())));
+            gateRecord.setData(ele.toString());
+            gateRecord.setDataMd5(DigestUtils.md5DigestAsHex(gateRecord.getData().getBytes()));
+            if (gateRecordRepository.findOneByRid(gateRecord.getRid()) == null) {
+                newRecords.add(gateRecord);
+            }
+            SAVED_RECORD_IDS.add(gateRecord.getRid());
+        }
+        if (!newRecords.isEmpty()) {
+            gateRecordRepository.saveAll(newRecords);
+            log.info("Saved {} new GateRecords of regionId {}", newRecords.size(), newRecords.get(0).getRegionId());
         }
     }
 

@@ -1,0 +1,29 @@
+{
+  "shieldApp": {
+    "gateRecord": {
+      "home": {
+        "title": "Gate Records",
+        "createLabel": "Create a new Gate Record",
+        "createOrEditLabel": "Create or edit a Gate Record",
+        "notFound": "No Gate Record found"
+      },
+      "created": "A new Gate Record is created with identifier {{ param }}",
+      "updated": "A Gate Record is updated with identifier {{ param }}",
+      "deleted": "A Gate Record is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Gate Record {{ id }}?"
+      },
+      "detail": {
+        "title": "Gate Record"
+      },
+      "recordType": "Record Type",
+      "truckNumber": "Truck Number",
+      "recordTime": "Record Time",
+      "data": "Data",
+      "rid": "Rid",
+      "createTime": "Create Time",
+      "regionId": "Region Id",
+      "dataMd5": "Data Md 5"
+    }
+  }
+}

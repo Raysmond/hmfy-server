@@ -1,0 +1,116 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+            <h2 id="jhi-gate-record-heading" jhiTranslate="shieldApp.gateRecord.home.createOrEditLabel">Create or edit a Gate Record</h2>
+            <div>
+                <jhi-alert-error></jhi-alert-error>
+                <div class="form-group" [hidden]="!editForm.get('id').value">
+                    <label for="id" jhiTranslate="global.field.id">ID</label>
+                    <input type="text" class="form-control" id="id" name="id" formControlName="id"
+                        readonly />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.gateRecord.recordType" for="field_recordType">Record Type</label>
+                    <select class="form-control" name="recordType" formControlName="recordType" id="field_recordType">
+                        <option value="IN">{{'shieldApp.RecordType.IN' | translate}}</option>
+                        <option value="OUT">{{'shieldApp.RecordType.OUT' | translate}}</option>
+                    </select>
+                    <div *ngIf="editForm.get('recordType').invalid && (editForm.get('recordType').dirty || editForm.get('recordType').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('recordType').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.gateRecord.truckNumber" for="field_truckNumber">Truck Number</label>
+                    <input type="text" class="form-control" name="truckNumber" id="field_truckNumber"
+                           formControlName="truckNumber"/>
+                    <div *ngIf="editForm.get('truckNumber').invalid && (editForm.get('truckNumber').dirty || editForm.get('truckNumber').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('truckNumber').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.gateRecord.recordTime" for="field_recordTime">Record Time</label>
+                    <div class="d-flex">
+                        <input id="field_recordTime" type="datetime-local" class="form-control" name="recordTime" formControlName="recordTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                    <div *ngIf="editForm.get('recordTime').invalid && (editForm.get('recordTime').dirty || editForm.get('recordTime').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('recordTime').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                            [hidden]="!editForm.get('recordTime').errors?.ZonedDateTimelocal" jhiTranslate="entity.validation.ZonedDateTimelocal">
+                            This field should be a date and time.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.gateRecord.data" for="field_data">Data</label>
+                    <textarea class="form-control" name="data" id="field_data"
+                              formControlName="data"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.gateRecord.rid" for="field_rid">Rid</label>
+                    <input type="text" class="form-control" name="rid" id="field_rid"
+                           formControlName="rid"/>
+                    <div *ngIf="editForm.get('rid').invalid && (editForm.get('rid').dirty || editForm.get('rid').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('rid').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.gateRecord.createTime" for="field_createTime">Create Time</label>
+                    <div class="d-flex">
+                        <input id="field_createTime" type="datetime-local" class="form-control" name="createTime" formControlName="createTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                    <div *ngIf="editForm.get('createTime').invalid && (editForm.get('createTime').dirty || editForm.get('createTime').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('createTime').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                            [hidden]="!editForm.get('createTime').errors?.ZonedDateTimelocal" jhiTranslate="entity.validation.ZonedDateTimelocal">
+                            This field should be a date and time.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.gateRecord.regionId" for="field_regionId">Region Id</label>
+                    <input type="number" class="form-control" name="regionId" id="field_regionId"
+                           formControlName="regionId"/>
+                    <div *ngIf="editForm.get('regionId').invalid && (editForm.get('regionId').dirty || editForm.get('regionId').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('regionId').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                            [hidden]="!editForm.get('regionId')?.errors?.number" jhiTranslate="entity.validation.number">
+                            This field should be a number.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.gateRecord.dataMd5" for="field_dataMd5">Data Md 5</label>
+                    <input type="text" class="form-control" name="dataMd5" id="field_dataMd5"
+                           formControlName="dataMd5"/>
+                </div>
+
+            </div>
+            <div>
+                <button type="button" id="cancel-save" class="btn btn-secondary"  (click)="previousState()">
+                    <fa-icon [icon]="'ban'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+                </button>
+                <button type="submit" id="save-entity" [disabled]="editForm.invalid || isSaving" class="btn btn-primary">
+                    <fa-icon [icon]="'save'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
