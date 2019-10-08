@@ -21,4 +21,8 @@ public interface GateRecordRepository extends JpaRepository<GateRecord, Long>, J
 
     @Query("select g from GateRecord g where g.regionId = ?1 and g.recordType = ?2 and g.truckNumber = ?3 and g.recordTime > ?4 order by g.recordTime asc")
     List<GateRecord> findByTruckNumber(Long regionId, RecordType recordType, String truckNumber, ZonedDateTime beginRecordTime);
+
+
+    @Query("select g from GateRecord g where g.regionId = ?1 and g.truckNumber = ?2 and g.recordTime > ?3 order by g.recordTime asc")
+    List<GateRecord> findByTruckNumber(Long regionId,  String truckNumber, ZonedDateTime beginRecordTime);
 }

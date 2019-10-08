@@ -34,9 +34,11 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -161,7 +163,7 @@ public class HuachanCarWhitelistService {
      */
     @Data
     public static class RegisterCarInfo {
-        private String applier_name = "高阳";
+        private String applier_name = "钱鹏飞";
         private String company_name;
         private Integer enter_door = 7;
         private Integer out_door = 7;
@@ -437,8 +439,9 @@ public class HuachanCarWhitelistService {
     /**
      * 从本地MySQL中拿化产区域车辆的出入场数据，并更新预约/计划的状态，出入场时间
      */
-    @Scheduled(fixedRate = 30 * 1000)
+    @Scheduled(fixedRate = 60 * 1000)
     public void updateAppointmentStatusByGateRecords() {
+        // 未进厂预约单（预约成功 --> 进厂)
         List<Appointment> appointments = appointmentRepository.findAllByRegionId(REGION_ID_HUACHAN, START, true, ZonedDateTime.now().minusHours(24));
         if (!CollectionUtils.isEmpty(appointments)) {
             log.info("Start to check appointment GateRecord for {} cars in START status", appointments.size());
@@ -451,21 +454,11 @@ public class HuachanCarWhitelistService {
                     appointment.setStatus(ENTER);
                     appointment.setUpdateTime(ZonedDateTime.now());
                     appointmentRepository.save(appointment);
-
-                    if (appointment.getApplyId() != null) {
-                        ShipPlan shipPlan = shipPlanRepository.findOneByApplyId(appointment.getApplyId());
-                        if (shipPlan != null) {
-                            shipPlan.setGateTime(appointment.getEnterTime());
-                            shipPlan.setUpdateTime(ZonedDateTime.now());
-                            shipPlanRepository.save(shipPlan);
-
-                            carWhiteListService.delayPutSyncShipPlanIdQueue(shipPlan.getId());
-                        }
-                    }
                 }
             }
         }
 
+        // 已进厂预约单（进厂 --> 离场)
         List<Appointment> enterAppointments = appointmentRepository.findAllByRegionId(REGION_ID_HUACHAN, ENTER, true, ZonedDateTime.now().minusHours(24));
         if (!CollectionUtils.isEmpty(enterAppointments)) {
             log.info("Start to check appointment GateRecord for {} cars in ENTER status", enterAppointments.size());
@@ -478,16 +471,65 @@ public class HuachanCarWhitelistService {
                     appointment.setStatus(LEAVE);
                     appointment.setUpdateTime(ZonedDateTime.now());
                     appointmentRepository.save(appointment);
+                }
+            }
+        }
 
-                    if (appointment.getApplyId() != null) {
-                        ShipPlan shipPlan = shipPlanRepository.findOneByApplyId(appointment.getApplyId());
-                        if (shipPlan != null) {
-                            shipPlan.setLeaveTime(appointment.getLeaveTime());
-                            shipPlan.setUpdateTime(ZonedDateTime.now());
-                            shipPlanRepository.save(shipPlan);
+        Region region = regionRepository.findById(REGION_ID_HUACHAN).get();
 
-                            carWhiteListService.delayPutSyncShipPlanIdQueue(shipPlan.getId());
-                        }
+        // 待提货且未进厂计划，需要填进厂时间
+        List<ShipPlan> shipPlans = shipPlanRepository.findAllByDeliverTime(region.getName(), LocalDate.now().atStartOfDay(ZoneId.systemDefault()).minusDays(1), ZonedDateTime.now(), 1)
+            .stream()
+            .filter(it -> it.getGateTime() == null)
+            .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(shipPlans)) {
+            log.info("Start to find gate_time for {} ShipPlan in region {}", shipPlans.size(), region.getId());
+            for (ShipPlan shipPlan : shipPlans) {
+                List<Appointment> appointmentList = appointmentRepository.findByApplyIdIn(Lists.newArrayList(shipPlan.getApplyId())).stream()
+                    .filter(it -> it.getStartTime() != null)
+                    .sorted(Comparator.comparing(Appointment::getStartTime).reversed())
+                    .collect(Collectors.toList());
+                ZonedDateTime beginTime = appointmentList.isEmpty() ? shipPlan.getCreateTime() : appointmentList.get(0).getStartTime();
+                List<GateRecord> records = gateRecordRepository.findByTruckNumber(REGION_ID_HUACHAN, RecordType.IN, shipPlan.getTruckNumber(), beginTime);
+                if (!records.isEmpty()) {
+                    GateRecord record = records.get(0);
+                    if (shipPlan.getLoadingStartTime() != null && record.getRecordTime().isAfter(shipPlan.getLoadingStartTime())) {
+                        continue;
+                    }
+                    log.info("Find ShipPlan [applyId={}, truckNumber={}] GateRecord IN, id={}, recordTime={}", shipPlan.getApplyId(), shipPlan.getTruckNumber(), record.getId(), record.getRecordTime());
+                    shipPlan.setGateTime(record.getRecordTime());
+                    shipPlan.setUpdateTime(ZonedDateTime.now());
+                    shipPlanRepository.save(shipPlan);
+                    carWhiteListService.delayPutSyncShipPlanIdQueue(shipPlan.getId());
+                }
+            }
+        }
+
+        // 已提货计划，需要填出场时间
+        shipPlans = shipPlanRepository
+            .findAllByDeliverTime(region.getName(), LocalDate.now().atStartOfDay(ZoneId.systemDefault()).minusDays(1), ZonedDateTime.now(), 3).stream()
+            .filter(it -> it.getLeaveTime() == null)
+            .filter(it -> it.getLoadingEndTime() != null)
+            .sorted(Comparator.comparing(ShipPlan::getLoadingEndTime).reversed())
+            .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(shipPlans)) {
+            log.info("Start to find leave_time for {} ShipPlan in region {}", shipPlans.size(), region.getId());
+            for (ShipPlan shipPlan : shipPlans) {
+                List<GateRecord> records = gateRecordRepository.findByTruckNumber(REGION_ID_HUACHAN, shipPlan.getTruckNumber(), shipPlan.getCreateTime());
+                for (int i = 0; i < records.size() - 1; i++) {
+                    if (records.get(i).getRecordType().equals(RecordType.IN)
+                        && records.get(i + 1).getRecordType().equals(RecordType.OUT)
+                        && records.get(i).getRecordTime().isBefore(shipPlan.getLoadingStartTime())
+                        && records.get(i + 1).getRecordTime().isAfter(shipPlan.getLoadingEndTime())) {
+                        GateRecord inRecord = records.get(i);
+                        GateRecord outRecord = records.get(i + 1);
+                        log.info("Find ShipPlan [applyId={}, truckNumber={}] GateRecord OUT, id={}, recordTime={}", shipPlan.getApplyId(), shipPlan.getTruckNumber(), outRecord.getId(), outRecord.getRecordTime());
+                        shipPlan.setGateTime(inRecord.getRecordTime());
+                        shipPlan.setLeaveTime(outRecord.getRecordTime());
+                        shipPlan.setUpdateTime(ZonedDateTime.now());
+                        shipPlanRepository.save(shipPlan);
+                        carWhiteListService.delayPutSyncShipPlanIdQueue(shipPlan.getId());
+                        break;
                     }
                 }
             }
@@ -551,7 +593,7 @@ public class HuachanCarWhitelistService {
         log.info("Start to query car IN/OUT records: {}", api);
         HttpEntity<String> request = new HttpEntity<>(headers);
         ResponseEntity<String> result = restTemplate.exchange(api, HttpMethod.GET, request, String.class);
-        log.info("response, status code: {}, response: {}", result.getStatusCode(), result.getBody());
+        log.info("response, status code: {}", result.getStatusCode());
 
         if (SAVED_RECORD_IDS.isEmpty()) {
             List<GateRecord> records = gateRecordRepository.findAllByRegionIdAndRecordTimeGreaterThanEqual(REGION_ID_HUACHAN, ZonedDateTime.now().minusDays(2));
