@@ -13,6 +13,7 @@ import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.domain.enumeration.ParkingConnectMethod;
 import com.shield.repository.RegionRepository;
 import com.shield.repository.ShipPlanRepository;
+import com.shield.security.SecurityUtils;
 import com.shield.service.AppointmentService;
 import com.shield.repository.AppointmentRepository;
 import com.shield.service.UserService;
@@ -228,6 +229,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     /**
      * 如果用户预约过期未进厂，则罚时 60min 之内不能抢号
+     *
      * @param userId
      */
     private void putUserInExpirePenalty(Long userId) {
@@ -457,7 +459,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public void countRemainQuota(RegionDTO region, boolean isVip) {
         // 统计剩余取号名额
-        List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), ZonedDateTime.now().minusHours(12), ZonedDateTime.now());
+        List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), ZonedDateTime.now().minusDays(2), ZonedDateTime.now());
         appointments = appointments.stream()
             .filter(it -> it.isValid() && (it.getStatus() == AppointmentStatus.START || it.getStatus() == AppointmentStatus.ENTER))
             .collect(Collectors.toList());
@@ -484,6 +486,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     /**
      * 尝试预约抢号
+     *
      * @param appointment
      * @return
      */
@@ -534,8 +537,8 @@ public class AppointmentServiceImpl implements AppointmentService {
      * 取号满额时，估计下一个号释放的时间
      */
     @Override
-    public Integer calcNextQuotaWaitingTime(Long regionId) {
-        List<Appointment> appointments = appointmentRepository.findAllByRegionIdAndUpdateTime(regionId, ZonedDateTime.now().minusHours(2), ZonedDateTime.now());
+    public Integer calcNextQuotaWaitingTime(RegionDTO region) {
+        List<Appointment> appointments = appointmentRepository.findAllByRegionIdAndUpdateTime(region.getId(), ZonedDateTime.now().minusHours(2), ZonedDateTime.now());
         appointments.sort(Comparator.comparing(Appointment::getUpdateTime));
         List<Long> times = Lists.newArrayList();
         List<ZonedDateTime> outTimes = Lists.newArrayList();
@@ -550,29 +553,67 @@ public class AppointmentServiceImpl implements AppointmentService {
                 outTimes.add(appointment.getUpdateTime());
             }
         }
-        if (outTimes.size() <= 1) {
-            return -1;
+        Integer avgGap = 0;
+        Integer lastOutGap = 0;
+        if (outTimes.size() > 0) {
+            if (outTimes.size() <= 1) {
+                return -1;
+            }
+            for (int i = 1; i < outTimes.size(); i++) {
+                times.add(outTimes.get(i).toEpochSecond() - outTimes.get(i - 1).toEpochSecond());
+            }
+            Double avg = times.stream().mapToInt(Long::intValue).average().orElse(Double.NaN);
+            avgGap = avg.intValue();
+            lastOutGap = (int) (ZonedDateTime.now().toEpochSecond() - outTimes.get(outTimes.size() - 1).toEpochSecond());
+            log.info("Calc avg wait time: {}, avg leave gap: {}, size: {}, last leave time: {}, gap: {}",
+                avgGap - lastOutGap, avgGap, outTimes.size(), outTimes.get(outTimes.size() - 1), lastOutGap);
         }
-        for (int i = 1; i < outTimes.size(); i++) {
-            times.add(outTimes.get(i).toEpochSecond() - outTimes.get(i - 1).toEpochSecond());
+
+        Integer nextWaitTime = avgGap - lastOutGap;
+        if (nextWaitTime < 60) {
+            nextWaitTime = 60;
         }
-        Double avg = times.stream().mapToInt(Long::intValue).average().orElse(Double.NaN);
-        Integer avgGap = avg.intValue();
-        Integer lastOutGap = (int) (ZonedDateTime.now().toEpochSecond() - outTimes.get(outTimes.size() - 1).toEpochSecond());
-        log.info("Calc avg wait time: {}, avg leave gap: {}, size: {}, last leave time: {}, gap: {}",
-            avgGap - lastOutGap, avgGap, outTimes.size(), outTimes.get(outTimes.size() - 1), lastOutGap);
+        Integer waitTimeInMinutes = nextWaitTime / 60 + (nextWaitTime % 60 > 0 ? 1 : 0);
+        region.setNextQuotaWaitTime(waitTimeInMinutes);
+
+        // 如果当前用户在排队等待中，则需要计算等待时间
+        List<Appointment> waitingList = appointmentRepository.findWaitingList(region.getId(), ZonedDateTime.now().minusDays(2));
+        if (waitingList.size() > 0) {
+            region.setStatusWait((long) waitingList.size());
+            if (SecurityUtils.isAuthenticated()) {
+                User user = userService.getUserWithAuthorities().get();
+                if (StringUtils.isNotBlank(user.getTruckNumber())) {
+                    for (int i = 0; i < waitingList.size(); i++) {
+                        if (waitingList.get(i).getLicensePlateNumber().equals(user.getTruckNumber())) {
+                            region.setStatusWaitBeforeUser((long) i);
+                            region.setUserInWaitingList(Boolean.TRUE);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (region.getUserInWaitingList()) {
+                if (region.getStatusWaitBeforeUser() > 0) {
+                    Integer userWaitTimeMinutes = region.getStatusWaitBeforeUser().intValue() * avgGap + nextWaitTime;
+                    userWaitTimeMinutes = userWaitTimeMinutes / 60 + (userWaitTimeMinutes % 60 > 0 ? 1 : 0);
+                    region.setWaitTime(userWaitTimeMinutes);
+                } else {
+                    region.setWaitTime(waitTimeInMinutes);
+                }
+            }
+        }
         return avgGap - lastOutGap;
     }
 
     /**
      * 排队自动抢号
      */
-    @Scheduled(fixedRate = 5 * 1000)
+    @Scheduled(fixedRate = 3 * 1000)
     public void autoMakeAppointmentForWaitingUsers() {
         for (Region region : regionRepository.findAll()) {
             if (region.isOpen() && region.getQueueQuota() != null && region.getQueueQuota() > 0) {
-                List<Appointment> waitingList = appointmentRepository.findWaitingList(region.getId(), ZonedDateTime.now().minusHours(24));
-                waitingList.sort((Comparator.comparing(Appointment::getCreateTime)));
+                List<Appointment> waitingList = appointmentRepository.findWaitingList(region.getId(), ZonedDateTime.now().minusDays(2));
                 for (Appointment appointment : waitingList) {
                     if (region.getQueueValidTime() != null && appointment.getCreateTime().plusHours(region.getQueueValidTime()).isBefore(ZonedDateTime.now())) {
                         log.info("Appointment [{}] queue expired after {} hours", appointment.getId(), region.getQueueValidTime());
@@ -589,7 +630,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     /**
      * 检查预约状态
-     *
+     * <p>
      * 1. 预约过期：START --> EXPIRED
      * 2. 拿不到出场时间失效：下磅之后1h，还没有拿到出场时间，则设置出场时间为当前系统时间，并且valid=FALSE
      */
@@ -600,7 +641,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 return;
             }
             long validHours = region.getValidTime().longValue();
-            List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.START, Boolean.TRUE, ZonedDateTime.now().minusHours(12));
+            List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.START, Boolean.TRUE, ZonedDateTime.now().minusDays(2));
             for (Appointment appointment : appointments) {
                 if (!appointment.isVip() && (appointment.getStartTime() == null || appointment.getStartTime().plusHours(validHours).isBefore(ZonedDateTime.now()))) {
                     // vip 的不过期
@@ -634,7 +675,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             }
 
             // 进厂之后，有可能拿不到出场时间，会一直占好
-            appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.ENTER, Boolean.TRUE, ZonedDateTime.now().minusHours(12));
+            appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.ENTER, Boolean.TRUE, ZonedDateTime.now().minusDays(2));
             for (Appointment appointment : appointments) {
                 if (appointment.getApplyId() != null) {
                     List<ShipPlan> plans = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(appointment.getApplyId()));

@@ -73,7 +73,7 @@ public interface AppointmentService {
 
     void updateStatusAfterCancelShipPlan(Long applyId);
 
-    Integer calcNextQuotaWaitingTime(Long regionId);
+    Integer calcNextQuotaWaitingTime(RegionDTO region);
 
     Integer getNextAppointmentNumber(Long regionId);
 }

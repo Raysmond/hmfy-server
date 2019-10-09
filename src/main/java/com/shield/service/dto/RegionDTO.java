@@ -43,6 +43,10 @@ public class RegionDTO implements Serializable {
     private Long statusStart = 0L;
     private Long statusEnter = 0L;
     private Integer nextQuotaNumber = 0;
+    private Long statusWait = 0L;
+    private Boolean userInWaitingList = Boolean.FALSE;
+    private Long statusWaitBeforeUser = 0L;
+    private Integer waitTime = 0;
 
     private ParkingConnectMethod parkingConnectMethod;
 
@@ -236,6 +240,38 @@ public class RegionDTO implements Serializable {
 
     public void setNextQuotaNumber(Integer nextQuotaNumber) {
         this.nextQuotaNumber = nextQuotaNumber;
+    }
+
+    public Boolean getUserInWaitingList() {
+        return userInWaitingList;
+    }
+
+    public void setUserInWaitingList(Boolean userInWaitingList) {
+        this.userInWaitingList = userInWaitingList;
+    }
+
+    public Long getStatusWaitBeforeUser() {
+        return statusWaitBeforeUser;
+    }
+
+    public void setStatusWaitBeforeUser(Long statusWaitBeforeUser) {
+        this.statusWaitBeforeUser = statusWaitBeforeUser;
+    }
+
+    public Long getStatusWait() {
+        return statusWait;
+    }
+
+    public void setStatusWait(Long statusWait) {
+        this.statusWait = statusWait;
+    }
+
+    public Integer getWaitTime() {
+        return waitTime;
+    }
+
+    public void setWaitTime(Integer waitTime) {
+        this.waitTime = waitTime;
     }
 
     @Override

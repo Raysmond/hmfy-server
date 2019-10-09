@@ -168,9 +168,8 @@ public class ShipPlanServiceImpl implements ShipPlanService {
         }
         RegionDTO regionDTO = region.get();
 
-        ZonedDateTime begin = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+        ZonedDateTime begin = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).minusDays(1);
         ZonedDateTime end = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).plusDays(1);
-        // 只获取今天的
         List<ShipPlan> plans = shipPlanRepository.findAvailableByTruckNumber(truckNumber, regionDTO.getName(), begin, end);
 
         if (!CollectionUtils.isEmpty(plans)) {

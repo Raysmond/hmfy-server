@@ -198,18 +198,20 @@ public class WxAppointmentApi {
         return ResponseEntity.badRequest().body(null);
     }
 
-    private Map<String, RegionDTO> regionStatCache = Maps.newHashMap();
-    private Map<String, ZonedDateTime> regionStatCacheTime = Maps.newHashMap();
+    private Map<String, Map<String, RegionDTO>> regionStatCache = Maps.newHashMap();
+    private Map<String, Map<String, ZonedDateTime>> regionStatCacheTime = Maps.newHashMap();
 
     /**
      * 统计区域取号额度
      */
     @GetMapping("/region/{regionName}")
     public ResponseEntity<RegionDTO> getRegion(@PathVariable String appid, @PathVariable String regionName) {
-        if (regionStatCache.containsKey(regionName)
-            && ZonedDateTime.now().toEpochSecond() - regionStatCacheTime.get(regionName).toEpochSecond() < 10) {
+        String cacheUser = SecurityUtils.isAuthenticated() ? SecurityUtils.getCurrentUserLogin().get() : "__DEFAULT__";
+        if (regionStatCache.containsKey(cacheUser)
+            && regionStatCache.get(cacheUser).containsKey(regionName)
+            && ZonedDateTime.now().toEpochSecond() - regionStatCacheTime.get(cacheUser).get(regionName).toEpochSecond() < 10) {
             // 10s 内不重复计算
-            return ResponseEntity.ok(regionStatCache.get(regionName));
+            return ResponseEntity.ok(regionStatCache.get(cacheUser).get(regionName));
         }
         RegionDTO region = regionService.findByName(regionName);
         if (region == null) {
@@ -222,12 +224,7 @@ public class WxAppointmentApi {
             appointmentService.countRemainQuota(region, false);
             if (region.getRemainQuota() == 0) {
                 try {
-                    Integer waitime = appointmentService.calcNextQuotaWaitingTime(region.getId());
-                    if (waitime < 60) {
-                        waitime = 60;
-                    }
-                    Integer waitTimeInMinutes = waitime / 60 + (waitime % 60 > 0 ? 1 : 0);
-                    region.setNextQuotaWaitTime(waitTimeInMinutes);
+                    appointmentService.calcNextQuotaWaitingTime(region);
                 } catch (Exception e) {
                     log.error("failed to calc average quota waiting time", e);
                 }
@@ -236,8 +233,12 @@ public class WxAppointmentApi {
             region.setOpen(Boolean.FALSE);
             region.setRemainQuota(0);
         }
-        regionStatCache.put(regionName, region);
-        regionStatCacheTime.put(regionName, ZonedDateTime.now());
+        if (!regionStatCache.containsKey(cacheUser)) {
+            regionStatCache.put(cacheUser, Maps.newHashMap());
+            regionStatCacheTime.put(cacheUser, Maps.newHashMap());
+        }
+        regionStatCache.get(cacheUser).put(regionName, region);
+        regionStatCacheTime.get(cacheUser).put(regionName, ZonedDateTime.now());
         return ResponseEntity.ok(region);
     }
 

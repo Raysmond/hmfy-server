@@ -34,6 +34,7 @@ public class TestController {
     @GetMapping("/")
     public String test() {
 //        huachanCarWhitelistService.loginAndGetSessionId();
+//        userService.changeSystemUserPassword("111");
 //        huachanCarWhitelistService.syncCarInOutRecords();
         return "ok";
     }

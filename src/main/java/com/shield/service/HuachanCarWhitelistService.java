@@ -7,6 +7,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -515,7 +516,7 @@ public class HuachanCarWhitelistService {
         if (!CollectionUtils.isEmpty(shipPlans)) {
             log.info("Start to find leave_time for {} ShipPlan in region {}", shipPlans.size(), region.getId());
             for (ShipPlan shipPlan : shipPlans) {
-                List<GateRecord> records = gateRecordRepository.findByTruckNumber(REGION_ID_HUACHAN, shipPlan.getTruckNumber(), shipPlan.getCreateTime());
+                List<GateRecord> records = gateRecordRepository.findByTruckNumber(REGION_ID_HUACHAN, shipPlan.getTruckNumber(), ZonedDateTime.now().minusDays(1));
                 for (int i = 0; i < records.size() - 1; i++) {
                     if (records.get(i).getRecordType().equals(RecordType.IN)
                         && records.get(i + 1).getRecordType().equals(RecordType.OUT)
@@ -538,6 +539,7 @@ public class HuachanCarWhitelistService {
 
 
     private static Set<String> SAVED_RECORD_IDS = Sets.newHashSet();
+    private static Map<String, Integer> lastSkip = Maps.newHashMap();
 
     /**
      * 获取出入场数据接口
@@ -550,10 +552,25 @@ public class HuachanCarWhitelistService {
             api = "http://127.0.0.1:10180/MIOS.Web/odata/MIOS/T_MIO_CAR_RECORDEntity";
         }
         String today = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String yestoday = ZonedDateTime.now().minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String lastDay = ZonedDateTime.now().minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        Integer skip = lastSkip.getOrDefault(lastDay, 0);
+        if (skip > 100) {
+            skip -= 100;
+        }
+
+        while (true) {
+            String param =
+                "?$top=100" +
+                    "&$count=true" +
+                    "&$skip=" + skip.toString() +
+                    "&$orderby=MODIFY_TIME+asc" +
+                    "&$filter=IS_DELETE+eq+false+" +
+                    "and+RECORD_YMD+ge+" + lastDay + "+" +
+                    "and+RECORD_YMD+le+" + today +
+                    "&_=" + ZonedDateTime.now().toEpochSecond();
+
 //        String param =
-//            "?$top=10" +
-//                "&$count=true" +
+//            "?&$count=true" +
 //                "&$skip=0" +
 //                "&$orderby=MODIFY_TIME+asc" +
 //                "&$filter=IS_DELETE+eq+false+" +
@@ -561,72 +578,80 @@ public class HuachanCarWhitelistService {
 //                "and+RECORD_YMD+le+" + today +
 //                "&_=" + ZonedDateTime.now().toEpochSecond();
 
-        String param =
-            "?&$count=true" +
-                "&$skip=0" +
-                "&$orderby=MODIFY_TIME+asc" +
-                "&$filter=IS_DELETE+eq+false+" +
-                "and+RECORD_YMD+ge+" + yestoday + "+" +
-                "and+RECORD_YMD+le+" + today +
-                "&_=" + ZonedDateTime.now().toEpochSecond();
+            String queryApi = api + param;
 
-        api += param;
+            String cookie = loginAndGetSessionId();
+            if (cookie == null) {
+                return;
+            }
 
-        String cookie = loginAndGetSessionId();
-        if (cookie == null) {
-            return;
-        }
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Cookie", String.format("ASP.NET_SessionId=%s", cookie));
+            headers.add("Referer", "http://10.70.16.101/MIOS.Web/mio/passrecord/passrecord_qry");
+            headers.add("Accept", "application/json, text/javascript, */*; q=0.01");
+            headers.add("Host", "10.70.16.101");
+            headers.add("Connection", "keep-alive");
+            headers.add("Origin", "http://10.70.16.101");
+            headers.add("Accept-Encoding", "gzip, deflate");
+            headers.add("Accept-Language", "en-US,en;q=0.9");
+            headers.add("X-Requested-With", "XMLHttpRequest");
+            headers.add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.add("Cookie", String.format("ASP.NET_SessionId=%s", cookie));
-        headers.add("Referer", "http://10.70.16.101/MIOS.Web/mio/passrecord/passrecord_qry");
-        headers.add("Accept", "application/json, text/javascript, */*; q=0.01");
-        headers.add("Host", "10.70.16.101");
-        headers.add("Connection", "keep-alive");
-        headers.add("Origin", "http://10.70.16.101");
-        headers.add("Accept-Encoding", "gzip, deflate");
-        headers.add("Accept-Language", "en-US,en;q=0.9");
-        headers.add("X-Requested-With", "XMLHttpRequest");
-        headers.add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
+            log.info("Start to query car IN/OUT records: {}", queryApi);
+            HttpEntity<String> request = new HttpEntity<>(headers);
+            ResponseEntity<String> result = restTemplate.exchange(queryApi, HttpMethod.GET, request, String.class);
+            log.info("response, status code: {}", result.getStatusCode());
 
-        log.info("Start to query car IN/OUT records: {}", api);
-        HttpEntity<String> request = new HttpEntity<>(headers);
-        ResponseEntity<String> result = restTemplate.exchange(api, HttpMethod.GET, request, String.class);
-        log.info("response, status code: {}", result.getStatusCode());
+            if (SAVED_RECORD_IDS.isEmpty()) {
+                List<GateRecord> records = gateRecordRepository.findAllByRegionIdAndRecordTimeGreaterThanEqual(REGION_ID_HUACHAN, ZonedDateTime.now().minusDays(2));
+                for (GateRecord record : records) {
+                    SAVED_RECORD_IDS.add(record.getRid());
+                }
+            }
 
-        if (SAVED_RECORD_IDS.isEmpty()) {
-            List<GateRecord> records = gateRecordRepository.findAllByRegionIdAndRecordTimeGreaterThanEqual(REGION_ID_HUACHAN, ZonedDateTime.now().minusDays(2));
-            for (GateRecord record : records) {
-                SAVED_RECORD_IDS.add(record.getRid());
+            JsonObject json = new JsonParser().parse(result.getBody()).getAsJsonObject();
+            List<GateRecord> newRecords = Lists.newArrayList();
+            JsonArray arr = json.getAsJsonArray("value");
+            for (JsonElement ele : arr) {
+                JsonObject log = ele.getAsJsonObject();
+                GateRecord gateRecord = new GateRecord();
+                gateRecord.setRid(log.get("ID").getAsString());
+                if (SAVED_RECORD_IDS.contains(gateRecord.getRid())) {
+                    continue;
+                }
+                gateRecord.setRegionId(REGION_ID_HUACHAN);
+                gateRecord.setTruckNumber(log.get("CAR_NO").getAsString());
+                gateRecord.setCreateTime(ZonedDateTime.now());
+                gateRecord.setRecordType(log.get("INOUT_TYPE").getAsString().equals("IN") ? RecordType.IN : RecordType.OUT);
+                gateRecord.setRecordTime(ZonedDateTime.parse(log.get("REC_TIME").getAsString().substring(0, 19), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault())));
+                gateRecord.setData(ele.toString());
+                gateRecord.setDataMd5(DigestUtils.md5DigestAsHex(gateRecord.getData().getBytes()));
+                if (gateRecordRepository.findOneByRid(gateRecord.getRid()) == null) {
+                    newRecords.add(gateRecord);
+                }
+                SAVED_RECORD_IDS.add(gateRecord.getRid());
+            }
+            if (!newRecords.isEmpty()) {
+                gateRecordRepository.saveAll(newRecords);
+                log.info("Saved {} new GateRecords of regionId {}, offset: {} / {}",
+                    newRecords.size(), newRecords.get(0).getRegionId(), skip + newRecords.size(), json.get("@odata.count").getAsInt());
+            }
+
+
+            if (json.get("@odata.count").getAsInt() < skip + 100) {
+                break;
+            }
+
+            skip += 100;
+
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
-
-        JsonObject json = new JsonParser().parse(result.getBody()).getAsJsonObject();
-        List<GateRecord> newRecords = Lists.newArrayList();
-        for (JsonElement ele : json.getAsJsonArray("value")) {
-            JsonObject log = ele.getAsJsonObject();
-            GateRecord gateRecord = new GateRecord();
-            gateRecord.setRid(log.get("ID").getAsString());
-            if (SAVED_RECORD_IDS.contains(gateRecord.getRid())) {
-                continue;
-            }
-            gateRecord.setRegionId(REGION_ID_HUACHAN);
-            gateRecord.setTruckNumber(log.get("CAR_NO").getAsString());
-            gateRecord.setCreateTime(ZonedDateTime.now());
-            gateRecord.setRecordType(log.get("INOUT_TYPE").getAsString().equals("IN") ? RecordType.IN : RecordType.OUT);
-            gateRecord.setRecordTime(ZonedDateTime.parse(log.get("REC_TIME").getAsString().substring(0, 19), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault())));
-            gateRecord.setData(ele.toString());
-            gateRecord.setDataMd5(DigestUtils.md5DigestAsHex(gateRecord.getData().getBytes()));
-            if (gateRecordRepository.findOneByRid(gateRecord.getRid()) == null) {
-                newRecords.add(gateRecord);
-            }
-            SAVED_RECORD_IDS.add(gateRecord.getRid());
-        }
-        if (!newRecords.isEmpty()) {
-            gateRecordRepository.saveAll(newRecords);
-            log.info("Saved {} new GateRecords of regionId {}", newRecords.size(), newRecords.get(0).getRegionId());
-        }
+        lastSkip.put(lastDay, skip);
     }
 
 }
