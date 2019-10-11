@@ -70,7 +70,11 @@ public class WxAppointmentApi {
         }
 
         if (appointmentService.isUserInCancelPenalty(user.getId())) {
-            throw new BadRequestAlertException("取消预约后，10分钟之内无法预约！", ENTITY_NAME, "");
+            throw new BadRequestAlertException("取消预约后，30分钟之内无法预约！", ENTITY_NAME, "");
+        }
+
+        if (appointmentService.isUserInCancelWaitPenalty(user.getId())) {
+            throw new BadRequestAlertException("取消排队后，30分钟之内无法预约！", ENTITY_NAME, "");
         }
 
         if (appointmentService.isUserInExpirePenalty(user.getId())) {

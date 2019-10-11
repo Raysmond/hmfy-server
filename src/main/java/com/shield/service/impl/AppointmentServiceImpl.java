@@ -90,9 +90,13 @@ public class AppointmentServiceImpl implements AppointmentService {
     // 手动VIP的预约 把出入场记录写到单独的表中
     public static final String REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS = "sync_vip_gate_log_appointment_ids";
 
-    // 预约取消后，10min之内不能重新预约
-    private static final Long PENALTY_TIME_MINUTES_CANCEL = 10L;
+    // 预约取消后，30min之内不能重新预约
+    private static final Long PENALTY_TIME_MINUTES_CANCEL = 30L;
     private static final String PENALTY_TIME_MINUTES_CANCEL_USER_ID_KEY = "penalty_cancel_user_id:%d";
+
+    // 排队取消后，30min之内不能重新预约
+    private static final Long PENALTY_TIME_MINUTES_CANCEL_WAIT = 30L;
+    private static final String PENALTY_TIME_MINUTES_CANCEL_WAIT_USER_ID_KEY = "penalty_cancel_wait_user_id:%d";
 
     // 自动过期的，60min之内不能重新预约
     private static final Long PENALTY_TIME_MINUTES_EXPIRE = 60L;
@@ -196,11 +200,30 @@ public class AppointmentServiceImpl implements AppointmentService {
         return redisLongTemplate.hasKey(k);
     }
 
+    /**
+     * 预约成功后取消惩罚
+     */
     private void putUserInCancelPenalty(Long userId) {
         String k = String.format(PENALTY_TIME_MINUTES_CANCEL_USER_ID_KEY, userId);
         redisTemplate.opsForValue().set(k, "1");
         redisTemplate.expire(k, PENALTY_TIME_MINUTES_CANCEL, TimeUnit.MINUTES);
         log.info("Put userId {} in cancel penalty", userId);
+    }
+
+    /**
+     * 取消排队惩罚
+     */
+    private void putUserInCancelWaitPenalty(Long userId) {
+        String k = String.format(PENALTY_TIME_MINUTES_CANCEL_WAIT_USER_ID_KEY, userId);
+        redisTemplate.opsForValue().set(k, "1");
+        redisTemplate.expire(k, PENALTY_TIME_MINUTES_CANCEL_WAIT, TimeUnit.MINUTES);
+        log.info("Put userId {} in cancel wait penalty", userId);
+    }
+
+    @Override
+    public boolean isUserInCancelWaitPenalty(Long userId) {
+        String k = String.format(PENALTY_TIME_MINUTES_CANCEL_WAIT_USER_ID_KEY, userId);
+        return redisLongTemplate.hasKey(k);
     }
 
     @Override
@@ -267,6 +290,12 @@ public class AppointmentServiceImpl implements AppointmentService {
             }
 
             wxMpMsgService.sendAppointmentCancelMsg(appointmentMapper.toDto(appointment));
+        }
+
+        if (currentStatus.equals(AppointmentStatus.WAIT)) {
+            if (!appointment.isVip() && appointment.getUser() != null) {
+                putUserInCancelWaitPenalty(appointment.getUser().getId());
+            }
         }
 
         return appointmentMapper.toDto(appointment);
@@ -452,9 +481,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     /**
      * 统计剩余取号名额
-     *
-     * @param region
-     * @param isVip
      */
     @Override
     public void countRemainQuota(RegionDTO region, boolean isVip) {
@@ -464,8 +490,6 @@ public class AppointmentServiceImpl implements AppointmentService {
             .filter(it -> it.isValid() && (it.getStatus() == AppointmentStatus.START || it.getStatus() == AppointmentStatus.ENTER))
             .collect(Collectors.toList());
 
-//        long current = appointmentRepository.countAllValidByRegionIdAndCreateTime(region.getId(), startTime);
-//        long curVip = appointmentRepository.countAllVipValidByRegionIdAndCreateTime(region.getId(), startTime);
         long current = appointments.size();
         long curVip = appointments.stream().filter(Appointment::isVip).count();
         long total = region.getQuota();
@@ -606,26 +630,57 @@ public class AppointmentServiceImpl implements AppointmentService {
         return avgGap - lastOutGap;
     }
 
-    /**
-     * 排队自动抢号
-     */
-    @Scheduled(fixedRate = 3 * 1000)
-    public void autoMakeAppointmentForWaitingUsers() {
-        for (Region region : regionRepository.findAll()) {
-            if (region.isOpen() && region.getQueueQuota() != null && region.getQueueQuota() > 0) {
-                List<Appointment> waitingList = appointmentRepository.findWaitingList(region.getId(), ZonedDateTime.now().minusDays(2));
-                for (Appointment appointment : waitingList) {
-                    if (region.getQueueValidTime() != null && appointment.getCreateTime().plusHours(region.getQueueValidTime()).isBefore(ZonedDateTime.now())) {
-                        log.info("Appointment [{}] queue expired after {} hours", appointment.getId(), region.getQueueValidTime());
-                        appointment.setUpdateTime(ZonedDateTime.now());
-                        appointment.setValid(false);
-                        appointmentRepository.save(appointment);
-                    } else if (!this.tryMakeAppointment(appointment)) {
-                        break;
-                    }
-                }
-            }
+
+    private void expireAppointment(Appointment appointment) {
+        log.info("Appointment [{}] expired after {} hours", appointment.getId(), appointment.getRegion().getValidTime());
+        appointment.setValid(false);
+        appointment.setStatus(AppointmentStatus.EXPIRED);
+        appointment.setUpdateTime(ZonedDateTime.now());
+        appointment.setExpireTime(ZonedDateTime.now());
+        appointmentRepository.save(appointment);
+
+        afterAppointmentExpired(appointment);
+    }
+
+    private void afterAppointmentExpired(Appointment appointment) {
+        switch (appointment.getRegion().getParkingConnectMethod()) {
+            case HUA_CHAN_API:
+                break;
+            case TCP:
+            case DATABASE:
+                redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
+                redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
+                break;
         }
+
+        if (appointment.getApplyId() != null) {
+            ShipPlan plan = shipPlanRepository.findOneByApplyId(appointment.getApplyId());
+            plan.setAllowInTime(appointment.getStartTime().plusHours(appointment.getRegion().getValidTime()));
+            shipPlanRepository.save(plan);
+            redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
+        }
+
+        if (appointment.getUser() != null) {
+            putUserInExpirePenalty(appointment.getUser().getId());
+        }
+
+        wxMpMsgService.sendAppointmentExpireMsg(appointmentMapper.toDto(appointment));
+    }
+
+
+    /**
+     * 拿不到出场时间失效：下磅之后1h，还没有拿到出场时间，则设置出场时间为当前系统时间
+     */
+    private void autoSetAppointmentLeave(Appointment appointment, ShipPlan plan) {
+        log.info("[AUTO] set appointment [id={}] status to LEAVE, 1 hour after weight time {}, ShipPlan {}, truckNumber: {}",
+            appointment.getId(),
+            plan.getLoadingStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:MM:SS")),
+            plan.getApplyId(),
+            plan.getTruckNumber());
+
+        appointment.setStatus(AppointmentStatus.LEAVE);
+        appointment.setUpdateTime(ZonedDateTime.now());
+        appointmentRepository.save(appointment);
     }
 
     /**
@@ -636,63 +691,67 @@ public class AppointmentServiceImpl implements AppointmentService {
      */
     @Scheduled(fixedRate = 30 * 1000)
     public void checkAppointments() {
-        for (Region region : regionRepository.findAll()) {
-            if (!region.isOpen()) {
-                return;
-            }
+        ZonedDateTime now = ZonedDateTime.now();
+        List<Region> regions = regionRepository.findAll().stream().filter(Region::isOpen).collect(Collectors.toList());
+        for (Region region : regions) {
             long validHours = region.getValidTime().longValue();
-            List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.START, Boolean.TRUE, ZonedDateTime.now().minusDays(2));
+            List<Appointment> appointmentsShouldExpire = appointmentRepository
+                .findAllByRegionId(region.getId(), AppointmentStatus.START, Boolean.TRUE, now.minusDays(2)).stream()
+                .filter(it -> !it.isVip() && it.getStartTime() != null)
+                .filter(it -> it.getStartTime().plusHours(validHours).isBefore(ZonedDateTime.now()))
+                .collect(Collectors.toList());
+
+            for (Appointment appointment : appointmentsShouldExpire) {
+                expireAppointment(appointment);
+            }
+
+            // 进厂之后，有可能拿不到出场时间，会一直占号
+            List<Appointment> appointments = appointmentRepository
+                .findAllByRegionId(region.getId(), AppointmentStatus.ENTER, Boolean.TRUE, now.minusDays(2)).stream()
+                .filter(it -> it.getApplyId() != null)
+                .collect(Collectors.toList());
             for (Appointment appointment : appointments) {
-                if (!appointment.isVip() && (appointment.getStartTime() == null || appointment.getStartTime().plusHours(validHours).isBefore(ZonedDateTime.now()))) {
-                    // vip 的不过期
-                    log.info("Appointment [{}] expired after {} hours", appointment.getId(), validHours);
-                    appointment.setUpdateTime(ZonedDateTime.now());
-                    appointment.setValid(false);
-                    appointment.setStatus(AppointmentStatus.EXPIRED);
-                    appointment.setExpireTime(ZonedDateTime.now());
-                    appointmentRepository.save(appointment);
-
-                    if (!region.getId().equals(REGION_ID_HUACHAN)) {
-                        redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointment.getId());
-                        redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
-                    }
-
-                    if (appointment.getApplyId() != null) {
-                        List<ShipPlan> plans = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(appointment.getApplyId()));
-                        for (ShipPlan plan : plans) {
-                            plan.setAllowInTime(ZonedDateTime.now().plusHours(region.getValidTime()));
-                            shipPlanRepository.save(plan);
-                            redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, plan.getId());
-                        }
-
-                        if (appointment.getUser() != null) {
-                            putUserInExpirePenalty(appointment.getUser().getId());
-                        }
-                    }
-
-                    wxMpMsgService.sendAppointmentExpireMsg(appointmentMapper.toDto(appointment));
+                ShipPlan plan = shipPlanRepository.findOneByApplyId(appointment.getApplyId());
+                if (plan.getLoadingEndTime() != null && plan.getLoadingEndTime().plusHours(1).isBefore(now)) {
+                    autoSetAppointmentLeave(appointment, plan);
                 }
             }
+        }
+    }
 
-            // 进厂之后，有可能拿不到出场时间，会一直占好
-            appointments = appointmentRepository.findAllByRegionId(region.getId(), AppointmentStatus.ENTER, Boolean.TRUE, ZonedDateTime.now().minusDays(2));
-            for (Appointment appointment : appointments) {
-                if (appointment.getApplyId() != null) {
-                    List<ShipPlan> plans = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(appointment.getApplyId()));
-                    if (!CollectionUtils.isEmpty(plans)) {
-                        ShipPlan plan = plans.get(0);
-                        if (plan.getLoadingEndTime() != null && plan.getLoadingEndTime().plusHours(1).isBefore(ZonedDateTime.now())) {
-                            log.info("[AUTO] set appointment [id={}] status to LEAVE , 1 hour after weight time {}, ShipPlan {}, truckNumber: {}",
-                                appointment.getId(),
-                                plan.getLoadingStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:MM:SS")),
-                                plan.getApplyId(),
-                                plan.getTruckNumber());
+    private void expireWaitAppointment(Appointment appointment) {
+        log.info("Appointment [{}] queue expired after {} hours", appointment.getId(), appointment.getRegion().getQueueValidTime());
+        appointment.setUpdateTime(ZonedDateTime.now());
+        appointment.setValid(false);
+        appointmentRepository.save(appointment);
+    }
 
-                            appointment.setStatus(AppointmentStatus.LEAVE);
-                            appointment.setUpdateTime(ZonedDateTime.now());
-                            appointmentRepository.save(appointment);
-                        }
-                    }
+    private boolean autoMakeAppointmentForWaitUser(Appointment appointment) {
+        log.info("[BEGIN] auto make appointment for appointment in WAIT status, id={}, truckNumber: {}, wait number: {}",
+            appointment.getId(), appointment.getLicensePlateNumber(), appointment.getQueueNumber());
+        if (this.tryMakeAppointment(appointment)) {
+            return true;
+        } else {
+            log.warn("Failed to auto make appointment");
+            return false;
+        }
+    }
+
+    /**
+     * 排队自动抢号
+     */
+    @Scheduled(fixedRate = 5 * 1000)
+    public void autoMakeAppointmentForWaitingUsers() {
+        List<Region> regions = regionRepository.findAll().stream()
+            .filter(it -> it.isOpen() && it.getQueueQuota() != null && it.getQueueQuota() > 0)
+            .collect(Collectors.toList());
+        for (Region region : regions) {
+            List<Appointment> waitingList = appointmentRepository.findWaitingList(region.getId(), ZonedDateTime.now().minusDays(2));
+            for (Appointment appointment : waitingList) {
+                if (appointment.getCreateTime().plusHours(region.getQueueValidTime()).isBefore(ZonedDateTime.now())) {
+                    expireWaitAppointment(appointment);
+                } else if (!this.autoMakeAppointmentForWaitUser(appointment)) {
+                    break;
                 }
             }
         }

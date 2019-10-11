@@ -20,16 +20,13 @@ import com.shield.repository.RegionRepository;
 import com.shield.repository.ShipPlanRepository;
 import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.mapper.AppointmentMapper;
-import io.github.jhipster.config.JHipsterConstants;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.http.*;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
@@ -53,7 +50,6 @@ import static com.shield.service.impl.AppointmentServiceImpl.REGION_ID_HUACHAN;
  */
 @Service
 @Slf4j
-@Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
 public class HuachanCarWhitelistService {
     private String token = null;
     private ZonedDateTime tokenIssueTime;
@@ -164,7 +160,7 @@ public class HuachanCarWhitelistService {
      */
     @Data
     public static class RegisterCarInfo {
-        private String applier_name = "钱鹏飞";
+        private String applier_name = "智能矿";
         private String company_name;
         private Integer enter_door = 7;
         private Integer out_door = 7;
@@ -178,7 +174,6 @@ public class HuachanCarWhitelistService {
     }
 
 
-    @Scheduled(fixedRate = 20 * 1000)
     public void autoRegisterCar() {
         Region region = regionRepository.findById(REGION_ID_HUACHAN).get();
         if (!region.isOpen()) {
@@ -254,8 +249,7 @@ public class HuachanCarWhitelistService {
     /**
      * 检查预约状态
      */
-    @Scheduled(fixedRate = 20 * 1000)
-    public void checkRegisterStatus() throws JsonProcessingException {
+    public void checkRegisterStatus() {
         Region region = regionRepository.findById(REGION_ID_HUACHAN).get();
         if (!region.isOpen()) {
             return;
@@ -440,7 +434,6 @@ public class HuachanCarWhitelistService {
     /**
      * 从本地MySQL中拿化产区域车辆的出入场数据，并更新预约/计划的状态，出入场时间
      */
-    @Scheduled(fixedRate = 60 * 1000)
     public void updateAppointmentStatusByGateRecords() {
         // 未进厂预约单（预约成功 --> 进厂)
         List<Appointment> appointments = appointmentRepository.findAllByRegionId(REGION_ID_HUACHAN, START, true, ZonedDateTime.now().minusHours(24));
@@ -538,13 +531,11 @@ public class HuachanCarWhitelistService {
     }
 
 
-    private static Set<String> SAVED_RECORD_IDS = Sets.newHashSet();
     private static Map<String, Integer> lastSkip = Maps.newHashMap();
 
     /**
      * 获取出入场数据接口
      */
-    @Scheduled(fixedRate = 60 * 1000)
     public void syncCarInOutRecords() {
         String api = "http://10.70.16.101/MIOS.Web/odata/MIOS/T_MIO_CAR_RECORDEntity";
         if (env.acceptsProfiles(Profiles.of("dev"))) {
@@ -554,13 +545,13 @@ public class HuachanCarWhitelistService {
         String today = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String lastDay = ZonedDateTime.now().minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         Integer skip = lastSkip.getOrDefault(lastDay, 0);
-        if (skip > 100) {
-            skip -= 100;
+        if (skip > 1000) {
+            skip -= 1000;
         }
 
         while (true) {
             String param =
-                "?$top=100" +
+                "?$top=200" +
                     "&$count=true" +
                     "&$skip=" + skip.toString() +
                     "&$orderby=MODIFY_TIME+asc" +
@@ -603,48 +594,49 @@ public class HuachanCarWhitelistService {
             ResponseEntity<String> result = restTemplate.exchange(queryApi, HttpMethod.GET, request, String.class);
             log.info("response, status code: {}", result.getStatusCode());
 
-            if (SAVED_RECORD_IDS.isEmpty()) {
-                List<GateRecord> records = gateRecordRepository.findAllByRegionIdAndRecordTimeGreaterThanEqual(REGION_ID_HUACHAN, ZonedDateTime.now().minusDays(2));
-                for (GateRecord record : records) {
-                    SAVED_RECORD_IDS.add(record.getRid());
-                }
-            }
-
             JsonObject json = new JsonParser().parse(result.getBody()).getAsJsonObject();
-            List<GateRecord> newRecords = Lists.newArrayList();
+            List<GateRecord> records = Lists.newArrayList();
             JsonArray arr = json.getAsJsonArray("value");
+            List<String> rids = Lists.newArrayList();
             for (JsonElement ele : arr) {
                 JsonObject log = ele.getAsJsonObject();
+                rids.add(log.get("ID").getAsString());
+            }
+            Map<String, GateRecord> exists = gateRecordRepository.findAllByRid(rids).stream().collect(Collectors.toMap(GateRecord::getRid, it -> it));
+            for (JsonElement ele : arr) {
+                JsonObject log = ele.getAsJsonObject();
+                String rid = log.get("ID").getAsString();
+                String data = ele.toString();
+                String dataMd5 = DigestUtils.md5DigestAsHex(data.getBytes());
                 GateRecord gateRecord = new GateRecord();
-                gateRecord.setRid(log.get("ID").getAsString());
-                if (SAVED_RECORD_IDS.contains(gateRecord.getRid())) {
-                    continue;
+                if (exists.containsKey(rid)) {
+                    if (exists.get(rid).getDataMd5().equals(dataMd5)) {
+                        continue;
+                    } else {
+                        gateRecord = exists.get(rid);
+                    }
                 }
+                gateRecord.setRid(rid);
+                gateRecord.setData(data);
+                gateRecord.setDataMd5(dataMd5);
                 gateRecord.setRegionId(REGION_ID_HUACHAN);
                 gateRecord.setTruckNumber(log.get("CAR_NO").getAsString());
                 gateRecord.setCreateTime(ZonedDateTime.now());
                 gateRecord.setRecordType(log.get("INOUT_TYPE").getAsString().equals("IN") ? RecordType.IN : RecordType.OUT);
                 gateRecord.setRecordTime(ZonedDateTime.parse(log.get("REC_TIME").getAsString().substring(0, 19), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault())));
-                gateRecord.setData(ele.toString());
-                gateRecord.setDataMd5(DigestUtils.md5DigestAsHex(gateRecord.getData().getBytes()));
-                if (gateRecordRepository.findOneByRid(gateRecord.getRid()) == null) {
-                    newRecords.add(gateRecord);
-                }
-                SAVED_RECORD_IDS.add(gateRecord.getRid());
+                records.add(gateRecord);
             }
-            if (!newRecords.isEmpty()) {
-                gateRecordRepository.saveAll(newRecords);
+            if (!records.isEmpty()) {
+                gateRecordRepository.saveAll(records);
                 log.info("Saved {} new GateRecords of regionId {}, offset: {} / {}",
-                    newRecords.size(), newRecords.get(0).getRegionId(), skip + newRecords.size(), json.get("@odata.count").getAsInt());
+                    records.size(), records.get(0).getRegionId(), skip + records.size(), json.get("@odata.count").getAsInt());
             }
 
-
-            if (json.get("@odata.count").getAsInt() < skip + 100) {
+            if (json.get("@odata.count").getAsInt() < skip + 200) {
                 break;
             }
 
-            skip += 100;
-
+            skip += 200;
             try {
                 Thread.sleep(3000);
             } catch (InterruptedException e) {

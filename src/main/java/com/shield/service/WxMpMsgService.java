@@ -174,6 +174,7 @@ public class WxMpMsgService {
         }
     }
 
+    @Async
     public void sendAppointmentExpireMsg(AppointmentDTO appointment) {
         if (appointment.getUserId() == null || (appointment.isVip() != null && appointment.isVip())) {
             return;
