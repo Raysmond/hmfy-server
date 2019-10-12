@@ -1,6 +1,7 @@
 package com.shield.service;
 
 import com.shield.domain.Appointment;
+import com.shield.domain.ShipPlan;
 import com.shield.service.dto.AppointmentDTO;
 
 import com.shield.service.dto.RegionDTO;
@@ -78,4 +79,12 @@ public interface AppointmentService {
     Integer calcNextQuotaWaitingTime(RegionDTO region);
 
     Integer getNextAppointmentNumber(Long regionId);
+
+    void expireWaitAppointment(Appointment appointment);
+
+    boolean autoMakeAppointmentForWaitUser(Appointment appointment);
+
+    void expireAppointment(Appointment appointment);
+
+    void autoSetAppointmentLeave(Appointment appointment, ShipPlan plan);
 }

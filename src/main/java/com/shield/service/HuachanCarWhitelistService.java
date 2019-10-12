@@ -39,11 +39,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.shield.config.Constants.REGION_ID_HUACHAN;
 import static com.shield.domain.enumeration.AppointmentStatus.*;
-import static com.shield.service.impl.AppointmentServiceImpl.REGION_ID_HUACHAN;
 
 /**
  * 化产区域的出入场数据管理
@@ -315,7 +314,7 @@ public class HuachanCarWhitelistService {
      * 获取出入场数据接口 登录
      */
     public String loginAndGetSessionId() {
-        if (StringUtils.isNotBlank(loginSessionId) && loginTime.plusHours(1).isAfter(ZonedDateTime.now())) {
+        if (StringUtils.isNotBlank(loginSessionId) && loginTime.plusHours(6).isAfter(ZonedDateTime.now())) {
             return loginSessionId;
         }
         String api = "http://10.70.16.101/MIOS.Web/account/login";
@@ -436,7 +435,7 @@ public class HuachanCarWhitelistService {
      */
     public void updateAppointmentStatusByGateRecords() {
         // 未进厂预约单（预约成功 --> 进厂)
-        List<Appointment> appointments = appointmentRepository.findAllByRegionId(REGION_ID_HUACHAN, START, true, ZonedDateTime.now().minusHours(24));
+        List<Appointment> appointments = appointmentRepository.findAllByStatusAndStartTime(REGION_ID_HUACHAN, START, true, ZonedDateTime.now().minusHours(24));
         if (!CollectionUtils.isEmpty(appointments)) {
             log.info("Start to check appointment GateRecord for {} cars in START status", appointments.size());
             for (Appointment appointment : appointments) {
@@ -453,7 +452,7 @@ public class HuachanCarWhitelistService {
         }
 
         // 已进厂预约单（进厂 --> 离场)
-        List<Appointment> enterAppointments = appointmentRepository.findAllByRegionId(REGION_ID_HUACHAN, ENTER, true, ZonedDateTime.now().minusHours(24));
+        List<Appointment> enterAppointments = appointmentRepository.findAllByStatusAndStartTime(REGION_ID_HUACHAN, ENTER, true, ZonedDateTime.now().minusHours(24));
         if (!CollectionUtils.isEmpty(enterAppointments)) {
             log.info("Start to check appointment GateRecord for {} cars in ENTER status", enterAppointments.size());
             for (Appointment appointment : enterAppointments) {

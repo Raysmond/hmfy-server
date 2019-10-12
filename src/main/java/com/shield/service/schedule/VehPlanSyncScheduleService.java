@@ -1,4 +1,4 @@
-package com.shield.service;
+package com.shield.service.schedule;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -40,23 +40,32 @@ import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_VIP_
 @Service
 @Slf4j
 @Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
-public class VehPlanSyncService {
+public class VehPlanSyncScheduleService {
+
+    private final VehDelivPlanRepository vehDelivPlanRepository;
+
+    private final VipGateLogRepository vipGateLogRepository;
+
+    private final ShipPlanRepository shipPlanRepository;
+
+    private final RedisTemplate<String, Long> redisLongTemplate;
+
+    private final AppointmentRepository appointmentRepository;
 
     @Autowired
-    private VehDelivPlanRepository vehDelivPlanRepository;
-
-    @Autowired
-    private VipGateLogRepository vipGateLogRepository;
-
-    @Autowired
-    private ShipPlanRepository shipPlanRepository;
-
-    @Autowired
-    @Qualifier("redisLongTemplate")
-    private RedisTemplate<String, Long> redisLongTemplate;
-
-    @Autowired
-    private AppointmentRepository appointmentRepository;
+    public VehPlanSyncScheduleService(
+        VehDelivPlanRepository vehDelivPlanRepository,
+        VipGateLogRepository vipGateLogRepository,
+        ShipPlanRepository shipPlanRepository,
+        @Qualifier("redisLongTemplate") RedisTemplate<String, Long> redisLongTemplate,
+        AppointmentRepository appointmentRepository
+    ) {
+        this.vehDelivPlanRepository = vehDelivPlanRepository;
+        this.vipGateLogRepository = vipGateLogRepository;
+        this.shipPlanRepository = shipPlanRepository;
+        this.redisLongTemplate = redisLongTemplate;
+        this.appointmentRepository = appointmentRepository;
+    }
 
     /**
      * 同步发运计划

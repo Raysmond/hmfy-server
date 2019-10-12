@@ -1,6 +1,5 @@
 package com.shield.service.impl;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.shield.service.RegionService;
@@ -16,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.shield.service.impl.AppointmentServiceImpl.REGION_ID_HUACHAN;
+import static com.shield.config.Constants.REGION_ID_HUACHAN;
 
 /**
  * Service Implementation for managing {@link Region}.

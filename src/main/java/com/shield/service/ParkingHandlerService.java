@@ -45,7 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.shield.service.impl.AppointmentServiceImpl.REGION_ID_HUACHAN;
+import static com.shield.config.Constants.REGION_ID_HUACHAN;
 
 @Service
 @Slf4j

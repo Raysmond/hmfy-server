@@ -16,8 +16,12 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class HuachanScheduleService {
 
+    private final HuachanCarWhitelistService huachanCarWhitelistService;
+
     @Autowired
-    private HuachanCarWhitelistService huachanCarWhitelistService;
+    public HuachanScheduleService(HuachanCarWhitelistService huachanCarWhitelistService) {
+        this.huachanCarWhitelistService = huachanCarWhitelistService;
+    }
 
 
     /**

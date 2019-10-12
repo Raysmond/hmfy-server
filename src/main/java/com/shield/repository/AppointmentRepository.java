@@ -47,9 +47,14 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
     @Query("select a from Appointment a where a.region.id = ?1 and a.status = ?2 and a.valid = ?3 and a.createTime > ?4")
     List<Appointment> findAllByRegionId(Long regionId, AppointmentStatus status, Boolean valid, ZonedDateTime beginTime);
 
+    @Query("select a from Appointment a where a.region.id = ?1 and a.status = ?2 and a.valid = ?3 and a.startTime > ?4")
+    List<Appointment> findAllByStatusAndStartTime(Long regionId, AppointmentStatus status, Boolean valid, ZonedDateTime startTime);
 
     @Query("select a from Appointment a where a.region.id = ?1 and a.valid = true and a.status in ('START', 'ENTER') and a.startTime >= ?2")
-    Page<Appointment> findLastValid(Long regionId, ZonedDateTime beginTime, Pageable pageable);
+    Page<Appointment> findLastValid(Long regionId, ZonedDateTime startTime, Pageable pageable);
+
+    @Query("select a from Appointment a where a.region.id = ?1 and a.valid = true and a.status in ('START', 'ENTER') and a.startTime >= ?2")
+    List<Appointment> findAllValid(Long regionId, ZonedDateTime startTime);
 
     @Query("select a from Appointment a where a.applyId in ?1 and a.createTime > ?2 and a.valid = true")
     List<Appointment> findByApplyIdIn(List<Long> applyIds, ZonedDateTime beginTime);

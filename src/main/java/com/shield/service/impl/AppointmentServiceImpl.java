@@ -3,7 +3,6 @@ package com.shield.service.impl;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.shield.chepaipark.service.CarWhiteListService;
 import com.shield.domain.Appointment;
 import com.shield.domain.Region;
@@ -31,7 +30,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -44,6 +42,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static com.shield.config.Constants.*;
 import static com.shield.service.ParkingHandlerService.*;
 
 @Service
@@ -89,21 +88,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     // 手动VIP的预约 把出入场记录写到单独的表中
     public static final String REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS = "sync_vip_gate_log_appointment_ids";
-
-    // 预约取消后，30min之内不能重新预约
-    private static final Long PENALTY_TIME_MINUTES_CANCEL = 30L;
-    private static final String PENALTY_TIME_MINUTES_CANCEL_USER_ID_KEY = "penalty_cancel_user_id:%d";
-
-    // 排队取消后，30min之内不能重新预约
-    private static final Long PENALTY_TIME_MINUTES_CANCEL_WAIT = 30L;
-    private static final String PENALTY_TIME_MINUTES_CANCEL_WAIT_USER_ID_KEY = "penalty_cancel_wait_user_id:%d";
-
-    // 自动过期的，60min之内不能重新预约
-    private static final Long PENALTY_TIME_MINUTES_EXPIRE = 60L;
-    private static final String PENALTY_TIME_MINUTES_EXPIRE_USER_ID_KEY = "penalty_expire_user_id:%d";
-
-    // 四期区域ID
-    public static final Long REGION_ID_HUACHAN = 2L;
 
     /**
      * Save a appointment.
@@ -484,12 +468,7 @@ public class AppointmentServiceImpl implements AppointmentService {
      */
     @Override
     public void countRemainQuota(RegionDTO region, boolean isVip) {
-        // 统计剩余取号名额
-        List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), ZonedDateTime.now().minusDays(2), ZonedDateTime.now());
-        appointments = appointments.stream()
-            .filter(it -> it.isValid() && (it.getStatus() == AppointmentStatus.START || it.getStatus() == AppointmentStatus.ENTER))
-            .collect(Collectors.toList());
-
+        List<Appointment> appointments = appointmentRepository.findAllValid(region.getId(), ZonedDateTime.now().minusHours(6));
         long current = appointments.size();
         long curVip = appointments.stream().filter(Appointment::isVip).count();
         long total = region.getQuota();
@@ -631,7 +610,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
 
-    private void expireAppointment(Appointment appointment) {
+    @Override
+    public void expireAppointment(Appointment appointment) {
         log.info("Appointment [{}] expired after {} hours", appointment.getId(), appointment.getRegion().getValidTime());
         appointment.setValid(false);
         appointment.setStatus(AppointmentStatus.EXPIRED);
@@ -671,7 +651,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     /**
      * 拿不到出场时间失效：下磅之后1h，还没有拿到出场时间，则设置出场时间为当前系统时间
      */
-    private void autoSetAppointmentLeave(Appointment appointment, ShipPlan plan) {
+    @Override
+    public void autoSetAppointmentLeave(Appointment appointment, ShipPlan plan) {
         log.info("[AUTO] set appointment [id={}] status to LEAVE, 1 hour after weight time {}, ShipPlan {}, truckNumber: {}",
             appointment.getId(),
             plan.getLoadingStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:MM:SS")),
@@ -683,50 +664,16 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointmentRepository.save(appointment);
     }
 
-    /**
-     * 检查预约状态
-     * <p>
-     * 1. 预约过期：START --> EXPIRED
-     * 2. 拿不到出场时间失效：下磅之后1h，还没有拿到出场时间，则设置出场时间为当前系统时间，并且valid=FALSE
-     */
-    @Scheduled(fixedRate = 30 * 1000)
-    public void checkAppointments() {
-        ZonedDateTime now = ZonedDateTime.now();
-        List<Region> regions = regionRepository.findAll().stream().filter(Region::isOpen).collect(Collectors.toList());
-        for (Region region : regions) {
-            long validHours = region.getValidTime().longValue();
-            List<Appointment> appointmentsShouldExpire = appointmentRepository
-                .findAllByRegionId(region.getId(), AppointmentStatus.START, Boolean.TRUE, now.minusDays(2)).stream()
-                .filter(it -> !it.isVip() && it.getStartTime() != null)
-                .filter(it -> it.getStartTime().plusHours(validHours).isBefore(ZonedDateTime.now()))
-                .collect(Collectors.toList());
-
-            for (Appointment appointment : appointmentsShouldExpire) {
-                expireAppointment(appointment);
-            }
-
-            // 进厂之后，有可能拿不到出场时间，会一直占号
-            List<Appointment> appointments = appointmentRepository
-                .findAllByRegionId(region.getId(), AppointmentStatus.ENTER, Boolean.TRUE, now.minusDays(2)).stream()
-                .filter(it -> it.getApplyId() != null)
-                .collect(Collectors.toList());
-            for (Appointment appointment : appointments) {
-                ShipPlan plan = shipPlanRepository.findOneByApplyId(appointment.getApplyId());
-                if (plan.getLoadingEndTime() != null && plan.getLoadingEndTime().plusHours(1).isBefore(now)) {
-                    autoSetAppointmentLeave(appointment, plan);
-                }
-            }
-        }
-    }
-
-    private void expireWaitAppointment(Appointment appointment) {
+    @Override
+    public void expireWaitAppointment(Appointment appointment) {
         log.info("Appointment [{}] queue expired after {} hours", appointment.getId(), appointment.getRegion().getQueueValidTime());
         appointment.setUpdateTime(ZonedDateTime.now());
         appointment.setValid(false);
         appointmentRepository.save(appointment);
     }
 
-    private boolean autoMakeAppointmentForWaitUser(Appointment appointment) {
+    @Override
+    public boolean autoMakeAppointmentForWaitUser(Appointment appointment) {
         log.info("[BEGIN] auto make appointment for appointment in WAIT status, id={}, truckNumber: {}, wait number: {}",
             appointment.getId(), appointment.getLicensePlateNumber(), appointment.getQueueNumber());
         if (this.tryMakeAppointment(appointment)) {
@@ -734,26 +681,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         } else {
             log.warn("Failed to auto make appointment");
             return false;
-        }
-    }
-
-    /**
-     * 排队自动抢号
-     */
-    @Scheduled(fixedRate = 5 * 1000)
-    public void autoMakeAppointmentForWaitingUsers() {
-        List<Region> regions = regionRepository.findAll().stream()
-            .filter(it -> it.isOpen() && it.getQueueQuota() != null && it.getQueueQuota() > 0)
-            .collect(Collectors.toList());
-        for (Region region : regions) {
-            List<Appointment> waitingList = appointmentRepository.findWaitingList(region.getId(), ZonedDateTime.now().minusDays(2));
-            for (Appointment appointment : waitingList) {
-                if (appointment.getCreateTime().plusHours(region.getQueueValidTime()).isBefore(ZonedDateTime.now())) {
-                    expireWaitAppointment(appointment);
-                } else if (!this.autoMakeAppointmentForWaitUser(appointment)) {
-                    break;
-                }
-            }
         }
     }
 }

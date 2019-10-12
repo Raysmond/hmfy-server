@@ -1,5 +1,6 @@
-package com.shield.service;
+package com.shield.service.schedule;
 
+import com.shield.service.WxMaUserService;
 import com.shield.service.dto.WxMaUserDTO;
 import io.github.jhipster.config.JHipsterConstants;
 import lombok.extern.slf4j.Slf4j;
@@ -16,13 +17,17 @@ import java.time.ZonedDateTime;
 
 @Service
 @Slf4j
-//@Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
-public class SyncWxMpUsersService {
-    @Autowired
-    private WxMpService wxMpService;
+@Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
+public class SyncWxMpUsersScheduleService {
+    private final WxMpService wxMpService;
+
+    private final WxMaUserService wxMaUserService;
 
     @Autowired
-    private WxMaUserService wxMaUserService;
+    public SyncWxMpUsersScheduleService(WxMaUserService wxMaUserService, WxMpService wxMpService) {
+        this.wxMaUserService = wxMaUserService;
+        this.wxMpService = wxMpService;
+    }
 
     @Scheduled(fixedRate = 6 * 3600 * 1000)
     public void syncMpUsers() {
