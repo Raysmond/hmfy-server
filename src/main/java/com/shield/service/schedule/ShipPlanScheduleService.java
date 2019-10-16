@@ -21,6 +21,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -108,6 +110,24 @@ public class ShipPlanScheduleService {
             }
         } catch (Exception e) {
             log.error("failed to send alert msg sendAlertMsgToWxUser() {}", e.getMessage());
+        }
+    }
+
+
+    /**
+     * 每天凌晨1点，将前一天待提货的计划改成过期
+     */
+    @Scheduled(cron = "0 0 1 * * *")
+    public void autoExpireShipPlan() {
+        ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+        List<ShipPlan> shipPlans = shipPlanRepository.findAllNeedToExpire(today);
+        if (!shipPlans.isEmpty()) {
+            log.info("Find {} ShipPlan in status 1, should be expired");
+            for (ShipPlan shipPlan : shipPlans) {
+                shipPlan.setAuditStatus(4);
+                shipPlan.setUpdateTime(ZonedDateTime.now());
+            }
+            shipPlanRepository.saveAll(shipPlans);
         }
     }
 }

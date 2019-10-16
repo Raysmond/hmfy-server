@@ -99,8 +99,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     public AppointmentDTO save(AppointmentDTO appointmentDTO) {
         log.debug("Request to save Appointment : {}", appointmentDTO);
         Appointment appointment = appointmentMapper.toEntity(appointmentDTO);
+        Appointment old = null;
         if (appointment.getId() == null) {
             appointment.setCreateTime(ZonedDateTime.now());
+        } else {
+            old = appointmentRepository.findById(appointmentDTO.getId()).get();
         }
         appointment.setUpdateTime(ZonedDateTime.now());
         appointment = appointmentRepository.save(appointment);
@@ -225,8 +228,13 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (!CollectionUtils.isEmpty(appointments)) {
             appointments.sort(Comparator.comparing(Appointment::getCreateTime).reversed());
             Appointment appointment = appointments.get(0);
-            if (appointment.isValid() && appointment.getStatus() == AppointmentStatus.START) {
+            if (appointment.isValid()
+                && (appointment.getStatus() == AppointmentStatus.START
+                || appointment.getStatus() == AppointmentStatus.START_CHECK
+                || appointment.getStatus() == AppointmentStatus.WAIT)
+            ) {
                 appointment.setValid(Boolean.FALSE);
+                appointment.setUpdateTime(ZonedDateTime.now());
                 appointmentRepository.save(appointment);
                 log.info("Set appointment[id={}], truckNumber: {} valid=false after ShipPlan[applyId={}] is canceled",
                     appointment.getId(), appointment.getLicensePlateNumber(), applyId);
@@ -449,16 +457,27 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setStatus(AppointmentStatus.CREATE);
         appointmentRepository.save(appointment);
 
-        if (!tryMakeAppointment(appointment)) {
-            if (region.getQueueQuota() != null
-                && region.getQueueQuota() > 0
-                && region.getQueueQuota() > appointmentRepository.countAllWaitByRegionIdAndCreateTime(regionId, ZonedDateTime.now().minusHours(12))) {
+        boolean enableQueue = region.getQueueQuota() != null && region.getQueueQuota() > 0;
+        if (enableQueue && !appointment.isVip()) {
+            Long waitCount = appointmentRepository.countAllWaitByRegionIdAndCreateTime(regionId, ZonedDateTime.now().minusHours(12));
+            if (region.getQueueQuota() > waitCount) {
                 appointment.setStatus(AppointmentStatus.WAIT);
                 appointment.setQueueNumber(generateQueueNumber(regionId));
             } else {
                 appointment.setValid(false);
-                appointmentRepository.save(appointment);
             }
+            appointmentRepository.save(appointment);
+            return appointmentMapper.toDto(appointment);
+        }
+
+        if (!tryMakeAppointment(appointment)) {
+            if (enableQueue && region.getQueueQuota() > appointmentRepository.countAllWaitByRegionIdAndCreateTime(regionId, ZonedDateTime.now().minusHours(12))) {
+                appointment.setStatus(AppointmentStatus.WAIT);
+                appointment.setQueueNumber(generateQueueNumber(regionId));
+            } else {
+                appointment.setValid(false);
+            }
+            appointmentRepository.save(appointment);
         }
         return appointmentMapper.toDto(appointment);
     }

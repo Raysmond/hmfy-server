@@ -103,7 +103,7 @@ public class WxAppointmentApi {
         appointmentDTO.setDriver(user.getFirstName());
         appointmentDTO.setRegionId(region.getId());
         appointmentDTO.setApplyId(plan.getPlan().getApplyId());
-        appointmentDTO.setVip(false);
+        appointmentDTO.setVip(plan.getPlan().isVip());
         AppointmentDTO appointment = appointmentService.makeAppointment(region.getId(), appointmentDTO);
 
         if (!appointment.isValid()) {

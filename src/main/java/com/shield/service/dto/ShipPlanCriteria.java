@@ -69,6 +69,8 @@ public class ShipPlanCriteria implements Serializable, Criteria {
 
     private StringFilter weigherNo;
 
+    private BooleanFilter vip;
+
     private LongFilter userId;
 
     public ShipPlanCriteria(){
@@ -97,6 +99,7 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.leaveAlert = other.leaveAlert == null ? null : other.leaveAlert.copy();
         this.netWeight = other.netWeight == null ? null : other.netWeight.copy();
         this.weigherNo = other.weigherNo == null ? null : other.weigherNo.copy();
+        this.vip = other.vip == null ? null : other.vip.copy();
         this.userId = other.userId == null ? null : other.userId.copy();
     }
 
@@ -281,6 +284,14 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         this.weigherNo = weigherNo;
     }
 
+    public BooleanFilter getVip() {
+        return vip;
+    }
+
+    public void setVip(BooleanFilter vip) {
+        this.vip = vip;
+    }
+
     public LongFilter getUserId() {
         return userId;
     }
@@ -322,6 +333,7 @@ public class ShipPlanCriteria implements Serializable, Criteria {
             Objects.equals(leaveAlert, that.leaveAlert) &&
             Objects.equals(netWeight, that.netWeight) &&
             Objects.equals(weigherNo, that.weigherNo) &&
+            Objects.equals(vip, that.vip) &&
             Objects.equals(userId, that.userId);
     }
 
@@ -350,6 +362,7 @@ public class ShipPlanCriteria implements Serializable, Criteria {
         leaveAlert,
         netWeight,
         weigherNo,
+        vip,
         userId
         );
     }
@@ -379,6 +392,7 @@ public class ShipPlanCriteria implements Serializable, Criteria {
                 (leaveAlert != null ? "leaveAlert=" + leaveAlert + ", " : "") +
                 (netWeight != null ? "netWeight=" + netWeight + ", " : "") +
                 (weigherNo != null ? "weigherNo=" + weigherNo + ", " : "") +
+                (vip != null ? "vip=" + vip + ", " : "") +
                 (userId != null ? "userId=" + userId + ", " : "") +
             "}";
     }

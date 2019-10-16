@@ -9,6 +9,7 @@ import com.shield.service.*;
 import com.shield.domain.ShipPlan;
 import com.shield.repository.ShipPlanRepository;
 import com.shield.service.dto.*;
+import com.shield.service.event.PlanStatusChangeEvent;
 import com.shield.service.mapper.ShipPlanMapper;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import io.github.jhipster.web.util.PageUtil;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -52,6 +54,8 @@ public class ShipPlanServiceImpl implements ShipPlanService {
 
     private final RegionService regionService;
 
+    private final ApplicationEventPublisher applicationEventPublisher;
+
     private final RedisTemplate<String, Long> redisLongTemplate;
 
 
@@ -62,6 +66,7 @@ public class ShipPlanServiceImpl implements ShipPlanService {
         AppointmentRepository appointmentRepository,
         AppointmentService appointmentService,
         RegionService regionService,
+        ApplicationEventPublisher applicationEventPublisher,
         @Qualifier("redisLongTemplate") RedisTemplate<String, Long> redisLongTemplate
     ) {
         this.shipPlanRepository = shipPlanRepository;
@@ -69,6 +74,7 @@ public class ShipPlanServiceImpl implements ShipPlanService {
         this.appointmentRepository = appointmentRepository;
         this.appointmentService = appointmentService;
         this.regionService = regionService;
+        this.applicationEventPublisher = applicationEventPublisher;
         this.redisLongTemplate = redisLongTemplate;
     }
 
@@ -93,12 +99,25 @@ public class ShipPlanServiceImpl implements ShipPlanService {
                 }
             }
         }
+
+        ShipPlanDTO old = null;
+        if (shipPlanDTO.getId() != null) {
+            old = shipPlanMapper.toDto(shipPlanRepository.findById(shipPlanDTO.getId()).get());
+        }
+
         ShipPlan shipPlan = shipPlanMapper.toEntity(shipPlanDTO);
         shipPlan = shipPlanRepository.save(shipPlan);
 
         if (needSync) {
             redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, shipPlan.getId());
         }
+
+        if (old != null && !old.getAuditStatus().equals(shipPlanDTO.getAuditStatus())) {
+            applicationEventPublisher.publishEvent(
+                new PlanStatusChangeEvent(this, shipPlan.getApplyId(), old.getAuditStatus(), shipPlan.getAuditStatus())
+            );
+        }
+
         return shipPlanMapper.toDto(shipPlan);
     }
 

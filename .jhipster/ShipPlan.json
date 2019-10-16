@@ -79,12 +79,12 @@
             "fieldType": "ZonedDateTime"
         },
         {
-          "fieldName": "loadingStartTime",
-          "fieldType": "ZonedDateTime"
+            "fieldName": "loadingStartTime",
+            "fieldType": "ZonedDateTime"
         },
         {
-          "fieldName": "loadingEndTime",
-          "fieldType": "ZonedDateTime"
+            "fieldName": "loadingEndTime",
+            "fieldType": "ZonedDateTime"
         },
         {
             "fieldName": "createTime",
@@ -105,26 +105,33 @@
             "fieldType": "ZonedDateTime"
         },
         {
-          "fieldName": "tareAlert",
-          "fieldType": "Boolean",
-          "fieldValidateRules": [
-            "required"
-          ]
+            "fieldName": "tareAlert",
+            "fieldType": "Boolean",
+            "fieldValidateRules": [
+                "required"
+            ]
         },
         {
-          "fieldName": "leaveAlert",
-          "fieldType": "Boolean",
-          "fieldValidateRules": [
-            "required"
-          ]
+            "fieldName": "leaveAlert",
+            "fieldType": "Boolean",
+            "fieldValidateRules": [
+                "required"
+            ]
         },
         {
-          "fieldName": "netWeight",
-          "fieldType": "Double"
+            "fieldName": "netWeight",
+            "fieldType": "Double"
         },
         {
-          "fieldName": "weigherNo",
-          "fieldType": "String"
+            "fieldName": "weigherNo",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "vip",
+            "fieldType": "Boolean",
+            "fieldValidateRules": [
+                "required"
+            ]
         }
     ],
     "changelogDate": "20190601171803",

@@ -6,6 +6,7 @@ import com.shield.domain.Appointment;
 import com.shield.domain.ShipPlan;
 import com.shield.repository.AppointmentRepository;
 import com.shield.repository.ShipPlanRepository;
+import com.shield.service.event.PlanStatusChangeEvent;
 import com.shield.sqlserver.domain.VehDelivPlan;
 import com.shield.sqlserver.domain.VipGateLog;
 import com.shield.sqlserver.repository.VehDelivPlanRepository;
@@ -14,6 +15,7 @@ import io.github.jhipster.config.JHipsterConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -52,19 +54,22 @@ public class VehPlanSyncScheduleService {
 
     private final AppointmentRepository appointmentRepository;
 
+    private final ApplicationEventPublisher applicationEventPublisher;
+
     @Autowired
     public VehPlanSyncScheduleService(
         VehDelivPlanRepository vehDelivPlanRepository,
         VipGateLogRepository vipGateLogRepository,
         ShipPlanRepository shipPlanRepository,
         @Qualifier("redisLongTemplate") RedisTemplate<String, Long> redisLongTemplate,
-        AppointmentRepository appointmentRepository
-    ) {
+        AppointmentRepository appointmentRepository,
+        ApplicationEventPublisher applicationEventPublisher) {
         this.vehDelivPlanRepository = vehDelivPlanRepository;
         this.vipGateLogRepository = vipGateLogRepository;
         this.shipPlanRepository = shipPlanRepository;
         this.redisLongTemplate = redisLongTemplate;
         this.appointmentRepository = appointmentRepository;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     /**
@@ -95,7 +100,7 @@ public class VehPlanSyncScheduleService {
                 .filter(it -> it.getApplyId().equals(plan.getApplyId()))
                 .findFirst()
                 .map(it -> {
-                    if (!it.getAuditStatus().equals(plan.getAuditStatus())
+                    if ((it.getAuditStatus().equals(1) && !it.getAuditStatus().equals(plan.getAuditStatus()))
                         || (it.getNetWeight() == null && plan.getNetWeight() != null)
                         || (it.getWeigherNo() == null && plan.getWeigherNo() != null)
                         || (it.getLoadingStartTime() == null && plan.getTareTime() != null)
@@ -115,6 +120,10 @@ public class VehPlanSyncScheduleService {
                         it.setAuditStatus(plan.getAuditStatus());
                         it.setUpdateTime(ZonedDateTime.now());
                         changedApplyIds.add(plan.getApplyId());
+
+                        if (!it.getAuditStatus().equals(plan.getAuditStatus())) {
+                            applicationEventPublisher.publishEvent(new PlanStatusChangeEvent(this, it.getApplyId(), it.getAuditStatus(), plan.getAuditStatus()));
+                        }
                     }
                     return it;
                 }).orElseGet(() -> {
@@ -179,6 +188,21 @@ public class VehPlanSyncScheduleService {
         }
     }
 
+    public void syncShipPlanToSqlServer(Long shipPlanId) {
+        ShipPlan plan = shipPlanRepository.findById(shipPlanId).get();
+        log.info("Start to sync data of ShipPlan [id={}] to SQL_SERVER, data: {}", shipPlanId, plan.toString());
+        List<VehDelivPlan> vehDelivPlans = vehDelivPlanRepository.findAllByApplyId(plan.getApplyId(), plan.getDeliverTime(), ZonedDateTime.now());
+        for (VehDelivPlan vehDelivPlan : vehDelivPlans) {
+            vehDelivPlan.setGateTime(plan.getGateTime());
+            vehDelivPlan.setLeaveTime(plan.getLeaveTime());
+            vehDelivPlan.setAllowInTime(plan.getAllowInTime());
+        }
+        vehDelivPlanRepository.saveAll(vehDelivPlans);
+        log.info("Updated {} VehDelivPlan data with ShipPlan data, where apply_id = {} ", vehDelivPlans.size(), plan.getApplyId());
+        plan.setSyncTime(ZonedDateTime.now());
+        shipPlanRepository.save(plan);
+    }
+
     /**
      * 同步手动设置的 VIP 预约 出入场时间 到 SQLSERVER
      */
@@ -225,6 +249,7 @@ public class VehPlanSyncScheduleService {
 
     private ShipPlan generateShipPlanFromVehPlan(VehDelivPlan plan) {
         ShipPlan newShipPlan = new ShipPlan();
+        newShipPlan.setVip(false);
         newShipPlan.setApplyId(plan.getApplyId());
         newShipPlan.setApplyNumber(plan.getApplyNumber());
         newShipPlan.setCompany(plan.getCustomer());

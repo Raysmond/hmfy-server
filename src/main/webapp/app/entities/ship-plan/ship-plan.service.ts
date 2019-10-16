@@ -55,12 +55,12 @@ export class ShipPlanService {
       leaveTime: shipPlan.leaveTime != null && shipPlan.leaveTime.isValid() ? shipPlan.leaveTime.toJSON() : null,
       deliverTime: shipPlan.deliverTime != null && shipPlan.deliverTime.isValid() ? shipPlan.deliverTime.toJSON() : null,
       allowInTime: shipPlan.allowInTime != null && shipPlan.allowInTime.isValid() ? shipPlan.allowInTime.toJSON() : null,
-      createTime: shipPlan.createTime != null && shipPlan.createTime.isValid() ? shipPlan.createTime.toJSON() : null,
-      updateTime: shipPlan.updateTime != null && shipPlan.updateTime.isValid() ? shipPlan.updateTime.toJSON() : null,
-      syncTime: shipPlan.syncTime != null && shipPlan.syncTime.isValid() ? shipPlan.syncTime.toJSON() : null,
       loadingStartTime:
         shipPlan.loadingStartTime != null && shipPlan.loadingStartTime.isValid() ? shipPlan.loadingStartTime.toJSON() : null,
-      loadingEndTime: shipPlan.loadingEndTime != null && shipPlan.loadingEndTime.isValid() ? shipPlan.loadingEndTime.toJSON() : null
+      loadingEndTime: shipPlan.loadingEndTime != null && shipPlan.loadingEndTime.isValid() ? shipPlan.loadingEndTime.toJSON() : null,
+      createTime: shipPlan.createTime != null && shipPlan.createTime.isValid() ? shipPlan.createTime.toJSON() : null,
+      updateTime: shipPlan.updateTime != null && shipPlan.updateTime.isValid() ? shipPlan.updateTime.toJSON() : null,
+      syncTime: shipPlan.syncTime != null && shipPlan.syncTime.isValid() ? shipPlan.syncTime.toJSON() : null
     });
     return copy;
   }
@@ -71,11 +71,11 @@ export class ShipPlanService {
       res.body.leaveTime = res.body.leaveTime != null ? moment(res.body.leaveTime) : null;
       res.body.deliverTime = res.body.deliverTime != null ? moment(res.body.deliverTime) : null;
       res.body.allowInTime = res.body.allowInTime != null ? moment(res.body.allowInTime) : null;
+      res.body.loadingStartTime = res.body.loadingStartTime != null ? moment(res.body.loadingStartTime) : null;
+      res.body.loadingEndTime = res.body.loadingEndTime != null ? moment(res.body.loadingEndTime) : null;
       res.body.createTime = res.body.createTime != null ? moment(res.body.createTime) : null;
       res.body.updateTime = res.body.updateTime != null ? moment(res.body.updateTime) : null;
       res.body.syncTime = res.body.syncTime != null ? moment(res.body.syncTime) : null;
-      res.body.loadingStartTime = res.body.loadingStartTime != null ? moment(res.body.loadingStartTime) : null;
-      res.body.loadingEndTime = res.body.loadingEndTime != null ? moment(res.body.loadingEndTime) : null;
     }
     return res;
   }
@@ -87,11 +87,11 @@ export class ShipPlanService {
         shipPlan.leaveTime = shipPlan.leaveTime != null ? moment(shipPlan.leaveTime) : null;
         shipPlan.deliverTime = shipPlan.deliverTime != null ? moment(shipPlan.deliverTime) : null;
         shipPlan.allowInTime = shipPlan.allowInTime != null ? moment(shipPlan.allowInTime) : null;
+        shipPlan.loadingStartTime = shipPlan.loadingStartTime != null ? moment(shipPlan.loadingStartTime) : null;
+        shipPlan.loadingEndTime = shipPlan.loadingEndTime != null ? moment(shipPlan.loadingEndTime) : null;
         shipPlan.createTime = shipPlan.createTime != null ? moment(shipPlan.createTime) : null;
         shipPlan.updateTime = shipPlan.updateTime != null ? moment(shipPlan.updateTime) : null;
         shipPlan.syncTime = shipPlan.syncTime != null ? moment(shipPlan.syncTime) : null;
-        shipPlan.loadingStartTime = shipPlan.loadingStartTime != null ? moment(shipPlan.loadingStartTime) : null;
-        shipPlan.loadingEndTime = shipPlan.loadingEndTime != null ? moment(shipPlan.loadingEndTime) : null;
       });
     }
     return res;

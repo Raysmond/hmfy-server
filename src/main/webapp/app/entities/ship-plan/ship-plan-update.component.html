@@ -49,17 +49,39 @@
                         </small>
                     </div>
                 </div>
+                <div *ngIf="!editForm.get('id').value" class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.deliverPosition" for="field_deliverPosition">Deliver Position</label>
+                    <select class="form-control" id="field_deliverPosition" name="deliverPosition" formControlName="deliverPosition">
+                        <option *ngIf="!editForm.get('deliverPosition').value" [ngValue]="null" selected></option>
+                        <option [ngValue]="regionOption.name" *ngFor="let regionOption of regions">{{regionOption.name}}</option>
+                    </select>
+                </div>
+                <div *ngIf="editForm.get('deliverPosition').invalid && (editForm.get('deliverPosition').dirty || editForm.get('deliverPosition').touched)">
+                    <small class="form-text text-danger"
+                           *ngIf="editForm.get('deliverPosition').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.deliverTime" for="field_deliverTime">Deliver Time</label>
+                    <div class="d-flex">
+                        <input id="field_deliverTime" type="date" class="form-control" name="deliverTime" formControlName="deliverTime"
+                               [readOnly]="editForm.get('id').value"
+                               placeholder="YYYY-MM-DD"/>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.auditStatus" for="field_auditStatus">Audit Status</label>
                     <!--<input type="number" class="form-control" name="auditStatus" id="field_auditStatus"-->
                            <!--formControlName="auditStatus"/>-->
 
                     <select class="form-control"  name="auditStatus" formControlName="auditStatus">
-                    <option [ngValue]="null"></option>
-                    <!--<option [ngValue]="status" *ngFor="let status of allAuditStatus">{{status}}</option>-->
-                    <option value="1">待提货</option>
-                    <option value="2">已取消</option>
-                    <option value="3">已提货</option>
+                        <option [ngValue]="null"></option>
+                        <!--<option [ngValue]="status" *ngFor="let status of allAuditStatus">{{status}}</option>-->
+                        <option value="1">待提货</option>
+                        <option value="2">已取消</option>
+                        <option value="3">已提货</option>
+                        <option value="4">已过期</option>
                     </select>
 
                     <div *ngIf="editForm.get('auditStatus').invalid && (editForm.get('auditStatus').dirty || editForm.get('auditStatus').touched)">
@@ -75,9 +97,13 @@
                 </div>
                 <div class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.productName" for="field_productName">Product Name</label>
-                    <input type="text" class="form-control" name="productName" id="field_productName"
-                           [readOnly]="editForm.get('id').value"
-                           formControlName="productName"/>
+                    <!--<input type="text" class="form-control" name="productName" id="field_productName"-->
+                           <!--[readOnly]="editForm.get('id').value"-->
+                           <!--formControlName="productName"/>-->
+                    <select class="form-control" id="field_region" name="productName" formControlName="productName" >
+                        <option *ngIf="!editForm.get('productName').value" [ngValue]="null" selected></option>
+                        <option [ngValue]="product" *ngFor="let product of products">{{product}}</option>
+                    </select>
                     <div *ngIf="editForm.get('productName').invalid && (editForm.get('productName').dirty || editForm.get('productName').touched)">
                         <small class="form-text text-danger"
                                *ngIf="editForm.get('productName').errors.required" jhiTranslate="entity.validation.required">
@@ -97,18 +123,17 @@
                         <!--</small>-->
                     <!--</div>-->
                 <!--</div>-->
-                <div *ngIf="!editForm.get('id').value" class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.deliverPosition" for="field_deliverPosition">Deliver Position</label>
-                    <select class="form-control" id="field_deliverPosition" name="deliverPosition" formControlName="deliverPosition">
-                        <option *ngIf="!editForm.get('deliverPosition').value" [ngValue]="null" selected></option>
-                        <option [ngValue]="regionOption.name" *ngFor="let regionOption of regions">{{regionOption.name}}</option>
-                    </select>
-                </div>
-                <div *ngIf="editForm.get('deliverPosition').invalid && (editForm.get('deliverPosition').dirty || editForm.get('deliverPosition').touched)">
-                    <small class="form-text text-danger"
-                           *ngIf="editForm.get('deliverPosition').errors.required" jhiTranslate="entity.validation.required">
-                        This field is required.
-                    </small>
+
+
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.vip" for="field_vip">Vip</label>
+                    <input type="checkbox" class="form-control" name="vip" id="field_vip" formControlName="vip"/>
+                    <div *ngIf="editForm.get('vip').invalid && (editForm.get('vip').dirty || editForm.get('vip').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('vip').errors.required" jhiTranslate="entity.validation.required">
+                            This field is required.
+                        </small>
+                    </div>
                 </div>
 
                 <div *ngIf="editForm.get('id').value" class="form-group">
@@ -138,14 +163,7 @@
                                type="datetime-local" class="form-control" name="leaveTime" formControlName="leaveTime" placeholder="YYYY-MM-DD HH:mm"/>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.deliverTime" for="field_deliverTime">Deliver Time</label>
-                    <div class="d-flex">
-                        <input id="field_deliverTime" type="date" class="form-control" name="deliverTime" formControlName="deliverTime"
-                               [readOnly]="editForm.get('id').value"
-                               placeholder="YYYY-MM-DD"/>
-                    </div>
-                </div>
+
                 <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.shipPlan.allowInTime" for="field_allowInTime">Allow In Time</label>
                     <div class="d-flex">

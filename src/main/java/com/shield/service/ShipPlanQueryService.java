@@ -152,6 +152,9 @@ public class ShipPlanQueryService extends QueryService<ShipPlan> {
             if (criteria.getWeigherNo() != null) {
                 specification = specification.and(buildStringSpecification(criteria.getWeigherNo(), ShipPlan_.weigherNo));
             }
+            if (criteria.getVip() != null) {
+                specification = specification.and(buildSpecification(criteria.getVip(), ShipPlan_.vip));
+            }
             if (criteria.getUserId() != null) {
                 specification = specification.and(buildSpecification(criteria.getUserId(),
                     root -> root.join(ShipPlan_.user, JoinType.LEFT).get(User_.id)));

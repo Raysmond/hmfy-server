@@ -1,5 +1,4 @@
 package com.shield.service.dto;
-
 import java.time.ZonedDateTime;
 import javax.validation.constraints.*;
 import java.io.Serializable;
@@ -63,20 +62,14 @@ public class ShipPlanDTO implements Serializable {
 
     private Boolean leaveAlert;
 
+    private Boolean vip;
+
     public Boolean getTareAlert() {
         return tareAlert;
     }
 
-    public void setTareAlert(Boolean tareAlert) {
-        this.tareAlert = tareAlert;
-    }
-
     public Boolean getLeaveAlert() {
         return leaveAlert;
-    }
-
-    public void setLeaveAlert(Boolean leaveAlert) {
-        this.leaveAlert = leaveAlert;
     }
 
     private Double netWeight;
@@ -187,6 +180,22 @@ public class ShipPlanDTO implements Serializable {
         this.allowInTime = allowInTime;
     }
 
+    public ZonedDateTime getLoadingStartTime() {
+        return loadingStartTime;
+    }
+
+    public void setLoadingStartTime(ZonedDateTime loadingStartTime) {
+        this.loadingStartTime = loadingStartTime;
+    }
+
+    public ZonedDateTime getLoadingEndTime() {
+        return loadingEndTime;
+    }
+
+    public void setLoadingEndTime(ZonedDateTime loadingEndTime) {
+        this.loadingEndTime = loadingEndTime;
+    }
+
     public ZonedDateTime getCreateTime() {
         return createTime;
     }
@@ -211,36 +220,20 @@ public class ShipPlanDTO implements Serializable {
         this.syncTime = syncTime;
     }
 
-    public Long getUserId() {
-        return userId;
+    public Boolean isTareAlert() {
+        return tareAlert;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setTareAlert(Boolean tareAlert) {
+        this.tareAlert = tareAlert;
     }
 
-    public String getUserLogin() {
-        return userLogin;
+    public Boolean isLeaveAlert() {
+        return leaveAlert;
     }
 
-    public void setUserLogin(String userLogin) {
-        this.userLogin = userLogin;
-    }
-
-    public ZonedDateTime getLoadingStartTime() {
-        return loadingStartTime;
-    }
-
-    public void setLoadingStartTime(ZonedDateTime loadingStartTime) {
-        this.loadingStartTime = loadingStartTime;
-    }
-
-    public ZonedDateTime getLoadingEndTime() {
-        return loadingEndTime;
-    }
-
-    public void setLoadingEndTime(ZonedDateTime loadingEndTime) {
-        this.loadingEndTime = loadingEndTime;
+    public void setLeaveAlert(Boolean leaveAlert) {
+        this.leaveAlert = leaveAlert;
     }
 
     public Double getNetWeight() {
@@ -257,6 +250,30 @@ public class ShipPlanDTO implements Serializable {
 
     public void setWeigherNo(String weigherNo) {
         this.weigherNo = weigherNo;
+    }
+
+    public Boolean isVip() {
+        return vip;
+    }
+
+    public void setVip(Boolean vip) {
+        this.vip = vip;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getUserLogin() {
+        return userLogin;
+    }
+
+    public void setUserLogin(String userLogin) {
+        this.userLogin = userLogin;
     }
 
     @Override
@@ -301,6 +318,11 @@ public class ShipPlanDTO implements Serializable {
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
             ", syncTime='" + getSyncTime() + "'" +
+            ", tareAlert='" + isTareAlert() + "'" +
+            ", leaveAlert='" + isLeaveAlert() + "'" +
+            ", netWeight=" + getNetWeight() +
+            ", weigherNo='" + getWeigherNo() + "'" +
+            ", vip='" + isVip() + "'" +
             ", user=" + getUserId() +
             ", user='" + getUserLogin() + "'" +
             "}";

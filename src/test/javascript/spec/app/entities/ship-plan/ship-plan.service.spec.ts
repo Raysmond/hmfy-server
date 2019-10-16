@@ -43,7 +43,14 @@ describe('Service Tests', () => {
         currentDate,
         currentDate,
         currentDate,
-        currentDate
+        currentDate,
+        currentDate,
+        currentDate,
+        false,
+        false,
+        0,
+        'AAAAAAA',
+        false
       );
     });
 
@@ -55,6 +62,8 @@ describe('Service Tests', () => {
             leaveTime: currentDate.format(DATE_TIME_FORMAT),
             deliverTime: currentDate.format(DATE_TIME_FORMAT),
             allowInTime: currentDate.format(DATE_TIME_FORMAT),
+            loadingStartTime: currentDate.format(DATE_TIME_FORMAT),
+            loadingEndTime: currentDate.format(DATE_TIME_FORMAT),
             createTime: currentDate.format(DATE_TIME_FORMAT),
             updateTime: currentDate.format(DATE_TIME_FORMAT),
             syncTime: currentDate.format(DATE_TIME_FORMAT)
@@ -79,6 +88,8 @@ describe('Service Tests', () => {
             leaveTime: currentDate.format(DATE_TIME_FORMAT),
             deliverTime: currentDate.format(DATE_TIME_FORMAT),
             allowInTime: currentDate.format(DATE_TIME_FORMAT),
+            loadingStartTime: currentDate.format(DATE_TIME_FORMAT),
+            loadingEndTime: currentDate.format(DATE_TIME_FORMAT),
             createTime: currentDate.format(DATE_TIME_FORMAT),
             updateTime: currentDate.format(DATE_TIME_FORMAT),
             syncTime: currentDate.format(DATE_TIME_FORMAT)
@@ -91,6 +102,8 @@ describe('Service Tests', () => {
             leaveTime: currentDate,
             deliverTime: currentDate,
             allowInTime: currentDate,
+            loadingStartTime: currentDate,
+            loadingEndTime: currentDate,
             createTime: currentDate,
             updateTime: currentDate,
             syncTime: currentDate
@@ -121,9 +134,16 @@ describe('Service Tests', () => {
             leaveTime: currentDate.format(DATE_TIME_FORMAT),
             deliverTime: currentDate.format(DATE_TIME_FORMAT),
             allowInTime: currentDate.format(DATE_TIME_FORMAT),
+            loadingStartTime: currentDate.format(DATE_TIME_FORMAT),
+            loadingEndTime: currentDate.format(DATE_TIME_FORMAT),
             createTime: currentDate.format(DATE_TIME_FORMAT),
             updateTime: currentDate.format(DATE_TIME_FORMAT),
-            syncTime: currentDate.format(DATE_TIME_FORMAT)
+            syncTime: currentDate.format(DATE_TIME_FORMAT),
+            tareAlert: true,
+            leaveAlert: true,
+            netWeight: 1,
+            weigherNo: 'BBBBBB',
+            vip: true
           },
           elemDefault
         );
@@ -134,6 +154,8 @@ describe('Service Tests', () => {
             leaveTime: currentDate,
             deliverTime: currentDate,
             allowInTime: currentDate,
+            loadingStartTime: currentDate,
+            loadingEndTime: currentDate,
             createTime: currentDate,
             updateTime: currentDate,
             syncTime: currentDate
@@ -164,9 +186,16 @@ describe('Service Tests', () => {
             leaveTime: currentDate.format(DATE_TIME_FORMAT),
             deliverTime: currentDate.format(DATE_TIME_FORMAT),
             allowInTime: currentDate.format(DATE_TIME_FORMAT),
+            loadingStartTime: currentDate.format(DATE_TIME_FORMAT),
+            loadingEndTime: currentDate.format(DATE_TIME_FORMAT),
             createTime: currentDate.format(DATE_TIME_FORMAT),
             updateTime: currentDate.format(DATE_TIME_FORMAT),
-            syncTime: currentDate.format(DATE_TIME_FORMAT)
+            syncTime: currentDate.format(DATE_TIME_FORMAT),
+            tareAlert: true,
+            leaveAlert: true,
+            netWeight: 1,
+            weigherNo: 'BBBBBB',
+            vip: true
           },
           elemDefault
         );
@@ -176,6 +205,8 @@ describe('Service Tests', () => {
             leaveTime: currentDate,
             deliverTime: currentDate,
             allowInTime: currentDate,
+            loadingStartTime: currentDate,
+            loadingEndTime: currentDate,
             createTime: currentDate,
             updateTime: currentDate,
             syncTime: currentDate

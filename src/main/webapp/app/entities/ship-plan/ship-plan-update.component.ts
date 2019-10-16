@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import * as moment from 'moment';
-import { DATE_TIME_FORMAT } from 'app/shared/constants/input.constants';
+import { DATE_FORMAT, DATE_TIME_FORMAT } from 'app/shared/constants/input.constants';
 import { JhiAlertService } from 'ng-jhipster';
 import { IShipPlan, ShipPlan } from 'app/shared/model/ship-plan.model';
 import { ShipPlanService } from './ship-plan.service';
@@ -24,6 +24,8 @@ export class ShipPlanUpdateComponent implements OnInit {
 
   allAuditStatus: any[] = [1, 2, 3];
 
+  products: any[] = ['铁粒子', '宝田S95矿粉', '五线矿粉', '化产矿粉', '原状灰', 'S105矿粉', '高炉渣粉', 'BTNM-A矿物添加剂'];
+
   regions: IRegion[];
 
   editForm = this.fb.group({
@@ -35,6 +37,7 @@ export class ShipPlanUpdateComponent implements OnInit {
     auditStatus: [null, [Validators.required]],
     productName: [null, [Validators.required]],
     deliverPosition: [null, [Validators.required]],
+    vip: [null, [Validators.required]],
     valid: [],
     gateTime: [],
     leaveTime: [],
@@ -60,6 +63,13 @@ export class ShipPlanUpdateComponent implements OnInit {
   ngOnInit() {
     this.isSaving = false;
     this.activatedRoute.data.subscribe(({ shipPlan }) => {
+      if (shipPlan.id === undefined) {
+        shipPlan.productName = '铁粒子';
+        shipPlan.auditStatus = 1;
+        shipPlan.deliverTime = moment();
+        shipPlan.vip = true;
+      }
+      console.log(shipPlan.deliverTime);
       this.updateForm(shipPlan);
     });
     // this.userService
@@ -90,9 +100,10 @@ export class ShipPlanUpdateComponent implements OnInit {
       productName: shipPlan.productName,
       deliverPosition: shipPlan.deliverPosition,
       valid: shipPlan.valid,
+      vip: shipPlan.vip,
       gateTime: shipPlan.gateTime != null ? shipPlan.gateTime.format(DATE_TIME_FORMAT) : null,
       leaveTime: shipPlan.leaveTime != null ? shipPlan.leaveTime.format(DATE_TIME_FORMAT) : null,
-      deliverTime: shipPlan.deliverTime != null ? shipPlan.deliverTime.format(DATE_TIME_FORMAT) : null,
+      deliverTime: shipPlan.deliverTime != null ? shipPlan.deliverTime.format(DATE_FORMAT) : null,
       allowInTime: shipPlan.allowInTime != null ? shipPlan.allowInTime.format(DATE_TIME_FORMAT) : null,
       createTime: shipPlan.createTime != null ? shipPlan.createTime.format(DATE_TIME_FORMAT) : null,
       updateTime: shipPlan.updateTime != null ? shipPlan.updateTime.format(DATE_TIME_FORMAT) : null,
@@ -128,6 +139,7 @@ export class ShipPlanUpdateComponent implements OnInit {
       auditStatus: this.editForm.get(['auditStatus']).value,
       productName: this.editForm.get(['productName']).value,
       deliverPosition: this.editForm.get(['deliverPosition']).value,
+      vip: this.editForm.get(['vip']).value,
       valid: this.editForm.get(['valid']).value,
       gateTime: this.editForm.get(['gateTime']).value != null ? moment(this.editForm.get(['gateTime']).value, DATE_TIME_FORMAT) : undefined,
       leaveTime:

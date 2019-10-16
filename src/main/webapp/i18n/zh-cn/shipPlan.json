@@ -36,6 +36,7 @@
       "createTime": "创建时间",
       "updateTime": "更新时间",
       "user": "创建者",
+      "vip": "VIP",
       "syncTime": "同步时间"
     }
   }

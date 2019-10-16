@@ -66,12 +66,16 @@
                 </div>
                 <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.status" for="field_status">Status</label>
-                    <select class="form-control" name="status" formControlName="status" id="field_status" disabled>
+                    <select class="form-control" name="status" formControlName="status" id="field_status">
+                        <option [ngValue]="null"></option>
                         <option value="CREATE">{{'shieldApp.AppointmentStatus.CREATE' | translate}}</option>
+                        <option value="CREATE">{{'shieldApp.AppointmentStatus.START_CHECK' | translate}}</option>
                         <option value="WAIT">{{'shieldApp.AppointmentStatus.WAIT' | translate}}</option>
                         <option value="START">{{'shieldApp.AppointmentStatus.START' | translate}}</option>
                         <option value="ENTER">{{'shieldApp.AppointmentStatus.ENTER' | translate}}</option>
                         <option value="LEAVE">{{'shieldApp.AppointmentStatus.LEAVE' | translate}}</option>
+                        <option value="EXPIRED">{{'shieldApp.AppointmentStatus.EXPIRED' | translate}}</option>
+                        <option value="CANCELED">{{'shieldApp.AppointmentStatus.CANCELED' | translate}}</option>
                     </select>
                     <div *ngIf="editForm.get('status').invalid && (editForm.get('status').dirty || editForm.get('status').touched)">
                         <small class="form-text text-danger"

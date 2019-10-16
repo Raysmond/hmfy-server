@@ -25,8 +25,6 @@
       "deliverPosition": "Deliver Position",
       "valid": "Valid",
       "gateTime": "Gate Time",
-      "netWeight": "Net Weight",
-      "weigherNo": "Weigher No",
       "leaveTime": "Leave Time",
       "deliverTime": "Deliver Time",
       "allowInTime": "Allow In Time",
@@ -37,6 +35,9 @@
       "syncTime": "Sync Time",
       "tareAlert": "Tare Alert",
       "leaveAlert": "Leave Alert",
+      "netWeight": "Net Weight",
+      "weigherNo": "Weigher No",
+      "vip": "Vip",
       "user": "User"
     }
   }

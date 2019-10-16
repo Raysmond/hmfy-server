@@ -53,4 +53,7 @@ public interface ShipPlanRepository extends JpaRepository<ShipPlan, Long>, JpaSp
     List<ShipPlan> findAllByLoadingEndTime(ZonedDateTime loadingEndTime, String regionName);
 
     ShipPlan findOneByApplyId(Long applyId);
+
+    @Query("select p from ShipPlan p where p.deliverTime < ?1 and p.auditStatus = 1")
+    List<ShipPlan> findAllNeedToExpire(ZonedDateTime endOfDeliverTime);
 }

@@ -222,7 +222,6 @@ public class CarWhiteListService {
     private static ZonedDateTime lastSyncTime = ZonedDateTime.now().minusHours(1);
     private static Map<Long, GateIO> lastProcessedGateIO = Maps.newConcurrentMap();
 
-    @Scheduled(fixedRate = 5 * 1000)
     public void syncCarGateIOEvents() {
         Map<String, Region> regions = regionRepository.findAll()
             .stream()

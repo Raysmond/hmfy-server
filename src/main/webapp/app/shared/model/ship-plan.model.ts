@@ -23,6 +23,7 @@ export interface IShipPlan {
   leaveAlert?: boolean;
   netWeight?: number;
   weigherNo?: string;
+  vip?: boolean;
   userLogin?: string;
   userId?: number;
 }
@@ -51,11 +52,13 @@ export class ShipPlan implements IShipPlan {
     public leaveAlert?: boolean,
     public netWeight?: number,
     public weigherNo?: string,
+    public vip?: boolean,
     public userLogin?: string,
     public userId?: number
   ) {
     this.valid = this.valid || false;
     this.tareAlert = this.tareAlert || false;
     this.leaveAlert = this.leaveAlert || false;
+    this.vip = this.vip || false;
   }
 }

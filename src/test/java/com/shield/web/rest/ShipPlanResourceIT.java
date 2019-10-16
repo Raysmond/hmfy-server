@@ -107,6 +107,9 @@ public class ShipPlanResourceIT {
     private static final String DEFAULT_WEIGHER_NO = "AAAAAAAAAA";
     private static final String UPDATED_WEIGHER_NO = "BBBBBBBBBB";
 
+    private static final Boolean DEFAULT_VIP = false;
+    private static final Boolean UPDATED_VIP = true;
+
     @Autowired
     private ShipPlanRepository shipPlanRepository;
 
@@ -178,7 +181,8 @@ public class ShipPlanResourceIT {
             .tareAlert(DEFAULT_TARE_ALERT)
             .leaveAlert(DEFAULT_LEAVE_ALERT)
             .netWeight(DEFAULT_NET_WEIGHT)
-            .weigherNo(DEFAULT_WEIGHER_NO);
+            .weigherNo(DEFAULT_WEIGHER_NO)
+            .vip(DEFAULT_VIP);
         return shipPlan;
     }
     /**
@@ -209,7 +213,8 @@ public class ShipPlanResourceIT {
             .tareAlert(UPDATED_TARE_ALERT)
             .leaveAlert(UPDATED_LEAVE_ALERT)
             .netWeight(UPDATED_NET_WEIGHT)
-            .weigherNo(UPDATED_WEIGHER_NO);
+            .weigherNo(UPDATED_WEIGHER_NO)
+            .vip(UPDATED_VIP);
         return shipPlan;
     }
 
@@ -255,6 +260,7 @@ public class ShipPlanResourceIT {
         assertThat(testShipPlan.isLeaveAlert()).isEqualTo(DEFAULT_LEAVE_ALERT);
         assertThat(testShipPlan.getNetWeight()).isEqualTo(DEFAULT_NET_WEIGHT);
         assertThat(testShipPlan.getWeigherNo()).isEqualTo(DEFAULT_WEIGHER_NO);
+        assertThat(testShipPlan.isVip()).isEqualTo(DEFAULT_VIP);
     }
 
     @Test
@@ -470,6 +476,25 @@ public class ShipPlanResourceIT {
 
     @Test
     @Transactional
+    public void checkVipIsRequired() throws Exception {
+        int databaseSizeBeforeTest = shipPlanRepository.findAll().size();
+        // set the field null
+        shipPlan.setVip(null);
+
+        // Create the ShipPlan, which fails.
+        ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(shipPlan);
+
+        restShipPlanMockMvc.perform(post("/api/ship-plans")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(shipPlanDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<ShipPlan> shipPlanList = shipPlanRepository.findAll();
+        assertThat(shipPlanList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
     public void getAllShipPlans() throws Exception {
         // Initialize the database
         shipPlanRepository.saveAndFlush(shipPlan);
@@ -499,7 +524,8 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.[*].tareAlert").value(hasItem(DEFAULT_TARE_ALERT.booleanValue())))
             .andExpect(jsonPath("$.[*].leaveAlert").value(hasItem(DEFAULT_LEAVE_ALERT.booleanValue())))
             .andExpect(jsonPath("$.[*].netWeight").value(hasItem(DEFAULT_NET_WEIGHT.doubleValue())))
-            .andExpect(jsonPath("$.[*].weigherNo").value(hasItem(DEFAULT_WEIGHER_NO.toString())));
+            .andExpect(jsonPath("$.[*].weigherNo").value(hasItem(DEFAULT_WEIGHER_NO.toString())))
+            .andExpect(jsonPath("$.[*].vip").value(hasItem(DEFAULT_VIP.booleanValue())));
     }
     
     @Test
@@ -533,7 +559,8 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.tareAlert").value(DEFAULT_TARE_ALERT.booleanValue()))
             .andExpect(jsonPath("$.leaveAlert").value(DEFAULT_LEAVE_ALERT.booleanValue()))
             .andExpect(jsonPath("$.netWeight").value(DEFAULT_NET_WEIGHT.doubleValue()))
-            .andExpect(jsonPath("$.weigherNo").value(DEFAULT_WEIGHER_NO.toString()));
+            .andExpect(jsonPath("$.weigherNo").value(DEFAULT_WEIGHER_NO.toString()))
+            .andExpect(jsonPath("$.vip").value(DEFAULT_VIP.booleanValue()));
     }
 
     @Test
@@ -1654,6 +1681,45 @@ public class ShipPlanResourceIT {
 
     @Test
     @Transactional
+    public void getAllShipPlansByVipIsEqualToSomething() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where vip equals to DEFAULT_VIP
+        defaultShipPlanShouldBeFound("vip.equals=" + DEFAULT_VIP);
+
+        // Get all the shipPlanList where vip equals to UPDATED_VIP
+        defaultShipPlanShouldNotBeFound("vip.equals=" + UPDATED_VIP);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByVipIsInShouldWork() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where vip in DEFAULT_VIP or UPDATED_VIP
+        defaultShipPlanShouldBeFound("vip.in=" + DEFAULT_VIP + "," + UPDATED_VIP);
+
+        // Get all the shipPlanList where vip equals to UPDATED_VIP
+        defaultShipPlanShouldNotBeFound("vip.in=" + UPDATED_VIP);
+    }
+
+    @Test
+    @Transactional
+    public void getAllShipPlansByVipIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        shipPlanRepository.saveAndFlush(shipPlan);
+
+        // Get all the shipPlanList where vip is not null
+        defaultShipPlanShouldBeFound("vip.specified=true");
+
+        // Get all the shipPlanList where vip is null
+        defaultShipPlanShouldNotBeFound("vip.specified=false");
+    }
+
+    @Test
+    @Transactional
     public void getAllShipPlansByUserIsEqualToSomething() throws Exception {
         // Initialize the database
         User user = UserResourceIT.createEntity(em);
@@ -1698,7 +1764,8 @@ public class ShipPlanResourceIT {
             .andExpect(jsonPath("$.[*].tareAlert").value(hasItem(DEFAULT_TARE_ALERT.booleanValue())))
             .andExpect(jsonPath("$.[*].leaveAlert").value(hasItem(DEFAULT_LEAVE_ALERT.booleanValue())))
             .andExpect(jsonPath("$.[*].netWeight").value(hasItem(DEFAULT_NET_WEIGHT.doubleValue())))
-            .andExpect(jsonPath("$.[*].weigherNo").value(hasItem(DEFAULT_WEIGHER_NO)));
+            .andExpect(jsonPath("$.[*].weigherNo").value(hasItem(DEFAULT_WEIGHER_NO)))
+            .andExpect(jsonPath("$.[*].vip").value(hasItem(DEFAULT_VIP.booleanValue())));
 
         // Check, that the count call also returns 1
         restShipPlanMockMvc.perform(get("/api/ship-plans/count?sort=id,desc&" + filter))
@@ -1766,7 +1833,8 @@ public class ShipPlanResourceIT {
             .tareAlert(UPDATED_TARE_ALERT)
             .leaveAlert(UPDATED_LEAVE_ALERT)
             .netWeight(UPDATED_NET_WEIGHT)
-            .weigherNo(UPDATED_WEIGHER_NO);
+            .weigherNo(UPDATED_WEIGHER_NO)
+            .vip(UPDATED_VIP);
         ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(updatedShipPlan);
 
         restShipPlanMockMvc.perform(put("/api/ship-plans")
@@ -1799,6 +1867,7 @@ public class ShipPlanResourceIT {
         assertThat(testShipPlan.isLeaveAlert()).isEqualTo(UPDATED_LEAVE_ALERT);
         assertThat(testShipPlan.getNetWeight()).isEqualTo(UPDATED_NET_WEIGHT);
         assertThat(testShipPlan.getWeigherNo()).isEqualTo(UPDATED_WEIGHER_NO);
+        assertThat(testShipPlan.isVip()).isEqualTo(UPDATED_VIP);
     }
 
     @Test

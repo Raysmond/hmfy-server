@@ -8,8 +8,10 @@ import com.shield.repository.AppointmentRepository;
 import com.shield.repository.RegionRepository;
 import com.shield.repository.ShipPlanRepository;
 import com.shield.service.AppointmentService;
+import io.github.jhipster.config.JHipsterConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ import static com.shield.config.Constants.AUTO_SET_LEAVE_TIME_AFTER_FINISH_HOURS
 
 @Service
 @Slf4j
+@Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
 public class AppointmentScheduleService {
     private final RegionRepository regionRepository;
 

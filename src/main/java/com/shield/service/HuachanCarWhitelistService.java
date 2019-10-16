@@ -202,7 +202,7 @@ public class HuachanCarWhitelistService {
         RegisterCarInfo registerCarInfo = new RegisterCarInfo();
         registerCarInfo.setCompany_name(shipPlan.isEmpty() ? "" : shipPlan.get(0).getCompany());
         registerCarInfo.setEnter_time(ZonedDateTime.now().plusMinutes(3).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        registerCarInfo.setOut_time(ZonedDateTime.now().plusHours(3).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        registerCarInfo.setOut_time(ZonedDateTime.now().plusHours(3).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))); // 最晚进厂时间
         registerCarInfo.setLicense(appointmentDTO.getLicensePlateNumber());
         registerCarInfo.setDriver(appointmentDTO.getDriver());
         if (StringUtils.isNotBlank(appointmentDTO.getUserLogin())) {
@@ -281,7 +281,7 @@ public class HuachanCarWhitelistService {
                         if (check == null) {
                             continue;
                         }
-                        log.info("[HUACHAN] check car register status, truckNumber: {}, code: {}, status: {}, bill_status: {}, bill_code: {}",
+                        log.info("[HUACHAN] check car register status, truckNumber: {}, code: {}, bill_status: {}, bill_code: {}",
                             appointment.getLicensePlateNumber(), appointment.getHsCode(), check.getBill_status(), check.getBill_code());
                         if (check.bill_status == 2) {
                             appointment.setStatus(START);

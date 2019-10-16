@@ -96,6 +96,10 @@ public class ShipPlan implements Serializable {
     @Column(name = "weigher_no")
     private String weigherNo;
 
+    @NotNull
+    @Column(name = "vip", nullable = false)
+    private Boolean vip;
+
     @ManyToOne
     @JsonIgnoreProperties("shipPlans")
     private User user;
@@ -382,6 +386,19 @@ public class ShipPlan implements Serializable {
         this.weigherNo = weigherNo;
     }
 
+    public Boolean isVip() {
+        return vip;
+    }
+
+    public ShipPlan vip(Boolean vip) {
+        this.vip = vip;
+        return this;
+    }
+
+    public void setVip(Boolean vip) {
+        this.vip = vip;
+    }
+
     public User getUser() {
         return user;
     }
@@ -437,6 +454,7 @@ public class ShipPlan implements Serializable {
             ", leaveAlert='" + isLeaveAlert() + "'" +
             ", netWeight=" + getNetWeight() +
             ", weigherNo='" + getWeigherNo() + "'" +
+            ", vip='" + isVip() + "'" +
             "}";
     }
 }
