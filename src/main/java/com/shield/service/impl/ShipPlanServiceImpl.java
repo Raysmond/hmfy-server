@@ -1,17 +1,21 @@
 package com.shield.service.impl;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.shield.domain.Appointment;
+import com.shield.domain.Region;
 import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.repository.AppointmentRepository;
+import com.shield.repository.RegionRepository;
 import com.shield.service.*;
 import com.shield.domain.ShipPlan;
 import com.shield.repository.ShipPlanRepository;
 import com.shield.service.dto.*;
-import com.shield.service.event.PlanStatusChangeEvent;
+import com.shield.service.event.PlanChangedEvent;
 import com.shield.service.mapper.ShipPlanMapper;
 import com.shield.web.rest.errors.BadRequestAlertException;
+import com.shield.web.rest.vm.WeightStat;
 import io.github.jhipster.web.util.PageUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +37,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
-
 /**
  * Service Implementation for managing {@link ShipPlan}.
  */
@@ -54,6 +56,8 @@ public class ShipPlanServiceImpl implements ShipPlanService {
 
     private final RegionService regionService;
 
+    private final RegionRepository regionRepository;
+
     private final ApplicationEventPublisher applicationEventPublisher;
 
     private final RedisTemplate<String, Long> redisLongTemplate;
@@ -66,7 +70,7 @@ public class ShipPlanServiceImpl implements ShipPlanService {
         AppointmentRepository appointmentRepository,
         AppointmentService appointmentService,
         RegionService regionService,
-        ApplicationEventPublisher applicationEventPublisher,
+        RegionRepository regionRepository, ApplicationEventPublisher applicationEventPublisher,
         @Qualifier("redisLongTemplate") RedisTemplate<String, Long> redisLongTemplate
     ) {
         this.shipPlanRepository = shipPlanRepository;
@@ -74,6 +78,7 @@ public class ShipPlanServiceImpl implements ShipPlanService {
         this.appointmentRepository = appointmentRepository;
         this.appointmentService = appointmentService;
         this.regionService = regionService;
+        this.regionRepository = regionRepository;
         this.applicationEventPublisher = applicationEventPublisher;
         this.redisLongTemplate = redisLongTemplate;
     }
@@ -87,50 +92,19 @@ public class ShipPlanServiceImpl implements ShipPlanService {
     @Override
     public ShipPlanDTO save(ShipPlanDTO shipPlanDTO) {
         log.debug("Request to save ShipPlan : {}", shipPlanDTO);
-        boolean needSync = false;
-        if (shipPlanDTO.getId() != null && shipPlanDTO.getApplyId() != null && !shipPlanDTO.getApplyId().equals(0L)) {
-            Optional<ShipPlan> origin = shipPlanRepository.findById(shipPlanDTO.getId());
-            if (origin.isPresent()) {
-                ShipPlan originPlan = origin.get();
-                if (timeNotEqual(originPlan.getGateTime(), shipPlanDTO.getGateTime())
-                    || timeNotEqual(originPlan.getLeaveTime(), shipPlanDTO.getLeaveTime())
-                    || timeNotEqual(originPlan.getAllowInTime(), shipPlanDTO.getAllowInTime())) {
-                    needSync = true;
-                }
-            }
-        }
-
         ShipPlanDTO old = null;
         if (shipPlanDTO.getId() != null) {
             old = shipPlanMapper.toDto(shipPlanRepository.findById(shipPlanDTO.getId()).get());
         }
 
+        shipPlanDTO.setUpdateTime(ZonedDateTime.now());
         ShipPlan shipPlan = shipPlanMapper.toEntity(shipPlanDTO);
         shipPlan = shipPlanRepository.save(shipPlan);
+        ShipPlanDTO updated = shipPlanMapper.toDto(shipPlan);
 
-        if (needSync) {
-            redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, shipPlan.getId());
-        }
-
-        if (old != null && !old.getAuditStatus().equals(shipPlanDTO.getAuditStatus())) {
-            applicationEventPublisher.publishEvent(
-                new PlanStatusChangeEvent(this, shipPlan.getApplyId(), old.getAuditStatus(), shipPlan.getAuditStatus())
-            );
-        }
-
-        return shipPlanMapper.toDto(shipPlan);
+        applicationEventPublisher.publishEvent(new PlanChangedEvent(this, old, updated));
+        return updated;
     }
-
-    private boolean timeNotEqual(ZonedDateTime t1, ZonedDateTime t2) {
-        if (t1 == null && t2 == null) {
-            return false;
-        } else if (t1 == null || t2 == null) {
-            return false;
-        } else {
-            return !t1.equals(t2);
-        }
-    }
-
 
     /**
      * Get all the shipPlans.
@@ -180,7 +154,7 @@ public class ShipPlanServiceImpl implements ShipPlanService {
         }
         RegionDTO regionDTO = region.get();
 
-        ZonedDateTime begin = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).minusDays(1);
+        ZonedDateTime begin = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
         ZonedDateTime end = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).plusDays(1);
         List<ShipPlan> plans = shipPlanRepository.findAvailableByTruckNumber(truckNumber, regionDTO.getName(), begin, end);
 
@@ -280,5 +254,34 @@ public class ShipPlanServiceImpl implements ShipPlanService {
         }
 
         return uniqueShipPlans.stream().filter(it -> !it.getAuditStatus().equals(1)).map(shipPlanMapper::toDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public ShipPlanDTO findOneByApplyId(Long applyId) {
+        ShipPlan plan = shipPlanRepository.findOneByApplyId(applyId);
+        if (plan != null) {
+            return shipPlanMapper.toDto(plan);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public WeightStat countWeightStat(String regionName, ZonedDateTime begin, ZonedDateTime end) {
+        WeightStat stat = new WeightStat();
+        stat.setDate(begin.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        for (ShipPlanRepository.WeightStatItem item : shipPlanRepository.findWeightStatTotal(regionName, begin, end)) {
+            stat.getCompanies().add(item.getCompany());
+            stat.getData().add(
+                WeightStat.CompanyWeightStat.builder()
+                    .name(item.getCompany())
+                    .company(item.getCompany())
+                    .count(item.getCount())
+                    .productName(item.getProductName())
+                    .weight(item.getWeight() == null ? 0 : item.getWeight()).build());
+        }
+        List<String> regionNames = regionRepository.findAll().stream().map(Region::getName).collect(Collectors.toList());
+        stat.setRegion(Joiner.on(",").join(regionNames));
+        return stat;
     }
 }

@@ -20,6 +20,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
     @Query("select appointment from Appointment appointment where appointment.user.login = ?#{principal.username}")
     List<Appointment> findByUserIsCurrentUser();
 
+    @Query("select a from Appointment a where a.region.id = ?1 and a.createTime >= ?2 and a.createTime < ?3 ")
+    List<Appointment> findAllByCreateTime(Long regionId, ZonedDateTime startTime, ZonedDateTime endTime);
+
     @Query("select a from Appointment a where a.region.id = ?1 and a.createTime >= ?2 and a.createTime  < ?3")
     List<Appointment> findAllByRegionId(Long regionId, ZonedDateTime startTime, ZonedDateTime endTime);
 
@@ -64,4 +67,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
 
     @Query("select a from Appointment a where a.region.id = ?1 and a.licensePlateNumber = ?2 and a.createTime >= ?3 and a.valid = true order by a.createTime desc")
     List<Appointment> findLatestByTruckNumber(Long regionId, String truckNumber, ZonedDateTime createTime);
+
+    @Query("select a.region.name as region, a.status as status, count(a.id) as count from Appointment a where a.createTime >= ?1 and a.createTime < ?2 group by a.region.name, a.status")
+    List<AppointmentStatusCount> countAppointments(ZonedDateTime begin, ZonedDateTime end);
+
+    interface AppointmentStatusCount {
+        String getRegion();
+        AppointmentStatus getStatus();
+        Long getCount();
+    }
 }

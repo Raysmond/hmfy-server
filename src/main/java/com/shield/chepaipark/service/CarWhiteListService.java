@@ -19,6 +19,12 @@ import com.shield.domain.enumeration.ParkingConnectMethod;
 import com.shield.repository.AppointmentRepository;
 import com.shield.repository.RegionRepository;
 import com.shield.repository.ShipPlanRepository;
+import com.shield.service.AppointmentService;
+import com.shield.service.ShipPlanService;
+import com.shield.service.dto.AppointmentDTO;
+import com.shield.service.dto.ShipPlanDTO;
+import com.shield.service.mapper.AppointmentMapper;
+import com.shield.service.mapper.ShipPlanMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -26,7 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,10 +48,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static com.shield.config.Constants.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
 import static com.shield.service.ParkingHandlerService.AUTO_DELETE_PLAN_ID_QUEUE;
 import static com.shield.service.ParkingHandlerService.REDIS_KEY_TRUCK_NUMBER_CARD_ID;
-import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
-import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS;
 
 /**
  * 数据库对接停车场门禁
@@ -63,6 +67,9 @@ public class CarWhiteListService {
 
     @Autowired
     private AppointmentRepository appointmentRepository;
+
+    @Autowired
+    private AppointmentService appointmentService;
 
     @Autowired
     private RegionRepository regionRepository;
@@ -85,6 +92,15 @@ public class CarWhiteListService {
 
     @Autowired
     private ThreadPoolTaskScheduler threadPoolTaskScheduler;
+
+    @Autowired
+    private AppointmentMapper appointmentMapper;
+
+    @Autowired
+    private ShipPlanService shipPlanService;
+
+    @Autowired
+    private ShipPlanMapper shipPlanMapper;
 
     private static final String REDIS_KEY_MAX_PARK_CARD_CID = "next_park_card_cid";
     private static final Long INITIAL_PARK_CARD_CID = 10000000L;
@@ -247,16 +263,13 @@ public class CarWhiteListService {
             lastProcessedGateIO.put(gate.getRecordId(), gate);
             log.info("[DB] Start to process GateIO, RecordID: {} CardNo: {}, GateInTime: {}, GateOutTime: {}, AreaName: {}",
                 gate.getRecordId(), gate.getCardNo(), gate.getGateInTime(), gate.getGateOutTime(), gate.getAreaName());
-            Region region = null;
-            if (gate.getAreaName().equals("宝田本部")) {
-                region = regions.getOrDefault("宝田", null);
-            } else {
-                region = regions.getOrDefault(gate.getAreaName(), null);
-            }
+
+            // TODO
+            Region region = regions.getOrDefault("宝田", null);
             if (region != null) {
                 if (region.getParkingConnectMethod() != null && region.getParkingConnectMethod().equals(ParkingConnectMethod.DATABASE)) {
                     this.updateCarInAndOutTime(
-                        region.getParkId(),
+                        region.getId(),
                         gate.getCardNo(),
                         gate.getGateOutTime() != null ? "uploadcarout" : "uploadcarin",
                         gate.getGateInTime(),
@@ -275,34 +288,30 @@ public class CarWhiteListService {
         }
     }
 
-
-    public void updateCarInAndOutTime(String parkId, String truckNumber, String service, ZonedDateTime inTime, ZonedDateTime outTime) {
-        Region region = regionRepository.findOneByParkId(parkId);
-        if (region == null) {
-            log.error("Cannot find region by parkid: {}", parkId);
-            return;
-        }
+    public void updateCarInAndOutTime(Long regionId, String truckNumber, String service, ZonedDateTime inTime, ZonedDateTime outTime) {
+        Region region = regionRepository.findById(regionId).get();
         ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
         if (service.equals("uploadcarin")) {
             // 车辆入场
-            List<ShipPlan> shipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today)
-                .stream().filter(it -> it.getAuditStatus().equals(Integer.valueOf(1)))
-                .sorted(Comparator.comparing(ShipPlan::getApplyId)).collect(Collectors.toList());
+            List<ShipPlanDTO> shipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today)
+                .stream()
+                .map(it -> shipPlanMapper.toDto(it))
+                .filter(it -> it.getAuditStatus().equals(Integer.valueOf(1)))
+                .sorted(Comparator.comparing(ShipPlanDTO::getApplyId)).collect(Collectors.toList());
             if (shipPlans.size() > 1) {
                 // 理论上车辆入场，当计划audit_status=1的只有一条
                 // 不排除同时建了多个计划的情况，有多个有效计划时，只取最早创建的一条
                 log.error("Multiple plans found for truckNumber {}, region: {}, deliverDate: {}, planIds: [{}]",
-                    truckNumber, region.getName(), today, Joiner.on(",").join(shipPlans.stream().map(ShipPlan::getId).collect(Collectors.toList())));
+                    truckNumber, region.getName(), today, Joiner.on(",").join(shipPlans.stream().map(ShipPlanDTO::getId).collect(Collectors.toList())));
             }
             if (!CollectionUtils.isEmpty(shipPlans)) {
-                ShipPlan plan = shipPlans.get(0);
+                ShipPlanDTO plan = shipPlans.get(0);
                 log.info("Find ShipPlan id={} for truckNumber {}, uploadcarin gateTime: {}", plan.getId(), truckNumber, inTime);
                 if (plan.getGateTime() == null) {
                     plan.setGateTime(inTime);
                     plan.setUpdateTime(ZonedDateTime.now());
-                    shipPlanRepository.save(plan);
+                    shipPlanService.save(plan);
                     log.info("update ShipPlan {} gateTime: {}, truckNumber: {}", plan.getApplyId(), inTime, truckNumber);
-                    delayPutSyncShipPlanIdQueue(plan.getId());
                 }
             } else {
                 log.error("Cannot find ShipPlan for truckNumber {}, uploadcarin gateTime: {}", truckNumber, inTime);
@@ -313,57 +322,54 @@ public class CarWhiteListService {
                 log.info("uploadcarout leave time error, {}", outTime);
                 outTime = ZonedDateTime.now();
             }
-            List<ShipPlan> shipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today)
-                .stream().filter(it -> it.getAuditStatus().equals(Integer.valueOf(3)) || (it.getGateTime() != null))
-                .sorted(Comparator.comparing(ShipPlan::getApplyId).reversed())
+            List<ShipPlanDTO> shipPlans = shipPlanRepository
+                .findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today).stream()
+                .map(it -> shipPlanMapper.toDto(it))
+                .filter(it -> it.getAuditStatus().equals(3) || (it.getGateTime() != null))
+                .sorted(Comparator.comparing(ShipPlanDTO::getApplyId).reversed())
                 .collect(Collectors.toList());
             // 取未出场的，最近一个提货完成的计划
             if (!shipPlans.isEmpty()) {
-                ShipPlan plan = shipPlans.get(0);
+                ShipPlanDTO plan = shipPlans.get(0);
                 log.info("Find ShipPlan id={} for truckNumber {}, uploadcarout gateTime: {}, leaveTime: {}", plan.getId(), truckNumber, inTime, outTime);
                 plan.setLeaveTime(outTime);
                 if (plan.getGateTime() == null && inTime != null) {
                     plan.setGateTime(inTime);
                 }
                 plan.setUpdateTime(ZonedDateTime.now());
-                shipPlanRepository.save(plan);
+                shipPlanService.save(plan);
                 log.info("update ShipPlan {} leaveTime: {}, truckNumber: {}", plan.getApplyId(), outTime, truckNumber);
-
-                delayPutSyncShipPlanIdQueue(plan.getId());
-                delayPutDeleteShipPlanIdQueue(plan.getId());
             } else {
                 log.error("Cannot find ShipPlan for truckNumber {}, uploadcarout gateTime: {}, leaveTime: {}", truckNumber, inTime, outTime);
             }
         }
 
-        List<Appointment> appointments = appointmentRepository.findLatestByTruckNumber(region.getId(), truckNumber, ZonedDateTime.now().minusHours(12));
+        List<AppointmentDTO> appointments = appointmentRepository
+            .findLatestByTruckNumber(region.getId(), truckNumber, ZonedDateTime.now().minusHours(12)).stream()
+            .map(it -> appointmentMapper.toDto(it))
+            .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(appointments)) {
-            Appointment appointment = appointments.get(0);
+            AppointmentDTO appointment = appointments.get(0);
             boolean save = false;
             if (service.equals("uploadcarin")) {
-                if (appointment.getStatus().equals(AppointmentStatus.START)) {
+                if (appointment.getStatus().equals(AppointmentStatus.START) && appointment.getStartTime() != null && appointment.getStartTime().isBefore(inTime)) {
                     appointment.setStatus(AppointmentStatus.ENTER);
                     appointment.setEnterTime(inTime);
                     save = true;
                 }
             } else if (service.equals("uploadcarout")) {
-                if (appointment.getStatus().equals(AppointmentStatus.ENTER)) {
+                if (appointment.getStatus().equals(AppointmentStatus.ENTER) && appointment.getEnterTime() != null && appointment.getEnterTime().isBefore(outTime)) {
                     appointment.setLeaveTime(outTime);
                     appointment.setStatus(AppointmentStatus.LEAVE);
                     save = true;
-                    // redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointment.getId());
                 }
             }
 
             if (save) {
                 appointment.setUpdateTime(ZonedDateTime.now());
-                appointmentRepository.save(appointment);
+                appointmentService.save(appointment);
                 log.info("Update appointment [{}] status: {}, inTime: {}, outTime: {}, truckNumber: {}",
                     appointment.getId(), appointment.getStatus(), inTime, outTime, truckNumber);
-
-                if (appointment.isVip() && appointment.getApplyId() == null) {
-                    this.deplyPutSyncVipAppointmentGateLog(appointment.getId());
-                }
             }
         }
     }
@@ -391,15 +397,5 @@ public class CarWhiteListService {
             log.info("Delayed 180s to put ShipPlan id {} to delete car whitelist queue {}", shipPlanId, AUTO_DELETE_PLAN_ID_QUEUE);
             redisLongTemplate.opsForSet().add(AUTO_DELETE_PLAN_ID_QUEUE, shipPlanId);
         }, 180L, TimeUnit.SECONDS);
-    }
-
-    /**
-     * 同步手动VIP预约的出入场记录
-     */
-    public void deplyPutSyncVipAppointmentGateLog(Long appointmentId) {
-        threadPoolTaskScheduler.getScheduledExecutor().schedule(() -> {
-            log.info("Delayed 60s to put Appointment[id={}] to syc vip gate log queue {}", appointmentId, REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS);
-            redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS, appointmentId);
-        }, 60L, TimeUnit.SECONDS);
     }
 }

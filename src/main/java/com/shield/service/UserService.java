@@ -369,7 +369,7 @@ public class UserService {
             });
     }
 
-    List<User> findByTruckNumber(String truckNumber) {
+    public List<User> findByTruckNumber(String truckNumber) {
         return userRepository.findByTruckNumber(truckNumber);
     }
 

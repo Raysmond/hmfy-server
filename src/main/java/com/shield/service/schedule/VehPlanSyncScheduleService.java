@@ -6,17 +6,14 @@ import com.shield.domain.Appointment;
 import com.shield.domain.ShipPlan;
 import com.shield.repository.AppointmentRepository;
 import com.shield.repository.ShipPlanRepository;
-import com.shield.service.event.PlanStatusChangeEvent;
 import com.shield.sqlserver.domain.VehDelivPlan;
 import com.shield.sqlserver.domain.VipGateLog;
 import com.shield.sqlserver.repository.VehDelivPlanRepository;
 import com.shield.sqlserver.repository.VipGateLogRepository;
-import io.github.jhipster.config.JHipsterConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -33,15 +30,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
-import static com.shield.service.impl.AppointmentServiceImpl.REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS;
+import static com.shield.config.Constants.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
+import static com.shield.config.Constants.REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS;
 
 /**
  * 发运计划管理
  */
 @Service
 @Slf4j
-@Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
 public class VehPlanSyncScheduleService {
 
     private final VehDelivPlanRepository vehDelivPlanRepository;
@@ -54,22 +50,18 @@ public class VehPlanSyncScheduleService {
 
     private final AppointmentRepository appointmentRepository;
 
-    private final ApplicationEventPublisher applicationEventPublisher;
-
     @Autowired
     public VehPlanSyncScheduleService(
         VehDelivPlanRepository vehDelivPlanRepository,
         VipGateLogRepository vipGateLogRepository,
         ShipPlanRepository shipPlanRepository,
         @Qualifier("redisLongTemplate") RedisTemplate<String, Long> redisLongTemplate,
-        AppointmentRepository appointmentRepository,
-        ApplicationEventPublisher applicationEventPublisher) {
+        AppointmentRepository appointmentRepository) {
         this.vehDelivPlanRepository = vehDelivPlanRepository;
         this.vipGateLogRepository = vipGateLogRepository;
         this.shipPlanRepository = shipPlanRepository;
         this.redisLongTemplate = redisLongTemplate;
         this.appointmentRepository = appointmentRepository;
-        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     /**
@@ -120,10 +112,6 @@ public class VehPlanSyncScheduleService {
                         it.setAuditStatus(plan.getAuditStatus());
                         it.setUpdateTime(ZonedDateTime.now());
                         changedApplyIds.add(plan.getApplyId());
-
-                        if (!it.getAuditStatus().equals(plan.getAuditStatus())) {
-                            applicationEventPublisher.publishEvent(new PlanStatusChangeEvent(this, it.getApplyId(), it.getAuditStatus(), plan.getAuditStatus()));
-                        }
                     }
                     return it;
                 }).orElseGet(() -> {
@@ -212,7 +200,7 @@ public class VehPlanSyncScheduleService {
         if (appointmentIds != null && appointmentIds.size() > 0) {
             for (Long appointmentId : appointmentIds) {
                 Appointment ap = appointmentRepository.findById(appointmentId).orElse(null);
-                if (ap == null) {
+                if (ap == null || !ap.isVip()) {
                     redisLongTemplate.opsForSet().remove(REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS, appointmentId);
                     continue;
                 }

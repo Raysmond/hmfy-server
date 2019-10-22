@@ -1,6 +1,7 @@
 package com.shield.repository;
 
 import com.shield.domain.ShipPlan;
+import com.shield.web.rest.vm.WeightStat;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
@@ -33,7 +34,7 @@ public interface ShipPlanRepository extends JpaRepository<ShipPlan, Long>, JpaSp
     @Query("select p from ShipPlan p where p.deliverPosition = ?1 and p.deliverTime >= ?2 and p.deliverTime < ?3 and p.auditStatus = ?4 order by p.createTime asc")
     List<ShipPlan> findAllByDeliverTime(String regionName, ZonedDateTime beginDeliverTime, ZonedDateTime endBeginDeliverTime, Integer auditStatus);
 
-    @Query("select p from ShipPlan p where p.truckNumber = ?1 and p.deliverPosition = ?2 and p.deliverTime =?3 order by p.deliverTime desc")
+    @Query("select p from ShipPlan p where p.truckNumber = ?1 and p.deliverPosition = ?2 and p.deliverTime >= ?3 order by p.createTime desc")
     List<ShipPlan> findAllByTruckNumberAndDeliverTime(String truckNumber, String regionName, ZonedDateTime deliverTime);
 
     @Query("select p from ShipPlan p where p.deliverTime >= ?1 and p.deliverTime < ?2 and p.auditStatus <> 1")
@@ -56,4 +57,21 @@ public interface ShipPlanRepository extends JpaRepository<ShipPlan, Long>, JpaSp
 
     @Query("select p from ShipPlan p where p.deliverTime < ?1 and p.auditStatus = 1")
     List<ShipPlan> findAllNeedToExpire(ZonedDateTime endOfDeliverTime);
+
+    @Query("select p.company as company, p.productName as productName, count(p.applyId) as count, sum(p.netWeight) as weight " +
+        "from ShipPlan p where p.deliverTime >= ?1 and p.auditStatus = 3 group by p.company, p.productName")
+    List<WeightStatItem> findWeightStat(ZonedDateTime begin);
+
+    @Query("select p.company as company, count(p.applyId) as count, sum(p.netWeight) as weight " +
+        "from ShipPlan p where p.deliverPosition = ?1 and p.deliverTime >= ?2 and p.deliverTime < ?3 and p.auditStatus = 3 " +
+        "group by p.company, p.productName")
+    List<WeightStatItem> findWeightStatTotal(String region, ZonedDateTime begin, ZonedDateTime end);
+
+    interface WeightStatItem {
+        String getRegionName();
+        String getCompany();
+        String getProductName();
+        Long getCount();
+        Double getWeight();
+    }
 }

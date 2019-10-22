@@ -3,6 +3,7 @@ package com.shield.service;
 import com.shield.service.dto.RegionDTO;
 
 import com.shield.web.rest.vm.RegionStatDTO;
+import com.shield.web.rest.vm.WeightStat;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -57,4 +58,6 @@ public interface RegionService {
     void delete(Long id);
 
     RegionDTO findByName(String name);
+
+    RegionDTO findByParkId(String parkId);
 }

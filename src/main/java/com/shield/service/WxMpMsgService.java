@@ -2,15 +2,21 @@ package com.shield.service;
 
 import com.google.common.collect.Lists;
 import com.shield.domain.*;
+import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.repository.ShipPlanRepository;
 import com.shield.repository.WxMaUserRepository;
+import com.shield.security.AuthoritiesConstants;
 import com.shield.service.dto.AppointmentDTO;
+import com.shield.service.dto.ShipPlanDTO;
+import com.shield.service.dto.UserDTO;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateData;
 import me.chanjar.weixin.mp.bean.template.WxMpTemplateMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +39,9 @@ public class WxMpMsgService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AppointmentService appointmentService;
 
     private static final String MINI_PROGRAM_APP_ID = "wx32a67eb90d6d98e9";
 
@@ -208,6 +217,83 @@ public class WxMpMsgService {
         } catch (Exception e) {
             log.error("failed to send appointment success msg, appointmentId: {}", appointment.getId());
             e.printStackTrace();
+        }
+    }
+
+    @Async
+    public void sendLoadStartAlertMsgToWxUser(ShipPlan delayedPlan) {
+        try {
+            AppointmentDTO appointmentDTO = appointmentService.findLastByApplyId(delayedPlan.getApplyId());
+            if (appointmentDTO != null && appointmentDTO.getUserId() != null && Boolean.FALSE.equals(appointmentDTO.isVip()) && appointmentDTO.getStatus().equals(AppointmentStatus.ENTER)) {
+                String remark = String.format("进厂时间：%s", delayedPlan.getGateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+
+                this.sendAlertMsg(appointmentDTO.getUserId(), null,
+                    String.format("您好，您的提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
+                    String.format("车牌%s在%s进厂之后三小时还未上磅提货！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                    remark);
+
+                if (appointmentDTO.getRegionId() != null) {
+                    Page<UserDTO> users = userService.getAllManagedUsersByRegionId(PageRequest.of(0, 1000), appointmentDTO.getRegionId());
+                    for (UserDTO user : users.getContent()) {
+                        if (user.getAuthorities().contains(AuthoritiesConstants.REGION_ADMIN)) {
+                            this.sendAlertMsg(user.getId(), null,
+                                String.format("提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
+                                String.format("车牌%s在%s进厂之后三小时还未上磅提货！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                                remark);
+                        }
+                    }
+                }
+
+                for (String openid : Lists.newArrayList("oZBny01fYBk-P1zpYZH00vm3uFQI", "oZBny09ivtl8EN8IVcdQKxyfA65c")) {
+                    this.sendAlertMsg(null, openid,
+                        String.format("提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
+                        String.format("车牌%s在%s进厂之后三小时还未上磅提货！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                        remark);
+                }
+            }
+        } catch (Exception e) {
+            log.error("failed to send alert msg sendAlertMsgToWxUser() {}", e.getMessage());
+        }
+    }
+
+    @Async
+    public void sendLeaveAlertMsg(ShipPlanDTO delayedPlan) {
+        try {
+            AppointmentDTO appointmentDTO = appointmentService.findLastByApplyId(delayedPlan.getApplyId());
+            if (appointmentDTO != null && appointmentDTO.getUserId() != null && Boolean.FALSE.equals(appointmentDTO.isVip()) && appointmentDTO.getStatus().equals(AppointmentStatus.ENTER)) {
+                String remark;
+                if (delayedPlan.getLoadingEndTime() != null) {
+                    remark = String.format("进厂时间：%s，提货时间：%s", delayedPlan.getGateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), delayedPlan.getLoadingEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+                } else {
+                    remark = String.format("进厂时间：%s", delayedPlan.getGateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+                }
+
+                this.sendAlertMsg(appointmentDTO.getUserId(), null,
+                    String.format("您好，您的提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
+                    String.format("车牌%s在%s提货之后半小时未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                    remark);
+
+                if (appointmentDTO.getRegionId() != null) {
+                    Page<UserDTO> users = userService.getAllManagedUsersByRegionId(PageRequest.of(0, 1000), appointmentDTO.getRegionId());
+                    for (UserDTO user : users.getContent()) {
+                        if (user.getAuthorities().contains(AuthoritiesConstants.REGION_ADMIN)) {
+                            this.sendAlertMsg(user.getId(), null,
+                                String.format("提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
+                                String.format("车牌%s在%s提货之后半小时未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                                remark);
+                        }
+                    }
+                }
+
+                for (String openid : Lists.newArrayList("oZBny01fYBk-P1zpYZH00vm3uFQI", "oZBny09ivtl8EN8IVcdQKxyfA65c")) {
+                    this.sendAlertMsg(null, openid,
+                        String.format("提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
+                        String.format("车牌%s在%s提货之后半小时未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                        remark);
+                }
+            }
+        } catch (Exception e) {
+            log.error("failed to send alert msg sendAlertMsgToWxUser() {}", e.getMessage());
         }
     }
 }

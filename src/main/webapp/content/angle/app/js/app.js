@@ -2169,9 +2169,9 @@
       }
     };
 
-    var chart = $('.chart-pie');
-    if (chart.length)
-      $.plot(chart, data, options);
+    // var chart = $('.chart-pie');
+    // if (chart.length)
+    //   $.plot(chart, data, options);
 
   }
 
@@ -2187,9 +2187,13 @@
     $(initCustom);
 
     function initCustom() {
-
         // custom code
-
+      console.log('custom code from js');
     }
 
 })();
+
+function initCustomHello() {
+  // custom code
+  console.log('custom a code from js');
+}

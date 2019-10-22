@@ -6,12 +6,10 @@ import com.google.common.collect.Maps;
 import com.shield.config.WxMiniAppConfiguration;
 import com.shield.domain.User;
 import com.shield.domain.enumeration.AppointmentStatus;
+import com.shield.domain.enumeration.ParkingConnectMethod;
 import com.shield.security.AuthoritiesConstants;
 import com.shield.security.SecurityUtils;
-import com.shield.service.AppointmentService;
-import com.shield.service.RegionService;
-import com.shield.service.ShipPlanService;
-import com.shield.service.UserService;
+import com.shield.service.*;
 import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.dto.PlanDTO;
 import com.shield.service.dto.RegionDTO;
@@ -54,6 +52,9 @@ public class WxAppointmentApi {
     @Autowired
     private ShipPlanService shipPlanService;
 
+    @Autowired
+    private PenaltyService penaltyService;
+
     /**
      * 预约排队接口
      */
@@ -69,15 +70,15 @@ public class WxAppointmentApi {
             throw new BadRequestAlertException("不具备预约员权限", ENTITY_NAME, "");
         }
 
-        if (appointmentService.isUserInCancelPenalty(user.getId())) {
+        if (penaltyService.isUserInCancelPenalty(user.getId())) {
             throw new BadRequestAlertException("取消预约后，30分钟之内无法预约！", ENTITY_NAME, "");
         }
 
-        if (appointmentService.isUserInCancelWaitPenalty(user.getId())) {
+        if (penaltyService.isUserInCancelWaitPenalty(user.getId())) {
             throw new BadRequestAlertException("取消排队后，30分钟之内无法预约！", ENTITY_NAME, "");
         }
 
-        if (appointmentService.isUserInExpirePenalty(user.getId())) {
+        if (penaltyService.isUserInExpirePenalty(user.getId())) {
             throw new BadRequestAlertException("预约过期后，一小时之内无法预约！", ENTITY_NAME, "");
         }
 
@@ -142,6 +143,11 @@ public class WxAppointmentApi {
 
         PlanDTO plan = result.getContent().get(0);
         RegionDTO region = regionService.findByName(plan.getPlan().getDeliverPosition());
+
+        if (ParkingConnectMethod.HUA_CHAN_API.equals(region.getParkingConnectMethod())
+            && !plan.getAppointment().getStatus().equals(AppointmentStatus.WAIT))  {
+            throw new BadRequestAlertException(String.format("区域%s不支持取消预约", region.getName()), ENTITY_NAME, "");
+        }
 
         if (StringUtils.isBlank(plan.getStatus()) || (!plan.getStatus().equals("预约成功") && !plan.getStatus().equals("排队中"))) {
             throw new BadRequestAlertException("当前计划无法取消", ENTITY_NAME, "");

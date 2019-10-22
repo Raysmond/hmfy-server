@@ -23,15 +23,6 @@ public class HuachanScheduleService {
         this.huachanCarWhitelistService = huachanCarWhitelistService;
     }
 
-
-    /**
-     * 化产注册预约车辆，申请入门许可
-     */
-    @Scheduled(fixedRate = 30 * 1000)
-    public void autoRegisterCar() {
-        huachanCarWhitelistService.autoRegisterCar();
-    }
-
     /**
      * 化产检查车辆预约审批结果
      */

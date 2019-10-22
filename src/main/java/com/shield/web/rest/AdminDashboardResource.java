@@ -2,45 +2,75 @@ package com.shield.web.rest;
 
 import com.shield.service.AppointmentService;
 import com.shield.service.RegionService;
-import com.shield.web.rest.errors.BadRequestAlertException;
-import com.shield.service.dto.AppointmentDTO;
-import com.shield.service.dto.AppointmentCriteria;
-import com.shield.service.AppointmentQueryService;
+import com.shield.service.ShipPlanService;
 
+import com.shield.web.rest.vm.AppointmentStat;
 import com.shield.web.rest.vm.RegionStatDTO;
-import io.github.jhipster.web.util.HeaderUtil;
-import io.github.jhipster.web.util.PaginationUtil;
-import io.github.jhipster.web.util.ResponseUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.shield.web.rest.vm.WeightStat;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @RestController
 @RequestMapping("/api/admin-dashboard")
 public class AdminDashboardResource {
-    private final Logger log = LoggerFactory.getLogger(AppointmentResource.class);
-
     @Autowired
     private RegionService regionService;
+
+    @Autowired
+    private ShipPlanService shipPlanService;
+
+    @Autowired
+    private AppointmentService appointmentService;
 
     @GetMapping("/region-stats")
     public RegionStatDTO getAllAppointments() {
         return regionService.countRegionStat();
+    }
+
+    @GetMapping("/weight-stats")
+    public WeightStat getWeightStatCount(@RequestParam String currentRegion, @RequestParam String date) {
+        ZonedDateTime begin = LocalDate.now().atStartOfDay().atZone(ZoneId.systemDefault());
+        ZonedDateTime end = begin.plusDays(1);
+        if (date.equals("昨日")) {
+            begin = begin.minusDays(1);
+            end = end.minusDays(1);
+        } else if (date.equals("最近七天")) {
+            begin = begin.minusDays(7);
+            end = end.minusDays(1);
+        }
+        return shipPlanService.countWeightStat(currentRegion, begin, end);
+    }
+
+    @GetMapping("/appointment-stats")
+    public AppointmentStat getAppointmentStat(@RequestParam String date) {
+        ZonedDateTime begin = LocalDate.now().atStartOfDay().atZone(ZoneId.systemDefault());
+        ZonedDateTime end = begin.plusDays(1);
+        if (date.equals("昨日")) {
+            begin = begin.minusDays(1);
+            end = end.minusDays(1);
+        } else if (date.equals("最近七天")) {
+            begin = begin.minusDays(7);
+            end = end.minusDays(1);
+        }
+        return appointmentService.countAppointmentStat(begin, end);
+    }
+
+    @GetMapping("/appointment-stats-today")
+    public AppointmentStat getAppointmentStatToday(@RequestParam String currentRegion, @RequestParam String date) {
+        ZonedDateTime begin = LocalDate.now().atStartOfDay().atZone(ZoneId.systemDefault());
+        ZonedDateTime end = begin.plusDays(1);
+        if (date.equals("昨日")) {
+            begin = begin.minusDays(1);
+            end = end.minusDays(1);
+        } else if (date.equals("最近七天")) {
+            begin = begin.minusDays(7);
+            end = end.minusDays(1);
+        }
+
+        return appointmentService.countAppointmentStat(currentRegion, begin, end);
     }
 }

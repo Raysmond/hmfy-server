@@ -2,6 +2,7 @@ package com.shield.service.impl;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.shield.domain.enumeration.ParkingConnectMethod;
 import com.shield.service.RegionService;
 import com.shield.domain.Region;
 import com.shield.repository.RegionRepository;
@@ -10,6 +11,7 @@ import com.shield.service.dto.RegionDTO;
 import com.shield.service.dto.RegionStatCount;
 import com.shield.service.mapper.RegionMapper;
 import com.shield.web.rest.vm.RegionStatDTO;
+import com.shield.web.rest.vm.WeightStat;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,7 +140,8 @@ public class RegionServiceImpl implements RegionService {
     @Override
     public List<RegionDTO> findAllConnectParkingSystem() {
         return regionRepository.findAll().stream()
-            .filter(it -> StringUtils.isNotBlank(it.getParkId()) && !it.getParkId().equals("NA") && !it.getId().equals(REGION_ID_HUACHAN))
+            .filter(it -> StringUtils.isNotBlank(it.getParkId()) && !it.getParkId().equals("NA") &&
+                (it.getParkingConnectMethod().equals(ParkingConnectMethod.DATABASE) || it.getParkingConnectMethod().equals(ParkingConnectMethod.TCP)))
             .map(regionMapper::toDto)
             .collect(Collectors.toList());
     }
@@ -172,6 +175,16 @@ public class RegionServiceImpl implements RegionService {
     @Override
     public RegionDTO findByName(String name) {
         Region region = regionRepository.findOneByName(name);
+        if (null != region) {
+            return regionMapper.toDto(region);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public RegionDTO findByParkId(String parkId) {
+        Region region = regionRepository.findOneByParkId(parkId);
         if (null != region) {
             return regionMapper.toDto(region);
         } else {

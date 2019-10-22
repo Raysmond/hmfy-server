@@ -185,7 +185,31 @@ Bootstrap tweaks
 
 .narrow-table th,
 .narrow-table td {
-  padding: 0.75rem 0.5rem;
+  padding: 0.75rem 0.3rem;
 }
 
+.narrow-table > thead > tr > th {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+.table-latest-appointments tr {
+  padding: 0 3px;
+}
+
+.table-latest-appointments td {
+  padding: 1px;
+  text-align: center;
+}
+
+@media screen and (max-width: 1366px) {
+  .narrow-table th,
+  .narrow-table td {
+    font-size: 12px;
+  }
+
+  .narrow-table > thead > tr > th {
+    font-size: 12px;
+  }
+}
 /* jhipster-needle-scss-add-main JHipster will add new css style */

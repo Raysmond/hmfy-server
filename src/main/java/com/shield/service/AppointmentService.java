@@ -5,6 +5,7 @@ import com.shield.domain.ShipPlan;
 import com.shield.service.dto.AppointmentDTO;
 
 import com.shield.service.dto.RegionDTO;
+import com.shield.web.rest.vm.AppointmentStat;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -65,26 +66,21 @@ public interface AppointmentService {
 
     AppointmentDTO cancelAppointment(Long appointmentId);
 
-
-    void updateCarInAndOutTime(String parkId, String truckNumber, String service, String carInTime, String carOutTime);
-
-    boolean isUserInCancelPenalty(Long userId);
-
-    boolean isUserInCancelWaitPenalty(Long userId);
-
-    boolean isUserInExpirePenalty(Long userId);
-
     void updateStatusAfterCancelShipPlan(Long applyId);
 
     Integer calcNextQuotaWaitingTime(RegionDTO region);
 
     Integer getNextAppointmentNumber(Long regionId);
 
-    void expireWaitAppointment(Appointment appointment);
+    void expireWaitAppointment(AppointmentDTO appointment);
 
-    boolean autoMakeAppointmentForWaitUser(Appointment appointment);
+    boolean autoMakeAppointmentForWaitUser(AppointmentDTO appointment);
 
-    void expireAppointment(Appointment appointment);
+    void expireAppointment(AppointmentDTO appointment);
 
-    void autoSetAppointmentLeave(Appointment appointment, ShipPlan plan);
+    void autoSetAppointmentLeave(AppointmentDTO appointment);
+
+    AppointmentStat countAppointmentStat(ZonedDateTime begin, ZonedDateTime end);
+
+    AppointmentStat countAppointmentStat(String currentRegion, ZonedDateTime begin, ZonedDateTime end);
 }

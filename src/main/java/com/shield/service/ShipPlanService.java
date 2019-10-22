@@ -6,6 +6,7 @@ import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.dto.PlanDTO;
 import com.shield.service.dto.ShipPlanDTO;
 
+import com.shield.web.rest.vm.WeightStat;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -60,4 +61,7 @@ public interface ShipPlanService {
 
     List<ShipPlanDTO> findAllShouldDeleteCarWhiteList(ZonedDateTime todayBegin, ZonedDateTime todayEnd);
 
+    ShipPlanDTO findOneByApplyId(Long applyId);
+
+    WeightStat countWeightStat(String region, ZonedDateTime begin, ZonedDateTime end);
 }

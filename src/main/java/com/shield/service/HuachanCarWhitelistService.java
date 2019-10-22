@@ -172,27 +172,6 @@ public class HuachanCarWhitelistService {
         private String mobile;
     }
 
-
-    public void autoRegisterCar() {
-        Region region = regionRepository.findById(REGION_ID_HUACHAN).get();
-        if (!region.isOpen()) {
-            return;
-        }
-        List<Appointment> appointments = appointmentRepository.findAllByRegionId(REGION_ID_HUACHAN, START_CHECK, true, ZonedDateTime.now().minusHours(6));
-        appointments = appointments.stream().filter(it -> it.getHsCode() == null).collect(Collectors.toList());
-        if (!CollectionUtils.isEmpty(appointments)) {
-            log.info("[HUACHAN] find {} appointments need to register car", appointments.size());
-            for (Appointment appointment : appointments) {
-                try {
-                    log.info("[HUACHAN] start to register car {}, applyId: {}", appointment.getLicensePlateNumber(), appointment.getApplyId());
-                    registerCar(appointmentMapper.toDto(appointment));
-                } catch (Exception e) {
-                    log.error("[HUACHAN] failed to register car {}", appointment.getLicensePlateNumber(), e);
-                }
-            }
-        }
-    }
-
     public Response registerCar(AppointmentDTO appointmentDTO) throws JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

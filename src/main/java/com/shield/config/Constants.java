@@ -1,5 +1,9 @@
 package com.shield.config;
 
+import com.google.common.collect.Sets;
+
+import java.util.Set;
+
 /**
  * Application constants.
  */
@@ -27,6 +31,14 @@ public final class Constants {
     // 自动过期的，60min之内不能重新预约
     public static final long PENALTY_TIME_MINUTES_EXPIRE = 60L;
     public static final String PENALTY_TIME_MINUTES_EXPIRE_USER_ID_KEY = "penalty_expire_user_id:%d";
+
+    public static final long LEAVE_ALERT_TIME_AFTER_LOAD_END = 30L;
+
+    public static final Set<String> VIP_CUSTOMER_COMPANIES = Sets.newHashSet("上海宝龙建材有限公司");
+    // 手动VIP的预约 把出入场记录写到单独的表中
+    public static final String REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS = "sync_vip_gate_log_appointment_ids";
+
+    public static final String REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN = "sync_ship_plan_ids";
 
     // 四期区域ID
     public static final Long REGION_ID_HUACHAN = 2L;

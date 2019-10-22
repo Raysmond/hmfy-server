@@ -45,7 +45,8 @@
                         <th>公司（车队）名称</th>
                         <th ><span jhiTranslate="userManagement.truckNumber">Truck Number</span></th>
                         <th><span jhiTranslate="userManagement.carCompany">Car Company</span></th>
-                        <th><span jhiTranslate="userManagement.carCapacity">Car Capacity</span></th>
+                        <!--<th><span jhiTranslate="userManagement.carCapacity">Car Capacity</span></th>-->
+                        <th><span>荷载量</span></th>
                         <th>姓名</th>
                         <th>手机号</th>
                         <th>绑定微信账号</th>
@@ -65,7 +66,7 @@
                         <!--<td><a [routerLink]="['./', user.login, 'view']">{{user.id}}</a></td>-->
                         <td>{{user.login}}</td>
                         <!--<td>{{user.email}}</td>-->
-                        <td>
+                        <td style="min-width:85px;">
                             <button class="btn btn-danger btn-sm" (click)="setActive(user, true)" *ngIf="!user.activated"
                                     jhiTranslate="userManagement.deactivated">Deactivated
                             </button>
