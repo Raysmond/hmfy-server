@@ -73,9 +73,7 @@ public class AppointmentEventListener {
             }
         }
 
-        if (after.getStatus() == AppointmentStatus.START_CHECK
-            && (before == null || before.getStatus() != AppointmentStatus.START_CHECK)
-            && StringUtils.isBlank(after.getHsCode())) {
+        if (after.getStatus() == AppointmentStatus.START_CHECK && StringUtils.isBlank(after.getHsCode())) {
             carWhiteListManager.registerCarWhiteList(after);
         }
 

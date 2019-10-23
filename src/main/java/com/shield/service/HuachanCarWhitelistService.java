@@ -233,6 +233,18 @@ public class HuachanCarWhitelistService {
             return;
         }
         List<Appointment> appointments = appointmentRepository.findAllByRegionId(REGION_ID_HUACHAN, START_CHECK, true, ZonedDateTime.now().minusHours(24));
+        List<Appointment> appointmentsNotSend = appointments.stream().filter(it -> StringUtils.isBlank(it.getHsCode())).collect(Collectors.toList());
+        if (appointmentsNotSend.size() > 0) {
+            log.warn("Find {} appointments in START_CHECK status without hs_code, need to send...", appointmentsNotSend.size());
+            for (Appointment appointment: appointmentsNotSend) {
+                try {
+                    this.registerCar(appointmentMapper.toDto(appointment));
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         appointments = appointments.stream().filter(it -> StringUtils.isNotBlank(it.getHsCode())).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(appointments)) {
             log.info("[HUACHAN] find {} appointments need to check register status, cars: {}",

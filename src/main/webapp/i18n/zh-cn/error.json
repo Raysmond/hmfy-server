@@ -11,6 +11,7 @@
     "concurrencyFailure": "出现并发提交. 您的提交被拒绝.",
     "validation": "服务器校验失败.",
     "NotBlank": "必填字段不允许为空",
-    "deliverTimeOnlyTodayAndTomorrow": "只能创建今天和明天的计划"
+    "deliverTimeOnlyTodayAndTomorrow": "只能创建今天和明天的计划",
+    "RAW_TITLE": "{{title}}"
   }
 }

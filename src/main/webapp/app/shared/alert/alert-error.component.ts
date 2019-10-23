@@ -43,7 +43,10 @@ export class JhiAlertErrorComponent implements OnDestroy {
               entityKey = httpErrorResponse.headers.get(entry);
             }
           });
-          if (errorHeader) {
+          if (errorHeader == 'error.RAW_TITLE') {
+            let title = httpErrorResponse.error.title;
+            this.addErrorAlert(title, errorHeader, { title });
+          } else if (errorHeader) {
             const entityName = translateService.instant('global.menu.entities.' + entityKey);
             this.addErrorAlert(errorHeader, errorHeader, { entityName });
           } else if (httpErrorResponse.error !== '' && httpErrorResponse.error.fieldErrors) {

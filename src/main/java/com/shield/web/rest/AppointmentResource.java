@@ -1,5 +1,7 @@
 package com.shield.web.rest;
 
+import com.google.common.collect.Sets;
+import com.shield.domain.Appointment;
 import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.service.AppointmentService;
 import com.shield.service.UserService;
@@ -28,8 +30,11 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static com.shield.domain.enumeration.AppointmentStatus.*;
 
 /**
  * REST controller for managing {@link com.shield.domain.Appointment}.
@@ -73,6 +78,10 @@ public class AppointmentResource {
         if (appointmentDTO.getRegionId() == null) {
             throw new BadRequestAlertException("请选择区域", ENTITY_NAME, "regionRequired");
         }
+        List<AppointmentDTO> latestAppointments = appointmentService.findLatestByTruckNumber(appointmentDTO.getLicensePlateNumber(), ZonedDateTime.now().minusDays(1));
+        if (latestAppointments.size() > 0 && Sets.newHashSet(START, START_CHECK, WAIT).contains(latestAppointments.get(0).getStatus())) {
+            throw new BadRequestAlertException("已存在有效预约，请勿重复预约", "appointment", "RAW_TITLE");
+        }
         appointmentDTO.setUserId(userService.getUserWithAuthorities().get().getId());
         appointmentDTO.setVip(true);
         appointmentDTO.setStatus(AppointmentStatus.CREATE);
@@ -96,6 +105,12 @@ public class AppointmentResource {
         log.debug("REST request to update Appointment : {}", appointmentDTO);
         if (appointmentDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
+        }
+        if (appointmentDTO.getStatus() == AppointmentStatus.ENTER && appointmentDTO.getEnterTime() == null) {
+            appointmentDTO.setEnterTime(ZonedDateTime.now());
+        }
+        if (appointmentDTO.getStatus() == AppointmentStatus.LEAVE && appointmentDTO.getLeaveTime() == null) {
+            appointmentDTO.setLeaveTime(ZonedDateTime.now());
         }
         AppointmentDTO result = appointmentService.save(appointmentDTO);
         return ResponseEntity.ok()

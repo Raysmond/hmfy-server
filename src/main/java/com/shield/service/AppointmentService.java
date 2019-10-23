@@ -83,4 +83,6 @@ public interface AppointmentService {
     AppointmentStat countAppointmentStat(ZonedDateTime begin, ZonedDateTime end);
 
     AppointmentStat countAppointmentStat(String currentRegion, ZonedDateTime begin, ZonedDateTime end);
+
+    List<AppointmentDTO> findLatestByTruckNumber(String licensePlateNumber, ZonedDateTime createTime);
 }

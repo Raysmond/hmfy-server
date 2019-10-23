@@ -1,7 +1,9 @@
 package com.shield.service.impl;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.shield.domain.Appointment;
 import com.shield.domain.Region;
 import com.shield.domain.User;
@@ -17,6 +19,7 @@ import com.shield.service.event.AppointmentChangedEvent;
 import com.shield.service.mapper.AppointmentMapper;
 import com.shield.service.mapper.RegionMapper;
 import com.shield.service.mapper.ShipPlanMapper;
+import com.shield.web.rest.errors.BadRequestAlertException;
 import com.shield.web.rest.vm.AppointmentStat;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -39,6 +42,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.shield.config.Constants.*;
+
+import static com.shield.domain.enumeration.AppointmentStatus.*;
 
 @Service
 @Transactional
@@ -80,6 +85,32 @@ public class AppointmentServiceImpl implements AppointmentService {
     private static final Long INITIAL_APPOINTMENT_NUMBER = 10000L;
     private static final Long INITIAL_QUEUE_NUMBER = 100L;
 
+    private static Map<AppointmentStatus, Set<AppointmentStatus>> STATUS_TRANSFER = Maps.newHashMap();
+
+    static {
+        STATUS_TRANSFER.put(null, Sets.newHashSet(WAIT, START, START_CHECK, CREATE));
+        STATUS_TRANSFER.put(CREATE, Sets.newHashSet(WAIT, START, START_CHECK));
+        STATUS_TRANSFER.put(WAIT, Sets.newHashSet(EXPIRED, START, START_CHECK, CANCELED));
+        STATUS_TRANSFER.put(START, Sets.newHashSet(EXPIRED, CANCELED, ENTER));
+        STATUS_TRANSFER.put(START_CHECK, Sets.newHashSet(EXPIRED, CANCELED, START));
+        STATUS_TRANSFER.put(ENTER, Sets.newHashSet(LEAVE));
+        STATUS_TRANSFER.put(LEAVE, Sets.newHashSet(LEAVE));
+        STATUS_TRANSFER.put(EXPIRED, Sets.newHashSet(EXPIRED));
+        STATUS_TRANSFER.put(CANCELED, Sets.newHashSet(CANCELED));
+    }
+
+    private void validChange(AppointmentDTO before, AppointmentDTO after) {
+        AppointmentStatus beforeStatus = null;
+        if (before != null) {
+            beforeStatus = before.getStatus();
+        }
+        if (beforeStatus != after.getStatus()) {
+            if (STATUS_TRANSFER.containsKey(beforeStatus) && !STATUS_TRANSFER.get(beforeStatus).contains(after.getStatus())) {
+                throw new BadRequestAlertException("状态 " + beforeStatus + " 不能改为 " + after.getStatus(), "appointment", "RAW_TITLE");
+            }
+        }
+    }
+
     /**
      * Save a appointment.
      *
@@ -96,9 +127,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         } else {
             before = appointmentMapper.toDto(appointmentRepository.findById(appointmentDTO.getId()).get());
         }
+
+        validChange(before, appointmentDTO);
+
         appointment.setUpdateTime(ZonedDateTime.now());
-        appointment = appointmentRepository.save(appointment);
-        AppointmentDTO after = appointmentMapper.toDto(appointment);
+        Appointment saved = appointmentRepository.save(appointment);
+        AppointmentDTO after = appointmentMapper.toDto(saved);
 
         applicationEventPublisher.publishEvent(new AppointmentChangedEvent(this, before, after));
         return after;
@@ -253,9 +287,10 @@ public class AppointmentServiceImpl implements AppointmentService {
             } else {
                 appointment.setValid(false);
             }
-            appointment = this.save(appointment);
+            return this.save(appointment);
+        } else {
+            return appointment;
         }
-        return appointment;
     }
 
     /**
@@ -302,7 +337,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                 appointment.setStartTime(ZonedDateTime.now());
                 appointment.setUpdateTime(ZonedDateTime.now());
                 appointment.setNumber(generateAppointmentNumber(region.getId()));
-                this.save(appointment);
+                AppointmentDTO saved = this.save(appointment);
+                if (appointment.getId() == null) {
+                    appointment.setId(saved.getId());
+                }
 
                 log.info("Appointment [{}] made success at region ({}, {}), number: {}, queue number: {}, truckNumber: {}",
                     appointment.getId(), region.getId(), region.getName(), appointment.getNumber(), appointment.getQueueNumber(), appointment.getLicensePlateNumber());
@@ -535,6 +573,11 @@ public class AppointmentServiceImpl implements AppointmentService {
             stat.getData().add(v);
         });
         return stat;
+    }
+
+    @Override
+    public List<AppointmentDTO> findLatestByTruckNumber(String licensePlateNumber, ZonedDateTime createTime) {
+        return appointmentRepository.findLatestByTruckNumber(licensePlateNumber, createTime).stream().map(appointmentMapper::toDto).collect(Collectors.toList());
     }
 
     @Override
