@@ -120,11 +120,11 @@
                             <span class="badge badge-secondary" *ngIf="!appointment.valid">无效</span>
                         </td>
                         <td>
-                            <span class="badge badge-info" *ngIf="appointment.status=='CREATE'"
+                            <span class="badge badge-secondary" *ngIf="appointment.status=='CREATE'"
                                   jhiTranslate="{{'shieldApp.AppointmentStatus.CREATE'}}">{{appointment.status}}</span>
                             <span class="badge badge-warning" *ngIf="appointment.status=='WAIT'"
                                   jhiTranslate="{{'shieldApp.AppointmentStatus.WAIT'}}">{{appointment.status}}</span>
-                            <span class="badge badge-warning" *ngIf="appointment.status=='START_CHECK'"
+                            <span class="badge badge-info" *ngIf="appointment.status=='START_CHECK'"
                                   jhiTranslate="{{'shieldApp.AppointmentStatus.START_CHECK'}}">{{appointment.status}}</span>
                             <span class="badge badge-success" *ngIf="appointment.status=='START'"
                                   jhiTranslate="{{'shieldApp.AppointmentStatus.START'}}">{{appointment.status}}</span>

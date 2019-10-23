@@ -29,13 +29,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
     @Query("select a from Appointment a where a.region.id = ?1 and a.updateTime >= ?2 and a.updateTime < ?3")
     List<Appointment> findAllByRegionIdAndUpdateTime(Long regionId, ZonedDateTime startTime, ZonedDateTime endTime);
 
-    @Query("select count(a.id) from Appointment a where a.region.id = ?1 and a.valid = true and a.status in ('START', 'ENTER')")
+    @Query("select count(a.id) from Appointment a where a.region.id = ?1 and a.valid = true and a.status in ('START', 'ENTER', 'START_CHECK')")
     Long countAllValidByRegionId(Long regionId);
 
-    @Query("select count(a.id) from Appointment a where a.region.id = ?1 and a.createTime > ?2 and a.valid = true and a.status in ('START', 'ENTER')")
+    @Query("select count(a.id) from Appointment a where a.region.id = ?1 and a.createTime > ?2 and a.valid = true and a.status in ('START', 'ENTER', 'START_CHECK')")
     Long countAllValidByRegionIdAndCreateTime(Long regionId, ZonedDateTime begin);
 
-    @Query("select count(a.id) from Appointment a where a.region.id = ?1 and a.createTime > ?2 and a.valid = true and a.vip = true and a.status in ('START', 'ENTER')")
+    @Query("select count(a.id) from Appointment a where a.region.id = ?1 and a.createTime > ?2 and a.valid = true and a.vip = true and a.status in ('START', 'ENTER', 'START_CHECK')")
     Long countAllVipValidByRegionIdAndCreateTime(Long regionId, ZonedDateTime begin);
 
     @Query("select count(a.id) from Appointment a where a.region.id = ?1 and a.valid = true and a.status = 'WAIT'")
@@ -53,10 +53,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
     @Query("select a from Appointment a where a.region.id = ?1 and a.status = ?2 and a.valid = ?3 and a.startTime > ?4")
     List<Appointment> findAllByStatusAndStartTime(Long regionId, AppointmentStatus status, Boolean valid, ZonedDateTime startTime);
 
-    @Query("select a from Appointment a where a.region.id = ?1 and a.valid = true and a.status in ('START', 'ENTER') and a.startTime >= ?2")
+    @Query("select a from Appointment a where a.region.id = ?1 and a.valid = true and a.status in ('START', 'ENTER', 'START_CHECK') and a.startTime >= ?2")
     Page<Appointment> findLastValid(Long regionId, ZonedDateTime startTime, Pageable pageable);
 
-    @Query("select a from Appointment a where a.region.id = ?1 and a.valid = true and a.status in ('START', 'ENTER') and a.startTime >= ?2")
+    @Query("select a from Appointment a where a.region.id = ?1 and a.valid = true and a.status in ('START', 'ENTER', 'START_CHECK') and a.startTime >= ?2")
     List<Appointment> findAllValid(Long regionId, ZonedDateTime startTime);
 
     @Query("select a from Appointment a where a.applyId in ?1 and a.createTime > ?2 and a.valid = true")

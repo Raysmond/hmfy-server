@@ -172,15 +172,19 @@ public class HuachanCarWhitelistService {
     }
 
     public Response registerCar(AppointmentDTO appointmentDTO) throws JsonProcessingException {
+        if (env.acceptsProfiles(Profiles.of("dev"))) {
+            log.info("[DEV] ignore register car in dev, truckNumber: {} region {}", appointmentDTO.getLicensePlateNumber(), appointmentDTO.getRegionId());
+            return null;
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("Authorization", getToken());
-//        Region region = regionRepository.findById(appointmentDTO.getRegionId()).get();
+        Region region = regionRepository.findById(appointmentDTO.getRegionId()).get();
         List<ShipPlan> shipPlan = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(appointmentDTO.getApplyId()));
         RegisterCarInfo registerCarInfo = new RegisterCarInfo();
         registerCarInfo.setCompany_name(shipPlan.isEmpty() ? "" : shipPlan.get(0).getCompany());
         registerCarInfo.setEnter_time(ZonedDateTime.now().plusMinutes(3).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        registerCarInfo.setOut_time(ZonedDateTime.now().plusHours(3).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))); // 最晚进厂时间
+        registerCarInfo.setOut_time(ZonedDateTime.now().plusHours(region.getValidTime()).plusMinutes(3).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))); // 最晚进厂时间
         registerCarInfo.setLicense(appointmentDTO.getLicensePlateNumber());
         registerCarInfo.setDriver(appointmentDTO.getDriver());
         if (StringUtils.isNotBlank(appointmentDTO.getUserLogin())) {
@@ -227,6 +231,10 @@ public class HuachanCarWhitelistService {
      * 检查预约状态
      */
     public void checkRegisterStatus() {
+        if (env.acceptsProfiles(Profiles.of("dev"))) {
+            log.info("[DEV] ignore checkRegisterStatus()");
+            return;
+        }
         Region region = regionRepository.findById(REGION_ID_HUACHAN).get();
         if (!region.isOpen()) {
             return;
@@ -235,7 +243,7 @@ public class HuachanCarWhitelistService {
         List<Appointment> appointmentsNotSend = appointments.stream().filter(it -> StringUtils.isBlank(it.getHsCode())).collect(Collectors.toList());
         if (appointmentsNotSend.size() > 0) {
             log.warn("Find {} appointments in START_CHECK status without hs_code, need to send...", appointmentsNotSend.size());
-            for (Appointment appointment: appointmentsNotSend) {
+            for (Appointment appointment : appointmentsNotSend) {
                 try {
                     this.registerCar(appointmentMapper.toDto(appointment));
                 } catch (JsonProcessingException e) {
@@ -424,6 +432,10 @@ public class HuachanCarWhitelistService {
      * 从本地MySQL中拿化产区域车辆的出入场数据，并更新预约/计划的状态，出入场时间
      */
     public void updateAppointmentStatusByGateRecords() {
+        if (env.acceptsProfiles(Profiles.of("dev"))) {
+            log.info("[DEV] ignore updateAppointmentStatusByGateRecords()");
+            return;
+        }
         // 未进厂预约单（预约成功 --> 进厂)
         List<Appointment> appointments = appointmentRepository.findAllByStatusAndStartTime(REGION_ID_HUACHAN, START, true, ZonedDateTime.now().minusHours(24));
         if (!CollectionUtils.isEmpty(appointments)) {

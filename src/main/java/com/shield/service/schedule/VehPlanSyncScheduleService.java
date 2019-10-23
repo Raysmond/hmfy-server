@@ -248,7 +248,6 @@ public class VehPlanSyncScheduleService {
         newShipPlan.setProductName(plan.getProductName());
         newShipPlan.setAuditStatus(plan.getAuditStatus());
         newShipPlan.setCreateTime(plan.getCreateTime());
-        newShipPlan.setCreateTime(ZonedDateTime.now());
         newShipPlan.setUpdateTime(ZonedDateTime.now());
         return newShipPlan;
     }

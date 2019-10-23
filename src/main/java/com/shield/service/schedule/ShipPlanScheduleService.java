@@ -75,7 +75,7 @@ public class ShipPlanScheduleService {
                 .filter(it ->
                     it.getLeaveTime() == null
                         && !it.isLeaveAlert()
-                        && it.getLoadingEndTime().plusMinutes(LEAVE_ALERT_TIME_AFTER_LOAD_END).isAfter(ZonedDateTime.now()))
+                        && ZonedDateTime.now().minusMinutes(LEAVE_ALERT_TIME_AFTER_LOAD_END).isAfter(it.getLoadingEndTime()))
                 .map(shipPlanMapper::toDto)
                 .collect(Collectors.toList());
             for (ShipPlanDTO plan : shipPlanDTOs) {

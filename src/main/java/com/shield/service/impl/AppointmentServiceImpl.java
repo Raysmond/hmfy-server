@@ -367,7 +367,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 if (StringUtils.isNotBlank(user.getTruckNumber())) {
                     for (int i = 0; i < waitingList.size(); i++) {
                         if (waitingList.get(i).getLicensePlateNumber().equals(user.getTruckNumber())) {
-                            region.setStatusWaitBeforeUser((long) i);
+                            region.setStatusWaitBeforeUser((long) i + 1);
                             region.setUserInWaitingList(Boolean.TRUE);
                             break;
                         }

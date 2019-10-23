@@ -53,6 +53,11 @@
                         </small>
                     </div>
                 </div>
+                <!--<div *ngIf="editForm.get('id').value" class="form-group">-->
+                    <!--<label class="form-control-label" jhiTranslate="shieldApp.appointment.queueNumber" for="field_queueNumber">Queue Number</label>-->
+                    <!--<input  [readOnly]="editForm.get('id').value" type="number" class="form-control" name="queueNumber" id="field_queueNumber"-->
+                            <!--formControlName="queueNumber"/>-->
+                <!--</div>-->
                 <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.valid" for="field_valid">Valid</label>
                     <input type="checkbox" class="form-control" name="valid" id="field_valid"
@@ -69,7 +74,7 @@
                     <select class="form-control" name="status" formControlName="status" id="field_status">
                         <option [ngValue]="null"></option>
                         <option value="CREATE">{{'shieldApp.AppointmentStatus.CREATE' | translate}}</option>
-                        <option value="CREATE">{{'shieldApp.AppointmentStatus.START_CHECK' | translate}}</option>
+                        <option value="START_CHECK">{{'shieldApp.AppointmentStatus.START_CHECK' | translate}}</option>
                         <option value="WAIT">{{'shieldApp.AppointmentStatus.WAIT' | translate}}</option>
                         <option value="START">{{'shieldApp.AppointmentStatus.START' | translate}}</option>
                         <option value="ENTER">{{'shieldApp.AppointmentStatus.ENTER' | translate}}</option>
@@ -84,14 +89,10 @@
                         </small>
                     </div>
                 </div>
-                <div *ngIf="editForm.get('id').value" class="form-group">
-                    <label class="form-control-label" jhiTranslate="shieldApp.appointment.queueNumber" for="field_queueNumber">Queue Number</label>
-                    <input  [readOnly]="editForm.get('id').value" type="number" class="form-control" name="queueNumber" id="field_queueNumber"
-                           formControlName="queueNumber"/>
-                </div>
+
                 <div *ngIf="editForm.get('id').value" class="form-group">
                     <label class="form-control-label" jhiTranslate="shieldApp.appointment.vip" for="field_vip">Vip</label>
-                    <input type="checkbox" class="form-control" name="vip" id="field_vip" disabled
+                    <input type="checkbox" class="form-control" name="vip" id="field_vip"
                            formControlName="vip"/>
                     <div *ngIf="editForm.get('vip').invalid && (editForm.get('vip').dirty || editForm.get('vip').touched)">
                         <small class="form-text text-danger"

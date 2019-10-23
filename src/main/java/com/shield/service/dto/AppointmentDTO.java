@@ -11,7 +11,7 @@ import com.shield.service.common.ValidTranfers;
 import com.shield.service.common.ValidTransfer;
 
 /**
- * A DTO for the {@link com.shield.domain.Appointment} entity.
+ * A DTO for the {@link com.shield.domain.Appointment} entity.ÅÅ
  */
 public class AppointmentDTO implements Serializable {
 
@@ -37,11 +37,11 @@ public class AppointmentDTO implements Serializable {
     @ValidTranfers(
         tranfers = {
             @ValidTransfer(before = "", after = {"CREATE", "WAIT", "START", "START_CHECK"}),
-            @ValidTransfer(before = "START", after = {"ENTER", "EXPIRED", "CANCELED"}),
+            @ValidTransfer(before = "START", after = {"ENTER", "EXPIRED", "CANCELED", "START"}),
             @ValidTransfer(before = "LEAVE", after = {"LEAVE"}),
-            @ValidTransfer(before = "START_CHECK", after = {"START"}),
-            @ValidTransfer(before = "ENTER", after = {"LEAVE"}),
-            @ValidTransfer(before = "CREATE", after = {"START", "START_CHECK", "CANCELED"}),
+            @ValidTransfer(before = "START_CHECK", after = {"START", "START_CHECK"}),
+            @ValidTransfer(before = "ENTER", after = {"LEAVE", "ENTER"}),
+            @ValidTransfer(before = "CREATE", after = {"START", "START_CHECK", "CREATE"}),
         }
     )
     private AppointmentStatus status;
@@ -52,12 +52,12 @@ public class AppointmentDTO implements Serializable {
     @NotNull
     private Boolean vip;
 
-    @Fixed
+//    @Fixed
     private ZonedDateTime createTime;
 
     private ZonedDateTime updateTime;
 
-    @Fixed
+//    @Fixed
     private ZonedDateTime startTime;
 
     private ZonedDateTime enterTime;

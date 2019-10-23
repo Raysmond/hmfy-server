@@ -226,6 +226,8 @@ public class ShipPlanServiceImpl implements ShipPlanService {
                         item.setStatus("已进厂");
                     } else if (status == AppointmentStatus.LEAVE) {
                         item.setStatus("已离厂");
+                    } else if (status == AppointmentStatus.START_CHECK) {
+                        item.setStatus("预约中");
                     }
                 }
             }
