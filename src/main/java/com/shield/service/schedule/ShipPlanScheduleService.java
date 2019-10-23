@@ -90,7 +90,7 @@ public class ShipPlanScheduleService {
     /**
      * 每天凌晨1点，将前一天待提货的计划改成过期
      */
-    @Scheduled(cron = "0 0 1 * * *")
+    @Scheduled(cron = "0 1 0 * * *")
     public void autoExpireShipPlan() {
         ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
         List<ShipPlan> shipPlans = shipPlanRepository.findAllNeedToExpire(today);

@@ -13,7 +13,6 @@ import com.shield.chepaipark.repository.ParkCardRepository;
 import com.shield.chepaipark.repository.SameBarriarCardRepository;
 import com.shield.domain.Appointment;
 import com.shield.domain.Region;
-import com.shield.domain.ShipPlan;
 import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.domain.enumeration.ParkingConnectMethod;
 import com.shield.repository.AppointmentRepository;
@@ -32,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -108,6 +108,7 @@ public class CarWhiteListService {
     private static final long DEFAULT_VIP_WHITELIST_VALID_HOURS = 24;
 
 
+    @Async
     public void deleteCarWhiteList(String truckNumber) {
         List<ParkCard> parkCards = parkCardRepository.findByCardNo(truckNumber);
         if (!parkCards.isEmpty()) {
@@ -132,6 +133,7 @@ public class CarWhiteListService {
         return ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHMMSS")) + RandomStringUtils.randomNumeric(3);
     }
 
+    @Async
     @Transactional
     public void registerCarWhiteListByAppointmentId(Long appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId).get();

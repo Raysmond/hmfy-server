@@ -1,9 +1,7 @@
 package com.shield.service.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.shield.domain.Appointment;
 import com.shield.domain.Region;
 import com.shield.domain.User;
@@ -12,6 +10,7 @@ import com.shield.repository.RegionRepository;
 import com.shield.security.SecurityUtils;
 import com.shield.service.*;
 import com.shield.repository.AppointmentRepository;
+import com.shield.service.common.ValidTransferCheck;
 import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.dto.RegionDTO;
 import com.shield.service.dto.ShipPlanDTO;
@@ -19,7 +18,6 @@ import com.shield.service.event.AppointmentChangedEvent;
 import com.shield.service.mapper.AppointmentMapper;
 import com.shield.service.mapper.RegionMapper;
 import com.shield.service.mapper.ShipPlanMapper;
-import com.shield.web.rest.errors.BadRequestAlertException;
 import com.shield.web.rest.vm.AppointmentStat;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -42,8 +40,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.shield.config.Constants.*;
-
-import static com.shield.domain.enumeration.AppointmentStatus.*;
 
 @Service
 @Transactional
@@ -85,38 +81,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     private static final Long INITIAL_APPOINTMENT_NUMBER = 10000L;
     private static final Long INITIAL_QUEUE_NUMBER = 100L;
 
-    private static Map<AppointmentStatus, Set<AppointmentStatus>> STATUS_TRANSFER = Maps.newHashMap();
-
-    static {
-        STATUS_TRANSFER.put(null, Sets.newHashSet(WAIT, START, START_CHECK, CREATE));
-        STATUS_TRANSFER.put(CREATE, Sets.newHashSet(WAIT, START, START_CHECK));
-        STATUS_TRANSFER.put(WAIT, Sets.newHashSet(EXPIRED, START, START_CHECK, CANCELED));
-        STATUS_TRANSFER.put(START, Sets.newHashSet(EXPIRED, CANCELED, ENTER));
-        STATUS_TRANSFER.put(START_CHECK, Sets.newHashSet(EXPIRED, CANCELED, START));
-        STATUS_TRANSFER.put(ENTER, Sets.newHashSet(LEAVE));
-        STATUS_TRANSFER.put(LEAVE, Sets.newHashSet(LEAVE));
-        STATUS_TRANSFER.put(EXPIRED, Sets.newHashSet(EXPIRED));
-        STATUS_TRANSFER.put(CANCELED, Sets.newHashSet(CANCELED));
-    }
-
-    private void validChange(AppointmentDTO before, AppointmentDTO after) {
-        AppointmentStatus beforeStatus = null;
-        if (before != null) {
-            beforeStatus = before.getStatus();
-        }
-        if (beforeStatus != after.getStatus()) {
-            if (STATUS_TRANSFER.containsKey(beforeStatus) && !STATUS_TRANSFER.get(beforeStatus).contains(after.getStatus())) {
-                throw new BadRequestAlertException("状态 " + beforeStatus + " 不能改为 " + after.getStatus(), "appointment", "RAW_TITLE");
-            }
-        }
-    }
-
-    /**
-     * Save a appointment.
-     *
-     * @param appointmentDTO the entity to save.
-     * @return the persisted entity.
-     */
     @Override
     public AppointmentDTO save(AppointmentDTO appointmentDTO) {
         log.debug("Request to save Appointment : {}", appointmentDTO);
@@ -128,7 +92,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             before = appointmentMapper.toDto(appointmentRepository.findById(appointmentDTO.getId()).get());
         }
 
-        validChange(before, appointmentDTO);
+        new ValidTransferCheck().valid(before, appointmentDTO);
 
         appointment.setUpdateTime(ZonedDateTime.now());
         Appointment saved = appointmentRepository.save(appointment);

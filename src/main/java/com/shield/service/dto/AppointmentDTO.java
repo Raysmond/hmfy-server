@@ -1,9 +1,14 @@
 package com.shield.service.dto;
+
 import java.time.ZonedDateTime;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Objects;
+
 import com.shield.domain.enumeration.AppointmentStatus;
+import com.shield.service.common.Fixed;
+import com.shield.service.common.ValidTranfers;
+import com.shield.service.common.ValidTransfer;
 
 /**
  * A DTO for the {@link com.shield.domain.Appointment} entity.
@@ -13,31 +18,46 @@ public class AppointmentDTO implements Serializable {
     private Long id;
 
     @NotNull
+    @Fixed
     private String licensePlateNumber;
 
     @NotNull
     private String driver;
 
+    @Fixed
     private Long applyId;
 
-    
+    @Fixed
     private Integer number;
 
     @NotNull
     private Boolean valid;
 
     @NotNull
+    @ValidTranfers(
+        tranfers = {
+            @ValidTransfer(before = "", after = {"CREATE", "WAIT", "START", "START_CHECK"}),
+            @ValidTransfer(before = "START", after = {"ENTER", "EXPIRED", "CANCELED"}),
+            @ValidTransfer(before = "LEAVE", after = {"LEAVE"}),
+            @ValidTransfer(before = "START_CHECK", after = {"START"}),
+            @ValidTransfer(before = "ENTER", after = {"LEAVE"}),
+            @ValidTransfer(before = "CREATE", after = {"START", "START_CHECK", "CANCELED"}),
+        }
+    )
     private AppointmentStatus status;
 
+    @Fixed
     private Integer queueNumber;
 
     @NotNull
     private Boolean vip;
 
+    @Fixed
     private ZonedDateTime createTime;
 
     private ZonedDateTime updateTime;
 
+    @Fixed
     private ZonedDateTime startTime;
 
     private ZonedDateTime enterTime;
@@ -46,15 +66,17 @@ public class AppointmentDTO implements Serializable {
 
     private ZonedDateTime expireTime;
 
-
+    @Fixed
     private Long regionId;
 
     private String regionName;
 
+    @Fixed
     private Long userId;
 
     private String userLogin;
 
+    @Fixed
     private String hsCode;
 
     public Long getId() {

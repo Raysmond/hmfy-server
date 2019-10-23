@@ -3,7 +3,6 @@ package com.shield.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.shield.chepaipark.service.CarWhiteListService;
 import com.shield.domain.enumeration.AppointmentStatus;
-import com.shield.repository.RegionRepository;
 import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.dto.RegionDTO;
 import com.shield.service.dto.ShipPlanDTO;
@@ -23,8 +22,6 @@ import static com.shield.service.ParkingHandlerService.*;
 public class CarWhiteListManager {
     private final RegionService regionService;
 
-    private final RegionRepository regionRepository;
-
     private final CarWhiteListService carWhiteListService;
 
     private final HuachanCarWhitelistService huachanCarWhitelistService;
@@ -34,12 +31,11 @@ public class CarWhiteListManager {
 
     @Autowired
     public CarWhiteListManager(
-        RegionService regionService, RegionRepository regionRepository,
+        RegionService regionService,
         CarWhiteListService carWhiteListService,
         HuachanCarWhitelistService huachanCarWhitelistService,
         @Qualifier("redisLongTemplate") RedisTemplate<String, Long> redisLongTemplate) {
         this.regionService = regionService;
-        this.regionRepository = regionRepository;
         this.carWhiteListService = carWhiteListService;
         this.huachanCarWhitelistService = huachanCarWhitelistService;
         this.redisLongTemplate = redisLongTemplate;
