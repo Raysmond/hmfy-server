@@ -1,5 +1,4 @@
 package com.shield.domain;
-
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -81,6 +80,18 @@ public class Region implements Serializable {
 
     @Column(name = "update_time")
     private ZonedDateTime updateTime;
+
+    @NotNull
+    @Min(value = 0)
+    @Max(value = 1440)
+    @Column(name = "load_alert_time", nullable = false)
+    private Integer loadAlertTime;
+
+    @NotNull
+    @Min(value = 0)
+    @Max(value = 1440)
+    @Column(name = "leave_alert_time", nullable = false)
+    private Integer leaveAlertTime;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -288,6 +299,32 @@ public class Region implements Serializable {
     public void setUpdateTime(ZonedDateTime updateTime) {
         this.updateTime = updateTime;
     }
+
+    public Integer getLoadAlertTime() {
+        return loadAlertTime;
+    }
+
+    public Region loadAlertTime(Integer loadAlertTime) {
+        this.loadAlertTime = loadAlertTime;
+        return this;
+    }
+
+    public void setLoadAlertTime(Integer loadAlertTime) {
+        this.loadAlertTime = loadAlertTime;
+    }
+
+    public Integer getLeaveAlertTime() {
+        return leaveAlertTime;
+    }
+
+    public Region leaveAlertTime(Integer leaveAlertTime) {
+        this.leaveAlertTime = leaveAlertTime;
+        return this;
+    }
+
+    public void setLeaveAlertTime(Integer leaveAlertTime) {
+        this.leaveAlertTime = leaveAlertTime;
+    }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override
@@ -325,6 +362,8 @@ public class Region implements Serializable {
             ", queueValidTime=" + getQueueValidTime() +
             ", createTime='" + getCreateTime() + "'" +
             ", updateTime='" + getUpdateTime() + "'" +
+            ", loadAlertTime=" + getLoadAlertTime() +
+            ", leaveAlertTime=" + getLeaveAlertTime() +
             "}";
     }
 }

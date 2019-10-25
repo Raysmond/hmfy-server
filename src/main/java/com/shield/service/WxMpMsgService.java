@@ -221,7 +221,7 @@ public class WxMpMsgService {
     }
 
     @Async
-    public void sendLoadStartAlertMsgToWxUser(ShipPlan delayedPlan) {
+    public void sendLoadStartAlertMsgToWxUser(ShipPlan delayedPlan, Integer loadAlertTime) {
         try {
             AppointmentDTO appointmentDTO = appointmentService.findLastByApplyId(delayedPlan.getApplyId());
             if (appointmentDTO != null && appointmentDTO.getUserId() != null && Boolean.FALSE.equals(appointmentDTO.isVip()) && appointmentDTO.getStatus().equals(AppointmentStatus.ENTER)) {
@@ -229,7 +229,7 @@ public class WxMpMsgService {
 
                 this.sendAlertMsg(appointmentDTO.getUserId(), null,
                     String.format("您好，您的提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
-                    String.format("车牌%s在%s进厂之后三小时还未上磅提货！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                    String.format("车牌%s在%s进厂之后%d小时还未上磅提货！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition(), loadAlertTime / 60),
                     remark);
 
                 if (appointmentDTO.getRegionId() != null) {
@@ -238,7 +238,7 @@ public class WxMpMsgService {
                         if (user.getAuthorities().contains(AuthoritiesConstants.REGION_ADMIN)) {
                             this.sendAlertMsg(user.getId(), null,
                                 String.format("提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
-                                String.format("车牌%s在%s进厂之后三小时还未上磅提货！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                                String.format("车牌%s在%s进厂之后%d小时还未上磅提货！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition(), loadAlertTime / 60),
                                 remark);
                         }
                     }
@@ -247,7 +247,7 @@ public class WxMpMsgService {
                 for (String openid : Lists.newArrayList("oZBny01fYBk-P1zpYZH00vm3uFQI", "oZBny09ivtl8EN8IVcdQKxyfA65c")) {
                     this.sendAlertMsg(null, openid,
                         String.format("提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
-                        String.format("车牌%s在%s进厂之后三小时还未上磅提货！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                        String.format("车牌%s在%s进厂之后%d小时还未上磅提货！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition(), loadAlertTime / 60),
                         remark);
                 }
             }
@@ -257,7 +257,7 @@ public class WxMpMsgService {
     }
 
     @Async
-    public void sendLeaveAlertMsg(ShipPlanDTO delayedPlan) {
+    public void sendLeaveAlertMsg(ShipPlanDTO delayedPlan, Integer leaveAlertTime) {
         try {
             AppointmentDTO appointmentDTO = appointmentService.findLastByApplyId(delayedPlan.getApplyId());
             if (appointmentDTO != null && appointmentDTO.getUserId() != null && Boolean.FALSE.equals(appointmentDTO.isVip()) && appointmentDTO.getStatus().equals(AppointmentStatus.ENTER)) {
@@ -270,7 +270,7 @@ public class WxMpMsgService {
 
                 this.sendAlertMsg(appointmentDTO.getUserId(), null,
                     String.format("您好，您的提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
-                    String.format("车牌%s在%s提货之后半小时未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                    String.format("车牌%s在%s提货之后%d分钟未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition(), leaveAlertTime),
                     remark);
 
                 if (appointmentDTO.getRegionId() != null) {
@@ -279,7 +279,7 @@ public class WxMpMsgService {
                         if (user.getAuthorities().contains(AuthoritiesConstants.REGION_ADMIN)) {
                             this.sendAlertMsg(user.getId(), null,
                                 String.format("提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
-                                String.format("车牌%s在%s提货之后半小时未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                                String.format("车牌%s在%s提货之后%d分钟未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition(), leaveAlertTime),
                                 remark);
                         }
                     }
@@ -288,7 +288,7 @@ public class WxMpMsgService {
                 for (String openid : Lists.newArrayList("oZBny01fYBk-P1zpYZH00vm3uFQI", "oZBny09ivtl8EN8IVcdQKxyfA65c")) {
                     this.sendAlertMsg(null, openid,
                         String.format("提货计划%s有异常情况。", delayedPlan.getApplyId().toString()),
-                        String.format("车牌%s在%s提货之后半小时未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition()),
+                        String.format("车牌%s在%s提货之后%d分钟未及时离厂！", delayedPlan.getTruckNumber(), delayedPlan.getDeliverPosition(), leaveAlertTime),
                         remark);
                 }
             }

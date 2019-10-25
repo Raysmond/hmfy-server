@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.shield.config.Constants.LEAVE_ALERT_TIME_AFTER_LOAD_END;
-import static com.shield.config.Constants.LOADING_START_ALERT_EXPIRED_TIMES_HOURS_AFTER_ENTER;
 
 @Service
 @Slf4j
@@ -30,7 +29,6 @@ public class ShipPlanScheduleService {
     private final RegionRepository regionRepository;
 
     private final ShipPlanRepository shipPlanRepository;
-
 
     private final WxMpMsgService wxMpMsgService;
 
@@ -56,32 +54,34 @@ public class ShipPlanScheduleService {
     public void checkOnShipPlans() {
         List<Region> regions = regionRepository.findAll().stream().filter(Region::isOpen).collect(Collectors.toList());
         for (Region region : regions) {
-            List<ShipPlan> plans = shipPlanRepository
-                .findAllByGateTime(ZonedDateTime.now().minusHours(LOADING_START_ALERT_EXPIRED_TIMES_HOURS_AFTER_ENTER + 1), region.getName()).stream()
-                .filter(it ->
-                    it.getGateTime() != null
-                        && it.getLoadingStartTime() == null
-                        && !it.isTareAlert() && it.getGateTime().plusHours(LOADING_START_ALERT_EXPIRED_TIMES_HOURS_AFTER_ENTER).isBefore(ZonedDateTime.now()))
-                .collect(Collectors.toList());
-            for (ShipPlan plan : plans) {
-                log.info("[AUTO] set ShipPlan [applyId={},truckNumber={}, gateTime: {}], tareAlert=true after {} hours",
-                    plan.getApplyId(), plan.getTruckNumber(), plan.getGateTime(), LOADING_START_ALERT_EXPIRED_TIMES_HOURS_AFTER_ENTER);
-                plan.setTareAlert(true);
-                shipPlanRepository.save(plan);
-                wxMpMsgService.sendLoadStartAlertMsgToWxUser(plan);
+            if (region.getLoadAlertTime() > 0) {
+                List<ShipPlan> plans = shipPlanRepository
+                    .findAllByGateTime(ZonedDateTime.now().minusMinutes(region.getLoadAlertTime() + 60), region.getName()).stream()
+                    .filter(it -> it.getGateTime() != null && it.getLoadingStartTime() == null
+                        && !it.isTareAlert() && it.getGateTime().plusMinutes(region.getLoadAlertTime()).isBefore(ZonedDateTime.now()))
+                    .collect(Collectors.toList());
+                for (ShipPlan plan : plans) {
+                    log.info("[AUTO] set ShipPlan [applyId={},truckNumber={}, gateTime: {}], tareAlert=true after {} hours",
+                        plan.getApplyId(), plan.getTruckNumber(), plan.getGateTime(), region.getLoadAlertTime());
+                    plan.setTareAlert(true);
+                    shipPlanRepository.save(plan);
+                    wxMpMsgService.sendLoadStartAlertMsgToWxUser(plan, region.getLoadAlertTime());
+                }
             }
 
+
+            Long defaultLeaveTime = region.getLeaveAlertTime() > 0 ? region.getLeaveAlertTime() : LEAVE_ALERT_TIME_AFTER_LOAD_END;
             List<ShipPlanDTO> shipPlanDTOs = shipPlanRepository
-                .findAllByLoadingEndTime(ZonedDateTime.now().minusMinutes(LEAVE_ALERT_TIME_AFTER_LOAD_END * 2), region.getName()).stream()
+                .findAllByLoadingEndTime(ZonedDateTime.now().minusMinutes(defaultLeaveTime * 2), region.getName()).stream()
                 .filter(it ->
                     it.getLeaveTime() == null
                         && !it.isLeaveAlert()
-                        && ZonedDateTime.now().minusMinutes(LEAVE_ALERT_TIME_AFTER_LOAD_END).isAfter(it.getLoadingEndTime()))
+                        && ZonedDateTime.now().minusMinutes(defaultLeaveTime).isAfter(it.getLoadingEndTime()))
                 .map(shipPlanMapper::toDto)
                 .collect(Collectors.toList());
             for (ShipPlanDTO plan : shipPlanDTOs) {
                 log.info("[AUTO] set ShipPlan [applyId={},truckNumber={}, loadingEndTime: {}], set leaveTime to now {} after {} minutes",
-                    plan.getApplyId(), plan.getTruckNumber(), plan.getLoadingEndTime(), ZonedDateTime.now(), LEAVE_ALERT_TIME_AFTER_LOAD_END);
+                    plan.getApplyId(), plan.getTruckNumber(), plan.getLoadingEndTime(), ZonedDateTime.now(), defaultLeaveTime);
                 carWhiteListService.updateCarInAndOutTime(region.getId(), plan.getTruckNumber(), RecordType.OUT, null, ZonedDateTime.now());
             }
         }
@@ -89,7 +89,7 @@ public class ShipPlanScheduleService {
 
 
     /**
-     * 每天凌晨1点，将前一天待提货的计划改成过期
+     * 每天凌晨00:01:00，将前一天待提货的计划改成过期
      */
     @Scheduled(cron = "0 1 0 * * *")
     public void autoExpireShipPlan() {

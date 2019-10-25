@@ -6,6 +6,9 @@ import com.shield.domain.Appointment;
 import com.shield.domain.ShipPlan;
 import com.shield.repository.AppointmentRepository;
 import com.shield.repository.ShipPlanRepository;
+import com.shield.service.ShipPlanService;
+import com.shield.service.dto.ShipPlanDTO;
+import com.shield.service.mapper.ShipPlanMapper;
 import com.shield.sqlserver.domain.VehDelivPlan;
 import com.shield.sqlserver.domain.VipGateLog;
 import com.shield.sqlserver.repository.VehDelivPlanRepository;
@@ -13,7 +16,6 @@ import com.shield.sqlserver.repository.VipGateLogRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -50,18 +52,26 @@ public class VehPlanSyncScheduleService {
 
     private final AppointmentRepository appointmentRepository;
 
+    private final ShipPlanMapper shipPlanMapper;
+
+    private final ShipPlanService shipPlanService;
+
     @Autowired
     public VehPlanSyncScheduleService(
         VehDelivPlanRepository vehDelivPlanRepository,
         VipGateLogRepository vipGateLogRepository,
         ShipPlanRepository shipPlanRepository,
         @Qualifier("redisLongTemplate") RedisTemplate<String, Long> redisLongTemplate,
-        AppointmentRepository appointmentRepository) {
+        AppointmentRepository appointmentRepository,
+        ShipPlanMapper shipPlanMapper,
+        ShipPlanService shipPlanService) {
         this.vehDelivPlanRepository = vehDelivPlanRepository;
         this.vipGateLogRepository = vipGateLogRepository;
         this.shipPlanRepository = shipPlanRepository;
         this.redisLongTemplate = redisLongTemplate;
         this.appointmentRepository = appointmentRepository;
+        this.shipPlanMapper = shipPlanMapper;
+        this.shipPlanService = shipPlanService;
     }
 
     /**
@@ -124,10 +134,14 @@ public class VehPlanSyncScheduleService {
 
         updateShipPlans = updateShipPlans.stream().filter(it -> changedApplyIds.contains(it.getApplyId())).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(updateShipPlans)) {
-            for (ShipPlan plan : updateShipPlans) {
-                plan.setSyncTime(ZonedDateTime.now());
+            List<ShipPlanDTO> planDTOS = updateShipPlans.stream().map(shipPlanMapper::toDto).collect(Collectors.toList());
+            for (ShipPlanDTO planDTO : planDTOS) {
+                shipPlanService.save(planDTO);
             }
-            shipPlanRepository.saveAll(updateShipPlans);
+//            for (ShipPlan plan : updateShipPlans) {
+//                plan.setSyncTime(ZonedDateTime.now());
+//            }
+//            shipPlanRepository.saveAll(updateShipPlans);
         }
         log.info("Synchronized {} veh plans", updateShipPlans.size());
     }

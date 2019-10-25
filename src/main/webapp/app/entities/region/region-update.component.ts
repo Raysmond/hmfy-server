@@ -30,6 +30,8 @@ export class RegionUpdateComponent implements OnInit {
     validTime: [null, [Validators.required, Validators.min(0)]],
     queueQuota: [null, [Validators.required, Validators.min(0)]],
     queueValidTime: [null, [Validators.required, Validators.min(0)]],
+    loadAlertTime: [null, [Validators.required, Validators.min(0)]],
+    leaveAlertTime: [null, [Validators.required, Validators.min(0)]],
     createTime: [],
     updateTime: []
   });
@@ -59,6 +61,8 @@ export class RegionUpdateComponent implements OnInit {
       validTime: region.validTime,
       queueQuota: region.queueQuota,
       queueValidTime: region.queueValidTime,
+      loadAlertTime: region.loadAlertTime,
+      leaveAlertTime: region.leaveAlertTime,
       createTime: region.createTime != null ? region.createTime.format(DATE_TIME_FORMAT) : null,
       updateTime: region.updateTime != null ? region.updateTime.format(DATE_TIME_FORMAT) : null
     });
@@ -95,6 +99,8 @@ export class RegionUpdateComponent implements OnInit {
       validTime: this.editForm.get(['validTime']).value,
       queueQuota: this.editForm.get(['queueQuota']).value,
       queueValidTime: this.editForm.get(['queueValidTime']).value,
+      loadAlertTime: this.editForm.get(['loadAlertTime']).value,
+      leaveAlertTime: this.editForm.get(['leaveAlertTime']).value,
       createTime:
         this.editForm.get(['createTime']).value != null ? moment(this.editForm.get(['createTime']).value, DATE_TIME_FORMAT) : undefined,
       updateTime:

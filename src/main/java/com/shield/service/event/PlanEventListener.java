@@ -5,7 +5,6 @@ import com.shield.domain.enumeration.RecordType;
 import com.shield.service.*;
 import com.shield.service.dto.RegionDTO;
 import com.shield.service.dto.ShipPlanDTO;
-import com.shield.service.schedule.VehPlanSyncScheduleService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,7 +16,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static com.shield.config.Constants.LEAVE_ALERT_TIME_AFTER_LOAD_END;
 import static com.shield.config.Constants.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
 
 @Service
@@ -25,8 +23,6 @@ import static com.shield.config.Constants.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
 public class PlanEventListener {
 
     private final AppointmentService appointmentService;
-
-    private final VehPlanSyncScheduleService vehPlanSyncScheduleService;
 
     private final RegionService regionService;
 
@@ -44,7 +40,6 @@ public class PlanEventListener {
     @Autowired
     public PlanEventListener(
         AppointmentService appointmentService,
-        VehPlanSyncScheduleService vehPlanSyncScheduleService,
         RegionService regionService,
         ShipPlanService shipPlanService,
         WxMpMsgService wxMpMsgService,
@@ -52,7 +47,6 @@ public class PlanEventListener {
         @Qualifier("redisLongTemplate") RedisTemplate<String, Long> redisLongTemplate,
         CarWhiteListService carWhiteListService) {
         this.appointmentService = appointmentService;
-        this.vehPlanSyncScheduleService = vehPlanSyncScheduleService;
         this.regionService = regionService;
         this.shipPlanService = shipPlanService;
         this.wxMpMsgService = wxMpMsgService;
@@ -134,17 +128,17 @@ public class PlanEventListener {
     private void afterShipPlanLeave(ShipPlanDTO before, ShipPlanDTO after) {
         log.info("TRIGGER afterShipPlanLeave...");
         RegionDTO region = regionService.findByName(after.getDeliverPosition());
-        if (region != null && region.isOpen()) {
+        if (region != null && region.isOpen() && region.getLeaveAlertTime() > 0) {
             if (region.isAutoAppointment()) {
                 carWhiteListManager.deleteCarWhiteList(after);
             }
 
             if (!after.getLeaveAlert()
                 && after.getLoadingEndTime() != null
-                && after.getLeaveTime().isAfter(after.getLoadingEndTime().plusMinutes(LEAVE_ALERT_TIME_AFTER_LOAD_END))) {
+                && after.getLeaveTime().isAfter(after.getLoadingEndTime().plusMinutes(region.getLeaveAlertTime()))) {
                 after.setLeaveAlert(true);
                 shipPlanService.save(after);
-                wxMpMsgService.sendLeaveAlertMsg(after);
+                wxMpMsgService.sendLeaveAlertMsg(after, region.getLeaveAlertTime());
             }
         }
     }

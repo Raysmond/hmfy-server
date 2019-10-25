@@ -22,6 +22,8 @@ export interface IRegion {
   queueValidTime?: number;
   createTime?: Moment;
   updateTime?: Moment;
+  loadAlertTime?: number;
+  leaveAlertTime?: number;
 }
 
 export class Region implements IRegion {
@@ -41,7 +43,9 @@ export class Region implements IRegion {
     public queueQuota?: number,
     public queueValidTime?: number,
     public createTime?: Moment,
-    public updateTime?: Moment
+    public updateTime?: Moment,
+    public loadAlertTime?: number,
+    public leaveAlertTime?: number
   ) {
     this.open = this.open || false;
     this.autoAppointment = this.autoAppointment || false;

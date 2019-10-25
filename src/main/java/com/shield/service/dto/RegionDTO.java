@@ -3,6 +3,7 @@ package com.shield.service.dto;
 import com.shield.domain.enumeration.ParkingConnectMethod;
 
 import java.time.ZonedDateTime;
+import javax.persistence.Column;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Objects;
@@ -49,6 +50,18 @@ public class RegionDTO implements Serializable {
     private Integer waitTime = 0;
 
     private ParkingConnectMethod parkingConnectMethod;
+
+    @NotNull
+    @Min(value = 0)
+    @Max(value = 1440)
+    @Column(name = "load_alert_time", nullable = false)
+    private Integer loadAlertTime;
+
+    @NotNull
+    @Min(value = 0)
+    @Max(value = 1440)
+    @Column(name = "leave_alert_time", nullable = false)
+    private Integer leaveAlertTime;
 
     @NotNull
     @Min(value = 0)
@@ -272,6 +285,22 @@ public class RegionDTO implements Serializable {
 
     public void setWaitTime(Integer waitTime) {
         this.waitTime = waitTime;
+    }
+
+    public Integer getLoadAlertTime() {
+        return loadAlertTime;
+    }
+
+    public void setLoadAlertTime(Integer loadAlertTime) {
+        this.loadAlertTime = loadAlertTime;
+    }
+
+    public Integer getLeaveAlertTime() {
+        return leaveAlertTime;
+    }
+
+    public void setLeaveAlertTime(Integer leaveAlertTime) {
+        this.leaveAlertTime = leaveAlertTime;
     }
 
     @Override

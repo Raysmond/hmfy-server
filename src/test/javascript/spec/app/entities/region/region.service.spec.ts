@@ -43,7 +43,9 @@ describe('Service Tests', () => {
         0,
         0,
         currentDate,
-        currentDate
+        currentDate,
+        0,
+        0
       );
     });
 
@@ -108,7 +110,9 @@ describe('Service Tests', () => {
             queueQuota: 1,
             queueValidTime: 1,
             createTime: currentDate.format(DATE_TIME_FORMAT),
-            updateTime: currentDate.format(DATE_TIME_FORMAT)
+            updateTime: currentDate.format(DATE_TIME_FORMAT),
+            loadAlertTime: 1,
+            leaveAlertTime: 1
           },
           elemDefault
         );
@@ -146,7 +150,9 @@ describe('Service Tests', () => {
             queueQuota: 1,
             queueValidTime: 1,
             createTime: currentDate.format(DATE_TIME_FORMAT),
-            updateTime: currentDate.format(DATE_TIME_FORMAT)
+            updateTime: currentDate.format(DATE_TIME_FORMAT),
+            loadAlertTime: 1,
+            leaveAlertTime: 1
           },
           elemDefault
         );

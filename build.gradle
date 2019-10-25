@@ -67,7 +67,7 @@ eclipse {
 defaultTasks "bootRun"
 
 group = "com.shield"
-version = "1.5.0-SNAPSHOT"
+version = "1.5.1-SNAPSHOT"
 
 description = ""
 
@@ -137,7 +137,7 @@ liquibase {
             driver "com.mysql.cj.jdbc.Driver"
             url "jdbc:mysql://localhost:3306/shield"
             username "root"
-            password ""
+            password "6VDVpiRmeEcFx7Cazpf"
             changeLogFile "src/main/resources/config/liquibase/master.xml"
             defaultSchemaName "shield"
             logLevel "debug"
@@ -147,7 +147,7 @@ liquibase {
             driver "com.mysql.cj.jdbc.Driver"
             url "jdbc:mysql://localhost:3306/shield"
             username "root"
-            password ""
+            password "6VDVpiRmeEcFx7Cazpf"
             changeLogFile project.ext.diffChangelogFile
             referenceUrl "hibernate:spring:com.shield.domain?dialect=org.hibernate.dialect.MySQL5InnoDBDialect&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy"
             defaultSchemaName "shield"

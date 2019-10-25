@@ -29,6 +29,8 @@
       "open": "开启预约",
       "createTime": "新建时间",
       "updateTime": "更新时间",
+      "loadAlertTime": "上磅告警时间(m)",
+      "leaveAlertTime": "离厂告警时间(m)",
       "validTime": "取号有效时间(h)"
     }
   }

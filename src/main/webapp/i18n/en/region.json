@@ -30,7 +30,9 @@
       "queueQuota": "Queue Quota",
       "queueValidTime": "Queue Valid Time",
       "createTime": "Create Time",
-      "updateTime": "Update Time"
+      "updateTime": "Update Time",
+      "loadAlertTime": "Load Alert Time",
+      "leaveAlertTime": "Leave Alert Time"
     }
   }
 }

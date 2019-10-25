@@ -1,107 +1,129 @@
 {
-  "fluentMethods": true,
-  "clientRootFolder": "",
-  "relationships": [],
-  "fields": [
-    {
-      "fieldName": "name",
-      "fieldType": "String",
-      "fieldValidateRules": [
-        "required"
-      ]
-    },
-    {
-      "fieldName": "quota",
-      "fieldType": "Integer",
-      "fieldValidateRules": [
-        "required",
-        "min"
-      ],
-      "fieldValidateRulesMin": "0"
-    },
-    {
-      "fieldName": "vipQuota",
-      "fieldType": "Integer",
-      "fieldValidateRules": [
-        "required",
-        "min"
-      ],
-      "fieldValidateRulesMin": "0"
-    },
-    {
-      "fieldName": "startTime",
-      "fieldType": "String"
-    },
-    {
-      "fieldName": "endTime",
-      "fieldType": "String"
-    },
-    {
-      "fieldName": "days",
-      "fieldType": "String"
-    },
-    {
-      "fieldName": "open",
-      "fieldType": "Boolean"
-    },
-    {
-      "fieldName": "autoAppointment",
-      "fieldType": "Boolean"
-    },
-    {
-      "fieldName": "parkingConnectMethod",
-      "fieldValues": "TCP,DATABASE",
-      "fieldType": "ParkingConnectMethod",
-      "fieldValidateRules": [
-        "required"
-      ]
-    },
-    {
-      "fieldName": "parkId",
-      "fieldType": "String"
-    },
-    {
-      "fieldName": "validTime",
-      "fieldType": "Integer",
-      "fieldValidateRules": [
-        "required",
-        "min"
-      ],
-      "fieldValidateRulesMin": "0"
-    },
-    {
-      "fieldName": "queueQuota",
-      "fieldType": "Integer",
-      "fieldValidateRules": [
-        "required",
-        "min"
-      ],
-      "fieldValidateRulesMin": "0"
-    },
-    {
-      "fieldName": "queueValidTime",
-      "fieldType": "Integer",
-      "fieldValidateRules": [
-        "required",
-        "min"
-      ],
-      "fieldValidateRulesMin": "0"
-    },
-    {
-      "fieldName": "createTime",
-      "fieldType": "ZonedDateTime"
-    },
-    {
-      "fieldName": "updateTime",
-      "fieldType": "ZonedDateTime"
-    }
-  ],
-  "changelogDate": "20190524165041",
-  "dto": "mapstruct",
-  "searchEngine": false,
-  "service": "serviceImpl",
-  "entityTableName": "region",
-  "databaseType": "sql",
-  "jpaMetamodelFiltering": false,
-  "pagination": "pagination"
+    "fluentMethods": true,
+    "clientRootFolder": "",
+    "relationships": [],
+    "fields": [
+        {
+            "fieldName": "name",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "quota",
+            "fieldType": "Integer",
+            "fieldValidateRules": [
+                "required",
+                "min"
+            ],
+            "fieldValidateRulesMin": "0"
+        },
+        {
+            "fieldName": "vipQuota",
+            "fieldType": "Integer",
+            "fieldValidateRules": [
+                "required",
+                "min"
+            ],
+            "fieldValidateRulesMin": "0"
+        },
+        {
+            "fieldName": "startTime",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "endTime",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "days",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "open",
+            "fieldType": "Boolean"
+        },
+        {
+            "fieldName": "autoAppointment",
+            "fieldType": "Boolean"
+        },
+        {
+            "fieldName": "parkingConnectMethod",
+            "fieldValues": "TCP,DATABASE",
+            "fieldType": "ParkingConnectMethod",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "parkId",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "validTime",
+            "fieldType": "Integer",
+            "fieldValidateRules": [
+                "required",
+                "min"
+            ],
+            "fieldValidateRulesMin": "0"
+        },
+        {
+            "fieldName": "queueQuota",
+            "fieldType": "Integer",
+            "fieldValidateRules": [
+                "required",
+                "min"
+            ],
+            "fieldValidateRulesMin": "0"
+        },
+        {
+            "fieldName": "queueValidTime",
+            "fieldType": "Integer",
+            "fieldValidateRules": [
+                "required",
+                "min"
+            ],
+            "fieldValidateRulesMin": "0"
+        },
+        {
+            "fieldName": "createTime",
+            "fieldType": "ZonedDateTime"
+        },
+        {
+            "fieldName": "updateTime",
+            "fieldType": "ZonedDateTime"
+        },
+        {
+            "fieldName": "loadAlertTime",
+            "fieldType": "Integer",
+            "fieldValidateRules": [
+                "required",
+                "min",
+                "max"
+            ],
+            "fieldValidateRulesMin": 0,
+            "fieldValidateRulesMax": "1440"
+        },
+        {
+            "fieldName": "leaveAlertTime",
+            "fieldType": "Integer",
+            "fieldValidateRules": [
+                "required",
+                "min",
+                "max"
+            ],
+            "fieldValidateRulesMin": 0,
+            "fieldValidateRulesMax": "1440"
+        }
+    ],
+    "changelogDate": "20190524165041",
+    "dto": "mapstruct",
+    "searchEngine": false,
+    "service": "serviceImpl",
+    "entityTableName": "region",
+    "databaseType": "sql",
+    "jpaMetamodelFiltering": false,
+    "pagination": "pagination"
 }

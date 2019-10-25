@@ -87,6 +87,12 @@ public class RegionResourceIT {
     private static final ZonedDateTime DEFAULT_UPDATE_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
     private static final ZonedDateTime UPDATED_UPDATE_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
 
+    private static final Integer DEFAULT_LOAD_ALERT_TIME = 0;
+    private static final Integer UPDATED_LOAD_ALERT_TIME = 1;
+
+    private static final Integer DEFAULT_LEAVE_ALERT_TIME = 0;
+    private static final Integer UPDATED_LEAVE_ALERT_TIME = 1;
+
     @Autowired
     private RegionRepository regionRepository;
 
@@ -149,7 +155,9 @@ public class RegionResourceIT {
             .queueQuota(DEFAULT_QUEUE_QUOTA)
             .queueValidTime(DEFAULT_QUEUE_VALID_TIME)
             .createTime(DEFAULT_CREATE_TIME)
-            .updateTime(DEFAULT_UPDATE_TIME);
+            .updateTime(DEFAULT_UPDATE_TIME)
+            .loadAlertTime(DEFAULT_LOAD_ALERT_TIME)
+            .leaveAlertTime(DEFAULT_LEAVE_ALERT_TIME);
         return region;
     }
     /**
@@ -174,7 +182,9 @@ public class RegionResourceIT {
             .queueQuota(UPDATED_QUEUE_QUOTA)
             .queueValidTime(UPDATED_QUEUE_VALID_TIME)
             .createTime(UPDATED_CREATE_TIME)
-            .updateTime(UPDATED_UPDATE_TIME);
+            .updateTime(UPDATED_UPDATE_TIME)
+            .loadAlertTime(UPDATED_LOAD_ALERT_TIME)
+            .leaveAlertTime(UPDATED_LEAVE_ALERT_TIME);
         return region;
     }
 
@@ -214,6 +224,8 @@ public class RegionResourceIT {
         assertThat(testRegion.getQueueValidTime()).isEqualTo(DEFAULT_QUEUE_VALID_TIME);
         assertThat(testRegion.getCreateTime()).isEqualTo(DEFAULT_CREATE_TIME);
         assertThat(testRegion.getUpdateTime()).isEqualTo(DEFAULT_UPDATE_TIME);
+        assertThat(testRegion.getLoadAlertTime()).isEqualTo(DEFAULT_LOAD_ALERT_TIME);
+        assertThat(testRegion.getLeaveAlertTime()).isEqualTo(DEFAULT_LEAVE_ALERT_TIME);
     }
 
     @Test
@@ -372,6 +384,44 @@ public class RegionResourceIT {
 
     @Test
     @Transactional
+    public void checkLoadAlertTimeIsRequired() throws Exception {
+        int databaseSizeBeforeTest = regionRepository.findAll().size();
+        // set the field null
+        region.setLoadAlertTime(null);
+
+        // Create the Region, which fails.
+        RegionDTO regionDTO = regionMapper.toDto(region);
+
+        restRegionMockMvc.perform(post("/api/regions")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(regionDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<Region> regionList = regionRepository.findAll();
+        assertThat(regionList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
+    public void checkLeaveAlertTimeIsRequired() throws Exception {
+        int databaseSizeBeforeTest = regionRepository.findAll().size();
+        // set the field null
+        region.setLeaveAlertTime(null);
+
+        // Create the Region, which fails.
+        RegionDTO regionDTO = regionMapper.toDto(region);
+
+        restRegionMockMvc.perform(post("/api/regions")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(regionDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<Region> regionList = regionRepository.findAll();
+        assertThat(regionList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
     public void getAllRegions() throws Exception {
         // Initialize the database
         regionRepository.saveAndFlush(region);
@@ -395,7 +445,9 @@ public class RegionResourceIT {
             .andExpect(jsonPath("$.[*].queueQuota").value(hasItem(DEFAULT_QUEUE_QUOTA)))
             .andExpect(jsonPath("$.[*].queueValidTime").value(hasItem(DEFAULT_QUEUE_VALID_TIME)))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
-            .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))));
+            .andExpect(jsonPath("$.[*].updateTime").value(hasItem(sameInstant(DEFAULT_UPDATE_TIME))))
+            .andExpect(jsonPath("$.[*].loadAlertTime").value(hasItem(DEFAULT_LOAD_ALERT_TIME)))
+            .andExpect(jsonPath("$.[*].leaveAlertTime").value(hasItem(DEFAULT_LEAVE_ALERT_TIME)));
     }
     
     @Test
@@ -423,7 +475,9 @@ public class RegionResourceIT {
             .andExpect(jsonPath("$.queueQuota").value(DEFAULT_QUEUE_QUOTA))
             .andExpect(jsonPath("$.queueValidTime").value(DEFAULT_QUEUE_VALID_TIME))
             .andExpect(jsonPath("$.createTime").value(sameInstant(DEFAULT_CREATE_TIME)))
-            .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)));
+            .andExpect(jsonPath("$.updateTime").value(sameInstant(DEFAULT_UPDATE_TIME)))
+            .andExpect(jsonPath("$.loadAlertTime").value(DEFAULT_LOAD_ALERT_TIME))
+            .andExpect(jsonPath("$.leaveAlertTime").value(DEFAULT_LEAVE_ALERT_TIME));
     }
 
     @Test
@@ -461,7 +515,9 @@ public class RegionResourceIT {
             .queueQuota(UPDATED_QUEUE_QUOTA)
             .queueValidTime(UPDATED_QUEUE_VALID_TIME)
             .createTime(UPDATED_CREATE_TIME)
-            .updateTime(UPDATED_UPDATE_TIME);
+            .updateTime(UPDATED_UPDATE_TIME)
+            .loadAlertTime(UPDATED_LOAD_ALERT_TIME)
+            .leaveAlertTime(UPDATED_LEAVE_ALERT_TIME);
         RegionDTO regionDTO = regionMapper.toDto(updatedRegion);
 
         restRegionMockMvc.perform(put("/api/regions")
@@ -488,6 +544,8 @@ public class RegionResourceIT {
         assertThat(testRegion.getQueueValidTime()).isEqualTo(UPDATED_QUEUE_VALID_TIME);
         assertThat(testRegion.getCreateTime()).isEqualTo(UPDATED_CREATE_TIME);
         assertThat(testRegion.getUpdateTime()).isEqualTo(UPDATED_UPDATE_TIME);
+        assertThat(testRegion.getLoadAlertTime()).isEqualTo(UPDATED_LOAD_ALERT_TIME);
+        assertThat(testRegion.getLeaveAlertTime()).isEqualTo(UPDATED_LEAVE_ALERT_TIME);
     }
 
     @Test
