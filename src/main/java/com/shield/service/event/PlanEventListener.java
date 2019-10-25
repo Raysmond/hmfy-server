@@ -1,5 +1,7 @@
 package com.shield.service.event;
 
+import com.shield.chepaipark.service.CarWhiteListService;
+import com.shield.domain.enumeration.RecordType;
 import com.shield.service.*;
 import com.shield.service.dto.RegionDTO;
 import com.shield.service.dto.ShipPlanDTO;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static com.shield.config.Constants.LEAVE_ALERT_TIME_AFTER_LOAD_END;
 import static com.shield.config.Constants.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
@@ -35,6 +38,8 @@ public class PlanEventListener {
 
     private final RedisTemplate<String, Long> redisLongTemplate;
 
+    private final CarWhiteListService carWhiteListService;
+
 
     @Autowired
     public PlanEventListener(
@@ -44,7 +49,8 @@ public class PlanEventListener {
         ShipPlanService shipPlanService,
         WxMpMsgService wxMpMsgService,
         CarWhiteListManager carWhiteListManager,
-        @Qualifier("redisLongTemplate") RedisTemplate<String, Long> redisLongTemplate) {
+        @Qualifier("redisLongTemplate") RedisTemplate<String, Long> redisLongTemplate,
+        CarWhiteListService carWhiteListService) {
         this.appointmentService = appointmentService;
         this.vehPlanSyncScheduleService = vehPlanSyncScheduleService;
         this.regionService = regionService;
@@ -52,6 +58,7 @@ public class PlanEventListener {
         this.wxMpMsgService = wxMpMsgService;
         this.carWhiteListManager = carWhiteListManager;
         this.redisLongTemplate = redisLongTemplate;
+        this.carWhiteListService = carWhiteListService;
     }
 
     @Async
@@ -74,10 +81,30 @@ public class PlanEventListener {
             if (old.getLeaveTime() == null && updated.getLeaveTime() != null) {
                 afterShipPlanLeave(old, updated);
             }
+
+            if (old.getLoadingStartTime() == null && updated.getLoadingStartTime() != null) {
+                afterLoadingStart(old, updated);
+            }
         }
 
         if (old == null) {
             afterShipPlanCreated(updated);
+        }
+    }
+
+    private void afterLoadingStart(ShipPlanDTO old, ShipPlanDTO updated) {
+        log.info("TRIGGER afterLoadingStart...");
+        RegionDTO region = regionService.findByName(updated.getDeliverPosition());
+        if (region != null && region.isOpen()) {
+            if (updated.getGateTime() == null) {
+                log.info("[AUTO] ShipPlan[applyId={}, truckNumber={}] loadingStartTime {} is set, but gateTime is null, auto set gateTime {} 30min before loadingStartTime",
+                    updated.getApplyId(),
+                    updated.getTruckNumber(),
+                    updated.getLoadingStartTime().format(DateTimeFormatter.ofPattern("yyyyMMddHHMMSS")),
+                    updated.getLoadingStartTime().minusMinutes(30).format(DateTimeFormatter.ofPattern("yyyyMMddHHMMSS"))
+                );
+                carWhiteListService.updateCarInAndOutTime(region.getId(), updated.getTruckNumber(), RecordType.IN, updated.getLoadingStartTime().minusMinutes(30), null);
+            }
         }
     }
 

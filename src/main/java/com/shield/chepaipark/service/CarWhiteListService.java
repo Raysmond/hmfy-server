@@ -15,6 +15,7 @@ import com.shield.domain.Appointment;
 import com.shield.domain.Region;
 import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.domain.enumeration.ParkingConnectMethod;
+import com.shield.domain.enumeration.RecordType;
 import com.shield.repository.AppointmentRepository;
 import com.shield.repository.RegionRepository;
 import com.shield.repository.ShipPlanRepository;
@@ -273,7 +274,7 @@ public class CarWhiteListService {
                     this.updateCarInAndOutTime(
                         region.getId(),
                         gate.getCardNo(),
-                        gate.getGateOutTime() != null ? "uploadcarout" : "uploadcarin",
+                        gate.getGateOutTime() != null ? RecordType.OUT : RecordType.IN,
                         gate.getGateInTime(),
                         gate.getGateOutTime());
                 }
@@ -290,10 +291,10 @@ public class CarWhiteListService {
         }
     }
 
-    public void updateCarInAndOutTime(Long regionId, String truckNumber, String service, ZonedDateTime inTime, ZonedDateTime outTime) {
+    public void updateCarInAndOutTime(Long regionId, String truckNumber, RecordType recordType, ZonedDateTime inTime, ZonedDateTime outTime) {
         Region region = regionRepository.findById(regionId).get();
         ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
-        if (service.equals("uploadcarin")) {
+        if (recordType.equals(RecordType.IN)) {
             // 车辆入场
             List<ShipPlanDTO> shipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today)
                 .stream()
@@ -318,7 +319,7 @@ public class CarWhiteListService {
             } else {
                 log.error("Cannot find ShipPlan for truckNumber {}, uploadcarin gateTime: {}", truckNumber, inTime);
             }
-        } else if (service.equals("uploadcarout")) {
+        } else if (recordType.equals(RecordType.OUT)) {
             // 车辆出厂
             if (outTime.getYear() < ZonedDateTime.now().getYear()) {
                 log.info("uploadcarout leave time error, {}", outTime);
@@ -353,13 +354,13 @@ public class CarWhiteListService {
         if (!CollectionUtils.isEmpty(appointments)) {
             AppointmentDTO appointment = appointments.get(0);
             boolean save = false;
-            if (service.equals("uploadcarin")) {
+            if (recordType.equals(RecordType.IN)) {
                 if (appointment.getStatus().equals(AppointmentStatus.START) && appointment.getStartTime() != null && appointment.getStartTime().isBefore(inTime)) {
                     appointment.setStatus(AppointmentStatus.ENTER);
                     appointment.setEnterTime(inTime);
                     save = true;
                 }
-            } else if (service.equals("uploadcarout")) {
+            } else if (recordType.equals(RecordType.OUT)) {
                 if (appointment.getStatus().equals(AppointmentStatus.ENTER) && appointment.getEnterTime() != null && appointment.getEnterTime().isBefore(outTime)) {
                     appointment.setLeaveTime(outTime);
                     appointment.setStatus(AppointmentStatus.LEAVE);

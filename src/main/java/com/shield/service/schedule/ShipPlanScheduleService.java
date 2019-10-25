@@ -3,6 +3,7 @@ package com.shield.service.schedule;
 import com.shield.chepaipark.service.CarWhiteListService;
 import com.shield.domain.Region;
 import com.shield.domain.ShipPlan;
+import com.shield.domain.enumeration.RecordType;
 import com.shield.repository.RegionRepository;
 import com.shield.repository.ShipPlanRepository;
 import com.shield.service.WxMpMsgService;
@@ -81,7 +82,7 @@ public class ShipPlanScheduleService {
             for (ShipPlanDTO plan : shipPlanDTOs) {
                 log.info("[AUTO] set ShipPlan [applyId={},truckNumber={}, loadingEndTime: {}], set leaveTime to now {} after {} minutes",
                     plan.getApplyId(), plan.getTruckNumber(), plan.getLoadingEndTime(), ZonedDateTime.now(), LEAVE_ALERT_TIME_AFTER_LOAD_END);
-                carWhiteListService.updateCarInAndOutTime(region.getId(), plan.getTruckNumber(), "uploadcarout", null, ZonedDateTime.now());
+                carWhiteListService.updateCarInAndOutTime(region.getId(), plan.getTruckNumber(), RecordType.OUT, null, ZonedDateTime.now());
             }
         }
     }

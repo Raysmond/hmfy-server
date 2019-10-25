@@ -10,6 +10,7 @@ import com.shield.chepaipark.service.CarWhiteListService;
 import com.shield.domain.*;
 import com.shield.domain.enumeration.ParkMsgType;
 import com.shield.domain.enumeration.ParkingConnectMethod;
+import com.shield.domain.enumeration.RecordType;
 import com.shield.repository.ParkMsgRepository;
 import com.shield.service.dto.*;
 import com.shield.service.tcp.*;
@@ -154,11 +155,11 @@ public class ParkingHandlerService {
                 return new ServiceResponse(heartBeatMsg.getService(), 0, "在线");
             case "uploadcarin":
                 UploadCarInMsg inMsg = objectMapper.readValue(msg, UploadCarInMsg.class);
-                updateCarInOutTime(inMsg.getParkid(), inMsg.getCar_number(), inMsg.getService(), inMsg.getIn_time(), null);
+                updateCarInOutTime(inMsg.getParkid(), inMsg.getCar_number(), RecordType.IN, inMsg.getIn_time(), null);
                 return new UploadCarInOutResponse(inMsg.getService(), 0, "上传成功", inMsg.getOrder_id());
             case "uploadcarout":
                 UploadCarOutMsg outMsg = objectMapper.readValue(msg, UploadCarOutMsg.class);
-                updateCarInOutTime(outMsg.getParkid(), outMsg.getCar_number(), outMsg.getService(), outMsg.getIn_time(), outMsg.getOut_time());
+                updateCarInOutTime(outMsg.getParkid(), outMsg.getCar_number(), RecordType.OUT, outMsg.getIn_time(), outMsg.getOut_time());
                 return new UploadCarInOutResponse(outMsg.getService(), 0, "上传成功", outMsg.getOrder_id());
             case "whitelist_sync":
                 // 固定车注册与修改 返回
@@ -477,7 +478,7 @@ public class ParkingHandlerService {
         }
     }
 
-    private void updateCarInOutTime(String parkId, String truckNumber, String service, String carInTime, String carOutTime) {
+    private void updateCarInOutTime(String parkId, String truckNumber, RecordType recordType, String carInTime, String carOutTime) {
         try {
             RegionDTO regionDTO = regionService.findByParkId(parkId);
             if (regionDTO == null) {
@@ -491,7 +492,7 @@ public class ParkingHandlerService {
             if (StringUtils.isNotBlank(carOutTime)) {
                 outTime = ZonedDateTime.parse(carOutTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault()));
             }
-            carWhiteListService.updateCarInAndOutTime(regionDTO.getId(), truckNumber, service, inTime, outTime);
+            carWhiteListService.updateCarInAndOutTime(regionDTO.getId(), truckNumber, recordType, inTime, outTime);
         } catch (Exception e) {
             log.error("failed to execute carWhiteListService.updateCarInAndOutTime(), " +
                 "parkId: {}, truckNumber: {}, carInTime: {}, carOutTime: {}", parkId, truckNumber, carInTime, carOutTime);
