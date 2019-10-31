@@ -55,6 +55,10 @@
         {
             "fieldName": "dataMd5",
             "fieldType": "String"
+        },
+        {
+            "fieldName": "modifyTime",
+            "fieldType": "ZonedDateTime"
         }
     ],
     "changelogDate": "20191007134631",

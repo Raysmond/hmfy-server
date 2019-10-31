@@ -52,7 +52,8 @@ export class GateRecordService {
   protected convertDateFromClient(gateRecord: IGateRecord): IGateRecord {
     const copy: IGateRecord = Object.assign({}, gateRecord, {
       recordTime: gateRecord.recordTime != null && gateRecord.recordTime.isValid() ? gateRecord.recordTime.toJSON() : null,
-      createTime: gateRecord.createTime != null && gateRecord.createTime.isValid() ? gateRecord.createTime.toJSON() : null
+      createTime: gateRecord.createTime != null && gateRecord.createTime.isValid() ? gateRecord.createTime.toJSON() : null,
+      modifyTime: gateRecord.modifyTime != null && gateRecord.modifyTime.isValid() ? gateRecord.modifyTime.toJSON() : null
     });
     return copy;
   }
@@ -61,6 +62,7 @@ export class GateRecordService {
     if (res.body) {
       res.body.recordTime = res.body.recordTime != null ? moment(res.body.recordTime) : null;
       res.body.createTime = res.body.createTime != null ? moment(res.body.createTime) : null;
+      res.body.modifyTime = res.body.modifyTime != null ? moment(res.body.modifyTime) : null;
     }
     return res;
   }
@@ -70,6 +72,7 @@ export class GateRecordService {
       res.body.forEach((gateRecord: IGateRecord) => {
         gateRecord.recordTime = gateRecord.recordTime != null ? moment(gateRecord.recordTime) : null;
         gateRecord.createTime = gateRecord.createTime != null ? moment(gateRecord.createTime) : null;
+        gateRecord.modifyTime = gateRecord.modifyTime != null ? moment(gateRecord.modifyTime) : null;
       });
     }
     return res;

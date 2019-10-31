@@ -36,6 +36,8 @@ public class GateRecordDTO implements Serializable {
 
     private String dataMd5;
 
+    private ZonedDateTime modifyTime;
+
 
     public Long getId() {
         return id;
@@ -109,6 +111,14 @@ public class GateRecordDTO implements Serializable {
         this.dataMd5 = dataMd5;
     }
 
+    public ZonedDateTime getModifyTime() {
+        return modifyTime;
+    }
+
+    public void setModifyTime(ZonedDateTime modifyTime) {
+        this.modifyTime = modifyTime;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -142,6 +152,7 @@ public class GateRecordDTO implements Serializable {
             ", createTime='" + getCreateTime() + "'" +
             ", regionId=" + getRegionId() +
             ", dataMd5='" + getDataMd5() + "'" +
+            ", modifyTime='" + getModifyTime() + "'" +
             "}";
     }
 }

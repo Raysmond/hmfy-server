@@ -296,9 +296,9 @@ public class CarWhiteListService {
         ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
         if (recordType.equals(RecordType.IN)) {
             // 车辆入场
-            List<ShipPlanDTO> shipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today)
-                .stream()
-                .map(it -> shipPlanMapper.toDto(it))
+            List<ShipPlanDTO> allShipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today)
+                .stream().map(it -> shipPlanMapper.toDto(it)).collect(Collectors.toList());
+            List<ShipPlanDTO> shipPlans = allShipPlans.stream()
                 .filter(it -> it.getAuditStatus().equals(Integer.valueOf(1)))
                 .sorted(Comparator.comparing(ShipPlanDTO::getApplyId)).collect(Collectors.toList());
             if (shipPlans.size() > 1) {
@@ -306,6 +306,9 @@ public class CarWhiteListService {
                 // 不排除同时建了多个计划的情况，有多个有效计划时，只取最早创建的一条
                 log.error("Multiple plans found for truckNumber {}, region: {}, deliverDate: {}, planIds: [{}]",
                     truckNumber, region.getName(), today, Joiner.on(",").join(shipPlans.stream().map(ShipPlanDTO::getId).collect(Collectors.toList())));
+            } else {
+                shipPlans = allShipPlans.stream().filter(it -> it.getAuditStatus().equals(3))
+                    .sorted(Comparator.comparing(ShipPlanDTO::getApplyId).reversed()).collect(Collectors.toList());
             }
             if (!CollectionUtils.isEmpty(shipPlans)) {
                 ShipPlanDTO plan = shipPlans.get(0);

@@ -23,18 +23,26 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -92,6 +100,11 @@ public class HuachanCarWhitelistService {
 
     @Autowired
     private CarWhiteListService carWhiteListService;
+
+    @Autowired
+    @Qualifier("redisLongTemplate")
+    private RedisTemplate<String, Long> redisLongTemplate;
+
 
     public HuachanCarWhitelistService() {
         this.restTemplate = new RestTemplate();
@@ -289,7 +302,7 @@ public class HuachanCarWhitelistService {
 
                             // 发送预约成功消息
                             wxMpMsgService.sendAppointmentSuccessMsg(appointmentMapper.toDto(appointment));
-                        } else if (check.bill_status == 3 || check.bill_status == 4 || check.bill_status == 5) {
+                        } else if (check.bill_status == -1 || check.bill_status == 3 || check.bill_status == 4 || check.bill_status == 5) {
                             appointment.setValid(Boolean.FALSE);
                             appointment.setUpdateTime(ZonedDateTime.now());
                             changedAppointments.add(appointment);
@@ -514,7 +527,7 @@ public class HuachanCarWhitelistService {
                 for (int i = 0; i < records.size() - 1; i++) {
                     if (records.get(i).getRecordType().equals(RecordType.IN)
                         && records.get(i + 1).getRecordType().equals(RecordType.OUT)
-                        && records.get(i).getRecordTime().isBefore(shipPlan.getLoadingStartTime())
+//                        && records.get(i).getRecordTime().isBefore(shipPlan.getLoadingStartTime())
                         && records.get(i + 1).getRecordTime().isAfter(shipPlan.getLoadingEndTime())) {
                         GateRecord inRecord = records.get(i);
                         GateRecord outRecord = records.get(i + 1);
@@ -531,9 +544,6 @@ public class HuachanCarWhitelistService {
         }
     }
 
-
-    private static Map<String, Integer> lastSkip = Maps.newHashMap();
-
     /**
      * 获取出入场数据接口
      */
@@ -545,33 +555,23 @@ public class HuachanCarWhitelistService {
         }
         String today = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String lastDay = ZonedDateTime.now().minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        Integer skip = lastSkip.getOrDefault(lastDay, 0);
-        if (skip > 1000) {
-            skip -= 1000;
-        }
+        Integer skip = 0;
+        Integer total = 10000;
+        Page<GateRecord> maxRecords = gateRecordRepository.findByModifyTime(ZonedDateTime.now().minusDays(1), PageRequest.of(0, 1, Sort.Direction.DESC, "modifyTime"));
+        ZonedDateTime maxRecTime = maxRecords.getContent().size() > 0 ? maxRecords.getContent().get(0).getModifyTime() : null;
 
         while (true) {
             String param =
-                "?$top=200" +
+                "?$top=500" +
                     "&$count=true" +
                     "&$skip=" + skip.toString() +
-                    "&$orderby=MODIFY_TIME+asc" +
+                    "&$orderby=MODIFY_TIME+desc" +
                     "&$filter=IS_DELETE+eq+false+" +
                     "and+RECORD_YMD+ge+" + lastDay + "+" +
                     "and+RECORD_YMD+le+" + today +
                     "&_=" + ZonedDateTime.now().toEpochSecond();
 
-//        String param =
-//            "?&$count=true" +
-//                "&$skip=0" +
-//                "&$orderby=MODIFY_TIME+asc" +
-//                "&$filter=IS_DELETE+eq+false+" +
-//                "and+RECORD_YMD+ge+" + yestoday + "+" +
-//                "and+RECORD_YMD+le+" + today +
-//                "&_=" + ZonedDateTime.now().toEpochSecond();
-
             String queryApi = api + param;
-
             String cookie = loginAndGetSessionId();
             if (cookie == null) {
                 return;
@@ -592,13 +592,22 @@ public class HuachanCarWhitelistService {
 
             log.info("Start to query car IN/OUT records: {}", queryApi);
             HttpEntity<String> request = new HttpEntity<>(headers);
-            ResponseEntity<String> result = restTemplate.exchange(queryApi, HttpMethod.GET, request, String.class);
+            ResponseEntity<String> result;
+            try {
+                result = restTemplate.exchange(queryApi, HttpMethod.GET, request, String.class);
+            } catch (HttpClientErrorException e) {
+                loginSessionId = null;
+                return;
+//                if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+//
+//                }
+            }
             log.info("response, status code: {}", result.getStatusCode());
-
             JsonObject json = new JsonParser().parse(result.getBody()).getAsJsonObject();
             List<GateRecord> records = Lists.newArrayList();
             JsonArray arr = json.getAsJsonArray("value");
             List<String> rids = Lists.newArrayList();
+            List<ZonedDateTime> modifyTimes = Lists.newArrayList();
             for (JsonElement ele : arr) {
                 JsonObject log = ele.getAsJsonObject();
                 rids.add(log.get("ID").getAsString());
@@ -617,34 +626,50 @@ public class HuachanCarWhitelistService {
                         gateRecord = exists.get(rid);
                     }
                 }
+                ZonedDateTime modifyTime = ZonedDateTime.parse(log.get("MODIFY_TIME").getAsString().substring(0, 19), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault()));
+                modifyTimes.add(modifyTime);
                 gateRecord.setRid(rid);
                 gateRecord.setData(data);
                 gateRecord.setDataMd5(dataMd5);
                 gateRecord.setRegionId(REGION_ID_HUACHAN);
+                gateRecord.setModifyTime(modifyTime);
                 gateRecord.setTruckNumber(log.get("CAR_NO").getAsString());
+                if (gateRecord.getTruckNumber().equals("0000000")) {
+                    continue;
+                }
                 gateRecord.setCreateTime(ZonedDateTime.now());
                 gateRecord.setRecordType(log.get("INOUT_TYPE").getAsString().equals("IN") ? RecordType.IN : RecordType.OUT);
                 gateRecord.setRecordTime(ZonedDateTime.parse(log.get("REC_TIME").getAsString().substring(0, 19), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault())));
                 records.add(gateRecord);
             }
+
             if (!records.isEmpty()) {
                 gateRecordRepository.saveAll(records);
                 log.info("Saved {} new GateRecords of regionId {}, offset: {} / {}",
                     records.size(), records.get(0).getRegionId(), skip + records.size(), json.get("@odata.count").getAsInt());
             }
 
-            if (json.get("@odata.count").getAsInt() < skip + 200) {
-                break;
+            if (maxRecTime != null && modifyTimes.size() > 0) {
+                Collections.sort(modifyTimes);
+                log.info("Sync last maxModifyTime: {}, now minModifyTime {}", maxRecTime, modifyTimes.get(0));
+                if (modifyTimes.get(0).isBefore(maxRecTime)) {
+                    break;
+                }
             }
 
-            skip += 200;
+            if (json.get("@odata.count").getAsInt() < skip + 500) {
+                break;
+            }
+            if (skip + arr.size() >= total) {
+                break;
+            }
+            skip += 500;
             try {
-                Thread.sleep(3000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        lastSkip.put(lastDay, skip);
     }
 
 }

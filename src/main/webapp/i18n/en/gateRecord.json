@@ -23,7 +23,8 @@
       "rid": "Rid",
       "createTime": "Create Time",
       "regionId": "Region Id",
-      "dataMd5": "Data Md 5"
+      "dataMd5": "Data Md 5",
+      "modifyTime": "Modify Time"
     }
   }
 }

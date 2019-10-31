@@ -56,6 +56,9 @@ public class GateRecord implements Serializable {
     @Column(name = "data_md5")
     private String dataMd5;
 
+    @Column(name = "modify_time")
+    private ZonedDateTime modifyTime;
+
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
         return id;
@@ -168,6 +171,19 @@ public class GateRecord implements Serializable {
     public void setDataMd5(String dataMd5) {
         this.dataMd5 = dataMd5;
     }
+
+    public ZonedDateTime getModifyTime() {
+        return modifyTime;
+    }
+
+    public GateRecord modifyTime(ZonedDateTime modifyTime) {
+        this.modifyTime = modifyTime;
+        return this;
+    }
+
+    public void setModifyTime(ZonedDateTime modifyTime) {
+        this.modifyTime = modifyTime;
+    }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
     @Override
@@ -198,6 +214,7 @@ public class GateRecord implements Serializable {
             ", createTime='" + getCreateTime() + "'" +
             ", regionId=" + getRegionId() +
             ", dataMd5='" + getDataMd5() + "'" +
+            ", modifyTime='" + getModifyTime() + "'" +
             "}";
     }
 }

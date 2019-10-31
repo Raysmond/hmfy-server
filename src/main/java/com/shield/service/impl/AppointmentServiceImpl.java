@@ -262,7 +262,7 @@ public class AppointmentServiceImpl implements AppointmentService {
      */
     @Override
     public void countRemainQuota(RegionDTO region, boolean isVip) {
-        List<Appointment> appointments = appointmentRepository.findAllValid(region.getId(), ZonedDateTime.now().minusHours(6));
+        List<Appointment> appointments = appointmentRepository.findAllValid(region.getId(), ZonedDateTime.now().minusHours(24));
         long current = appointments.size();
         long curVip = appointments.stream().filter(Appointment::isVip).count();
         long total = region.getQuota();

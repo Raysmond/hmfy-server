@@ -58,14 +58,18 @@ public class PlanEventListener {
     @Async
     @TransactionalEventListener
     public void handlePlanChangedEvent(PlanChangedEvent planChangedEvent) {
-        log.info("[EVENT] listen on PlanChangedEvent, applyId: {}, truckNumber: {}, before: {}, after: {}",
-            planChangedEvent.getOld().getApplyId(), planChangedEvent.getOld().getTruckNumber(), planChangedEvent.getOld(), planChangedEvent.getUpdated());
-
         ShipPlanDTO old = planChangedEvent.getOld();
         ShipPlanDTO updated = planChangedEvent.getUpdated();
 
+        log.info("[EVENT] listen on PlanChangedEvent, applyId: {}, truckNumber: {}, before: {}, after: {}",
+            planChangedEvent.getUpdated().getApplyId(),
+            planChangedEvent.getUpdated().getTruckNumber(),
+            planChangedEvent.getOld(),
+            planChangedEvent.getUpdated());
+
+
         if (old != null) {
-            redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN);
+            redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, old.getId());
 
             if (old.getAuditStatus().equals(1) && updated.getAuditStatus().equals(2)) {
                 // 计划取消

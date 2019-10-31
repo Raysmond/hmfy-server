@@ -110,6 +110,9 @@ public class GateRecordQueryService extends QueryService<GateRecord> {
             if (criteria.getDataMd5() != null) {
                 specification = specification.and(buildStringSpecification(criteria.getDataMd5(), GateRecord_.dataMd5));
             }
+            if (criteria.getModifyTime() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getModifyTime(), GateRecord_.modifyTime));
+            }
         }
         return specification;
     }

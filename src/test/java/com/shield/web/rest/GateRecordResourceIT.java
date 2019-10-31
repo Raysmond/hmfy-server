@@ -69,6 +69,9 @@ public class GateRecordResourceIT {
     private static final String DEFAULT_DATA_MD_5 = "AAAAAAAAAA";
     private static final String UPDATED_DATA_MD_5 = "BBBBBBBBBB";
 
+    private static final ZonedDateTime DEFAULT_MODIFY_TIME = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
+    private static final ZonedDateTime UPDATED_MODIFY_TIME = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+
     @Autowired
     private GateRecordRepository gateRecordRepository;
 
@@ -127,7 +130,8 @@ public class GateRecordResourceIT {
             .rid(DEFAULT_RID)
             .createTime(DEFAULT_CREATE_TIME)
             .regionId(DEFAULT_REGION_ID)
-            .dataMd5(DEFAULT_DATA_MD_5);
+            .dataMd5(DEFAULT_DATA_MD_5)
+            .modifyTime(DEFAULT_MODIFY_TIME);
         return gateRecord;
     }
     /**
@@ -145,7 +149,8 @@ public class GateRecordResourceIT {
             .rid(UPDATED_RID)
             .createTime(UPDATED_CREATE_TIME)
             .regionId(UPDATED_REGION_ID)
-            .dataMd5(UPDATED_DATA_MD_5);
+            .dataMd5(UPDATED_DATA_MD_5)
+            .modifyTime(UPDATED_MODIFY_TIME);
         return gateRecord;
     }
 
@@ -178,6 +183,7 @@ public class GateRecordResourceIT {
         assertThat(testGateRecord.getCreateTime()).isEqualTo(DEFAULT_CREATE_TIME);
         assertThat(testGateRecord.getRegionId()).isEqualTo(DEFAULT_REGION_ID);
         assertThat(testGateRecord.getDataMd5()).isEqualTo(DEFAULT_DATA_MD_5);
+        assertThat(testGateRecord.getModifyTime()).isEqualTo(DEFAULT_MODIFY_TIME);
     }
 
     @Test
@@ -333,7 +339,8 @@ public class GateRecordResourceIT {
             .andExpect(jsonPath("$.[*].rid").value(hasItem(DEFAULT_RID.toString())))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
             .andExpect(jsonPath("$.[*].regionId").value(hasItem(DEFAULT_REGION_ID.intValue())))
-            .andExpect(jsonPath("$.[*].dataMd5").value(hasItem(DEFAULT_DATA_MD_5.toString())));
+            .andExpect(jsonPath("$.[*].dataMd5").value(hasItem(DEFAULT_DATA_MD_5.toString())))
+            .andExpect(jsonPath("$.[*].modifyTime").value(hasItem(sameInstant(DEFAULT_MODIFY_TIME))));
     }
     
     @Test
@@ -354,7 +361,8 @@ public class GateRecordResourceIT {
             .andExpect(jsonPath("$.rid").value(DEFAULT_RID.toString()))
             .andExpect(jsonPath("$.createTime").value(sameInstant(DEFAULT_CREATE_TIME)))
             .andExpect(jsonPath("$.regionId").value(DEFAULT_REGION_ID.intValue()))
-            .andExpect(jsonPath("$.dataMd5").value(DEFAULT_DATA_MD_5.toString()));
+            .andExpect(jsonPath("$.dataMd5").value(DEFAULT_DATA_MD_5.toString()))
+            .andExpect(jsonPath("$.modifyTime").value(sameInstant(DEFAULT_MODIFY_TIME)));
     }
 
     @Test
@@ -710,6 +718,72 @@ public class GateRecordResourceIT {
         // Get all the gateRecordList where dataMd5 is null
         defaultGateRecordShouldNotBeFound("dataMd5.specified=false");
     }
+
+    @Test
+    @Transactional
+    public void getAllGateRecordsByModifyTimeIsEqualToSomething() throws Exception {
+        // Initialize the database
+        gateRecordRepository.saveAndFlush(gateRecord);
+
+        // Get all the gateRecordList where modifyTime equals to DEFAULT_MODIFY_TIME
+        defaultGateRecordShouldBeFound("modifyTime.equals=" + DEFAULT_MODIFY_TIME);
+
+        // Get all the gateRecordList where modifyTime equals to UPDATED_MODIFY_TIME
+        defaultGateRecordShouldNotBeFound("modifyTime.equals=" + UPDATED_MODIFY_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllGateRecordsByModifyTimeIsInShouldWork() throws Exception {
+        // Initialize the database
+        gateRecordRepository.saveAndFlush(gateRecord);
+
+        // Get all the gateRecordList where modifyTime in DEFAULT_MODIFY_TIME or UPDATED_MODIFY_TIME
+        defaultGateRecordShouldBeFound("modifyTime.in=" + DEFAULT_MODIFY_TIME + "," + UPDATED_MODIFY_TIME);
+
+        // Get all the gateRecordList where modifyTime equals to UPDATED_MODIFY_TIME
+        defaultGateRecordShouldNotBeFound("modifyTime.in=" + UPDATED_MODIFY_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllGateRecordsByModifyTimeIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        gateRecordRepository.saveAndFlush(gateRecord);
+
+        // Get all the gateRecordList where modifyTime is not null
+        defaultGateRecordShouldBeFound("modifyTime.specified=true");
+
+        // Get all the gateRecordList where modifyTime is null
+        defaultGateRecordShouldNotBeFound("modifyTime.specified=false");
+    }
+
+    @Test
+    @Transactional
+    public void getAllGateRecordsByModifyTimeIsGreaterThanOrEqualToSomething() throws Exception {
+        // Initialize the database
+        gateRecordRepository.saveAndFlush(gateRecord);
+
+        // Get all the gateRecordList where modifyTime greater than or equals to DEFAULT_MODIFY_TIME
+        defaultGateRecordShouldBeFound("modifyTime.greaterOrEqualThan=" + DEFAULT_MODIFY_TIME);
+
+        // Get all the gateRecordList where modifyTime greater than or equals to UPDATED_MODIFY_TIME
+        defaultGateRecordShouldNotBeFound("modifyTime.greaterOrEqualThan=" + UPDATED_MODIFY_TIME);
+    }
+
+    @Test
+    @Transactional
+    public void getAllGateRecordsByModifyTimeIsLessThanSomething() throws Exception {
+        // Initialize the database
+        gateRecordRepository.saveAndFlush(gateRecord);
+
+        // Get all the gateRecordList where modifyTime less than or equals to DEFAULT_MODIFY_TIME
+        defaultGateRecordShouldNotBeFound("modifyTime.lessThan=" + DEFAULT_MODIFY_TIME);
+
+        // Get all the gateRecordList where modifyTime less than or equals to UPDATED_MODIFY_TIME
+        defaultGateRecordShouldBeFound("modifyTime.lessThan=" + UPDATED_MODIFY_TIME);
+    }
+
     /**
      * Executes the search, and checks that the default entity is returned.
      */
@@ -725,7 +799,8 @@ public class GateRecordResourceIT {
             .andExpect(jsonPath("$.[*].rid").value(hasItem(DEFAULT_RID)))
             .andExpect(jsonPath("$.[*].createTime").value(hasItem(sameInstant(DEFAULT_CREATE_TIME))))
             .andExpect(jsonPath("$.[*].regionId").value(hasItem(DEFAULT_REGION_ID.intValue())))
-            .andExpect(jsonPath("$.[*].dataMd5").value(hasItem(DEFAULT_DATA_MD_5)));
+            .andExpect(jsonPath("$.[*].dataMd5").value(hasItem(DEFAULT_DATA_MD_5)))
+            .andExpect(jsonPath("$.[*].modifyTime").value(hasItem(sameInstant(DEFAULT_MODIFY_TIME))));
 
         // Check, that the count call also returns 1
         restGateRecordMockMvc.perform(get("/api/gate-records/count?sort=id,desc&" + filter))
@@ -780,7 +855,8 @@ public class GateRecordResourceIT {
             .rid(UPDATED_RID)
             .createTime(UPDATED_CREATE_TIME)
             .regionId(UPDATED_REGION_ID)
-            .dataMd5(UPDATED_DATA_MD_5);
+            .dataMd5(UPDATED_DATA_MD_5)
+            .modifyTime(UPDATED_MODIFY_TIME);
         GateRecordDTO gateRecordDTO = gateRecordMapper.toDto(updatedGateRecord);
 
         restGateRecordMockMvc.perform(put("/api/gate-records")
@@ -800,6 +876,7 @@ public class GateRecordResourceIT {
         assertThat(testGateRecord.getCreateTime()).isEqualTo(UPDATED_CREATE_TIME);
         assertThat(testGateRecord.getRegionId()).isEqualTo(UPDATED_REGION_ID);
         assertThat(testGateRecord.getDataMd5()).isEqualTo(UPDATED_DATA_MD_5);
+        assertThat(testGateRecord.getModifyTime()).isEqualTo(UPDATED_MODIFY_TIME);
     }
 
     @Test

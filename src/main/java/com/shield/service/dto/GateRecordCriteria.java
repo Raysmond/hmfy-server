@@ -60,6 +60,8 @@ public class GateRecordCriteria implements Serializable, Criteria {
 
     private StringFilter dataMd5;
 
+    private ZonedDateTimeFilter modifyTime;
+
     public GateRecordCriteria(){
     }
 
@@ -72,6 +74,7 @@ public class GateRecordCriteria implements Serializable, Criteria {
         this.createTime = other.createTime == null ? null : other.createTime.copy();
         this.regionId = other.regionId == null ? null : other.regionId.copy();
         this.dataMd5 = other.dataMd5 == null ? null : other.dataMd5.copy();
+        this.modifyTime = other.modifyTime == null ? null : other.modifyTime.copy();
     }
 
     @Override
@@ -143,6 +146,14 @@ public class GateRecordCriteria implements Serializable, Criteria {
         this.dataMd5 = dataMd5;
     }
 
+    public ZonedDateTimeFilter getModifyTime() {
+        return modifyTime;
+    }
+
+    public void setModifyTime(ZonedDateTimeFilter modifyTime) {
+        this.modifyTime = modifyTime;
+    }
+
 
     @Override
     public boolean equals(Object o) {
@@ -161,7 +172,8 @@ public class GateRecordCriteria implements Serializable, Criteria {
             Objects.equals(rid, that.rid) &&
             Objects.equals(createTime, that.createTime) &&
             Objects.equals(regionId, that.regionId) &&
-            Objects.equals(dataMd5, that.dataMd5);
+            Objects.equals(dataMd5, that.dataMd5) &&
+            Objects.equals(modifyTime, that.modifyTime);
     }
 
     @Override
@@ -174,7 +186,8 @@ public class GateRecordCriteria implements Serializable, Criteria {
         rid,
         createTime,
         regionId,
-        dataMd5
+        dataMd5,
+        modifyTime
         );
     }
 
@@ -189,6 +202,7 @@ public class GateRecordCriteria implements Serializable, Criteria {
                 (createTime != null ? "createTime=" + createTime + ", " : "") +
                 (regionId != null ? "regionId=" + regionId + ", " : "") +
                 (dataMd5 != null ? "dataMd5=" + dataMd5 + ", " : "") +
+                (modifyTime != null ? "modifyTime=" + modifyTime + ", " : "") +
             "}";
     }
 

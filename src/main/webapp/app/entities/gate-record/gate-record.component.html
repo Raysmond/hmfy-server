@@ -26,6 +26,7 @@
             <th jhiSortBy="createTime"><span jhiTranslate="shieldApp.gateRecord.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="regionId"><span jhiTranslate="shieldApp.gateRecord.regionId">Region Id</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th jhiSortBy="dataMd5"><span jhiTranslate="shieldApp.gateRecord.dataMd5">Data Md 5</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="modifyTime"><span jhiTranslate="shieldApp.gateRecord.modifyTime">Modify Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
             <th></th>
             </tr>
             </thead>
@@ -40,6 +41,7 @@
                 <td>{{gateRecord.createTime | date:'medium'}}</td>
                 <td>{{gateRecord.regionId}}</td>
                 <td>{{gateRecord.dataMd5}}</td>
+                <td>{{gateRecord.modifyTime | date:'medium'}}</td>
                 <td class="text-right">
                     <div class="btn-group">
                         <button type="submit"

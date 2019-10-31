@@ -25,7 +25,8 @@ export class GateRecordUpdateComponent implements OnInit {
     rid: [null, [Validators.required]],
     createTime: [null, [Validators.required]],
     regionId: [null, [Validators.required]],
-    dataMd5: []
+    dataMd5: [],
+    modifyTime: []
   });
 
   constructor(
@@ -53,7 +54,8 @@ export class GateRecordUpdateComponent implements OnInit {
       rid: gateRecord.rid,
       createTime: gateRecord.createTime != null ? gateRecord.createTime.format(DATE_TIME_FORMAT) : null,
       regionId: gateRecord.regionId,
-      dataMd5: gateRecord.dataMd5
+      dataMd5: gateRecord.dataMd5,
+      modifyTime: gateRecord.modifyTime != null ? gateRecord.modifyTime.format(DATE_TIME_FORMAT) : null
     });
   }
 
@@ -116,7 +118,9 @@ export class GateRecordUpdateComponent implements OnInit {
       createTime:
         this.editForm.get(['createTime']).value != null ? moment(this.editForm.get(['createTime']).value, DATE_TIME_FORMAT) : undefined,
       regionId: this.editForm.get(['regionId']).value,
-      dataMd5: this.editForm.get(['dataMd5']).value
+      dataMd5: this.editForm.get(['dataMd5']).value,
+      modifyTime:
+        this.editForm.get(['modifyTime']).value != null ? moment(this.editForm.get(['modifyTime']).value, DATE_TIME_FORMAT) : undefined
     };
     return entity;
   }

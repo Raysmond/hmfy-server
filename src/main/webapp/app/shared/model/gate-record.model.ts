@@ -15,6 +15,7 @@ export interface IGateRecord {
   createTime?: Moment;
   regionId?: number;
   dataMd5?: string;
+  modifyTime?: Moment;
 }
 
 export class GateRecord implements IGateRecord {
@@ -27,6 +28,7 @@ export class GateRecord implements IGateRecord {
     public rid?: string,
     public createTime?: Moment,
     public regionId?: number,
-    public dataMd5?: string
+    public dataMd5?: string,
+    public modifyTime?: Moment
   ) {}
 }

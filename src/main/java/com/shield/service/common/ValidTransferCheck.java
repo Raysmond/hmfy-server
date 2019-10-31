@@ -20,7 +20,7 @@ public class ValidTransferCheck {
             if (field.isAnnotationPresent(ValidTranfers.class)) {
                 Object v = getProperty(before, field.getName(), null);
                 Object va = getProperty(after, field.getName(), null);
-                String beforeValue = (before == null ? "" : v == null ? "" : v).toString();
+                String beforeValue = (before == null ? "" : (v == null ? "" : v)).toString();
                 String afterValue = (va == null ? "" : va).toString();
 
                 ValidTranfers validTranfers = field.getAnnotation(ValidTranfers.class);
@@ -48,7 +48,7 @@ public class ValidTransferCheck {
                             equal = vb.equals(va);
                         }
                         if (!equal) {
-                            log.error("Field " + field.getName() + " cannot be changed, "+ vb.toString() + " --> " + va.toString());
+                            log.error("Field " + field.getName() + " cannot be changed, " + vb + " --> " + va);
                             throw new BadRequestAlertException("Field " + field.getName() + " cannot be changed", "appointment", "RAW_TITLE");
                         }
                     }

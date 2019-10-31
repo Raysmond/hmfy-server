@@ -27,7 +27,7 @@ describe('Service Tests', () => {
       httpMock = injector.get(HttpTestingController);
       currentDate = moment();
 
-      elemDefault = new GateRecord(0, RecordType.IN, 'AAAAAAA', currentDate, 'AAAAAAA', 'AAAAAAA', currentDate, 0, 'AAAAAAA');
+      elemDefault = new GateRecord(0, RecordType.IN, 'AAAAAAA', currentDate, 'AAAAAAA', 'AAAAAAA', currentDate, 0, 'AAAAAAA', currentDate);
     });
 
     describe('Service methods', () => {
@@ -35,7 +35,8 @@ describe('Service Tests', () => {
         const returnedFromService = Object.assign(
           {
             recordTime: currentDate.format(DATE_TIME_FORMAT),
-            createTime: currentDate.format(DATE_TIME_FORMAT)
+            createTime: currentDate.format(DATE_TIME_FORMAT),
+            modifyTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
@@ -54,14 +55,16 @@ describe('Service Tests', () => {
           {
             id: 0,
             recordTime: currentDate.format(DATE_TIME_FORMAT),
-            createTime: currentDate.format(DATE_TIME_FORMAT)
+            createTime: currentDate.format(DATE_TIME_FORMAT),
+            modifyTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
         const expected = Object.assign(
           {
             recordTime: currentDate,
-            createTime: currentDate
+            createTime: currentDate,
+            modifyTime: currentDate
           },
           returnedFromService
         );
@@ -84,7 +87,8 @@ describe('Service Tests', () => {
             rid: 'BBBBBB',
             createTime: currentDate.format(DATE_TIME_FORMAT),
             regionId: 1,
-            dataMd5: 'BBBBBB'
+            dataMd5: 'BBBBBB',
+            modifyTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
@@ -92,7 +96,8 @@ describe('Service Tests', () => {
         const expected = Object.assign(
           {
             recordTime: currentDate,
-            createTime: currentDate
+            createTime: currentDate,
+            modifyTime: currentDate
           },
           returnedFromService
         );
@@ -115,14 +120,16 @@ describe('Service Tests', () => {
             rid: 'BBBBBB',
             createTime: currentDate.format(DATE_TIME_FORMAT),
             regionId: 1,
-            dataMd5: 'BBBBBB'
+            dataMd5: 'BBBBBB',
+            modifyTime: currentDate.format(DATE_TIME_FORMAT)
           },
           elemDefault
         );
         const expected = Object.assign(
           {
             recordTime: currentDate,
-            createTime: currentDate
+            createTime: currentDate,
+            modifyTime: currentDate
           },
           returnedFromService
         );
