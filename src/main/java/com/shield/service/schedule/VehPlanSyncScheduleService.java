@@ -235,7 +235,11 @@ public class VehPlanSyncScheduleService {
                         appointmentId, ap.getLicensePlateNumber(), ap.getEnterTime(), ap.getLeaveTime(), lastGateLog.getRowId(), lastGateLog.getInTime());
                 } else {
                     VipGateLog newLog = new VipGateLog();
-                    newLog.setRowId(vipGateLogRepository.findMaxRowId());
+//                    Long maxRowId = vipGateLogRepository.findMaxRowId();
+//                    if (maxRowId == null) {
+//                        maxRowId = 1000L;
+//                    }
+//                    newLog.setRowId(maxRowId + 1);
                     newLog.setInTime(ap.getEnterTime());
                     newLog.setOutTime(ap.getLeaveTime());
                     newLog.setTruckNumber(ap.getLicensePlateNumber());

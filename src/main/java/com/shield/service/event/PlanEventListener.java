@@ -13,11 +13,13 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static com.shield.config.Constants.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
 
+/**
+ * 监听计划状态变更
+ */
 @Service
 @Slf4j
 public class PlanEventListener {
@@ -58,53 +60,60 @@ public class PlanEventListener {
     @Async
     @TransactionalEventListener
     public void handlePlanChangedEvent(PlanChangedEvent planChangedEvent) {
-        ShipPlanDTO old = planChangedEvent.getOld();
-        ShipPlanDTO updated = planChangedEvent.getUpdated();
+        ShipPlanDTO before = planChangedEvent.getOld();
+        ShipPlanDTO after = planChangedEvent.getUpdated();
+        log.info("[EVENT] listen on PlanChangedEvent, applyId: {}, truckNumber: {}, before: {}, after: {}", after.getApplyId(), after.getTruckNumber(), before, after);
 
-        log.info("[EVENT] listen on PlanChangedEvent, applyId: {}, truckNumber: {}, before: {}, after: {}",
-            planChangedEvent.getUpdated().getApplyId(),
-            planChangedEvent.getUpdated().getTruckNumber(),
-            planChangedEvent.getOld(),
-            planChangedEvent.getUpdated());
+        try {
+            if (before != null) {
+                // 取消计划
+                if (before.getAuditStatus().equals(1) && after.getAuditStatus().equals(2)) {
+                    afterShipPlanCanceled(before, after);
+                }
 
+                // 离场
+                if (before.getLeaveTime() == null && after.getLeaveTime() != null) {
+                    afterShipPlanLeave(before, after);
+                }
 
-        if (old != null) {
-            redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, old.getId());
+                // 上磅
+                if (before.getLoadingStartTime() == null && after.getLoadingStartTime() != null) {
+                    afterLoadingStart(before, after);
+                }
 
-            if (old.getAuditStatus().equals(1) && updated.getAuditStatus().equals(2)) {
-                // 计划取消
-                afterShipPlanCanceled(old, updated);
+                // 过期
+                if (!before.getAuditStatus().equals(1) && after.getAuditStatus().equals(4)) {
+                    afterShipPlanExpired(after);
+                }
+
+                // 同步计划到 SQL_SERVER
+                redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, after.getId());
             }
 
-            if (old.getLeaveTime() == null && updated.getLeaveTime() != null) {
-                afterShipPlanLeave(old, updated);
+            if (before == null) {
+                // 新建计划
+                afterShipPlanCreated(after);
             }
-
-            if (old.getLoadingStartTime() == null && updated.getLoadingStartTime() != null) {
-                afterLoadingStart(old, updated);
-            }
-
-            if (!old.getAuditStatus().equals(1) && updated.getAuditStatus().equals(4)) {
-                afterShipPlanExpired(updated);
-            }
-        }
-
-        if (old == null) {
-            afterShipPlanCreated(updated);
+        } catch (Exception e) {
+            log.error("Failed to execute handlePlanChangedEvent()..., applyId: {}, truckNumber: {}", after.getApplyId(), after.getTruckNumber());
         }
     }
 
+    /**
+     * 计划过期后
+     */
     private void afterShipPlanExpired(ShipPlanDTO after) {
         log.info("TRIGGER afterShipPlanExpired...");
         RegionDTO region = regionService.findByName(after.getDeliverPosition());
         if (region != null && region.isOpen()) {
             appointmentService.updateStatusAfterCancelShipPlan(after.getApplyId());
-            if (region.isAutoAppointment()) {
-                carWhiteListManager.deleteCarWhiteList(after);
-            }
+            carWhiteListManager.deleteCarWhiteList(after);
         }
     }
 
+    /**
+     * 上磅之后
+     */
     private void afterLoadingStart(ShipPlanDTO old, ShipPlanDTO updated) {
         log.info("TRIGGER afterLoadingStart...");
         RegionDTO region = regionService.findByName(updated.getDeliverPosition());
@@ -121,6 +130,9 @@ public class PlanEventListener {
         }
     }
 
+    /**
+     * 新创建计划
+     */
     private void afterShipPlanCreated(ShipPlanDTO plan) {
         log.info("TRIGGER afterShipPlanCreated...");
         if (plan.getAuditStatus().equals(1)) {
@@ -133,6 +145,9 @@ public class PlanEventListener {
         }
     }
 
+    /**
+     * 计划取消后 1 -> 2
+     */
     private void afterShipPlanCanceled(ShipPlanDTO before, ShipPlanDTO after) {
         log.info("TRIGGER afterShipPlanCanceled...");
         RegionDTO region = regionService.findByName(after.getDeliverPosition());
@@ -144,6 +159,9 @@ public class PlanEventListener {
         }
     }
 
+    /**
+     * 离场后（拿到离场时间）
+     */
     private void afterShipPlanLeave(ShipPlanDTO before, ShipPlanDTO after) {
         log.info("TRIGGER afterShipPlanLeave...");
         RegionDTO region = regionService.findByName(after.getDeliverPosition());
@@ -159,16 +177,6 @@ public class PlanEventListener {
                 shipPlanService.save(after);
                 wxMpMsgService.sendLeaveAlertMsg(after, region.getLeaveAlertTime());
             }
-        }
-    }
-
-    private boolean timeNotEqual(ZonedDateTime t1, ZonedDateTime t2) {
-        if (t1 == null && t2 == null) {
-            return false;
-        } else if (t1 == null || t2 == null) {
-            return false;
-        } else {
-            return !t1.equals(t2);
         }
     }
 

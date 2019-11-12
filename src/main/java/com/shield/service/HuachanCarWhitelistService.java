@@ -23,21 +23,19 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -100,11 +98,6 @@ public class HuachanCarWhitelistService {
 
     @Autowired
     private CarWhiteListService carWhiteListService;
-
-    @Autowired
-    @Qualifier("redisLongTemplate")
-    private RedisTemplate<String, Long> redisLongTemplate;
-
 
     public HuachanCarWhitelistService() {
         this.restTemplate = new RestTemplate();
@@ -381,72 +374,6 @@ public class HuachanCarWhitelistService {
         return null;
     }
 
-    @Data
-    public static class CarInOutResponse {
-        @JsonProperty("@odata.context")
-        private String context;
-
-        @JsonProperty("@odata.count")
-        private String count;
-
-        private List<JsonObject> value = Lists.newArrayList();
-    }
-
-    @Data
-    public static class CarInOutData {
-        @JsonProperty("ID")
-        private String ID;
-        private String CAR_COLOR;
-        private String CAR_NO;
-        private String CAR_TYPE;
-        private String CERT_CODE;
-        private String CER_TYPE_CODE;
-        private String CER_TYPE_NAME;
-        private String CLIENT_MODE;
-        private String CREATOR_IP;
-        private String CREATOR_MAC;
-        private String CREATOR_TIME;
-        private String CREATOR_UID;
-        private String CREATOR_UNAME;
-        private String DATA_AREA;
-        private String DATA_SOURCE;
-        private String DELETE_IP;
-        private String DELETE_MAC;
-        private String DELETE_TIME;
-        private String DELETE_UID;
-        private String DELETE_UNAME;
-        private String FIELD1;
-        private String FIELD2;
-        private String INOUT_TYPE;
-        private Boolean IS_ALLOW_PASS;
-        private Boolean IS_AUTO_ROD;
-        private Boolean IS_DELETE;
-        private String LIFE_ROD_TIME;
-        private Integer LIFE_ROD_YMD;
-        private String MG_NO;
-        private String MODIFY_IP;
-        private String MODIFY_MAC;
-        private String MODIFY_TIME;
-        private String MODIFY_UNAME;
-        private String RECORD_EXPLAIN;
-        private String RECORD_MODE;
-        private String RECORD_YMD;
-        private String REC_CAR_BCOLOR;
-        private String REC_CAR_LENGTH;
-        private String REC_CAR_NO;
-        private String REC_CAR_TYPE;
-        private String REC_DEV_ID;
-        private String REC_RECORD_ID;
-        private String REC_RECORD_TYPE;
-        private Integer REC_SPEED;
-        private String REC_TIME;
-        private String REC_VENDOR_CODE;
-        private String REMARK;
-        private Integer ROAD_NO;
-        private String TOKEN_INFO;
-    }
-
-
     /**
      * 从本地MySQL中拿化产区域车辆的出入场数据，并更新预约/计划的状态，出入场时间
      */
@@ -562,28 +489,33 @@ public class HuachanCarWhitelistService {
         String today = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String lastDay = ZonedDateTime.now().minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         Integer skip = 0;
-        Integer total = 10000;
+        Integer maxSyncRecords = 1000;
+        Integer pageSize = 10;
         Page<GateRecord> maxRecords = gateRecordRepository.findByModifyTime(ZonedDateTime.now().minusDays(1), PageRequest.of(0, 1, Sort.Direction.DESC, "modifyTime"));
-        ZonedDateTime maxRecTime = maxRecords.getContent().size() > 0 ? maxRecords.getContent().get(0).getModifyTime() : null;
-
+        ZonedDateTime maxModifyTime = maxRecords.getContent().size() > 0 ? maxRecords.getContent().get(0).getModifyTime() : null;
+        String cookie = null;
+        if (env.acceptsProfiles(Profiles.of("dev"))) {
+            cookie = "g2ekdusav4zgznx0tjfvfljo";
+        } else {
+            cookie = loginAndGetSessionId();
+        }
+        if (cookie == null) {
+            return;
+        }
         while (true) {
             String param =
-                "?$top=500" +
+                "?$top=" + pageSize +
                     "&$count=true" +
                     "&$skip=" + skip.toString() +
                     "&$orderby=MODIFY_TIME+desc" +
                     "&$filter=IS_DELETE+eq+false+" +
                     "and+RECORD_YMD+ge+" + lastDay + "+" +
-                    "and+RECORD_YMD+le+" + today +
-//                    "and+MG_NO+eq+\"7#\"" +
+                    "and+RECORD_YMD+le+" + today + "+" +
+                    "and+MG_NO+eq+'7%23'" +  // 指定7号门
                     "&_=" + ZonedDateTime.now().toEpochSecond();
 
             String queryApi = api + param;
-            String cookie = loginAndGetSessionId();
-            if (cookie == null) {
-                return;
-            }
-
+            URI uri = URI.create(queryApi);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.add("Cookie", String.format("ASP.NET_SessionId=%s", cookie));
@@ -597,22 +529,22 @@ public class HuachanCarWhitelistService {
             headers.add("X-Requested-With", "XMLHttpRequest");
             headers.add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
 
-            log.info("Start to query car IN/OUT records: {}", queryApi);
+            log.info("Start to query car IN/OUT records: {}, skip: {}", queryApi, skip);
             HttpEntity<String> request = new HttpEntity<>(headers);
             ResponseEntity<String> result;
             try {
-                result = restTemplate.exchange(queryApi, HttpMethod.GET, request, String.class);
+                result = restTemplate.exchange(uri, HttpMethod.GET, request, String.class);
             } catch (HttpClientErrorException e) {
                 loginSessionId = null;
                 return;
-//                if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-//
-//                }
             }
             log.info("response, status code: {}", result.getStatusCode());
             JsonObject json = new JsonParser().parse(result.getBody()).getAsJsonObject();
             List<GateRecord> records = Lists.newArrayList();
             JsonArray arr = json.getAsJsonArray("value");
+            if (arr.size() == 0) {
+                break;
+            }
             List<String> rids = Lists.newArrayList();
             List<ZonedDateTime> modifyTimes = Lists.newArrayList();
             for (JsonElement ele : arr) {
@@ -625,6 +557,8 @@ public class HuachanCarWhitelistService {
                 String rid = log.get("ID").getAsString();
                 String data = ele.toString();
                 String dataMd5 = DigestUtils.md5DigestAsHex(data.getBytes());
+                ZonedDateTime modifyTime = ZonedDateTime.parse(log.get("MODIFY_TIME").getAsString().substring(0, 19), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault()));
+                modifyTimes.add(modifyTime);
                 GateRecord gateRecord = new GateRecord();
                 if (exists.containsKey(rid)) {
                     if (exists.get(rid).getDataMd5().equals(dataMd5)) {
@@ -633,8 +567,6 @@ public class HuachanCarWhitelistService {
                         gateRecord = exists.get(rid);
                     }
                 }
-                ZonedDateTime modifyTime = ZonedDateTime.parse(log.get("MODIFY_TIME").getAsString().substring(0, 19), DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault()));
-                modifyTimes.add(modifyTime);
                 gateRecord.setRid(rid);
                 gateRecord.setData(data);
                 gateRecord.setDataMd5(dataMd5);
@@ -656,21 +588,21 @@ public class HuachanCarWhitelistService {
                     records.size(), records.get(0).getRegionId(), skip + records.size(), json.get("@odata.count").getAsInt());
             }
 
-            if (maxRecTime != null && modifyTimes.size() > 0) {
+            if (maxModifyTime != null && modifyTimes.size() > 0) {
                 Collections.sort(modifyTimes);
-                log.info("Sync last maxModifyTime: {}, now minModifyTime {}", maxRecTime, modifyTimes.get(0));
-                if (modifyTimes.get(0).isBefore(maxRecTime)) {
+                log.info("Sync last maxModifyTime: {}, now minModifyTime {}", maxModifyTime, modifyTimes.get(0));
+                if (modifyTimes.get(0).isBefore(maxModifyTime)) {
                     break;
                 }
             }
 
-            if (json.get("@odata.count").getAsInt() < skip + 500) {
+            if (json.get("@odata.count").getAsInt() < skip + pageSize) {
                 break;
             }
-            if (skip + arr.size() >= total) {
+            if (skip + arr.size() >= maxSyncRecords) {
                 break;
             }
-            skip += 500;
+            skip += pageSize;
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {

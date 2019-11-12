@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.net.URI;
+import java.time.ZonedDateTime;
 
 @RestController
 @RequestMapping("/api/test")
@@ -35,6 +37,7 @@ public class TestController {
     public String test() {
 //        huachanCarWhitelistService.loginAndGetSessionId();
 //        userService.changeSystemUserPassword("111");
+
 //        huachanCarWhitelistService.syncCarInOutRecords();
         return "ok";
     }

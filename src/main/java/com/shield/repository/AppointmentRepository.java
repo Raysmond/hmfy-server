@@ -74,6 +74,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
     @Query("select a.region.name as region, a.status as status, count(a.id) as count from Appointment a where a.createTime >= ?1 and a.createTime < ?2 group by a.region.name, a.status")
     List<AppointmentStatusCount> countAppointments(ZonedDateTime begin, ZonedDateTime end);
 
+    @Query("select a.region.name as region, a.status as status, count(a.id) as count from Appointment a where a.valid = true and a.createTime >= ?1 and a.createTime < ?2 group by a.region.name, a.status")
+    List<AppointmentStatusCount> countValidAppointments(ZonedDateTime begin, ZonedDateTime end);
+
     interface AppointmentStatusCount {
         String getRegion();
         AppointmentStatus getStatus();

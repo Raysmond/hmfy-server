@@ -1,7 +1,5 @@
 package com.shield.service;
 
-import com.shield.domain.Appointment;
-import com.shield.domain.ShipPlan;
 import com.shield.service.dto.AppointmentDTO;
 
 import com.shield.service.dto.RegionDTO;
@@ -49,13 +47,7 @@ public interface AppointmentService {
      */
     void delete(Long id);
 
-    Long countAppointmentOfRegionId(Long regionId);
-
-    Long countAllWaitByRegionId(Long regionId);
-
     void countRemainQuota(RegionDTO region, boolean isVip);
-
-    Long countAppointmentOfRegionIdAndCreateTime(Long regionId, ZonedDateTime begin);
 
     AppointmentDTO makeAppointment(Long regionId, AppointmentDTO appointmentDTO);
 

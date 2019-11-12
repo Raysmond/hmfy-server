@@ -451,7 +451,7 @@ public class ParkingHandlerService {
                         || region.getParkingConnectMethod() == null || !region.getParkingConnectMethod().equals(ParkingConnectMethod.TCP)
                         || (region.isAutoAppointment() != null && region.isAutoAppointment())) {
                         log.warn("[TCP] no need to upload car whitelist for appointment of region: {}, name: {}", region.getId(), region.getName());
-                        redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointmentId);
+                        redisLongTemplate.opsForSet().remove(REDIS_KEY_DELETE_CAR_WHITELIST, appointmentId);
                         continue;
                     }
 

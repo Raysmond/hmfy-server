@@ -4,10 +4,7 @@ package com.shield.sqlserver.domain;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -16,6 +13,7 @@ import java.time.ZonedDateTime;
 @Setter
 public class VipGateLog {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "fd_Rowid")
     private Long rowId;
 

@@ -80,6 +80,10 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Autowired
     private RegionService regionService;
 
+    @Autowired
+    private RegionMapper regionMapper;
+
+
     private static final Long INITIAL_APPOINTMENT_NUMBER = 10000L;
     private static final Long INITIAL_QUEUE_NUMBER = 100L;
 
@@ -172,21 +176,6 @@ public class AppointmentServiceImpl implements AppointmentService {
             return result.get(applyId);
         }
         return null;
-    }
-
-    @Override
-    public Long countAppointmentOfRegionId(Long regionId) {
-        return appointmentRepository.countAllValidByRegionId(regionId);
-    }
-
-    @Override
-    public Long countAppointmentOfRegionIdAndCreateTime(Long regionId, ZonedDateTime begin) {
-        return appointmentRepository.countAllValidByRegionIdAndCreateTime(regionId, begin);
-    }
-
-    @Override
-    public Long countAllWaitByRegionId(Long regionId) {
-        return appointmentRepository.countAllWaitByRegionId(regionId);
     }
 
     public Integer generateAppointmentNumber(Long regionId) {
@@ -463,9 +452,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         this.save(appointment);
     }
 
-    @Autowired
-    private RegionMapper regionMapper;
-
     @Override
     public AppointmentStat countAppointmentStat(ZonedDateTime begin, ZonedDateTime end) {
         AppointmentStat stat = new AppointmentStat();
@@ -481,8 +467,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         stat.setRegions(regions);
         stat.setDate(begin.format(DateTimeFormatter.BASIC_ISO_DATE));
         List<AppointmentRepository.AppointmentStatusCount> data = appointmentRepository.countAppointments(begin, end);
+        List<AppointmentRepository.AppointmentStatusCount> validData = appointmentRepository.countValidAppointments(begin, end);
         Map<String, AppointmentStat.AppointmentStatItem> regionToStat = Maps.newHashMap();
-        for (AppointmentRepository.AppointmentStatusCount item : data) {
+        for (AppointmentRepository.AppointmentStatusCount item : validData) {
             AppointmentStat.AppointmentStatItem statItem = new AppointmentStat.AppointmentStatItem();
             if (regionToStat.containsKey(item.getRegion())) {
                 statItem = regionToStat.get(item.getRegion());
@@ -509,6 +496,21 @@ public class AppointmentServiceImpl implements AppointmentService {
             }
             regionToStat.put(item.getRegion(), statItem);
         }
+
+        for (AppointmentRepository.AppointmentStatusCount item : data) {
+            AppointmentStat.AppointmentStatItem statItem = null;
+            if (regionToStat.containsKey(item.getRegion())) {
+                statItem = regionToStat.get(item.getRegion());
+            } else {
+                break;
+            }
+            switch (item.getStatus()) {
+                case EXPIRED:
+                    statItem.setExpired(item.getCount());
+                    break;
+            }
+        }
+
         regionToStat.forEach((k, v) -> {
             stat.getData().add(v);
         });

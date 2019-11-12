@@ -42,7 +42,7 @@ public class HuachanScheduleService {
     /**
      * 化产出入场时间同步到本地MySQL
      */
-    @Scheduled(fixedRate = 60 * 1000)
+    @Scheduled(fixedRate = 30 * 1000)
     public void syncCarInOutRecords() {
         huachanCarWhitelistService.syncCarInOutRecords();
     }
