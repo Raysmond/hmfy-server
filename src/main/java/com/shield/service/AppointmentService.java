@@ -5,6 +5,7 @@ import com.shield.domain.ShipPlan;
 import com.shield.service.dto.AppointmentDTO;
 
 import com.shield.service.dto.RegionDTO;
+import com.shield.service.dto.ShipPlanDTO;
 import com.shield.web.rest.vm.AppointmentStat;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -85,4 +86,6 @@ public interface AppointmentService {
     AppointmentStat countAppointmentStat(String currentRegion, ZonedDateTime begin, ZonedDateTime end);
 
     List<AppointmentDTO> findLatestByTruckNumber(String licensePlateNumber, ZonedDateTime createTime);
+
+    AppointmentDTO makeAppointmentForTomorrow(RegionDTO region, ShipPlanDTO plan, AppointmentDTO appointmentDTO);
 }

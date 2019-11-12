@@ -351,7 +351,7 @@ public class CarWhiteListService {
         }
 
         List<AppointmentDTO> appointments = appointmentRepository
-            .findLatestByTruckNumber(region.getId(), truckNumber, ZonedDateTime.now().minusHours(12)).stream()
+            .findLatestByTruckNumber(region.getId(), truckNumber, ZonedDateTime.now().minusHours(24)).stream()
             .map(it -> appointmentMapper.toDto(it))
             .collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(appointments)) {
@@ -377,7 +377,33 @@ public class CarWhiteListService {
                 log.info("Update appointment [{}] status: {}, inTime: {}, outTime: {}, truckNumber: {}",
                     appointment.getId(), appointment.getStatus(), inTime, outTime, truckNumber);
             }
+
+            if (!save) {
+                if (appointments.size() > 1) {
+                    AppointmentDTO second = appointments.get(1);
+                    if (second.isValid() && second.getStatus() == AppointmentStatus.START) {
+                        if (recordType.equals(RecordType.IN)) {
+                            second.setStatus(AppointmentStatus.ENTER);
+                            second.setUpdateTime(ZonedDateTime.now());
+                            second.setEnterTime(inTime);
+                            appointmentService.save(second);
+                            log.info("Update appointment [{}] status: {}, inTime: {}, outTime: {}, truckNumber: {}",
+                                second.getId(), second.getStatus(), inTime, outTime, truckNumber);
+                        }
+                    } else if (second.isValid() && second.getStatus() == AppointmentStatus.ENTER) {
+                        if (recordType.equals(RecordType.OUT)) {
+                            second.setStatus(AppointmentStatus.LEAVE);
+                            second.setUpdateTime(ZonedDateTime.now());
+                            second.setLeaveTime(inTime);
+                            appointmentService.save(second);
+                            log.info("Update appointment [{}] status: {}, inTime: {}, outTime: {}, truckNumber: {}",
+                                second.getId(), second.getStatus(), inTime, outTime, truckNumber);
+                        }
+                    }
+                }
+            }
         }
+
     }
 
 

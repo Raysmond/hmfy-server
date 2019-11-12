@@ -3,9 +3,11 @@ package com.shield.service.schedule;
 import com.shield.chepaipark.service.CarWhiteListService;
 import com.shield.domain.Region;
 import com.shield.domain.ShipPlan;
+import com.shield.domain.enumeration.ParkingConnectMethod;
 import com.shield.domain.enumeration.RecordType;
 import com.shield.repository.RegionRepository;
 import com.shield.repository.ShipPlanRepository;
+import com.shield.service.ShipPlanService;
 import com.shield.service.WxMpMsgService;
 import com.shield.service.dto.ShipPlanDTO;
 import com.shield.service.mapper.ShipPlanMapper;
@@ -18,6 +20,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.shield.config.Constants.LEAVE_ALERT_TIME_AFTER_LOAD_END;
@@ -36,18 +39,22 @@ public class ShipPlanScheduleService {
 
     private final CarWhiteListService carWhiteListService;
 
+    private final ShipPlanService shipPlanService;
+
     @Autowired
     public ShipPlanScheduleService(
         RegionRepository regionRepository,
         ShipPlanRepository shipPlanRepository,
         WxMpMsgService wxMpMsgService,
         ShipPlanMapper shipPlanMapper,
-        CarWhiteListService carWhiteListService) {
+        CarWhiteListService carWhiteListService,
+        ShipPlanService shipPlanService) {
         this.regionRepository = regionRepository;
         this.shipPlanRepository = shipPlanRepository;
         this.wxMpMsgService = wxMpMsgService;
         this.shipPlanMapper = shipPlanMapper;
         this.carWhiteListService = carWhiteListService;
+        this.shipPlanService = shipPlanService;
     }
 
     @Scheduled(fixedRate = 60 * 1000)
@@ -68,7 +75,6 @@ public class ShipPlanScheduleService {
                     wxMpMsgService.sendLoadStartAlertMsgToWxUser(plan, region.getLoadAlertTime());
                 }
             }
-
 
             Long defaultLeaveTime = region.getLeaveAlertTime() > 0 ? region.getLeaveAlertTime() : LEAVE_ALERT_TIME_AFTER_LOAD_END;
             List<ShipPlanDTO> shipPlanDTOs = shipPlanRepository
@@ -93,15 +99,21 @@ public class ShipPlanScheduleService {
      */
     @Scheduled(cron = "0 1 0 * * *")
     public void autoExpireShipPlan() {
+        Map<String, Region> regions = regionRepository.findAll().stream().collect(Collectors.toMap(Region::getName, it -> it));
         ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
-        List<ShipPlan> shipPlans = shipPlanRepository.findAllNeedToExpire(today);
+        List<ShipPlanDTO> shipPlans = shipPlanRepository.findAllNeedToExpire(today).stream().map(shipPlanMapper::toDto).collect(Collectors.toList());
         if (!shipPlans.isEmpty()) {
             log.info("Find {} ShipPlan in status 1, should be expired");
-            for (ShipPlan shipPlan : shipPlans) {
-                shipPlan.setAuditStatus(4);
-                shipPlan.setUpdateTime(ZonedDateTime.now());
+            for (ShipPlanDTO plan : shipPlans) {
+                if (regions.containsKey(plan.getDeliverPosition())) {
+                    Region region = regions.get(plan.getDeliverPosition());
+                    if (region.isOpen() && !region.getParkingConnectMethod().equals(ParkingConnectMethod.HUA_CHAN_API)) {
+                        plan.setAuditStatus(4);
+                        plan.setUpdateTime(ZonedDateTime.now());
+                        shipPlanService.save(plan);
+                    }
+                }
             }
-            shipPlanRepository.saveAll(shipPlans);
         }
     }
 }

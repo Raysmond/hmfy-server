@@ -83,10 +83,25 @@ public class PlanEventListener {
             if (old.getLoadingStartTime() == null && updated.getLoadingStartTime() != null) {
                 afterLoadingStart(old, updated);
             }
+
+            if (!old.getAuditStatus().equals(1) && updated.getAuditStatus().equals(4)) {
+                afterShipPlanExpired(updated);
+            }
         }
 
         if (old == null) {
             afterShipPlanCreated(updated);
+        }
+    }
+
+    private void afterShipPlanExpired(ShipPlanDTO after) {
+        log.info("TRIGGER afterShipPlanExpired...");
+        RegionDTO region = regionService.findByName(after.getDeliverPosition());
+        if (region != null && region.isOpen()) {
+            appointmentService.updateStatusAfterCancelShipPlan(after.getApplyId());
+            if (region.isAutoAppointment()) {
+                carWhiteListManager.deleteCarWhiteList(after);
+            }
         }
     }
 

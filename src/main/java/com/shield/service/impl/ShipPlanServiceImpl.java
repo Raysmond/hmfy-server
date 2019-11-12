@@ -37,6 +37,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.shield.config.Constants.REGION_ID_HUACHAN;
+
 /**
  * Service Implementation for managing {@link ShipPlan}.
  */
@@ -156,6 +158,9 @@ public class ShipPlanServiceImpl implements ShipPlanService {
 
         ZonedDateTime begin = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
         ZonedDateTime end = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).plusDays(1);
+        if (regionId.equals(REGION_ID_HUACHAN) && ZonedDateTime.now().getHour() >= 22) {
+            end = end.plusHours(1);
+        }
         List<ShipPlan> plans = shipPlanRepository.findAvailableByTruckNumber(truckNumber, regionDTO.getName(), begin, end);
 
         if (!CollectionUtils.isEmpty(plans)) {
@@ -197,19 +202,30 @@ public class ShipPlanServiceImpl implements ShipPlanService {
             if (appointmentDTOS.containsKey(item.getPlan().getApplyId())) {
                 item.setAppointment(appointmentDTOS.get(item.getPlan().getApplyId()));
             }
+            RegionDTO regionDTO = regionService.findByName(item.getPlan().getDeliverPosition());
 
-            ZonedDateTime dt = item.getPlan().getDeliverTime().plusSeconds(1L);
+            LocalDate deliverDay = item.getPlan().getDeliverTime().toLocalDate();
+            LocalDate today = LocalDate.now();
+            LocalDate tomorrow = LocalDate.now().plusDays(1);
+            if (regionDTO != null && regionDTO.getId().equals(REGION_ID_HUACHAN)) {
+                if (ZonedDateTime.now().getHour() >= 22) {
+                }
+            }
             if (item.getAppointment() == null) {
-                if (dt.isAfter(begin) && dt.isBefore(end)) {
+                if (deliverDay.equals(today)) {
                     item.setStatus("可预约");
-                } else if (dt.isAfter(end)) {
+                } else if (deliverDay.equals(tomorrow)){
                     item.setStatus("未开始");
                 } else {
                     item.setStatus("预约日期失效");
                 }
+                if (regionDTO != null && regionDTO.getId().equals(REGION_ID_HUACHAN)) {
+                    if (ZonedDateTime.now().getHour() >= 22 && deliverDay.equals(tomorrow)) {
+                        item.setStatus("可预约");
+                    }
+                }
             } else {
                 AppointmentStatus status = item.getAppointment().getStatus();
-                RegionDTO regionDTO = regionService.findOne(item.getAppointment().getRegionId()).get();
                 if (item.getAppointment().getStartTime() != null) {
 //                    item.setMaxAllowInTime(item.getAppointment().getStartTime().plusSeconds(regionDTO.getValidTime()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
                     item.setMaxAllowInTime(item.getAppointment().getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
@@ -227,7 +243,7 @@ public class ShipPlanServiceImpl implements ShipPlanService {
                     } else if (status == AppointmentStatus.LEAVE) {
                         item.setStatus("已离厂");
                     } else if (status == AppointmentStatus.START_CHECK) {
-                        item.setStatus("预约中");
+                        item.setStatus("待审批");
                     }
                 }
             }

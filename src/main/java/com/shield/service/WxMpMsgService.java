@@ -110,7 +110,7 @@ public class WxMpMsgService {
 
     @Async
     public void sendAppointmentSuccessMsg(AppointmentDTO appointment) {
-        if (appointment.getUserId() == null || (appointment.isVip() != null && appointment.isVip())) {
+        if (appointment.getUserId() == null) {
             return;
         }
         try {

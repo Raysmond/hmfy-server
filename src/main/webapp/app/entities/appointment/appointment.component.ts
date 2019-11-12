@@ -36,7 +36,7 @@ export class AppointmentComponent implements OnInit, OnDestroy {
 
   searchForm = this.fb.group({
     query: null,
-    valid: null,
+    valid: true,
     status: null,
     regionId: null
   });

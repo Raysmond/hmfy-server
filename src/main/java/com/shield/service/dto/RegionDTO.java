@@ -43,6 +43,7 @@ public class RegionDTO implements Serializable {
     private Integer nextQuotaWaitTime = 0;
     private Long statusStart = 0L;
     private Long statusEnter = 0L;
+    private Long statusStartCheck = 0L;
     private Integer nextQuotaNumber = 0;
     private Long statusWait = 0L;
     private Boolean userInWaitingList = Boolean.FALSE;
@@ -303,6 +304,14 @@ public class RegionDTO implements Serializable {
         this.leaveAlertTime = leaveAlertTime;
     }
 
+    public Long getStatusStartCheck() {
+        return statusStartCheck;
+    }
+
+    public void setStatusStartCheck(Long statusStartCheck) {
+        this.statusStartCheck = statusStartCheck;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -344,4 +353,5 @@ public class RegionDTO implements Serializable {
             ", updateTime='" + getUpdateTime() + "'" +
             "}";
     }
+
 }

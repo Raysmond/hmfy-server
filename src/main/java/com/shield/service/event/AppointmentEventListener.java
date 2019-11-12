@@ -32,6 +32,8 @@ public class AppointmentEventListener {
 
     private final CarWhiteListManager carWhiteListManager;
 
+    private final AppointmentService appointmentService;
+
     @Autowired
     public AppointmentEventListener(
         ShipPlanService shipPlanService,
@@ -39,13 +41,14 @@ public class AppointmentEventListener {
         WxMpMsgService wxMpMsgService,
         PenaltyService penaltyService,
         RegionService regionService,
-        CarWhiteListManager carWhiteListManager) {
+        CarWhiteListManager carWhiteListManager, AppointmentService appointmentService) {
         this.shipPlanService = shipPlanService;
         this.redisLongTemplate = redisLongTemplate;
         this.wxMpMsgService = wxMpMsgService;
         this.penaltyService = penaltyService;
         this.regionService = regionService;
         this.carWhiteListManager = carWhiteListManager;
+        this.appointmentService = appointmentService;
     }
 
     @Async
@@ -58,6 +61,10 @@ public class AppointmentEventListener {
         if (before != null) {
             if (before.getStatus() == AppointmentStatus.ENTER && after.getStatus() == AppointmentStatus.LEAVE) {
                 afterAppointmentLeave(before, after);
+            }
+
+            if (before.getStatus() == AppointmentStatus.START && after.getStatus() == AppointmentStatus.ENTER) {
+                afterAppointmentEnter(before, after);
             }
 
             if (before.getStatus() == AppointmentStatus.START && after.getStatus() == AppointmentStatus.EXPIRED) {
@@ -95,6 +102,19 @@ public class AppointmentEventListener {
             redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS, after.getId());
         }
 
+    }
+
+    private void afterAppointmentEnter(AppointmentDTO before, AppointmentDTO after) {
+        log.info("TRIGGER afterAppointmentEnter...");
+        if (after.getApplyId() != null) {
+            ShipPlanDTO plan = shipPlanService.findOneByApplyId(after.getApplyId());
+            if (plan.getAuditStatus().equals(4)) {
+                // 如果计划过期了，则将这个预约作废。此时他进行的应该是下一个计划
+                after.setValid(false);
+                log.info("Appointment in ENTER status but plan is expired, set valid to false, truckNumber: {}, appointmentId: {}, applyId: {}", after.getLicensePlateNumber(), after.getId(), after.getApplyId());
+                appointmentService.save(after);
+            }
+        }
     }
 
     private void afterAppointmentLeave(AppointmentDTO before, AppointmentDTO after) {

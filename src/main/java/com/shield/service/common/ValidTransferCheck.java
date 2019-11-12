@@ -25,7 +25,7 @@ public class ValidTransferCheck {
 
                 ValidTranfers validTranfers = field.getAnnotation(ValidTranfers.class);
                 for (ValidTransfer validTransfer : validTranfers.tranfers()) {
-                    System.out.println(field.getName() + ": before: " + validTransfer.before() + ", after: " + Joiner.on(",").join(validTransfer.after()));
+//                    System.out.println(field.getName() + ": before: " + validTransfer.before() + ", after: " + Joiner.on(",").join(validTransfer.after()));
                     if (validTransfer.before().equals(beforeValue)) {
                         boolean contains = Lists.newArrayList(validTransfer.after()).contains(afterValue);
                         if ((contains && validTransfer.negtive()) || (!contains && !validTransfer.negtive())) {

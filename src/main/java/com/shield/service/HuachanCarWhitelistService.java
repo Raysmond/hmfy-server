@@ -196,8 +196,12 @@ public class HuachanCarWhitelistService {
         List<ShipPlan> shipPlan = shipPlanRepository.findByApplyIdIn(Lists.newArrayList(appointmentDTO.getApplyId()));
         RegisterCarInfo registerCarInfo = new RegisterCarInfo();
         registerCarInfo.setCompany_name(shipPlan.isEmpty() ? "" : shipPlan.get(0).getCompany());
-        registerCarInfo.setEnter_time(ZonedDateTime.now().plusMinutes(3).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        registerCarInfo.setOut_time(ZonedDateTime.now().plusHours(region.getValidTime()).plusMinutes(3).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))); // 最晚进厂时间
+        ZonedDateTime enterTimeStart = ZonedDateTime.now().plusMinutes(3);
+        if (appointmentDTO.getStartTime() != null && appointmentDTO.getStartTime().isAfter(enterTimeStart)) {
+            enterTimeStart = appointmentDTO.getStartTime();
+        }
+        registerCarInfo.setEnter_time(enterTimeStart.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        registerCarInfo.setOut_time(enterTimeStart.plusHours(region.getValidTime()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))); // 最晚进厂时间
         registerCarInfo.setLicense(appointmentDTO.getLicensePlateNumber());
         registerCarInfo.setDriver(appointmentDTO.getDriver());
         if (StringUtils.isNotBlank(appointmentDTO.getUserLogin())) {
@@ -296,7 +300,9 @@ public class HuachanCarWhitelistService {
                             appointment.getLicensePlateNumber(), appointment.getHsCode(), check.getBill_status(), check.getBill_code());
                         if (check.bill_status == 2) {
                             appointment.setStatus(START);
-                            appointment.setStartTime(ZonedDateTime.now());
+                            if (appointment.getStartTime() != null && appointment.getStartTime().isBefore(ZonedDateTime.now())) {
+                                appointment.setStartTime(ZonedDateTime.now());
+                            }
                             appointment.setUpdateTime(ZonedDateTime.now());
                             changedAppointments.add(appointment);
 
@@ -569,6 +575,7 @@ public class HuachanCarWhitelistService {
                     "&$filter=IS_DELETE+eq+false+" +
                     "and+RECORD_YMD+ge+" + lastDay + "+" +
                     "and+RECORD_YMD+le+" + today +
+//                    "and+MG_NO+eq+\"7#\"" +
                     "&_=" + ZonedDateTime.now().toEpochSecond();
 
             String queryApi = api + param;

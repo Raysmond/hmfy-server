@@ -18,6 +18,7 @@ import com.shield.service.event.AppointmentChangedEvent;
 import com.shield.service.mapper.AppointmentMapper;
 import com.shield.service.mapper.RegionMapper;
 import com.shield.service.mapper.ShipPlanMapper;
+import com.shield.web.rest.errors.BadRequestAlertException;
 import com.shield.web.rest.vm.AppointmentStat;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -218,6 +220,48 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    public AppointmentDTO makeAppointmentForTomorrow(RegionDTO region, ShipPlanDTO plan, AppointmentDTO appointment) {
+        appointment.setRegionId(region.getId());
+        if (appointment.getUserId() == null) {
+            Optional<User> user = userService.getUserWithAuthorities();
+            if (user.isPresent()) {
+                appointment.setUserId(user.get().getId());
+            }
+        }
+        appointment.setStatus(AppointmentStatus.CREATE);
+        ZonedDateTime tomorrow = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).plusDays(1);
+        List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), ZonedDateTime.now().minusHours(24), ZonedDateTime.now().plusDays(1));
+        appointments = appointments.stream()
+            .filter(it -> it.getStartTime() != null
+                && it.getStartTime().isAfter(tomorrow)
+                && it.isValid()
+                && (it.getStatus().equals(AppointmentStatus.START) || it.getStatus().equals(AppointmentStatus.START_CHECK) || it.getStatus().equals(AppointmentStatus.ENTER)))
+            .collect(Collectors.toList());
+        if (appointments.size() < region.getQuota() * 2) {
+            if (appointments.size() < region.getQuota()) {
+                // 上半夜
+                appointment.setStartTime(tomorrow.plusSeconds(1));
+            } else {
+                // 下半夜
+                appointment.setStartTime(tomorrow.plusHours(3));
+            }
+            appointment.setStatus(AppointmentStatus.START_CHECK);
+            appointment.setValid(true);
+            appointment.setUpdateTime(ZonedDateTime.now());
+            appointment.setNumber(generateAppointmentNumber(region.getId()));
+            AppointmentDTO saved = this.save(appointment);
+            appointment.setId(saved.getId());
+            log.info("[Tomorrow] Appointment [{}] made success at region ({}, {}), number: {}, queue number: {}, truckNumber: {}",
+                appointment.getId(), region.getId(), region.getName(), appointment.getNumber(), appointment.getQueueNumber(), appointment.getLicensePlateNumber());
+            return saved;
+        } else {
+            appointment.setValid(false);
+            throw new BadRequestAlertException("当前已无预约额度", "appointment", "");
+//            return appointment;
+        }
+    }
+
+    @Override
     public AppointmentDTO makeAppointment(Long regionId, AppointmentDTO appointment) {
         Region region = regionRepository.getOne(regionId);
         appointment.setRegionId(regionId);
@@ -227,12 +271,13 @@ public class AppointmentServiceImpl implements AppointmentService {
                 appointment.setUserId(user.get().getId());
             }
         }
+
         appointment.setValid(true);
         appointment.setStatus(AppointmentStatus.CREATE);
 
         boolean enableQueue = region.getQueueQuota() != null && region.getQueueQuota() > 0;
         if (enableQueue && !appointment.isVip()) {
-            Long waitCount = appointmentRepository.countAllWaitByRegionIdAndCreateTime(regionId, ZonedDateTime.now().minusHours(12));
+            Long waitCount = appointmentRepository.countAllWaitByRegionIdAndCreateTime(regionId, ZonedDateTime.now().minusHours(24));
             if (waitCount > 0) {
                 if (region.getQueueQuota() > waitCount) {
                     appointment.setStatus(AppointmentStatus.WAIT);
@@ -245,7 +290,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         if (!tryMakeAppointment(appointment)) {
-            if (enableQueue && region.getQueueQuota() > appointmentRepository.countAllWaitByRegionIdAndCreateTime(regionId, ZonedDateTime.now().minusHours(12))) {
+            if (enableQueue && region.getQueueQuota() > appointmentRepository.countAllWaitByRegionIdAndCreateTime(regionId, ZonedDateTime.now().minusHours(24))) {
                 appointment.setStatus(AppointmentStatus.WAIT);
                 appointment.setQueueNumber(generateQueueNumber(regionId));
             } else {
@@ -278,6 +323,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         region.setRemainQuota(Math.max((int) (total - current), 0));
         region.setQuota((int) total);
         region.setStatusStart(appointments.stream().filter(it -> it.getStatus() == AppointmentStatus.START).count());
+        region.setStatusStartCheck(appointments.stream().filter(it -> it.getStatus() == AppointmentStatus.START_CHECK).count());
         region.setStatusEnter(appointments.stream().filter(it -> it.getStatus() == AppointmentStatus.ENTER).count());
     }
 
@@ -575,9 +621,9 @@ public class AppointmentServiceImpl implements AppointmentService {
             appointments.sort(Comparator.comparing(Appointment::getCreateTime).reversed());
             AppointmentDTO appointment = appointmentMapper.toDto(appointments.get(0));
             if (appointment.isValid()
-                && (appointment.getStatus() == AppointmentStatus.START
-                || appointment.getStatus() == AppointmentStatus.START_CHECK
-                || appointment.getStatus() == AppointmentStatus.WAIT)
+                && (appointment.getStatus() == AppointmentStatus.ENTER
+                || appointment.getStatus() == AppointmentStatus.WAIT
+                || appointment.getStatus() == AppointmentStatus.START)
             ) {
                 appointment.setValid(Boolean.FALSE);
                 appointment.setUpdateTime(ZonedDateTime.now());

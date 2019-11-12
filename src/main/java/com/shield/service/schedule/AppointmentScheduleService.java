@@ -123,7 +123,7 @@ public class AppointmentScheduleService {
 
             // Appointment was expired
             List<AppointmentDTO> appointmentsShouldExpire = appointmentRepository
-                .findAllByStatusAndStartTime(region.getId(), AppointmentStatus.START, Boolean.TRUE, now.minusHours(12)).stream()
+                .findAllByStatusAndStartTime(region.getId(), AppointmentStatus.START, Boolean.TRUE, now.minusHours(24)).stream()
                 .filter(it -> !it.isVip() && it.getStartTime() != null)
                 .filter(it -> it.getStartTime().plusHours(validHours).isBefore(ZonedDateTime.now()))
                 .map(appointmentMapper::toDto)
@@ -135,7 +135,7 @@ public class AppointmentScheduleService {
 
             // Set appointment status to LEAVE after a long time
             List<AppointmentDTO> appointments = appointmentRepository
-                .findAllByStatusAndStartTime(region.getId(), AppointmentStatus.ENTER, Boolean.TRUE, now.minusHours(12)).stream()
+                .findAllByStatusAndStartTime(region.getId(), AppointmentStatus.ENTER, Boolean.TRUE, now.minusHours(24)).stream()
                 .filter(it -> it.getApplyId() != null)
                 .map(appointmentMapper::toDto)
                 .collect(Collectors.toList());
