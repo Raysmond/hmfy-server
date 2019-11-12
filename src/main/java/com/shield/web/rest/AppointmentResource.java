@@ -106,15 +106,21 @@ public class AppointmentResource {
         if (appointmentDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
-        if (appointmentDTO.getStatus() == AppointmentStatus.ENTER && appointmentDTO.getEnterTime() == null) {
-            appointmentDTO.setEnterTime(ZonedDateTime.now());
+        AppointmentDTO old = appointmentService.findOne(appointmentDTO.getId()).get();
+        // 后台只能修改以下字段
+        old.setValid(appointmentDTO.isValid());
+        old.setVip(appointmentDTO.isVip());
+        old.setStatus(appointmentDTO.getStatus());
+
+        if (old.getStatus() == AppointmentStatus.ENTER && old.getEnterTime() == null) {
+            old.setEnterTime(ZonedDateTime.now());
         }
-        if (appointmentDTO.getStatus() == AppointmentStatus.LEAVE && appointmentDTO.getLeaveTime() == null) {
-            appointmentDTO.setLeaveTime(ZonedDateTime.now());
+        if (old.getStatus() == AppointmentStatus.LEAVE && old.getLeaveTime() == null) {
+            old.setLeaveTime(ZonedDateTime.now());
         }
-        AppointmentDTO result = appointmentService.save(appointmentDTO);
+        AppointmentDTO result = appointmentService.save(old);
         return ResponseEntity.ok()
-            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, appointmentDTO.getId().toString()))
+            .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, old.getId().toString()))
             .body(result);
     }
 

@@ -1,6 +1,7 @@
 package com.shield.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.shield.service.event.AppointmentEntityListener;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -18,6 +19,7 @@ import com.shield.domain.enumeration.AppointmentStatus;
 @Entity
 @Table(name = "appointment")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+//@EntityListeners(value = AppointmentEntityListener.class)
 public class Appointment implements Serializable {
 
     private static final long serialVersionUID = 1L;
