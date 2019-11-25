@@ -47,7 +47,27 @@ spring:
   #        prepStmtCacheSize: 250
   #        prepStmtCacheSqlLimit: 2048
   #        useServerPrepStmts: true
-
+  db2-datasource:
+    driverClassName: com.ibm.db2.jcc.DB2Driver
+    jdbc-url: jdbc:db2://localhost:50000/Icprod
+    username: mgapp
+    password: pass@word1
+    poolName: Hikari
+    auto-commit: false
+  db2-jpa:
+    database-platform: org.hibernate.dialect.DB2Dialect
+    show-sql: true
+    hibernate:
+      naming.implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
+      naming.physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+    properties:
+      hibernate.id.new_generator_mappings: true
+      hibernate.connection.provider_disables_autocommit: true
+      hibernate.cache.use_second_level_cache: false
+      hibernate.cache.use_query_cache: false
+      hibernate.generate_statistics: false
+      hibernate.jdbc.time_zone: Asia/Shanghai
+      hibernate.dialect: org.hibernate.dialect.DB2Dialect
   mysql-datasource:
     jdbc-url: jdbc:mysql://localhost:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai
     #    jdbc-url: jdbc:mysql://localhost:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC

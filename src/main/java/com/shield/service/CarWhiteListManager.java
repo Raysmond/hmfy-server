@@ -50,13 +50,14 @@ public class CarWhiteListManager {
         if (isRegionOpen(region)) {
             switch (region.getParkingConnectMethod()) {
                 case HUA_CHAN_API:
-                    if (appointmentDTO.getStatus() == AppointmentStatus.START_CHECK && StringUtils.isBlank(appointmentDTO.getHsCode())) {
-                        try {
-                            huachanCarWhitelistService.registerCar(appointmentDTO);
-                        } catch (JsonProcessingException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    // 由定时任务进行预约
+//                    if (appointmentDTO.getStatus() == AppointmentStatus.START_CHECK && StringUtils.isBlank(appointmentDTO.getHsCode())) {
+//                        try {
+//                            huachanCarWhitelistService.registerCar(appointmentDTO);
+//                        } catch (JsonProcessingException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
                     break;
                 case TCP:
                     redisLongTemplate.opsForSet().remove(REDIS_KEY_DELETE_CAR_WHITELIST, appointmentDTO.getId());

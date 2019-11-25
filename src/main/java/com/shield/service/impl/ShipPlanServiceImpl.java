@@ -203,14 +203,10 @@ public class ShipPlanServiceImpl implements ShipPlanService {
                 item.setAppointment(appointmentDTOS.get(item.getPlan().getApplyId()));
             }
             RegionDTO regionDTO = regionService.findByName(item.getPlan().getDeliverPosition());
-
             LocalDate deliverDay = item.getPlan().getDeliverTime().toLocalDate();
             LocalDate today = LocalDate.now();
             LocalDate tomorrow = LocalDate.now().plusDays(1);
-            if (regionDTO != null && regionDTO.getId().equals(REGION_ID_HUACHAN)) {
-                if (ZonedDateTime.now().getHour() >= 22) {
-                }
-            }
+
             if (item.getAppointment() == null) {
                 if (deliverDay.equals(today)) {
                     item.setStatus("可预约");

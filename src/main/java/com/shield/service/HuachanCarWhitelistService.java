@@ -256,7 +256,8 @@ public class HuachanCarWhitelistService {
             for (Appointment appointment : appointmentsNotSend) {
                 try {
                     this.registerCar(appointmentMapper.toDto(appointment));
-                } catch (JsonProcessingException e) {
+                    Thread.sleep(1000);
+                } catch (JsonProcessingException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }
@@ -293,9 +294,6 @@ public class HuachanCarWhitelistService {
                             appointment.getLicensePlateNumber(), appointment.getHsCode(), check.getBill_status(), check.getBill_code());
                         if (check.bill_status == 2) {
                             appointment.setStatus(START);
-                            if (appointment.getStartTime() != null && appointment.getStartTime().isBefore(ZonedDateTime.now())) {
-                                appointment.setStartTime(ZonedDateTime.now());
-                            }
                             appointment.setUpdateTime(ZonedDateTime.now());
                             changedAppointments.add(appointment);
 

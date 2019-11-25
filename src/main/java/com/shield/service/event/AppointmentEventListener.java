@@ -80,10 +80,6 @@ public class AppointmentEventListener {
             }
         }
 
-        if (after.getStatus() == AppointmentStatus.START_CHECK && StringUtils.isBlank(after.getHsCode())) {
-            carWhiteListManager.registerCarWhiteList(after);
-        }
-
         if (after.getStatus() == AppointmentStatus.START && (before == null || before.getStatus() != AppointmentStatus.START)) {
             // 预约成功
             RegionDTO region = regionService.findOne(after.getRegionId()).get();
