@@ -86,8 +86,12 @@ public class AppointmentEventListener {
             if (after.getApplyId() != null) {
                 ShipPlanDTO plan = shipPlanService.findOneByApplyId(after.getApplyId());
                 plan.setAllowInTime(after.getStartTime().plusHours(region.getValidTime()));
+                if (after.getNumber() != null) {
+                    plan.setAppointmentNumber(after.getNumber().toString());
+                }
                 shipPlanService.save(plan);
             }
+//            shipPlanService.afterAppointmentMadeSuccess(after);
             carWhiteListManager.registerCarWhiteList(after);
             wxMpMsgService.sendAppointmentSuccessMsg(after);
         }
@@ -129,6 +133,16 @@ public class AppointmentEventListener {
 
         // 发送过期消息
         wxMpMsgService.sendAppointmentExpireMsg(appointment);
+
+//        shipPlanService.afterAppointmentCanceledOrExpired(appointment);
+
+        if (appointment.getApplyId() != null) {
+            ShipPlanDTO plan = shipPlanService.findOneByApplyId(appointment.getApplyId());
+            if (plan != null && appointment.getNumber() != null) {
+                plan.setAppointmentNumber(null);
+            }
+            shipPlanService.save(plan);
+        }
     }
 
     private void afterAppointmentInvalid(AppointmentDTO before, AppointmentDTO after) {
@@ -144,6 +158,15 @@ public class AppointmentEventListener {
             }
 
             wxMpMsgService.sendAppointmentCancelMsg(after);
+//            shipPlanService.afterAppointmentCanceledOrExpired(after);
+
+            if (after.getApplyId() != null) {
+                ShipPlanDTO plan = shipPlanService.findOneByApplyId(after.getApplyId());
+                if (plan != null && after.getNumber() != null) {
+                    plan.setAppointmentNumber(null);
+                }
+                shipPlanService.save(plan);
+            }
         }
     }
 
@@ -172,6 +195,12 @@ public class AppointmentEventListener {
             }
         }
 
-
+        if (after.getApplyId() != null) {
+            ShipPlanDTO plan = shipPlanService.findOneByApplyId(after.getApplyId());
+            if (plan != null && after.getNumber() != null) {
+                plan.setAppointmentNumber(null);
+            }
+            shipPlanService.save(plan);
+        }
     }
 }

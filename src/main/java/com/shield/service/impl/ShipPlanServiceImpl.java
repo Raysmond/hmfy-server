@@ -26,6 +26,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -210,7 +211,7 @@ public class ShipPlanServiceImpl implements ShipPlanService {
             if (item.getAppointment() == null) {
                 if (deliverDay.equals(today)) {
                     item.setStatus("可预约");
-                } else if (deliverDay.equals(tomorrow)){
+                } else if (deliverDay.equals(tomorrow)) {
                     item.setStatus("未开始");
                 } else {
                     item.setStatus("预约日期失效");
@@ -297,5 +298,31 @@ public class ShipPlanServiceImpl implements ShipPlanService {
         List<String> regionNames = regionRepository.findAll().stream().map(Region::getName).collect(Collectors.toList());
         stat.setRegion(Joiner.on(",").join(regionNames));
         return stat;
+    }
+
+    @Override
+    public void afterAppointmentMadeSuccess(AppointmentDTO appointmentDTO) {
+        if (appointmentDTO.getApplyId() != null && appointmentDTO.getNumber() != null) {
+            ShipPlan shipPlan = shipPlanRepository.findOneByApplyId(appointmentDTO.getApplyId());
+            if (shipPlan != null) {
+                log.info("Need to update appointment number to ShipPlan for truckNumber {}", shipPlan.getTruckNumber());
+                ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(shipPlan);
+                shipPlanDTO.setAppointmentNumber(appointmentDTO.getNumber().toString());
+                this.save(shipPlanDTO);
+            }
+        }
+    }
+
+    @Override
+    public void afterAppointmentCanceledOrExpired(AppointmentDTO appointmentDTO) {
+        if (appointmentDTO.getApplyId() != null && appointmentDTO.getNumber() != null) {
+            ShipPlan shipPlan = shipPlanRepository.findOneByApplyId(appointmentDTO.getApplyId());
+            if (shipPlan != null && shipPlan.getAppointmentNumber() != null) {
+                log.info("Need to remove appointment number to ShipPlan for truckNumber {}", shipPlan.getTruckNumber());
+                ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(shipPlan);
+                shipPlanDTO.setAppointmentNumber(null);
+                this.save(shipPlanDTO);
+            }
+        }
     }
 }

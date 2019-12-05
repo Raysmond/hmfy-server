@@ -63,4 +63,7 @@ public class VehDelivPlan {
 
     @Column(name = "fd_WeigherNo")
     private String weigherNo;
+
+    @Column(name = "fd_OrderNumber")
+    private String orderNumber;
 }

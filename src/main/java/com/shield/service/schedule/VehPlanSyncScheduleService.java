@@ -178,6 +178,7 @@ public class VehPlanSyncScheduleService {
                         vehDelivPlan.setGateTime(plan.getGateTime());
                         vehDelivPlan.setLeaveTime(plan.getLeaveTime());
                         vehDelivPlan.setAllowInTime(plan.getAllowInTime());
+                        vehDelivPlan.setOrderNumber(plan.getAppointmentNumber());
                     }
                     vehDelivPlanRepository.saveAll(vehDelivPlans);
                     log.info("Updated {} VehDelivPlan data with ShipPlan data, where apply_id = {} ", vehDelivPlans.size(), plan.getApplyId());

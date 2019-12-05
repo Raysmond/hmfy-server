@@ -104,6 +104,9 @@ public class ShipPlan implements Serializable {
     @JsonIgnoreProperties("shipPlans")
     private User user;
 
+    @Column(name = "appointment_number")
+    private String appointmentNumber;
+
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
         return id;
@@ -397,6 +400,15 @@ public class ShipPlan implements Serializable {
 
     public void setVip(Boolean vip) {
         this.vip = vip;
+    }
+
+
+    public String getAppointmentNumber() {
+        return appointmentNumber;
+    }
+
+    public void setAppointmentNumber(String appointmentNumber) {
+        this.appointmentNumber = appointmentNumber;
     }
 
     public User getUser() {

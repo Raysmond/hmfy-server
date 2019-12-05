@@ -76,6 +76,8 @@ public class ShipPlanDTO implements Serializable {
 
     private String weigherNo;
 
+    private String appointmentNumber;
+
     public Long getId() {
         return id;
     }
@@ -276,6 +278,14 @@ public class ShipPlanDTO implements Serializable {
         this.userLogin = userLogin;
     }
 
+    public String getAppointmentNumber() {
+        return appointmentNumber;
+    }
+
+    public void setAppointmentNumber(String appointmentNumber) {
+        this.appointmentNumber = appointmentNumber;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -323,6 +333,7 @@ public class ShipPlanDTO implements Serializable {
             ", netWeight=" + getNetWeight() +
             ", weigherNo='" + getWeigherNo() + "'" +
             ", vip='" + isVip() + "'" +
+            ", appointmentNumber='" + getAppointmentNumber() + "'" +
             ", user=" + getUserId() +
             ", user='" + getUserLogin() + "'" +
             "}";

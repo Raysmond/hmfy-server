@@ -64,4 +64,8 @@ public interface ShipPlanService {
     ShipPlanDTO findOneByApplyId(Long applyId);
 
     WeightStat countWeightStat(String region, ZonedDateTime begin, ZonedDateTime end);
+
+    void afterAppointmentMadeSuccess(AppointmentDTO appointmentDTO);
+    
+    void afterAppointmentCanceledOrExpired(AppointmentDTO appointmentDTO);
 }

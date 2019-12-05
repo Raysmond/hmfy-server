@@ -349,16 +349,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 
-
-    /**
-     * 取号满额时，估计下一个号释放的时间
-     */
-    @Override
-    public Integer calcNextQuotaWaitingTime(RegionDTO region) {
-        List<Appointment> appointments = appointmentRepository.findAllByRegionIdAndUpdateTime(region.getId(), ZonedDateTime.now().minusHours(2), ZonedDateTime.now());
+    private void getAppointmentOutTime(Long regionId, Long hours, List<ZonedDateTime> outTimes) {
+        List<Appointment> appointments = appointmentRepository.findAllByRegionIdAndUpdateTime(regionId, ZonedDateTime.now().minusHours(hours), ZonedDateTime.now());
         appointments.sort(Comparator.comparing(Appointment::getUpdateTime));
-        List<Long> times = Lists.newArrayList();
-        List<ZonedDateTime> outTimes = Lists.newArrayList();
         for (Appointment appointment : appointments) {
             if (appointment.getStatus() == AppointmentStatus.LEAVE && appointment.getStartTime() != null && appointment.getLeaveTime() != null) {
                 outTimes.add(appointment.getLeaveTime());
@@ -370,20 +363,38 @@ public class AppointmentServiceImpl implements AppointmentService {
                 outTimes.add(appointment.getUpdateTime());
             }
         }
+    }
+
+
+    /**
+     * 取号满额时，估计下一个号释放的时间
+     */
+    @Override
+    public Integer calcNextQuotaWaitingTime(RegionDTO region) {
+        List<Long> times = Lists.newArrayList();
+        List<ZonedDateTime> outTimes = Lists.newArrayList();
+        getAppointmentOutTime(region.getId(), 2L, outTimes);
+        if (outTimes.size() <= 1) {
+            outTimes.clear();
+            getAppointmentOutTime(region.getId(), 12L, outTimes);
+            log.info("Change to fetch appointments in last 12 hours to calc avg leave time for regionId: {}", region.getId());
+        }
+
         Integer avgGap = 0;
         Integer lastOutGap = 0;
-        if (outTimes.size() > 0) {
-            if (outTimes.size() <= 1) {
-                return -1;
-            }
+        if (outTimes.size() > 1) {
             for (int i = 1; i < outTimes.size(); i++) {
                 times.add(outTimes.get(i).toEpochSecond() - outTimes.get(i - 1).toEpochSecond());
             }
             Double avg = times.stream().mapToInt(Long::intValue).average().orElse(Double.NaN);
             avgGap = avg.intValue();
             lastOutGap = (int) (ZonedDateTime.now().toEpochSecond() - outTimes.get(outTimes.size() - 1).toEpochSecond());
-            log.info("Calc avg wait time: {}, avg leave gap: {}, size: {}, last leave time: {}, gap: {}",
-                avgGap - lastOutGap, avgGap, outTimes.size(), outTimes.get(outTimes.size() - 1), lastOutGap);
+            log.info("Region {}, Calc avg wait time: {}, avg leave gap: {}, size: {}, last leave time: {}, gap: {}",
+                region.getId(), avgGap - lastOutGap, avgGap, outTimes.size(), outTimes.get(outTimes.size() - 1), lastOutGap);
+        } else {
+            log.info("Region {}, set avg wait time to default value 16 min", region.getId());
+            avgGap = 16 * 60;
+            lastOutGap = 0;
         }
 
         Integer nextWaitTime = avgGap - lastOutGap;
