@@ -158,34 +158,43 @@ public class VehPlanSyncScheduleService {
         if (shipPlanIds != null && shipPlanIds.size() > 0) {
             log.info("Find {} ShipPlan ids, start to sync data to SQL_SERVER", shipPlanIds.size());
             for (Long shipPlanId : shipPlanIds) {
-                Optional<ShipPlan> shipPlan = shipPlanRepository.findById(shipPlanId);
-                if (shipPlan.isPresent() && !StringUtils.isEmpty(shipPlan.get().getApplyId())) {
-                    ShipPlan plan = shipPlan.get();
-                    log.info("Start to sync data of ShipPlan [id={}] to SQL_SERVER, data: {}", shipPlanId, plan.toString());
-                    List<VehDelivPlan> vehDelivPlans = vehDelivPlanRepository.findAllByApplyId(plan.getApplyId(), today, ZonedDateTime.now());
-                    if (vehDelivPlans.size() > 1) {
-                        log.warn("Find multiple ({}) VehDelivPlan where apply_id = {}", vehDelivPlans.size(), plan.getApplyId());
-                    }
-                    if (CollectionUtils.isEmpty(vehDelivPlans)) {
+                try {
+                    Optional<ShipPlan> shipPlan = shipPlanRepository.findById(shipPlanId);
+                    if (shipPlan.isPresent() && !StringUtils.isEmpty(shipPlan.get().getApplyId())) {
+                        ShipPlan plan = shipPlan.get();
+                        log.info("Start to sync data of ShipPlan [id={}] to SQL_SERVER, data: {}", shipPlanId, plan.toString());
+                        List<VehDelivPlan> vehDelivPlans = vehDelivPlanRepository.findAllByApplyId(plan.getApplyId(), today, ZonedDateTime.now());
+                        if (vehDelivPlans.size() > 1) {
+                            log.warn("Find multiple ({}) VehDelivPlan where apply_id = {}", vehDelivPlans.size(), plan.getApplyId());
+                        }
+                        if (CollectionUtils.isEmpty(vehDelivPlans)) {
+                            redisLongTemplate.opsForSet().remove(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, shipPlanId);
+                            continue;
+                        }
+                        if (!StringUtils.isEmpty(plan.getApplyNumber()) && plan.getApplyNumber().startsWith("FKSN")) {
+                            redisLongTemplate.opsForSet().remove(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, shipPlanId);
+                            continue;
+                        }
+                        for (VehDelivPlan vehDelivPlan : vehDelivPlans) {
+                            vehDelivPlan.setGateTime(plan.getGateTime());
+                            vehDelivPlan.setLeaveTime(plan.getLeaveTime());
+                            vehDelivPlan.setAllowInTime(plan.getAllowInTime());
+                            if (!StringUtils.isEmpty(plan.getAppointmentNumber())) {
+                                vehDelivPlan.setOrderNumber(plan.getAppointmentNumber());
+                            } else {
+                                vehDelivPlan.setOrderNumber("");
+                            }
+                        }
+                        vehDelivPlanRepository.saveAll(vehDelivPlans);
+                        log.info("Updated {} VehDelivPlan data with ShipPlan data, where apply_id = {} ", vehDelivPlans.size(), plan.getApplyId());
                         redisLongTemplate.opsForSet().remove(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, shipPlanId);
-                        continue;
-                    }
-                    if (!StringUtils.isEmpty(plan.getApplyNumber()) && plan.getApplyNumber().startsWith("FKSN")) {
-                        redisLongTemplate.opsForSet().remove(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, shipPlanId);
-                        continue;
-                    }
-                    for (VehDelivPlan vehDelivPlan : vehDelivPlans) {
-                        vehDelivPlan.setGateTime(plan.getGateTime());
-                        vehDelivPlan.setLeaveTime(plan.getLeaveTime());
-                        vehDelivPlan.setAllowInTime(plan.getAllowInTime());
-                        vehDelivPlan.setOrderNumber(plan.getAppointmentNumber());
-                    }
-                    vehDelivPlanRepository.saveAll(vehDelivPlans);
-                    log.info("Updated {} VehDelivPlan data with ShipPlan data, where apply_id = {} ", vehDelivPlans.size(), plan.getApplyId());
-                    redisLongTemplate.opsForSet().remove(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, shipPlanId);
 
-                    plan.setSyncTime(ZonedDateTime.now());
-                    shipPlanRepository.save(plan);
+                        plan.setSyncTime(ZonedDateTime.now());
+                        shipPlanRepository.save(plan);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    log.error("Failed to sync ShipPlan id:{} to SQLSERVER, skip...", shipPlanId, e);
                 }
             }
         }

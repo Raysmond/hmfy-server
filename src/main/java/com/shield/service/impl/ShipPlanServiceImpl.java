@@ -320,7 +320,7 @@ public class ShipPlanServiceImpl implements ShipPlanService {
             if (shipPlan != null && shipPlan.getAppointmentNumber() != null) {
                 log.info("Need to remove appointment number to ShipPlan for truckNumber {}", shipPlan.getTruckNumber());
                 ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(shipPlan);
-                shipPlanDTO.setAppointmentNumber(null);
+                shipPlanDTO.setAppointmentNumber("");
                 this.save(shipPlanDTO);
             }
         }
