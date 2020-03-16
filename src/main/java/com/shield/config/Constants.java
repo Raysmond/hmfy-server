@@ -2,6 +2,8 @@ package com.shield.config;
 
 import com.google.common.collect.Sets;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -11,7 +13,7 @@ public final class Constants {
 
     // Regex for acceptable logins
     public static final String LOGIN_REGEX = "^[_.@A-Za-z0-9-]*$";
-    
+
     public static final String SYSTEM_ACCOUNT = "system";
     public static final String DEFAULT_LANGUAGE = "zh-cn";
     public static final String ANONYMOUS_USER = "anonymoususer";
@@ -42,6 +44,18 @@ public final class Constants {
 
     // 四期区域ID
     public static final Long REGION_ID_HUACHAN = 2L;
+    public static final Long REGION_ID_BAOTIAN = 1L;
+    public static final Long REGION_ID_WUQI = 3L;
+
+    public static Map<Long, Integer> REGION_ID_2_AREA_ID = new HashMap<Long, Integer>() {{
+        put(REGION_ID_BAOTIAN, 1);
+        put(REGION_ID_WUQI, 4);
+    }};
+
+    public static Map<Integer, Long> AREA_ID_2_REGION_ID = new HashMap<Integer, Long>() {{
+        put(1, REGION_ID_BAOTIAN);
+        put(4, REGION_ID_WUQI);
+    }};
 
     private Constants() {
     }

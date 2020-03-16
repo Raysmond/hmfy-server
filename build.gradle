@@ -3,7 +3,7 @@ buildscript {
         mavenLocal()
         mavenCentral()
         gradlePluginPortal()
-        maven { url "http://repo.spring.io/plugins-release" }
+        maven { url "https://repo.spring.io/plugins-release" }
         maven { url "https://artifacts.alfresco.com/nexus/content/repositories/public/" }
     }
     dependencies {
@@ -68,7 +68,7 @@ eclipse {
 defaultTasks "bootRun"
 
 group = "com.shield"
-version = "1.8.9-SNAPSHOT"
+version = "1.9.1-SNAPSHOT"
 
 description = ""
 

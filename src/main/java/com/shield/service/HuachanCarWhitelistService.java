@@ -1,6 +1,5 @@
 package com.shield.service;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
@@ -98,6 +97,9 @@ public class HuachanCarWhitelistService {
 
     @Autowired
     private CarWhiteListService carWhiteListService;
+
+    @Autowired
+    private AppointmentService appointmentService;
 
     public HuachanCarWhitelistService() {
         this.restTemplate = new RestTemplate();
@@ -249,13 +251,15 @@ public class HuachanCarWhitelistService {
         if (!region.isOpen()) {
             return;
         }
-        List<Appointment> appointments = appointmentRepository.findAllByRegionId(REGION_ID_HUACHAN, START_CHECK, true, ZonedDateTime.now().minusHours(24));
-        List<Appointment> appointmentsNotSend = appointments.stream().filter(it -> StringUtils.isBlank(it.getHsCode())).collect(Collectors.toList());
+        List<AppointmentDTO> appointments = appointmentRepository
+            .findAllByRegionId(REGION_ID_HUACHAN, START_CHECK, true, ZonedDateTime.now().minusHours(24))
+            .stream().map(it -> appointmentMapper.toDto(it)).collect(Collectors.toList());
+        List<AppointmentDTO> appointmentsNotSend = appointments.stream().filter(it -> StringUtils.isBlank(it.getHsCode())).collect(Collectors.toList());
         if (appointmentsNotSend.size() > 0) {
             log.warn("Find {} appointments in START_CHECK status without hs_code, need to send...", appointmentsNotSend.size());
-            for (Appointment appointment : appointmentsNotSend) {
+            for (AppointmentDTO appointment : appointmentsNotSend) {
                 try {
-                    this.registerCar(appointmentMapper.toDto(appointment));
+                    this.registerCar(appointment);
                     Thread.sleep(1000);
                 } catch (JsonProcessingException | InterruptedException e) {
                     e.printStackTrace();
@@ -266,10 +270,10 @@ public class HuachanCarWhitelistService {
         appointments = appointments.stream().filter(it -> StringUtils.isNotBlank(it.getHsCode())).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(appointments)) {
             log.info("[HUACHAN] find {} appointments need to check register status, cars: {}",
-                appointments.size(), Joiner.on(",").join(appointments.stream().map(Appointment::getLicensePlateNumber).collect(Collectors.toList()))
+                appointments.size(), Joiner.on(",").join(appointments.stream().map(AppointmentDTO::getLicensePlateNumber).collect(Collectors.toList()))
             );
 
-            List<String> codes = appointments.stream().map(Appointment::getHsCode).collect(Collectors.toList());
+            List<String> codes = appointments.stream().map(AppointmentDTO::getHsCode).collect(Collectors.toList());
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.add("Authorization", getToken());
@@ -284,8 +288,8 @@ public class HuachanCarWhitelistService {
                         log.info("[HUACHAN] check car register status,  code: {}, bill_status: {}", check.getCode(), check.getBill_status());
                         code2Status.put(check.getCode(), check);
                     }
-                    List<Appointment> changedAppointments = Lists.newArrayList();
-                    for (Appointment appointment : appointments) {
+                    List<AppointmentDTO> changedAppointments = Lists.newArrayList();
+                    for (AppointmentDTO appointment : appointments) {
                         CheckResult check = code2Status.get(appointment.getHsCode());
                         if (check == null) {
                             continue;
@@ -298,7 +302,7 @@ public class HuachanCarWhitelistService {
                             changedAppointments.add(appointment);
 
                             // 发送预约成功消息
-                            wxMpMsgService.sendAppointmentSuccessMsg(appointmentMapper.toDto(appointment));
+//                            wxMpMsgService.sendAppointmentSuccessMsg(appointmentMapper.toDto(appointment));
                         } else if (check.bill_status == -1 || check.bill_status == 3 || check.bill_status == 4 || check.bill_status == 5) {
                             appointment.setValid(Boolean.FALSE);
                             appointment.setUpdateTime(ZonedDateTime.now());
@@ -306,7 +310,9 @@ public class HuachanCarWhitelistService {
                         }
                     }
                     if (!CollectionUtils.isEmpty(changedAppointments)) {
-                        appointmentRepository.saveAll(changedAppointments);
+                        for (AppointmentDTO appointmentDTO : appointments) {
+                            appointmentService.save(appointmentDTO);
+                        }
                     }
                 }
             } else {

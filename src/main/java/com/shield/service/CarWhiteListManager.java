@@ -102,6 +102,7 @@ public class CarWhiteListManager {
                     break;
                 case DATABASE:
                     carWhiteListService.registerCarWhiteList(
+                        region.getId(),
                         planDTO.getTruckNumber(),
                         ZonedDateTime.now(),
                         ZonedDateTime.now().plusHours(region.getValidTime()),

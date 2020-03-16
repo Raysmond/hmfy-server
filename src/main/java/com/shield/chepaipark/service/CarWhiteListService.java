@@ -44,12 +44,13 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.shield.config.Constants.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
+import static com.shield.config.Constants.*;
 import static com.shield.service.ParkingHandlerService.AUTO_DELETE_PLAN_ID_QUEUE;
 import static com.shield.service.ParkingHandlerService.REDIS_KEY_TRUCK_NUMBER_CARD_ID;
 
@@ -157,6 +158,7 @@ public class CarWhiteListService {
                 validTime = appointment.getStartTime().plusHours(DEFAULT_VIP_WHITELIST_VALID_HOURS);
             }
             registerCarWhiteList(
+                region.getId(),
                 appointment.getLicensePlateNumber(),
                 appointment.getStartTime(),
                 validTime,
@@ -173,7 +175,7 @@ public class CarWhiteListService {
         redisTemplate.opsForHash().put(REDIS_KEY_TRUCK_NUMBER_CARD_ID, k, cardId);
     }
 
-    public void registerCarWhiteList(String truckNumber, ZonedDateTime startTime, ZonedDateTime validTime, String userName) {
+    public void registerCarWhiteList(Long regionId, String truckNumber, ZonedDateTime startTime, ZonedDateTime validTime, String userName) {
         SameBarriarCard barriarCard = findOrCreateBarriarCardByTruckNumber(truckNumber);
         List<ParkCard> parkCards = parkCardRepository.findByCardNo(truckNumber);
         if (!parkCards.isEmpty()) {
@@ -200,7 +202,7 @@ public class CarWhiteListService {
         parkCard.setRemark("（通用接口新增）");
         parkCard.setFeePeriod("月");
         parkCard.setLimitDayType(0);
-        parkCard.setAreaId(-1);
+        parkCard.setAreaId(REGION_ID_2_AREA_ID.getOrDefault(regionId, -1));
         parkCard.setHcardNo(generateUniqueHcardNo());
         parkCard.setZMCarLocateCount(0);
         parkCard.setZMUsedLocateCount(0);
@@ -245,10 +247,10 @@ public class CarWhiteListService {
     private static Map<Long, GateIO> lastProcessedGateIO = Maps.newConcurrentMap();
 
     public void syncCarGateIOEvents() {
-        Map<String, Region> regions = regionRepository.findAll()
+        Map<Long, Region> regions = regionRepository.findAll()
             .stream()
             .filter(it -> it.isOpen() && it.getParkingConnectMethod() != null && it.getParkingConnectMethod().equals(ParkingConnectMethod.DATABASE))
-            .collect(Collectors.toMap(Region::getName, it -> it));
+            .collect(Collectors.toMap(Region::getId, it -> it));
         if (regions.isEmpty()) {
             return;
         }
@@ -259,6 +261,9 @@ public class CarWhiteListService {
         }
         log.info("Find {} GateIO newest history", gates.size());
         for (GateIO gate : gates) {
+            if (!AREA_ID_2_REGION_ID.containsKey(gate.getAreaId())) {
+                continue;
+            }
             if (lastProcessedGateIO.containsKey(gate.getRecordId())) {
                 GateIO last = lastProcessedGateIO.get(gate.getRecordId());
                 if (last.getUpdatedTime().equals(gate.getUpdatedTime())) {
@@ -270,8 +275,8 @@ public class CarWhiteListService {
             log.info("[DB] Start to process GateIO, RecordID: {} CardNo: {}, GateInTime: {}, GateOutTime: {}, AreaName: {}",
                 gate.getRecordId(), gate.getCardNo(), gate.getGateInTime(), gate.getGateOutTime(), gate.getAreaName());
 
-            // TODO
-            Region region = regions.getOrDefault("宝田", null);
+            Long regionId = AREA_ID_2_REGION_ID.get(gate.getAreaId());
+            Region region = regions.getOrDefault(regionId, null);
             if (region != null) {
                 if (region.getParkingConnectMethod() != null && region.getParkingConnectMethod().equals(ParkingConnectMethod.DATABASE)) {
                     this.updateCarInAndOutTime(
@@ -282,7 +287,7 @@ public class CarWhiteListService {
                         gate.getGateOutTime());
                 }
             } else {
-                log.info("Cannot find region for AreaName: {}", gate.getAreaName());
+                log.info("Cannot find region for AreaID: {}", gate.getAreaId());
             }
         }
 
