@@ -81,7 +81,7 @@ public class GateIO implements Serializable {
     @Column(name = "RecordType")
     private Integer recordType;
 
-    @Column(name = "AreaID")
+    @Column(name = "AreaId")
     private Integer areaId;
 
     @Column(name = "AreaName")

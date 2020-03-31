@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import static com.shield.config.Constants.REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS;
+import static com.shield.config.Constants.REGION_ID_HUACHAN;
 
 @Service
 @Slf4j
@@ -136,7 +137,7 @@ public class AppointmentEventListener {
 
 //        shipPlanService.afterAppointmentCanceledOrExpired(appointment);
 
-        if (appointment.getApplyId() != null) {
+        if (appointment.getApplyId() != null && !appointment.getRegionId().equals(REGION_ID_HUACHAN)) {
             ShipPlanDTO plan = shipPlanService.findOneByApplyId(appointment.getApplyId());
             if (plan != null && appointment.getNumber() != null) {
                 plan.setAppointmentNumber(null);
@@ -160,7 +161,7 @@ public class AppointmentEventListener {
             wxMpMsgService.sendAppointmentCancelMsg(after);
 //            shipPlanService.afterAppointmentCanceledOrExpired(after);
 
-            if (after.getApplyId() != null) {
+            if (after.getApplyId() != null && !after.getRegionId().equals(REGION_ID_HUACHAN)) {
                 ShipPlanDTO plan = shipPlanService.findOneByApplyId(after.getApplyId());
                 if (plan != null && after.getNumber() != null) {
                     plan.setAppointmentNumber(null);
@@ -182,6 +183,15 @@ public class AppointmentEventListener {
             }
 
             wxMpMsgService.sendAppointmentCancelMsg(after);
+
+            if (after.getApplyId() != null && after.getRegionId().equals(REGION_ID_HUACHAN)) {
+                // 化产的只有手动取消，才清空预约号（给万的）
+                ShipPlanDTO plan = shipPlanService.findOneByApplyId(after.getApplyId());
+                if (plan != null && after.getNumber() != null) {
+                    plan.setAppointmentNumber(null);
+                }
+                shipPlanService.save(plan);
+            }
         }
 
         if (!after.isVip() && after.getUserId() != null) {

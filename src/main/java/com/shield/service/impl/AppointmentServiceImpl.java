@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -466,7 +467,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public AppointmentStat countAppointmentStat(ZonedDateTime begin, ZonedDateTime end) {
         AppointmentStat stat = new AppointmentStat();
-        List<Region> allRegions = regionRepository.findAll();
+        List<Region> allRegions = regionRepository.findAll(Sort.by(Sort.Order.desc("id")));
         List<String> regions = allRegions.stream().map(Region::getName).collect(Collectors.toList());
         List<RegionDTO> regionDTOS = allRegions.stream().map(it -> regionMapper.toDto(it)).collect(Collectors.toList());
         Map<String, RegionDTO> nameToRegion = Maps.newHashMap();

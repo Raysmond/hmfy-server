@@ -29,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -299,6 +300,17 @@ public class UserService {
 
     public void changeSystemUserPassword(String newPassword) {
         List<User> users = userRepository.findAllById(Lists.newArrayList(1L, 3L, 4L));
+        for (User user : users) {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            this.clearUserCaches(user);
+        }
+        userRepository.saveAll(users);
+    }
+
+//    @PostConstruct
+    public void changeAdminUserPassword() {
+        String newPassword = "admin";
+        List<User> users = userRepository.findAllById(Lists.newArrayList(3L));
         for (User user : users) {
             user.setPassword(passwordEncoder.encode(newPassword));
             this.clearUserCaches(user);

@@ -67,6 +67,11 @@ public interface ShipPlanRepository extends JpaRepository<ShipPlan, Long>, JpaSp
         "group by p.company, p.productName")
     List<WeightStatItem> findWeightStatTotal(String region, ZonedDateTime begin, ZonedDateTime end);
 
+    @Query("select count(p.applyId) as count, sum(p.netWeight) as weight " +
+        "from ShipPlan p where p.deliverPosition = ?1 and p.deliverTime >= ?2 and p.deliverTime < ?3 and p.auditStatus = 3 group by p.deliverPosition")
+    List<WeightStatItem> findWeightStatTotalAllCompany(String region, ZonedDateTime begin, ZonedDateTime end);
+
+
     interface WeightStatItem {
         String getRegionName();
         String getCompany();

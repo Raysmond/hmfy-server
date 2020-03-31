@@ -296,14 +296,15 @@ public class HuachanCarWhitelistService {
                         }
                         log.info("[HUACHAN] check car register status, truckNumber: {}, code: {}, bill_status: {}, bill_code: {}",
                             appointment.getLicensePlateNumber(), appointment.getHsCode(), check.getBill_status(), check.getBill_code());
-                        if (check.bill_status == 2) {
+                        if (check.bill_status == 2 || check.bill_status == -1) {
+                            // -1 是重复授权, 等同于生效
                             appointment.setStatus(START);
                             appointment.setUpdateTime(ZonedDateTime.now());
                             changedAppointments.add(appointment);
 
                             // 发送预约成功消息
 //                            wxMpMsgService.sendAppointmentSuccessMsg(appointmentMapper.toDto(appointment));
-                        } else if (check.bill_status == -1 || check.bill_status == 3 || check.bill_status == 4 || check.bill_status == 5) {
+                        } else if (check.bill_status == 3 || check.bill_status == 4 || check.bill_status == 5) {
                             appointment.setValid(Boolean.FALSE);
                             appointment.setUpdateTime(ZonedDateTime.now());
                             changedAppointments.add(appointment);

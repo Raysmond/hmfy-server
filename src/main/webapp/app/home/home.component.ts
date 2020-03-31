@@ -68,6 +68,7 @@ export class HomeComponent implements OnInit {
     // -----------------------------------
     (function($) {
       'use strict';
+
       function initNowTimer() {
         $('[data-now]').each(function() {
           var element = $(this),
@@ -178,9 +179,10 @@ export class HomeComponent implements OnInit {
 
     this.http.get(`${this.resourceUrl}/weight-stats?currentRegion=${this.currentRegion}&date=${this.currentDate}`).subscribe(
       (res: HttpResponse<any>) => {
+        countOption.title.text = res['region'] + this.currentDate + '发运量统计';
         option.title.subtext += ' - ' + res['date'];
-        countOption.title.subtext = res['region'] + ' - ' + countOption.title.subtext;
-        countOption.title.subtext += ' - ' + res['date'];
+        countOption.title.subtext = '发运总车次：' + res['totalCount'] + '，总量：' + res['totalWeight'].toFixed(2) + '吨';
+        // countOption.title.subtext += ' - ' + res['date'];
         option.series[0].data = [];
         countOption.series[0].data = [];
         for (let i = 0; i < res['data'].length; i++) {

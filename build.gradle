@@ -68,7 +68,7 @@ eclipse {
 defaultTasks "bootRun"
 
 group = "com.shield"
-version = "1.9.1-SNAPSHOT"
+version = "1.9.8-SNAPSHOT"
 
 description = ""
 

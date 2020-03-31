@@ -14,6 +14,9 @@ public class WeightStat {
     private List<String> companies = Lists.newArrayList();
     private List<CompanyWeightStat> data = Lists.newArrayList();
 
+    private Long totalCount = 0L;
+    private Double totalWeight = 0D;
+
     @Data
     @Builder
     public static class CompanyWeightStat {

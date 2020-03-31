@@ -295,8 +295,13 @@ public class ShipPlanServiceImpl implements ShipPlanService {
                     .productName(item.getProductName())
                     .weight(item.getWeight() == null ? 0 : item.getWeight()).build());
         }
-        List<String> regionNames = regionRepository.findAll().stream().map(Region::getName).collect(Collectors.toList());
-        stat.setRegion(Joiner.on(",").join(regionNames));
+//        List<String> regionNames = regionRepository.findAll().stream().map(Region::getName).collect(Collectors.toList());
+        List<ShipPlanRepository.WeightStatItem> totalItem = shipPlanRepository.findWeightStatTotalAllCompany(regionName, begin, end);
+        if (!totalItem.isEmpty()) {
+            stat.setTotalCount(totalItem.get(0).getCount());
+            stat.setTotalWeight(totalItem.get(0).getWeight());
+        }
+        stat.setRegion(regionName);
         return stat;
     }
 

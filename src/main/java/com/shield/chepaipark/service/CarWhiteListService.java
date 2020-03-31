@@ -31,6 +31,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -108,6 +110,7 @@ public class CarWhiteListService {
     private static final Long INITIAL_PARK_CARD_CID = 10000000L;
     private static final long DEFAULT_WHITELIST_VALID_HOURS = 6;
     private static final long DEFAULT_VIP_WHITELIST_VALID_HOURS = 24;
+    public static final String AUTO_DELETE_PLAN_ID_QUEUE_DB = "auto_delete_ship_plan_ids_queue_db";
 
 
     @Async
@@ -247,13 +250,13 @@ public class CarWhiteListService {
     private static Map<Long, GateIO> lastProcessedGateIO = Maps.newConcurrentMap();
 
     public void syncCarGateIOEvents() {
-        Map<Long, Region> regions = regionRepository.findAll()
-            .stream()
-            .filter(it -> it.isOpen() && it.getParkingConnectMethod() != null && it.getParkingConnectMethod().equals(ParkingConnectMethod.DATABASE))
-            .collect(Collectors.toMap(Region::getId, it -> it));
-        if (regions.isEmpty()) {
-            return;
-        }
+//        Map<Long, Region> regions = regionRepository.findAll()
+//            .stream()
+//            .filter(it -> it.isOpen() && it.getParkingConnectMethod() != null && it.getParkingConnectMethod().equals(ParkingConnectMethod.DATABASE))
+//            .collect(Collectors.toMap(Region::getId, it -> it));
+//        if (regions.isEmpty()) {
+//            return;
+//        }
         List<GateIO> gates = gateIORepository.findAllNewerThan(lastSyncTime.minusMinutes(5));
         lastSyncTime = ZonedDateTime.now();
         if (CollectionUtils.isEmpty(gates)) {
@@ -272,22 +275,21 @@ public class CarWhiteListService {
                 }
             }
             lastProcessedGateIO.put(gate.getRecordId(), gate);
-            log.info("[DB] Start to process GateIO, RecordID: {} CardNo: {}, GateInTime: {}, GateOutTime: {}, AreaName: {}",
-                gate.getRecordId(), gate.getCardNo(), gate.getGateInTime(), gate.getGateOutTime(), gate.getAreaName());
-
             Long regionId = AREA_ID_2_REGION_ID.get(gate.getAreaId());
-            Region region = regions.getOrDefault(regionId, null);
-            if (region != null) {
-                if (region.getParkingConnectMethod() != null && region.getParkingConnectMethod().equals(ParkingConnectMethod.DATABASE)) {
-                    this.updateCarInAndOutTime(
-                        region.getId(),
-                        gate.getCardNo(),
-                        gate.getGateOutTime() != null ? RecordType.OUT : RecordType.IN,
-                        gate.getGateInTime(),
-                        gate.getGateOutTime());
-                }
-            } else {
-                log.info("Cannot find region for AreaID: {}", gate.getAreaId());
+            Region region = regionRepository.findById(regionId).get();
+
+            log.info("[DB] Start to process GateIO, RecordID: {} CardNo: {}, GateInTime: {}, GateOutTime: {}, " +
+                    "AreaId: {}, AreaName: {}, regionId: {}, regionName: {}",
+                gate.getRecordId(), gate.getCardNo(), gate.getGateInTime(), gate.getGateOutTime(),
+                gate.getAreaId(), gate.getAreaName(), regionId, region.getName());
+
+            if (region.getParkingConnectMethod() != null && region.getParkingConnectMethod().equals(ParkingConnectMethod.DATABASE)) {
+                this.updateCarInAndOutTime(
+                    region.getId(),
+                    gate.getCardNo(),
+                    gate.getGateOutTime() != null ? RecordType.OUT : RecordType.IN,
+                    gate.getGateInTime(),
+                    gate.getGateOutTime());
             }
         }
 
@@ -302,9 +304,12 @@ public class CarWhiteListService {
     public void updateCarInAndOutTime(Long regionId, String truckNumber, RecordType recordType, ZonedDateTime inTime, ZonedDateTime outTime) {
         Region region = regionRepository.findById(regionId).get();
         ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
+        log.info("Start to find ShipPlan for truckNumber: {}, regionId: {}, regionName: {}, recordType: {}, inTime: {}, outTime: {}, today: {}",
+            truckNumber, region.getId(), region.getName(), recordType, inTime, outTime, today);
         if (recordType.equals(RecordType.IN)) {
             // 车辆入场
             List<ShipPlanDTO> allShipPlans = shipPlanRepository.findAllByTruckNumberAndDeliverTime(truckNumber, region.getName(), today)
+//            List<ShipPlanDTO> allShipPlans = shipPlanRepository.findAllByTruckNumber(truckNumber, true, PageRequest.of(0, 1, Sort.by(Sort.Order.desc("createTime"))))
                 .stream().map(it -> shipPlanMapper.toDto(it)).collect(Collectors.toList());
             List<ShipPlanDTO> shipPlans = allShipPlans.stream()
                 .filter(it -> it.getAuditStatus().equals(Integer.valueOf(1)))
@@ -314,9 +319,6 @@ public class CarWhiteListService {
                 // 不排除同时建了多个计划的情况，有多个有效计划时，只取最早创建的一条
                 log.error("Multiple plans found for truckNumber {}, region: {}, deliverDate: {}, planIds: [{}]",
                     truckNumber, region.getName(), today, Joiner.on(",").join(shipPlans.stream().map(ShipPlanDTO::getId).collect(Collectors.toList())));
-            } else {
-                shipPlans = allShipPlans.stream().filter(it -> it.getAuditStatus().equals(3))
-                    .sorted(Comparator.comparing(ShipPlanDTO::getApplyId).reversed()).collect(Collectors.toList());
             }
             if (!CollectionUtils.isEmpty(shipPlans)) {
                 ShipPlanDTO plan = shipPlans.get(0);
@@ -414,7 +416,6 @@ public class CarWhiteListService {
 
     }
 
-
     /**
      * 延时一分钟将出入场时间同步到发运
      *
@@ -428,14 +429,14 @@ public class CarWhiteListService {
     }
 
     /**
-     * 出场后延时三分钟删除白名单
+     * 出场后延时两分钟删除白名单(DB)
      *
      * @param shipPlanId
      */
-    public void delayPutDeleteShipPlanIdQueue(Long shipPlanId) {
+    public void delayPutDeleteShipPlanIdQueueDB(Long shipPlanId) {
         threadPoolTaskScheduler.getScheduledExecutor().schedule(() -> {
-            log.info("Delayed 180s to put ShipPlan id {} to delete car whitelist queue {}", shipPlanId, AUTO_DELETE_PLAN_ID_QUEUE);
-            redisLongTemplate.opsForSet().add(AUTO_DELETE_PLAN_ID_QUEUE, shipPlanId);
-        }, 180L, TimeUnit.SECONDS);
+            log.info("Delayed 180s to put ShipPlan id {} to delete car whitelist queue {}", shipPlanId, AUTO_DELETE_PLAN_ID_QUEUE_DB);
+            redisLongTemplate.opsForSet().add(AUTO_DELETE_PLAN_ID_QUEUE_DB, shipPlanId);
+        }, 120L, TimeUnit.SECONDS);
     }
 }
