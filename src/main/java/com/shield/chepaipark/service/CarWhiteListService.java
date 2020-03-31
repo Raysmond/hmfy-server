@@ -347,10 +347,15 @@ public class CarWhiteListService {
             // 取未出场的，最近一个提货完成的计划
             if (!shipPlans.isEmpty()) {
                 ShipPlanDTO plan = shipPlans.get(0);
-                log.info("Find ShipPlan id={} for truckNumber {}, uploadcarout gateTime: {}, leaveTime: {}", plan.getId(), truckNumber, inTime, outTime);
+                log.info("Find ShipPlan applyId={} for truckNumber {}, uploadcarout gateTime: {}, leaveTime: {}", plan.getApplyId(), truckNumber, inTime, outTime);
                 plan.setLeaveTime(outTime);
                 if (plan.getGateTime() == null && inTime != null) {
                     plan.setGateTime(inTime);
+                    if (plan.getLoadingStartTime() != null && inTime.isAfter(plan.getLoadingStartTime())) {
+                        log.info("ShipPlan id={} for truckNumber: {}, inTime: {} is after loadingStartTime {}, reset to 30min before loadingStartTime",
+                            plan.getId(), plan.getTruckNumber(), inTime, plan.getLoadingStartTime());
+                        plan.setGateTime(plan.getLoadingStartTime().minusMinutes(30));
+                    }
                 }
                 plan.setUpdateTime(ZonedDateTime.now());
                 shipPlanService.save(plan);
