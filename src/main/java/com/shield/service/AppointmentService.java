@@ -80,4 +80,6 @@ public interface AppointmentService {
     List<AppointmentDTO> findLatestByTruckNumber(String licensePlateNumber, ZonedDateTime createTime);
 
     AppointmentDTO makeAppointmentForTomorrow(RegionDTO region, ShipPlanDTO plan, AppointmentDTO appointmentDTO);
+
+    void setApplyNumber(List<AppointmentDTO> appointmentDTOS);
 }

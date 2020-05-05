@@ -81,7 +81,7 @@ public class AppointmentEventListener {
             }
         }
 
-        if (after.getStatus() == AppointmentStatus.START && (before == null || before.getStatus() != AppointmentStatus.START)) {
+        if (after.isValid() && after.getStatus() == AppointmentStatus.START && (before == null || before.getStatus() != AppointmentStatus.START)) {
             // 预约成功
             RegionDTO region = regionService.findOne(after.getRegionId()).get();
             if (after.getApplyId() != null) {
@@ -95,6 +95,17 @@ public class AppointmentEventListener {
 //            shipPlanService.afterAppointmentMadeSuccess(after);
             carWhiteListManager.registerCarWhiteList(after);
             wxMpMsgService.sendAppointmentSuccessMsg(after);
+        }
+
+        if (after.isValid() && after.getRegionId().equals(REGION_ID_HUACHAN) && after.getStatus().equals(AppointmentStatus.START_CHECK)) {
+            // 化产，审批中就把预约号抛过去
+            if (after.getApplyId() != null) {
+                ShipPlanDTO plan = shipPlanService.findOneByApplyId(after.getApplyId());
+                if (after.getNumber() != null) {
+                    plan.setAppointmentNumber(after.getNumber().toString());
+                }
+                shipPlanService.save(plan);
+            }
         }
 
         if (before != null && after.isVip()
@@ -136,14 +147,6 @@ public class AppointmentEventListener {
         wxMpMsgService.sendAppointmentExpireMsg(appointment);
 
 //        shipPlanService.afterAppointmentCanceledOrExpired(appointment);
-
-        if (appointment.getApplyId() != null && !appointment.getRegionId().equals(REGION_ID_HUACHAN)) {
-            ShipPlanDTO plan = shipPlanService.findOneByApplyId(appointment.getApplyId());
-            if (plan != null && appointment.getNumber() != null) {
-                plan.setAppointmentNumber(null);
-            }
-            shipPlanService.save(plan);
-        }
     }
 
     private void afterAppointmentInvalid(AppointmentDTO before, AppointmentDTO after) {
@@ -161,13 +164,6 @@ public class AppointmentEventListener {
             wxMpMsgService.sendAppointmentCancelMsg(after);
 //            shipPlanService.afterAppointmentCanceledOrExpired(after);
 
-            if (after.getApplyId() != null && !after.getRegionId().equals(REGION_ID_HUACHAN)) {
-                ShipPlanDTO plan = shipPlanService.findOneByApplyId(after.getApplyId());
-                if (plan != null && after.getNumber() != null) {
-                    plan.setAppointmentNumber(null);
-                }
-                shipPlanService.save(plan);
-            }
         }
     }
 
@@ -183,15 +179,6 @@ public class AppointmentEventListener {
             }
 
             wxMpMsgService.sendAppointmentCancelMsg(after);
-
-            if (after.getApplyId() != null && after.getRegionId().equals(REGION_ID_HUACHAN)) {
-                // 化产的只有手动取消，才清空预约号（给万的）
-                ShipPlanDTO plan = shipPlanService.findOneByApplyId(after.getApplyId());
-                if (plan != null && after.getNumber() != null) {
-                    plan.setAppointmentNumber(null);
-                }
-                shipPlanService.save(plan);
-            }
         }
 
         if (!after.isVip() && after.getUserId() != null) {
@@ -205,12 +192,12 @@ public class AppointmentEventListener {
             }
         }
 
-        if (after.getApplyId() != null) {
-            ShipPlanDTO plan = shipPlanService.findOneByApplyId(after.getApplyId());
-            if (plan != null && after.getNumber() != null) {
-                plan.setAppointmentNumber(null);
-            }
-            shipPlanService.save(plan);
-        }
+//        if (after.getApplyId() != null) {
+//            ShipPlanDTO plan = shipPlanService.findOneByApplyId(after.getApplyId());
+//            if (plan != null && after.getNumber() != null) {
+//                plan.setAppointmentNumber(null);
+//            }
+//            shipPlanService.save(plan);
+//        }
     }
 }

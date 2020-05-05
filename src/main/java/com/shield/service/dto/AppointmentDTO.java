@@ -27,6 +27,8 @@ public class AppointmentDTO implements Serializable {
     @Fixed
     private Long applyId;
 
+    private String applyNumber;
+
     @Fixed
     private Integer number;
 
@@ -109,6 +111,14 @@ public class AppointmentDTO implements Serializable {
 
     public void setApplyId(Long applyId) {
         this.applyId = applyId;
+    }
+
+    public String getApplyNumber() {
+        return applyNumber;
+    }
+
+    public void setApplyNumber(String applyNumber) {
+        this.applyNumber = applyNumber;
     }
 
     public Integer getNumber() {

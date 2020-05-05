@@ -5,6 +5,7 @@ export interface IShipPlan {
   company?: string;
   applyId?: number;
   applyNumber?: string;
+  appointmentNumber?: string;
   truckNumber?: string;
   auditStatus?: number;
   productName?: string;
@@ -34,6 +35,7 @@ export class ShipPlan implements IShipPlan {
     public company?: string,
     public applyId?: number,
     public applyNumber?: string,
+    public appointmentNumber?: string,
     public truckNumber?: string,
     public auditStatus?: number,
     public productName?: string,

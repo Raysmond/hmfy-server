@@ -320,14 +320,15 @@ public class ShipPlanServiceImpl implements ShipPlanService {
 
     @Override
     public void afterAppointmentCanceledOrExpired(AppointmentDTO appointmentDTO) {
-        if (appointmentDTO.getApplyId() != null && appointmentDTO.getNumber() != null) {
-            ShipPlan shipPlan = shipPlanRepository.findOneByApplyId(appointmentDTO.getApplyId());
-            if (shipPlan != null && shipPlan.getAppointmentNumber() != null) {
-                log.info("Need to remove appointment number to ShipPlan for truckNumber {}", shipPlan.getTruckNumber());
-                ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(shipPlan);
-                shipPlanDTO.setAppointmentNumber("");
-                this.save(shipPlanDTO);
-            }
-        }
+        // 预约号填了以后，就不删除
+//        if (appointmentDTO.getApplyId() != null && appointmentDTO.getNumber() != null) {
+//            ShipPlan shipPlan = shipPlanRepository.findOneByApplyId(appointmentDTO.getApplyId());
+//            if (shipPlan != null && shipPlan.getAppointmentNumber() != null) {
+//                log.info("Need to remove appointment number to ShipPlan for truckNumber {}", shipPlan.getTruckNumber());
+//                ShipPlanDTO shipPlanDTO = shipPlanMapper.toDto(shipPlan);
+//                shipPlanDTO.setAppointmentNumber("");
+//                this.save(shipPlanDTO);
+//            }
+//        }
     }
 }

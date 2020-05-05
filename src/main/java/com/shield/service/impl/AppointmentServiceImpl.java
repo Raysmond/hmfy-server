@@ -4,9 +4,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.shield.domain.Appointment;
 import com.shield.domain.Region;
+import com.shield.domain.ShipPlan;
 import com.shield.domain.User;
 import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.repository.RegionRepository;
+import com.shield.repository.ShipPlanRepository;
 import com.shield.security.SecurityUtils;
 import com.shield.service.*;
 import com.shield.repository.AppointmentRepository;
@@ -83,6 +85,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Autowired
     private RegionMapper regionMapper;
+
+    @Autowired
+    private ShipPlanRepository shipPlanRepository;
 
 
     private static final Long INITIAL_APPOINTMENT_NUMBER = 10000L;
@@ -248,6 +253,25 @@ public class AppointmentServiceImpl implements AppointmentService {
             appointment.setValid(false);
             throw new BadRequestAlertException("当前已无预约额度", "appointment", "");
 //            return appointment;
+        }
+    }
+
+    @Override
+    public void setApplyNumber(List<AppointmentDTO> appointmentDTOS) {
+        List<Long> applyIds = appointmentDTOS.stream()
+            .filter(it -> it.getApplyId() != null)
+            .map(AppointmentDTO::getApplyId).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(applyIds)) {
+            return;
+        }
+        List<ShipPlan> shipPlans = shipPlanRepository.findByApplyIdIn(applyIds);
+        for (AppointmentDTO appointmentDTO : appointmentDTOS) {
+            for (ShipPlan shipPlan : shipPlans) {
+                if (appointmentDTO.getApplyId() != null && appointmentDTO.getApplyId().equals(shipPlan.getApplyId())) {
+                    appointmentDTO.setApplyNumber(shipPlan.getApplyNumber());
+                    break;
+                }
+            }
         }
     }
 
@@ -516,23 +540,19 @@ public class AppointmentServiceImpl implements AppointmentService {
             } else {
                 break;
             }
-            switch (item.getStatus()) {
-                case EXPIRED:
-                    statItem.setExpired(item.getCount());
-                    break;
+            if (item.getStatus().equals(AppointmentStatus.EXPIRED)) {
+                statItem.setExpired(item.getCount());
             }
         }
 
-        regionToStat.forEach((k, v) -> {
-            stat.getData().add(v);
-        });
-        for (String region : regions) {
-            if (!regionToStat.containsKey(region)) {
-                AppointmentStat.AppointmentStatItem item = new AppointmentStat.AppointmentStatItem();
-                item.setRegion(region);
+        for (RegionDTO regionDTO : regionDTOS) {
+            AppointmentStat.AppointmentStatItem item = regionToStat.get(regionDTO.getName());
+            if (item == null) {
+                item = new AppointmentStat.AppointmentStatItem();
+                item.setRegion(regionDTO.getName());
                 item.setAvailable(nameToRegion.get(item.getRegion()).getRemainQuota().longValue());
-                stat.getData().add(item);
             }
+            stat.getData().add(item);
         }
         return stat;
     }

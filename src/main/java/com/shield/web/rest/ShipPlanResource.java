@@ -139,6 +139,9 @@ public class ShipPlanResource {
         if (shipPlanDTO.getId() == null) {
             throw new BadRequestAlertException("Invalid id", ENTITY_NAME, "idnull");
         }
+        if (shipPlanDTO.getLeaveTime() != null) {
+            throw new BadRequestAlertException("已离场数据无法变更", ENTITY_NAME, "");
+        }
         ShipPlanDTO result = shipPlanService.save(shipPlanDTO);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, shipPlanDTO.getId().toString()))

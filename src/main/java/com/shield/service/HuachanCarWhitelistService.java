@@ -308,6 +308,33 @@ public class HuachanCarWhitelistService {
                             appointment.setValid(Boolean.FALSE);
                             appointment.setUpdateTime(ZonedDateTime.now());
                             changedAppointments.add(appointment);
+                        } else if (check.bill_status == 6) {
+                            // 已完成
+                            appointment.setStatus(ENTER);
+                            appointment.setEnterTime(ZonedDateTime.now());
+                            appointment.setUpdateTime(ZonedDateTime.now());
+                            changedAppointments.add(appointment);
+
+                            if (appointment.getApplyId() != null) {
+                                ShipPlan shipPlan = shipPlanRepository.findOneByApplyId(appointment.getApplyId());
+                                if (shipPlan != null && shipPlan.getLoadingEndTime() != null) {
+                                    List<GateRecord> outRecords = gateRecordRepository.findByTruckNumber(appointment.getRegionId(), RecordType.OUT, appointment.getLicensePlateNumber(), shipPlan.getLoadingEndTime());
+                                    if (outRecords.size() > 0) {
+                                        appointment.setStatus(LEAVE);
+                                        appointment.setLeaveTime(ZonedDateTime.now());
+                                    } else {
+                                        appointment.setValid(Boolean.FALSE);
+                                    }
+                                }
+                            }
+                        } else if (check.bill_status == 1 && appointment.getStartTime().plusHours(region.getValidTime()).isBefore(ZonedDateTime.now())) {
+                            // 长时间未审批，超过三小时有效期，直接将预约置为过期
+                            log.info("化产：{}, 长时间未审批，超过三小时有效期，直接将预约置为过期", appointment.getLicensePlateNumber());
+                            appointment.setValid(false);
+                            appointment.setStatus(EXPIRED);
+                            appointment.setUpdateTime(ZonedDateTime.now());
+                            appointment.setExpireTime(ZonedDateTime.now());
+                            changedAppointments.add(appointment);
                         }
                     }
                     if (!CollectionUtils.isEmpty(changedAppointments)) {
@@ -388,7 +415,8 @@ public class HuachanCarWhitelistService {
             return;
         }
         // 未进厂预约单（预约成功 --> 进厂)
-        List<Appointment> appointments = appointmentRepository.findAllByStatusAndStartTime(REGION_ID_HUACHAN, START, true, ZonedDateTime.now().minusHours(24));
+//        List<Appointment> appointments = appointmentRepository.findAllByStatusAndStartTime(REGION_ID_HUACHAN, START, true, ZonedDateTime.now().minusHours(24));
+        List<Appointment> appointments = appointmentRepository.findAllByStatusInAndStartTime(REGION_ID_HUACHAN, Lists.newArrayList(START, START_CHECK), true, ZonedDateTime.now().minusHours(24));
         if (!CollectionUtils.isEmpty(appointments)) {
             log.info("Start to check appointment GateRecord for {} cars in START status", appointments.size());
             for (Appointment appointment : appointments) {

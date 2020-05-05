@@ -1,5 +1,6 @@
 package com.shield.web.rest;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.shield.domain.Appointment;
 import com.shield.domain.enumeration.AppointmentStatus;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.http.ResponseEntity;
@@ -54,12 +56,13 @@ public class AppointmentResource {
 
     private final AppointmentQueryService appointmentQueryService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    public AppointmentResource(AppointmentService appointmentService, AppointmentQueryService appointmentQueryService) {
+    @Autowired
+    public AppointmentResource(AppointmentService appointmentService, AppointmentQueryService appointmentQueryService, UserService userService) {
         this.appointmentService = appointmentService;
         this.appointmentQueryService = appointmentQueryService;
+        this.userService = userService;
     }
 
     /**
@@ -132,19 +135,27 @@ public class AppointmentResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of appointments in body.
      */
     @GetMapping("/appointments")
-    public ResponseEntity<List<AppointmentDTO>> getAllAppointments(AppointmentCriteria criteria, Pageable pageable, @RequestParam MultiValueMap<String, String> queryParams, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<List<AppointmentDTO>> getAllAppointments(
+        AppointmentCriteria criteria,
+        Pageable pageable,
+        @RequestParam MultiValueMap<String, String> queryParams,
+        UriComponentsBuilder uriBuilder) {
         log.debug("REST request to get Appointments by criteria: {}", criteria);
         Page<AppointmentDTO> page = appointmentQueryService.findByCriteria(criteria, pageable);
+        List<AppointmentDTO> result = page.getContent();
+        if (!CollectionUtils.isEmpty(result)) {
+            appointmentService.setApplyNumber(result);
+        }
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(uriBuilder.queryParams(queryParams), page);
-        return ResponseEntity.ok().headers(headers).body(page.getContent());
+        return ResponseEntity.ok().headers(headers).body(result);
     }
 
     /**
-    * {@code GET  /appointments/count} : count all the appointments.
-    *
-    * @param criteria the criteria which the requested entities should match.
-    * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the count in body.
-    */
+     * {@code GET  /appointments/count} : count all the appointments.
+     *
+     * @param criteria the criteria which the requested entities should match.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the count in body.
+     */
     @GetMapping("/appointments/count")
     public ResponseEntity<Long> countAppointments(AppointmentCriteria criteria) {
         log.debug("REST request to count Appointments by criteria: {}", criteria);
@@ -161,6 +172,10 @@ public class AppointmentResource {
     public ResponseEntity<AppointmentDTO> getAppointment(@PathVariable Long id) {
         log.debug("REST request to get Appointment : {}", id);
         Optional<AppointmentDTO> appointmentDTO = appointmentService.findOne(id);
+        if (appointmentDTO.isPresent()) {
+            List<AppointmentDTO> result = Lists.newArrayList(appointmentDTO.get());
+            appointmentService.setApplyNumber(result);
+        }
         return ResponseUtil.wrapOrNotFound(appointmentDTO);
     }
 
