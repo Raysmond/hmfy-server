@@ -56,7 +56,6 @@ public interface ShipPlanService {
 
     Page<PlanDTO> getAllByTruckNumber(Pageable pageable, String truckNumber, Long shipPlanId);
 
-
     List<ShipPlanDTO> findAllByDeliverTime(String regionName, ZonedDateTime beginDeliverTime, ZonedDateTime endBeginDeliverTime, Integer auditStatus);
 
     List<ShipPlanDTO> findAllShouldDeleteCarWhiteList(ZonedDateTime todayBegin, ZonedDateTime todayEnd);
@@ -66,6 +65,6 @@ public interface ShipPlanService {
     WeightStat countWeightStat(String region, ZonedDateTime begin, ZonedDateTime end);
 
     void afterAppointmentMadeSuccess(AppointmentDTO appointmentDTO);
-    
+
     void afterAppointmentCanceledOrExpired(AppointmentDTO appointmentDTO);
 }

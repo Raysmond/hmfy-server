@@ -13,6 +13,7 @@ import com.shield.sqlserver.domain.VehDelivPlan;
 import com.shield.sqlserver.domain.VipGateLog;
 import com.shield.sqlserver.repository.VehDelivPlanRepository;
 import com.shield.sqlserver.repository.VipGateLogRepository;
+import com.shield.utils.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -36,7 +37,7 @@ import static com.shield.config.Constants.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
 import static com.shield.config.Constants.REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMENT_IDS;
 
 /**
- * 发运计划管理
+ * 发运计划同步服务
  */
 @Service
 @Slf4j
@@ -77,14 +78,12 @@ public class VehPlanSyncScheduleService {
     /**
      * 同步发运计划
      * <p>
-     * SQLSERVER --> MySQL
+     * SQL SERVER --> MySQL
      */
     @Scheduled(fixedRate = 60 * 1000)
     public void syncVehPlans() {
-        ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
-        List<VehDelivPlan> plans = vehDelivPlanRepository.findAllByDeliverTimeGreaterThanEqualOrderByCreateTime(today);
-        log.info("Find {} veh plans from SQLServer, deliverTime >= {}", plans.size(), today.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-
+        List<VehDelivPlan> plans = vehDelivPlanRepository.findAllByDeliverTimeGreaterThanEqualOrderByCreateTime(DateUtils.yesterday());
+        log.info("[SYNC] Find {} veh plans from SQLServer, deliverTime >= {}", plans.size(), DateUtils.yesterday().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         if (CollectionUtils.isEmpty(plans)) {
             return;
         }
@@ -122,11 +121,22 @@ public class VehPlanSyncScheduleService {
                         it.setAuditStatus(plan.getAuditStatus());
                         it.setUpdateTime(ZonedDateTime.now());
                         changedApplyIds.add(plan.getApplyId());
+                        log.info("[SYNC] VehDelivPlan changed: applyId: {}, truckNumber: {}, " +
+                                "getNetWeight: {} -> {}," +
+                                "getWeigherNo: {} -> {}," +
+                                "getTareTime: {} -> {}," +
+                                "getWeightTime: {} -> {}," +
+                                "", plan.getApplyId(), plan.getTruckNumber(),
+                            it.getNetWeight(), plan.getNetWeight(),
+                            it.getWeigherNo(), plan.getWeigherNo(),
+                            it.getLoadingStartTime(), plan.getTareTime(),
+                            it.getLoadingEndTime(), plan.getWeightTime());
                     }
                     return it;
                 }).orElseGet(() -> {
                     ShipPlan newShipPlan = generateShipPlanFromVehPlan(plan);
                     changedApplyIds.add(plan.getApplyId());
+                    log.info("[SYNC] new VehDelivPlan plan: {}", plan);
                     return newShipPlan;
                 });
             updateShipPlans.add(shipPlan);
@@ -138,18 +148,14 @@ public class VehPlanSyncScheduleService {
             for (ShipPlanDTO planDTO : planDTOS) {
                 shipPlanService.save(planDTO);
             }
-//            for (ShipPlan plan : updateShipPlans) {
-//                plan.setSyncTime(ZonedDateTime.now());
-//            }
-//            shipPlanRepository.saveAll(updateShipPlans);
         }
-        log.info("Synchronized {} veh plans", updateShipPlans.size());
+        log.info("[SYNC] Synchronized {} veh plans to MySQL", updateShipPlans.size());
     }
 
     /**
      * 同步出入场时间 到 发运计划
      * <p>
-     * MySQL --> SQLSERVER
+     * MySQL --> SQL SERVER
      */
     @Scheduled(fixedRate = 60 * 1000)
     public void syncShipPlan() {
@@ -198,21 +204,6 @@ public class VehPlanSyncScheduleService {
                 }
             }
         }
-    }
-
-    public void syncShipPlanToSqlServer(Long shipPlanId) {
-        ShipPlan plan = shipPlanRepository.findById(shipPlanId).get();
-        log.info("Start to sync data of ShipPlan [id={}] to SQL_SERVER, data: {}", shipPlanId, plan.toString());
-        List<VehDelivPlan> vehDelivPlans = vehDelivPlanRepository.findAllByApplyId(plan.getApplyId(), plan.getDeliverTime(), ZonedDateTime.now());
-        for (VehDelivPlan vehDelivPlan : vehDelivPlans) {
-            vehDelivPlan.setGateTime(plan.getGateTime());
-            vehDelivPlan.setLeaveTime(plan.getLeaveTime());
-            vehDelivPlan.setAllowInTime(plan.getAllowInTime());
-        }
-        vehDelivPlanRepository.saveAll(vehDelivPlans);
-        log.info("Updated {} VehDelivPlan data with ShipPlan data, where apply_id = {} ", vehDelivPlans.size(), plan.getApplyId());
-        plan.setSyncTime(ZonedDateTime.now());
-        shipPlanRepository.save(plan);
     }
 
     /**

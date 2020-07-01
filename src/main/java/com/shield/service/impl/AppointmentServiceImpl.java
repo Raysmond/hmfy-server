@@ -20,6 +20,7 @@ import com.shield.service.event.AppointmentChangedEvent;
 import com.shield.service.mapper.AppointmentMapper;
 import com.shield.service.mapper.RegionMapper;
 import com.shield.service.mapper.ShipPlanMapper;
+import com.shield.utils.DateUtils;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import com.shield.web.rest.vm.AppointmentStat;
 import org.apache.commons.lang3.StringUtils;
@@ -214,17 +215,21 @@ public class AppointmentServiceImpl implements AppointmentService {
         return redisLongTemplate.opsForValue().increment(key, 1L).intValue();
     }
 
+    /**
+     * 提前排第二天的计划，
+     * 只有22-0点之间，才会进入这个流程
+     */
     @Override
     public AppointmentDTO makeAppointmentForTomorrow(RegionDTO region, ShipPlanDTO plan, AppointmentDTO appointment) {
         appointment.setRegionId(region.getId());
         if (appointment.getUserId() == null) {
-            Optional<User> user = userService.getUserWithAuthorities();
-            if (user.isPresent()) {
-                appointment.setUserId(user.get().getId());
-            }
+            userService.getUserWithAuthorities()
+                .ifPresent(value -> appointment.setUserId(value.getId()));
         }
         appointment.setStatus(AppointmentStatus.CREATE);
-        ZonedDateTime tomorrow = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).plusDays(1);
+        ZonedDateTime tomorrow = DateUtils.tomorrow();
+
+        // 获取明天的有效预约
         List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), ZonedDateTime.now().minusHours(24), ZonedDateTime.now().plusDays(1));
         appointments = appointments.stream()
             .filter(it -> it.getStartTime() != null
@@ -232,12 +237,13 @@ public class AppointmentServiceImpl implements AppointmentService {
                 && it.isValid()
                 && (it.getStatus().equals(AppointmentStatus.START) || it.getStatus().equals(AppointmentStatus.START_CHECK) || it.getStatus().equals(AppointmentStatus.ENTER)))
             .collect(Collectors.toList());
+
         if (appointments.size() < region.getQuota() * 2) {
             if (appointments.size() < region.getQuota()) {
-                // 上半夜
+                // 上半夜，预设有效时间0～3点
                 appointment.setStartTime(tomorrow.plusSeconds(1));
             } else {
-                // 下半夜
+                // 下半夜，预设有效时间3～6点
                 appointment.setStartTime(tomorrow.plusHours(3));
             }
             appointment.setStatus(AppointmentStatus.START_CHECK);
@@ -250,10 +256,23 @@ public class AppointmentServiceImpl implements AppointmentService {
                 appointment.getId(), region.getId(), region.getName(), appointment.getNumber(), appointment.getQueueNumber(), appointment.getLicensePlateNumber());
             return saved;
         } else {
-            appointment.setValid(false);
-            throw new BadRequestAlertException("当前已无预约额度", "appointment", "");
-//            return appointment;
+            if (region.enabledQueue()) {
+                Long waitCount = appointmentRepository.countAllWaitByRegionIdAndCreateTime(region.getId(), ZonedDateTime.now().minusHours(48));
+                if (region.getQueueQuota() > waitCount) {
+                    appointment.setStatus(AppointmentStatus.WAIT);
+                    appointment.setQueueNumber(generateQueueNumber(region.getId()));
+                    appointment.setValid(true);
+                    AppointmentDTO saved = this.save(appointment);
+                    appointment.setId(saved.getId());
+                    log.info("[Tomorrow] Appointment [{}] enter WAIT queue at region ({}, {}), number: {}, queue number: {}, truckNumber: {}",
+                        appointment.getId(), region.getId(), region.getName(), appointment.getNumber(), appointment.getQueueNumber(), appointment.getLicensePlateNumber());
+                    return saved;
+                }
+            } else {
+                throw new BadRequestAlertException("当前排队额度已用完", "appointment", "");
+            }
         }
+        return appointment;
     }
 
     @Override
@@ -275,43 +294,50 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 
+    /**
+     * 预约排队
+     */
     @Override
     public AppointmentDTO makeAppointment(Long regionId, AppointmentDTO appointment) {
-        Region region = regionRepository.getOne(regionId);
+        RegionDTO region = regionService.findOne(appointment.getRegionId()).get();
         appointment.setRegionId(regionId);
         if (appointment.getUserId() == null) {
             Optional<User> user = userService.getUserWithAuthorities();
-            if (user.isPresent()) {
-                appointment.setUserId(user.get().getId());
-            }
+            user.ifPresent(value -> appointment.setUserId(value.getId()));
         }
 
         appointment.setValid(true);
         appointment.setStatus(AppointmentStatus.CREATE);
 
-        boolean enableQueue = region.getQueueQuota() != null && region.getQueueQuota() > 0;
-        if (enableQueue && !appointment.isVip()) {
-            Long waitCount = appointmentRepository.countAllWaitByRegionIdAndCreateTime(regionId, ZonedDateTime.now().minusHours(24));
-            if (waitCount > 0) {
-                if (region.getQueueQuota() > waitCount) {
-                    appointment.setStatus(AppointmentStatus.WAIT);
-                    appointment.setQueueNumber(generateQueueNumber(regionId));
-                } else {
-                    appointment.setValid(false);
-                }
+        Long waitCount = 0L;
+        if (region.enabledQueue()) {
+            waitCount = appointmentRepository.countAllWaitByRegionIdAndCreateTime(regionId, ZonedDateTime.now().minusHours(48));
+        }
+
+        if (region.enabledQueue() && !appointment.isVip() && waitCount > 0) {
+            // 当前已经用完额度，开始排队了，后面的预约直接进入排队
+            if (region.getQueueQuota() > waitCount) {
+                appointment.setStatus(AppointmentStatus.WAIT);
+                appointment.setQueueNumber(generateQueueNumber(regionId));
                 return this.save(appointment);
+            } else {
+                appointment.setValid(false);
+                throw new BadRequestAlertException("当前排队额度已用完", "appointment", "");
             }
         }
 
         if (!tryMakeAppointment(appointment)) {
-            if (enableQueue && region.getQueueQuota() > appointmentRepository.countAllWaitByRegionIdAndCreateTime(regionId, ZonedDateTime.now().minusHours(24))) {
+            // 可能由于竞争关系，预约失败，再次检查加入排队
+            if (region.enabledQueue() && region.getQueueQuota() > waitCount) {
                 appointment.setStatus(AppointmentStatus.WAIT);
                 appointment.setQueueNumber(generateQueueNumber(regionId));
+                return this.save(appointment);
             } else {
                 appointment.setValid(false);
+                throw new BadRequestAlertException("当前排队额度已用完", "appointment", "");
             }
-            return this.save(appointment);
         } else {
+            // 预约成功
             return appointment;
         }
     }
@@ -343,9 +369,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     /**
      * 尝试预约抢号
-     *
-     * @param appointment
-     * @return
      */
     private boolean tryMakeAppointment(AppointmentDTO appointment) {
         synchronized (this) {

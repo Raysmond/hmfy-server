@@ -124,10 +124,9 @@ public class ShipPlanResource {
     }
 
     /**
-     * {@code PUT  /ship-plans} : Updates an existing shipPlan.
-     *
+     * {@code PUT  /ship-plans} : Updates an existing shipPla
      * @param shipPlanDTO the shipPlanDTO to update.
-     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated shipPlanDTO,
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated shipPlanDTO,iprodo
      * or with status {@code 400 (Bad Request)} if the shipPlanDTO is not valid,
      * or with status {@code 500 (Internal Server Error)} if the shipPlanDTO couldn't be updated.
      * @throws URISyntaxException if the Location URI syntax is incorrect.

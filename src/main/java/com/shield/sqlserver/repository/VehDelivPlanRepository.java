@@ -10,6 +10,7 @@ import java.util.List;
 public interface VehDelivPlanRepository extends JpaRepository<VehDelivPlan, Long> {
 
     List<VehDelivPlan> findAllByCreateTimeAfterOrderByCreateTime(ZonedDateTime createTime);
+
     List<VehDelivPlan> findAllByDeliverTimeGreaterThanEqualOrderByCreateTime(ZonedDateTime startDeliverTime);
 
     @Query("select p from VehDelivPlan p where p.applyId = ?1 and p.deliverTime >= ?2 and p.deliverTime < ?3 order by p.createTime asc")

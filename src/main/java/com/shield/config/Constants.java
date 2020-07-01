@@ -42,9 +42,8 @@ public final class Constants {
 
     public static final String REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN = "sync_ship_plan_ids";
 
-    // 四期区域ID
-    public static final Long REGION_ID_HUACHAN = 2L;
     public static final Long REGION_ID_BAOTIAN = 1L;
+    public static final Long REGION_ID_HUACHAN = 2L;
     public static final Long REGION_ID_WUQI = 3L;
 
     public static Map<Long, Integer> REGION_ID_2_AREA_ID = new HashMap<Long, Integer>() {{

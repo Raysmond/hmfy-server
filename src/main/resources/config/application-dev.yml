@@ -69,7 +69,7 @@ spring:
       hibernate.jdbc.time_zone: Asia/Shanghai
       hibernate.dialect: org.hibernate.dialect.DB2Dialect
   mysql-datasource:
-    jdbc-url: jdbc:mysql://localhost:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai
+    jdbc-url: jdbc:mysql://localhost:3301/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai
     #    jdbc-url: jdbc:mysql://localhost:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
     username: root
     #    password:

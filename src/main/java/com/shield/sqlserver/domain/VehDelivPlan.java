@@ -66,4 +66,27 @@ public class VehDelivPlan {
 
     @Column(name = "fd_OrderNumber")
     private String orderNumber;
+
+    @Override
+    public String toString() {
+        return "VehDelivPlan{" +
+            "applyId=" + applyId +
+            ", applyNumber='" + applyNumber + '\'' +
+            ", customer='" + customer + '\'' +
+            ", truckNumber='" + truckNumber + '\'' +
+            ", auditStatus=" + auditStatus +
+            ", deliverPosition='" + deliverPosition + '\'' +
+            ", productName='" + productName + '\'' +
+            ", createTime=" + createTime +
+            ", deliverTime=" + deliverTime +
+            ", allowInTime=" + allowInTime +
+            ", gateTime=" + gateTime +
+            ", leaveTime=" + leaveTime +
+            ", tareTime=" + tareTime +
+            ", weightTime=" + weightTime +
+            ", netWeight=" + netWeight +
+            ", weigherNo='" + weigherNo + '\'' +
+            ", orderNumber='" + orderNumber + '\'' +
+            '}';
+    }
 }

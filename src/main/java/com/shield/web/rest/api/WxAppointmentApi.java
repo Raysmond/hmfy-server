@@ -1,4 +1,4 @@
-package com.shield.web.rest;
+package com.shield.web.rest.api;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import com.google.common.collect.Lists;
@@ -28,7 +28,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -36,6 +35,9 @@ import java.util.Map;
 
 import static com.shield.config.Constants.REGION_ID_HUACHAN;
 
+/**
+ * 取号 API
+ */
 @RestController
 @RequestMapping("/api/wx/{appid}")
 public class WxAppointmentApi {
@@ -63,12 +65,8 @@ public class WxAppointmentApi {
      * 预约排队接口
      */
     @PostMapping("/ship_plans/{id}/make_appointment")
-    public synchronized ResponseEntity<PlanDTO> makeAppointment(
-        @PathVariable String appid,
-        @PathVariable Long id) {
+    public synchronized ResponseEntity<PlanDTO> makeAppointment(@PathVariable String appid, @PathVariable Long id) {
         log.debug("REST request to make appointment with ship plan id : {}", id);
-        final WxMaService wxService = WxMiniAppConfiguration.getMaService(appid);
-
         User user = userService.getUserWithAuthorities().get();
         if (!SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.APPOINTMENT) || StringUtils.isBlank(user.getTruckNumber())) {
             throw new BadRequestAlertException("不具备预约员权限", ENTITY_NAME, "");
@@ -103,34 +101,31 @@ public class WxAppointmentApi {
             throw new BadRequestAlertException("该计划已有预约号，不能重复取号", ENTITY_NAME, "");
         }
 
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
-        if (!region.getId().equals(REGION_ID_HUACHAN) && plan.getPlan().getDeliverTime().toLocalDate().equals(tomorrow)) {
-            throw new BadRequestAlertException("不能预约明天的计划", ENTITY_NAME, "");
-        }
-
         AppointmentDTO appointmentDTO = new AppointmentDTO();
         appointmentDTO.setLicensePlateNumber(user.getTruckNumber());
         appointmentDTO.setDriver(user.getFirstName());
         appointmentDTO.setRegionId(region.getId());
         appointmentDTO.setApplyId(plan.getPlan().getApplyId());
         appointmentDTO.setVip(plan.getPlan().isVip());
+        appointmentDTO.setUserId(user.getId());
 
         AppointmentDTO appointment = null;
-        if (region.getId().equals(REGION_ID_HUACHAN) && plan.getPlan().getDeliverTime().toLocalDate().equals(tomorrow) && ZonedDateTime.now().getHour() >= 22) {
-            appointment = appointmentService.makeAppointmentForTomorrow(region, plan.getPlan(), appointmentDTO);
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        boolean isTomorrowPlan = plan.getPlan().getDeliverTime().toLocalDate().equals(tomorrow);
+        if (isTomorrowPlan) {
+            if (region.getId().equals(REGION_ID_HUACHAN) && ZonedDateTime.now().getHour() >= 22) {
+                // 只有化产22：00开始，可以排第二天的计划
+                appointment = appointmentService.makeAppointmentForTomorrow(region, plan.getPlan(), appointmentDTO);
+            } else {
+                throw new BadRequestAlertException("不能预约明天的计划", ENTITY_NAME, "");
+            }
         } else {
             appointment = appointmentService.makeAppointment(region.getId(), appointmentDTO);
-        }
-
-        if (!appointment.isValid()) {
-            appointmentService.delete(appointment.getId());
-            throw new BadRequestAlertException("明天的预约额度已用完", "appointment", "");
         }
 
         plan.setAppointment(appointment);
         if (appointment.getStatus().equals(AppointmentStatus.START)) {
             plan.setStatus("预约成功");
-//            plan.setMaxAllowInTime(appointment.getStartTime().plusSeconds(region.getValidTime()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
             plan.setMaxAllowInTime(appointment.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
                 + " - " + appointment.getStartTime().plusHours(region.getValidTime()).format(DateTimeFormatter.ofPattern("HH:mm")));
         } else {

@@ -269,7 +269,7 @@ public class CarWhiteListService {
             }
             if (lastProcessedGateIO.containsKey(gate.getRecordId())) {
                 GateIO last = lastProcessedGateIO.get(gate.getRecordId());
-                if (last.getUpdatedTime().equals(gate.getUpdatedTime())) {
+                if (!((last.getGateInTime() == null && gate.getGateInTime() != null) || (last.getGateOutTime() == null && gate.getGateOutTime() != null))) {
                     // 没有更新
                     continue;
                 }
@@ -295,7 +295,7 @@ public class CarWhiteListService {
 
         for (Long recordId : lastProcessedGateIO.keySet()) {
             GateIO gate = lastProcessedGateIO.get(recordId);
-            if (gate.getGateOutTime() != null && gate.getGateOutTime().plusHours(12).isBefore(ZonedDateTime.now())) {
+            if (gate.getGateOutTime() != null && gate.getGateOutTime().plusDays(1).isBefore(ZonedDateTime.now())) {
                 lastProcessedGateIO.remove(recordId);
             }
         }

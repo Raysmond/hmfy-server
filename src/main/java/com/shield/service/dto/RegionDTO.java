@@ -80,6 +80,10 @@ public class RegionDTO implements Serializable {
 
     private ZonedDateTime updateTime;
 
+    public boolean enabledQueue() {
+        return queueQuota != null && queueQuota > 0;
+    }
+
     public Integer getDrivers() {
         return drivers;
     }
