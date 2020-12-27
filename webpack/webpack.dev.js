@@ -23,6 +23,7 @@ module.exports = (options) => webpackMerge(commonConfig({ env: ENV }), {
                 '/'
             ],
             target: `http${options.tls ? 's' : ''}://localhost:8080`,
+            // target: `https://pd.bwhk.net/api`,
             secure: false,
             changeOrigin: options.tls
         }],

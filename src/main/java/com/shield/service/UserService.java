@@ -365,6 +365,11 @@ public class UserService {
         return SecurityUtils.getCurrentUserLogin().flatMap(userRepository::findOneWithAuthoritiesByLogin);
     }
 
+    @Transactional(readOnly = true)
+    public Optional<User> getUserWithAuthoritiesByUnionId(Long unionId) {
+        return userRepository.findOneWithAuthoritiesByUnionId(unionId);
+    }
+
     /**
      * Not activated users should be automatically deleted after 3 days.
      * <p>
@@ -422,4 +427,13 @@ public class UserService {
         userRepository.save(user);
         this.clearUserCaches(user);
     }
+
+    public void bindUnionUser(User user, Long unionUserId, String username) {
+        log.info("bindUnionUser, user_id: {}, unionUserId: {}, username: {}", user, unionUserId, username);
+        user.setUnionId(unionUserId);
+        user.setUnionUsername(username);
+        userRepository.save(user);
+        this.clearUserCaches(user);
+    }
+
 }

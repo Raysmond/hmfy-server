@@ -41,6 +41,23 @@ export class AuthServerProvider {
     }
   }
 
+  loginWithUnionToken(jwt, rememberMe) {
+    const data = {
+      unionAccessToken: jwt,
+      rememberMe: rememberMe
+    }
+    return this.http.post(SERVER_API_URL + 'api/union_login', data, { observe: 'response' }).pipe(map(authenticateSuccess.bind(this)));
+
+    function authenticateSuccess(resp) {
+      const bearerToken = resp.headers.get('Authorization');
+      if (bearerToken && bearerToken.slice(0, 7) === 'Bearer ') {
+        const jwt = bearerToken.slice(7, bearerToken.length);
+        this.storeAuthenticationToken(jwt, rememberMe);
+        return jwt;
+      }
+    }
+  }
+
   storeAuthenticationToken(jwt, rememberMe) {
     if (rememberMe) {
       this.$localStorage.store('authenticationToken', jwt);

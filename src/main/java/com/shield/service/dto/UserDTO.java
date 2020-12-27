@@ -77,6 +77,10 @@ public class UserDTO {
 
     private String memo;
 
+    private Long unionId;
+
+    private String unionUsername;
+
 
     public UserDTO() {
         // Empty constructor needed for Jackson.
@@ -100,6 +104,8 @@ public class UserDTO {
             .map(Authority::getName)
             .collect(Collectors.toSet());
         this.truckNumber = user.getTruckNumber();
+        this.unionId = user.getUnionId();
+        this.unionUsername = user.getUnionUsername();
         if (null != user.getWxMaUser()) {
             this.userInfo = new WxMaUserDTO();
             this.userInfo.setOpenId(user.getWxMaUser().getOpenId());
@@ -305,6 +311,22 @@ public class UserDTO {
 
     public void setMemo(String memo) {
         this.memo = memo;
+    }
+
+    public Long getUnionId() {
+        return unionId;
+    }
+
+    public void setUnionId(Long unionId) {
+        this.unionId = unionId;
+    }
+
+    public String getUnionUsername() {
+        return unionUsername;
+    }
+
+    public void setUnionUsername(String unionUsername) {
+        this.unionUsername = unionUsername;
     }
 
     @Override

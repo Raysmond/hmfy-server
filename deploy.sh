@@ -37,7 +37,7 @@ increment_version ()
 increment_version $version
 sed -i -e "s/^version\ =\ .*/version\ =\ \"$version\-SNAPSHOT\"/g" build.gradle
 
-./gradlew -Pprod clean bootJar
+./gradlew  -Dorg.gradle.jvmargs=-Xmx10240m -Pprod clean bootJar
 
 # test
 # scp -P 2233 build/libs/shield-0.0.1-SNAPSHOT.jar zou@116.247.114.12:/home/zou/shield/docker/

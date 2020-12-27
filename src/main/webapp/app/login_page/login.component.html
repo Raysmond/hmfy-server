@@ -11,6 +11,7 @@
             </div>
             <div class="card-body" style="color:#fff;">
                 <!--<p class="text-center py-2">宝田发运预约取号系统</p>-->
+                <p style="color:#fb9090;">{{unionAlert}}</p>
                 <form class="form" role="form" (ngSubmit)="login()" [formGroup]="loginForm">
                     <div class="form-group">
                         <label class="username-label" for="username" jhiTranslate="global.form.username.label">Login</label>
@@ -28,9 +29,14 @@
                         <div class="checkbox c-checkbox float-left mt-0"><label>
                             <input class="form-check-input" type="checkbox" name="rememberMe" id="rememberMe" formControlName="rememberMe" checked>
                             <span class="fa fa-check"></span> 记住我</label></div>
+                        <div class="checkbox c-checkbox float-left mt-0">
+                            <a href="http://pd.bwhk.net:8080/login?redirect=http://pd.bwhk.net/api/union_login"></a>
+                        </div>
                     </div><button class="btn btn-block btn-primary mt-3" type="submit">登录</button>
                 </form>
-                <!--<p class="pt-3 text-center">Need to Signup?</p><a class="btn btn-block btn-secondary" href="register.html">Register Now</a>-->
+                <p class="pt-3 text-center">
+                    <a class="" style="color:#fff;" href="http://pd.bwhk.net:8080/login?redirect=https://pd.bwhk.net/login">统一身份认证登录</a>
+                </p>
             </div>
         </div><!-- END card-->
         <!--<div class="p-3 text-center" style="color:#fff;"><span class="mr-2">&copy;</span><span>2019</span><span class="mr-2 ml-2">-</span><span>宝田发运预约取号系统</span></div>-->

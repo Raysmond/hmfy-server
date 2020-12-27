@@ -4,6 +4,8 @@ package com.shield.web.rest;
 import com.shield.domain.User;
 import com.shield.repository.UserRepository;
 import com.shield.security.SecurityUtils;
+import com.shield.security.jwt.JWTFilter;
+import com.shield.security.jwt.TokenProvider;
 import com.shield.service.MailService;
 import com.shield.service.UserService;
 import com.shield.service.WxMaUserService;
@@ -15,15 +17,25 @@ import com.shield.web.rest.errors.*;
 import com.shield.web.rest.vm.KeyAndPasswordVM;
 import com.shield.web.rest.vm.ManagedUserVM;
 
+import com.shield.web.rest.wx.WxMaUserController;
+import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.util.*;
 
 /**
@@ -48,7 +60,18 @@ public class AccountResource {
     private final MailService mailService;
 
     @Autowired
+    private TokenProvider tokenProvider;
+
+    @Autowired
+    private AuthenticationManagerBuilder authenticationManagerBuilder;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
     private WxMaUserService wxMaUserService;
+
+    private RestTemplate restTemplate = new RestTemplate();
 
     public AccountResource(UserRepository userRepository, UserService userService, MailService mailService) {
 
@@ -193,4 +216,62 @@ public class AccountResource {
             password.length() >= ManagedUserVM.PASSWORD_MIN_LENGTH &&
             password.length() <= ManagedUserVM.PASSWORD_MAX_LENGTH;
     }
+
+
+    @Data
+    static class UnionLoginVm {
+        @NotBlank
+        private String unionAccessToken;
+        private Boolean rememberMe;
+    }
+
+    @Data
+    static class UnionUser {
+        Long id;
+        String username;
+    }
+
+    @Data
+    static class UnionUserResponse {
+        UnionUser user;
+        List<String> roles;
+    }
+
+    @PostMapping("/union_login")
+    public ResponseEntity<WxMaUserController.JWTToken> unionLogin(@RequestBody @Valid UnionLoginVm unionLoginVm) {
+        log.info("Union login with token: {}", unionLoginVm);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Accept", "application/json");
+        headers.add("Authorization", unionLoginVm.unionAccessToken);
+        HttpEntity<String> request = new HttpEntity<>(null, headers);
+        ResponseEntity<UnionUserResponse> res = restTemplate.exchange("http://pd.bwhk.net:8080/api/auth/info", HttpMethod.GET, request, UnionUserResponse.class);
+        if (res.getStatusCode() == HttpStatus.OK) {
+            log.info("get union user success, {}", res.getBody());
+            UnionUser unionUser = res.getBody().user;
+            Optional<User> user = userService.getUserWithAuthoritiesByUnionId(unionUser.getId());
+            if (user.isPresent()) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(user.get().getLogin());
+                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                String jwt = tokenProvider.createToken(authentication, false);
+                HttpHeaders httpHeaders = new HttpHeaders();
+                httpHeaders.add(JWTFilter.AUTHORIZATION_HEADER, "Bearer " + jwt);
+                return new ResponseEntity<>(new WxMaUserController.JWTToken(jwt), httpHeaders, HttpStatus.OK);
+            } else {
+                if (SecurityUtils.isAuthenticated()) {
+                    // 绑定统一身份
+                    User currentUser = userService.getUserWithAuthorities().get();
+                    userService.bindUnionUser(currentUser, unionUser.getId(), unionUser.getUsername());
+                    return ResponseEntity.ok(new WxMaUserController.JWTToken(null, "绑定身份成功"));
+                } else {
+                    return ResponseEntity.badRequest().body(new WxMaUserController.JWTToken(null, "未绑定统一身份认证"));
+                }
+            }
+        } else {
+            log.warn("Failed to find union user");
+            return ResponseEntity.badRequest().body(new WxMaUserController.JWTToken(null, "统一认证失败"));
+        }
+    }
+
 }

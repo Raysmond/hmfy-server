@@ -1,0 +1,24 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="raysmond (generated)" id="2020-12-27-01">
+        <addColumn tableName="jhi_user">
+            <column name="union_id"  type="bigint(20)">
+            </column>
+        </addColumn>
+        <addColumn tableName="jhi_user">
+            <column name="union_username"  type="varchar(64)">
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="raysmond (generated)" id="2020-12-27-02">
+        <createIndex
+            indexName="idx_jhi_union_id"
+            tableName="jhi_user"
+            unique="false">
+            <column name="union_id" type="bigint(20)"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

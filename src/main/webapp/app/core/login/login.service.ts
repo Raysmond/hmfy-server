@@ -31,6 +31,22 @@ export class LoginService {
     return this.authServerProvider.loginWithToken(jwt, rememberMe);
   }
 
+  loginWithUnionToken(unionJwt, rememberMe) {
+    return new Promise((resolve, reject) => {
+      this.authServerProvider.loginWithUnionToken(unionJwt, rememberMe).subscribe(
+        data => {
+          this.accountService.identity(true).then(account => {
+            resolve(data);
+          });
+        },
+        err => {
+          this.logout();
+          reject(err);
+        }
+      );
+    });
+  }
+
   logout() {
     this.authServerProvider.logout().subscribe(null, null, () => this.accountService.authenticate(null));
   }

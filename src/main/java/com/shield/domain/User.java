@@ -121,6 +121,12 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Column(name = "memo")
     private String memo;
 
+    @Column(name = "union_id")
+    private Long unionId;
+
+    @Column(name = "union_username")
+    private String unionUsername;
+
 
     public String getTruckNumber() {
         return truckNumber;
@@ -289,6 +295,22 @@ public class User extends AbstractAuditingEntity implements Serializable {
 
     public void setMemo(String memo) {
         this.memo = memo;
+    }
+
+    public Long getUnionId() {
+        return unionId;
+    }
+
+    public void setUnionId(Long unionId) {
+        this.unionId = unionId;
+    }
+
+    public String getUnionUsername() {
+        return unionUsername;
+    }
+
+    public void setUnionUsername(String unionUsername) {
+        this.unionUsername = unionUsername;
     }
 
     @Override

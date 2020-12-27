@@ -50,6 +50,7 @@
                         <th>姓名</th>
                         <th>手机号</th>
                         <th>绑定微信账号</th>
+                        <th>统一身份</th>
                         <!--<th jhiSortBy="createdDate"><span jhiTranslate="userManagement.createdDate">Created Date</span>-->
                             <!--<fa-icon [icon]="'sort'"></fa-icon>-->
                         <!--</th>-->
@@ -100,6 +101,16 @@
                             <div *ngIf="user.userInfo">
                                 <img src="{{user.userInfo.avatarUrl}}" style="width: 48px;height:48px;border-radius: 50%;"/>
                                 {{user.userInfo.nickName}}
+                            </div>
+                        </td>
+                        <td>
+                            <div *ngIf="user.unionUsername">
+                                <span>账号：{{user.unionUsername}}</span>
+                                <br>
+                                <span>ID: {{user.unionId}}</span>
+                            </div>
+                            <div *ngIf="!user.unionUsername">
+                                未绑定
                             </div>
                         </td>
                         <!--<td>{{user.createdDate | date:'yyyy-MM-dd HH:mm'}}</td>-->
