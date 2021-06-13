@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -371,6 +372,25 @@ public class AppointmentServiceImpl implements AppointmentService {
      * 尝试预约抢号
      */
     private boolean tryMakeAppointment(AppointmentDTO appointment) {
+        // 检查上一次预约的离场状态
+        Appointment lastAppointment = appointmentRepository.findLatestByTruckNumberAndStatus(
+            appointment.getRegionId(),
+            appointment.getLicensePlateNumber(),
+            AppointmentStatus.ENTER,
+            ZonedDateTime.now().minusHours(24),
+            PageRequest.of(0, 1))
+            .stream().findFirst().orElse(null);
+        if (lastAppointment != null && lastAppointment.isValid() && lastAppointment.getEnterTime() != null) {
+            if (lastAppointment.getLeaveTime() == null
+                || lastAppointment.getLeaveTime().plusMinutes(3).isAfter(ZonedDateTime.now())) {
+                log.info("上一个预约没有离场，或者刚离场3min之内，无法进行预约，" +
+                        "truckNumber: {}, last appointment id: {}",
+                    appointment.getLicensePlateNumber(), lastAppointment.getId());
+                return false;
+            }
+        }
+
+        // 进行预约
         synchronized (this) {
             RegionDTO region = regionService.findOne(appointment.getRegionId()).get();
             this.countRemainQuota(region, appointment.isVip());

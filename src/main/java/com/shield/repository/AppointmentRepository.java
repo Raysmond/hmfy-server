@@ -71,6 +71,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
     @Query("select a from Appointment a where a.region.id = ?1 and a.licensePlateNumber = ?2 and a.createTime >= ?3 and a.valid = true order by a.createTime desc")
     List<Appointment> findLatestByTruckNumber(Long regionId, String truckNumber, ZonedDateTime createTime);
 
+    @Query("select a from Appointment a where a.region.id = ?1 and a.licensePlateNumber = ?2 and a.status = ?3 and a.createTime>=?4 and a.valid = true order by a.id desc")
+    List<Appointment> findLatestByTruckNumberAndStatus(Long regionId, String truckNumber, AppointmentStatus status, ZonedDateTime createTime, Pageable pageable);
+
     @Query("select a from Appointment a where a.licensePlateNumber = ?1 and a.createTime >= ?2 and a.valid = true order by a.id desc")
     List<Appointment> findLatestByTruckNumber(String truckNumber, ZonedDateTime createTime);
 
