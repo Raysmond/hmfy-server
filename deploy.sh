@@ -9,6 +9,9 @@
 #     python
 # ------------------------------------------------------------------
 
+java -version
+node -v
+
 # Get application version from build.gradle
 version=$(cat build.gradle |  grep "version = \"[0-9\.]")
 tmp=${version#*\"}

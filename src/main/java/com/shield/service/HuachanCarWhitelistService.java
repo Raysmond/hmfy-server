@@ -3,6 +3,7 @@ package com.shield.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
@@ -10,6 +11,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.shield.chepaipark.service.CarWhiteListService;
+import com.shield.config.ApplicationProperties;
 import com.shield.domain.*;
 import com.shield.domain.enumeration.RecordType;
 import com.shield.repository.AppointmentRepository;
@@ -17,6 +19,7 @@ import com.shield.repository.GateRecordRepository;
 import com.shield.repository.RegionRepository;
 import com.shield.repository.ShipPlanRepository;
 import com.shield.service.dto.AppointmentDTO;
+import com.shield.service.dto.ShipPlanDTO;
 import com.shield.service.mapper.AppointmentMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
@@ -39,10 +43,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.shield.config.Constants.REGION_ID_HUACHAN;
@@ -62,9 +63,9 @@ public class HuachanCarWhitelistService {
     //    private final String AUTH_USER_PASSWORD = "btkf@666";
     private final String AUTH_USER_PASSWORD = "EB71A80D1BA26EE0F9760E3B206036533F3E57FEC74D0E8E9FCECCA8017F89D4";
 
-    private final String AUTH_API = "https://cg.meowpapa.com/backend/login";
-    private final String REGISTER_CAR_API = "https://cg.meowpapa.com/backend/api/deliver";
-    private final String REGISTER_CAR_QUERY_API = "https://cg.meowpapa.com/backend/api/query?codes=%s";
+    private final String AUTH_API = "https://vm.bwhk.net/backend/login";
+    private final String REGISTER_CAR_API = "https://vm.bwhk.net/backend/api/deliver";
+    private final String REGISTER_CAR_QUERY_API = "https://vm.bwhk.net/backend/api/query?codes=%s";
 
     private RestTemplate restTemplate;
 
@@ -101,9 +102,13 @@ public class HuachanCarWhitelistService {
     @Autowired
     private AppointmentService appointmentService;
 
+    @Autowired
+    ApplicationProperties applicationProperties;
+
     public HuachanCarWhitelistService() {
         this.restTemplate = new RestTemplate();
     }
+
 
     @Data
     public static class Response {
@@ -132,6 +137,207 @@ public class HuachanCarWhitelistService {
             log.error("failed to get token, status code : {}", result.getStatusCode());
         }
         return token;
+    }
+
+    /**
+     * 提货之后，提交出门证申请
+     * 需要分两步：1、申请；2、提交
+     */
+    @Async
+    public void registerOutApplication(ShipPlanDTO plan) {
+        log.info("registerOutApplication: {}", plan);
+        if (env.acceptsProfiles(Profiles.of("dev"))) {
+            log.info("[DEV] ignore registerOutApplication");
+            return;
+        }
+
+        AppointmentDTO appointment = appointmentService.findLastByApplyId(plan.getApplyId());
+        if (appointment == null) {
+            log.info("appointment is null, ignore registerOutApplication");
+            return;
+        }
+        User user = userService.getUserWithAuthorities(appointment.getUserId()).get();
+
+        String productNameFixed; // 化产出门证上可以选项：铁粒子、S95矿粉；排队系统内部的命名不太一致，需要做一下转换
+
+        if (plan.getProductName().contains("铁粒子")) {
+            productNameFixed = "铁粒子";
+        } else if (plan.getProductName().contains("S95")) {
+            productNameFixed = "S95矿粉";
+        } else {
+            log.warn("productName not in choices: [铁粒子、S95矿粉], 跳过提交出门证");
+            return;
+        }
+
+        Map<String, Map<String, String>> customFields = Maps.newHashMap();
+        customFields.put("ID", ImmutableBiMap.of("S95矿粉", "17e87b9444a84937b3649953951fca9b", "铁粒子", "59ee2611df56409688c8cdeb9b9eae27"));
+        customFields.put("FIELD2", ImmutableBiMap.of("S95矿粉", "SY62", "铁粒子", "SY61"));
+        customFields.put("ALLOW_OMG_LIST", ImmutableBiMap.of("S95矿粉", "7#", "铁粒子", "6#"));
+
+        int validTimeInMinutes = applicationProperties.getRegion().getOutApplicationConfig().getValidTimeInMinutes();
+        int startTimeOffsetInMinutes = applicationProperties.getRegion().getOutApplicationConfig().getStartTimeOffsetInMinutes();
+        ZonedDateTime startTime = ZonedDateTime.now().plusMinutes(startTimeOffsetInMinutes);
+        ZonedDateTime endTime = ZonedDateTime.now().plusMinutes(startTimeOffsetInMinutes + validTimeInMinutes);
+
+        // 2个时间段禁行： AM：7:30- 8:30 ， PM：4:30- 5:30
+        if (startTime.getHour() == 7 && startTime.getMinute() >= 30) {
+            startTime = startTime.withHour(8).withMinute(30);
+            endTime = startTime.plusMinutes(validTimeInMinutes);
+        }
+        if (startTime.getHour() == 16 && startTime.getMinute() >= 30) {
+            startTime = startTime.withHour(17).withMinute(30);
+            endTime = startTime.plusMinutes(validTimeInMinutes);
+        }
+
+        String body = "{\n" +
+            "  \"ID\": \"" + customFields.get("ID").get(productNameFixed) + "\",\n" +
+            "  \"CAR_NO\": \"" + plan.getTruckNumber() + "\",\n" +
+            "  \"CAR_COLOR\": \"1\",\n" +
+            "  \"CAR_TYPE\": \"car_02\",\n" +
+            "  \"CAR_DRIVER_NAME\": \"" + appointment.getDriver() + "\",\n" +
+            "  \"CAR_DRIVER_PHONE\": \"\",\n" +
+            "  \"WEIGH_NO\": \"" + plan.getApplyId() + "\",\n" +
+            "  \"PLAN_NUM\": \"" + plan.getApplyId() + "\",\n" +
+            "  \"FIEID3\": \"\",\n" +
+            "  \"OUT_VALID_STIME\": \"" + startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + "\",\n" +
+            "  \"OUT_VALID_ETIME\": \"" + endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) + "\",\n" +
+            "  \"MBTYPE_CODE\": \"CM05\",\n" +
+            "  \"FIEID2\": \"" + customFields.get("FIELD2").get(productNameFixed) + "\",\n" +
+            "  \"FIEID1\": \"宝武环科\",\n" +
+            "  \"PRODUCT_NAME\": \"" + productNameFixed + "\",\n" +
+            "  \"MAT_MUNIT\": \"t\",\n" +
+            "  \"file\": \"\",\n" +
+            "  \"BILLING_EMP_CODE\": \"550843\",\n" +
+            "  \"BILLING_EMP_PHONE\": \"" + user.getPhone() + "\",\n" +
+            "  \"BILLING_EMP_NAME\": \"俞伟\",\n" +
+            "  \"BILLING_ORG_CODE\": \"BSHZ\",\n" +
+            "  \"BILLING_ORG_NAME\": \"宝武环科\",\n" +
+            "  \"REMARK\": \"排队系统提交出门证\",\n" +
+            "  \"IS_NEED_WEIGH\": false,\n" +
+            "  \"ALLOW_OMG_LIST\": \"" + customFields.get("ALLOW_OMG_LIST").get(productNameFixed) + "\",\n" +
+            "  \"TMioBillMDetailEntitys\": [\n" +
+            "    {\n" +
+            "      \"PRODUCT_NAME\": \"" + plan.getProductName() + "\",\n" +
+            "      \"MAT_MTYPE_CODE\": null,\n" +
+            "      \"MAT_MTYPE_NAME\": null,\n" +
+            "      \"MAT_SPEC\": null,\n" +
+            "      \"MAT_NUMBER\": 0,\n" +
+            "      \"FIEID1\": \"0\",\n" +
+            "      \"MAT_WEIGHT\": 33.1,\n" +
+            "      \"MAT_MUNIT\": \"t\",\n" +
+            "      \"MAT_NO\": null,\n" +
+            "      \"LAY_TABLE_INDEX\": 0\n" +
+            "    }\n" +
+            "  ],\n" +
+            "  \"TMioAnnexListEntitys\": []\n" +
+            "}";
+
+        String api = "http://10.70.16.101/MIOS.Web/mio/OutFactory/OutFactory_Info?$ResTargetFun=add&billId=" + customFields.get("ID").get(productNameFixed);
+        if (env.acceptsProfiles(Profiles.of("dev"))) {
+            // 本地测试用
+            api = "http://127.0.0.1:8000/MIOS.Web/mio/OutFactory/OutFactory_Info?$ResTargetFun=add&billId=" + customFields.get("ID").get(productNameFixed);
+        }
+
+        String cookie = null;
+        cookie = loginAndGetSessionId();
+
+        if (cookie == null) {
+            log.warn("ignore, cookie is null");
+            return;
+        }
+
+        URI uri = URI.create(api);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Cookie", String.format("ASP.NET_SessionId=%s", cookie));
+        headers.add("Referer", "http://10.70.16.101/MIOS.Web/mio/outfactory/outfactory_info?$ResTargetFun=add");
+        headers.add("Accept", "application/json, text/javascript, */*; q=0.01");
+        headers.add("Host", "10.70.16.101");
+        headers.add("Connection", "keep-alive");
+        headers.add("Origin", "http://10.70.16.101");
+        headers.add("Accept-Encoding", "gzip, deflate");
+        headers.add("Accept-Language", "en-US,en;q=0.9");
+        headers.add("X-Requested-With", "XMLHttpRequest");
+        headers.add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
+
+        log.info("Start to invoke outfactory_info api: {}", api);
+        HttpEntity<String> request = new HttpEntity<>(body, headers);
+        ResponseEntity<String> result;
+        try {
+            result = restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
+        } catch (HttpClientErrorException e) {
+            loginSessionId = null;
+            return;
+        }
+        log.info("response, status:{}, body: {}", result.getStatusCode(), result.getBody());
+        if (result.getStatusCode() == HttpStatus.OK) {
+            // 返回body示例：
+            // {"id":null,"state":"success","message":"保存出厂单成功","data":{"ID":"0ecb3d2c15cf474a9ff062b7318eec5b","BILL_CODE":"OEU2211050156","IS_NEED_WEIGH":false},"jsondata":null}
+            JsonObject json = new JsonParser().parse(result.getBody()).getAsJsonObject();
+            if (Objects.equals("success", json.get("state").getAsString())) {
+                String outApplyId = json.getAsJsonObject("data").get("ID").getAsString();
+                if (this.submitOutApplication(outApplyId)) { // 确认提交出门证
+                    wxMpMsgService.sendOutgateApplicationSuccessMsg(plan, appointment, startTime, endTime, customFields.get("ALLOW_OMG_LIST").get(productNameFixed));
+                }
+            }
+        }
+    }
+
+    /**
+     * 确认提交出门证
+     */
+    public boolean submitOutApplication(String outApplyId) {
+        String api = "http://10.70.16.101/MIOS.Web/mio/outfactory/outfactory_confirm?";
+
+        String cookie = null;
+        cookie = loginAndGetSessionId();
+
+        if (cookie == null) {
+            log.warn("ignore, cookie is null");
+            return false;
+        }
+
+        URI uri = URI.create(api);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Cookie", String.format("ASP.NET_SessionId=%s", cookie));
+        headers.add("Referer", "http://10.70.16.101/MIOS.Web/mio/outfactory/outfactory_qry");
+        headers.add("Accept", "application/json, text/javascript, */*; q=0.01");
+        headers.add("Host", "10.70.16.101");
+        headers.add("Connection", "keep-alive");
+        headers.add("Origin", "http://10.70.16.101");
+        headers.add("Accept-Encoding", "gzip, deflate");
+        headers.add("Accept-Language", "en-US,en;q=0.9");
+        headers.add("X-Requested-With", "XMLHttpRequest");
+        headers.add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
+
+        String body = String.format("[\"%s\"]", outApplyId);
+
+        log.info("invoke: submitOutApplication: {}", api);
+        HttpEntity<String> request = new HttpEntity<>(body, headers);
+        ResponseEntity<String> result;
+        try {
+            result = restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
+        } catch (HttpClientErrorException e) {
+            loginSessionId = null;
+            return false;
+        }
+        log.info("submitOutApplication response, status:{}, body: {}", result.getStatusCode(), result.getBody());
+        // {
+        //  "id": null,
+        //  "state": "success",
+        //  "message": "成功提交1条数据！",
+        //  "data": [
+        //    "663531784fd84c7ca3704e79f51f262d"
+        //  ],
+        //  "jsondata": null
+        //}
+        if (result.getStatusCode() == HttpStatus.OK) {
+            JsonObject json = new JsonParser().parse(result.getBody()).getAsJsonObject();
+            return Objects.equals("success", json.get("state").getAsString());
+        }
+
+        return false;
     }
 
     /**
@@ -362,7 +568,7 @@ public class HuachanCarWhitelistService {
         String api = "http://10.70.16.101/MIOS.Web/account/login";
         if (env.acceptsProfiles(Profiles.of("dev"))) {
             // 本地测试用
-            api = "http://127.0.0.1:10180/MIOS.Web/account/login";
+            api = "http://127.0.0.1:8000/MIOS.Web/account/login";
         }
         String data = "{" +
             "\"fromurl\" : \"http://10.80.16.101/MIOS.Web\"," +
@@ -517,7 +723,7 @@ public class HuachanCarWhitelistService {
         String api = "http://10.70.16.101/MIOS.Web/odata/MIOS/T_MIO_CAR_RECORDEntity";
         if (env.acceptsProfiles(Profiles.of("dev"))) {
             // 本地测试用
-            api = "http://127.0.0.1:10180/MIOS.Web/odata/MIOS/T_MIO_CAR_RECORDEntity";
+            api = "http://127.0.0.1:8000/MIOS.Web/odata/MIOS/T_MIO_CAR_RECORDEntity";
         }
         String today = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String lastDay = ZonedDateTime.now().minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));

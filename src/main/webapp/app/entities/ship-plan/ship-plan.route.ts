@@ -8,6 +8,7 @@ import { filter, map } from 'rxjs/operators';
 import { ShipPlan } from 'app/shared/model/ship-plan.model';
 import { ShipPlanService } from './ship-plan.service';
 import { ShipPlanComponent } from './ship-plan.component';
+import { ShipPlanWarningComponent } from './ship-plan-warning.component';
 import { ShipPlanDetailComponent } from './ship-plan-detail.component';
 import { ShipPlanUpdateComponent } from './ship-plan-update.component';
 import { ShipPlanDeletePopupComponent } from './ship-plan-delete-dialog.component';
@@ -39,6 +40,19 @@ export const shipPlanRoute: Routes = [
     data: {
       authorities: ['ROLE_REGION_ADMIN', 'ROLE_ADMIN'],
       defaultSort: 'id,asc',
+      pageTitle: 'shieldApp.shipPlan.home.title'
+    },
+    canActivate: [UserRouteAccessService]
+  },
+  {
+    path: 'warning',
+    component: ShipPlanWarningComponent,
+    resolve: {
+      pagingParams: JhiResolvePagingParams
+    },
+    data: {
+      authorities: ['ROLE_REGION_ADMIN', 'ROLE_ADMIN'],
+      defaultSort: 'updateTime,desc',
       pageTitle: 'shieldApp.shipPlan.home.title'
     },
     canActivate: [UserRouteAccessService]

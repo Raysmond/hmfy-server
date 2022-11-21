@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-//@Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
+@Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
 public class ParkingScheduleService {
     private final CarWhiteListService carWhiteListService;
 

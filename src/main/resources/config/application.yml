@@ -160,3 +160,12 @@ application:
       token: #微信小程序消息服务器配置的token
       aesKey: #微信小程序消息服务器配置的EncodingAESKey
       msgDataFormat: JSON
+  region:
+    fixedQuotaForTomorrow:
+      2: 9
+    outApplicationConfig:
+      validTimeInMinutes: 30
+      startTimeOffsetInMinutes: 8
+      forbiddenTimePeriods: [ "07:30-08:30", "16:30-17:30" ]
+
+

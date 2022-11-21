@@ -11,17 +11,21 @@ import com.shield.service.dto.ShipPlanDTO;
 import com.shield.service.dto.ShipPlanCriteria;
 import com.shield.service.ShipPlanQueryService;
 
+import io.github.jhipster.service.filter.IntegerFilter;
 import io.github.jhipster.service.filter.StringFilter;
 import io.github.jhipster.service.filter.ZonedDateTimeFilter;
 import io.github.jhipster.web.util.HeaderUtil;
+import io.github.jhipster.web.util.PageUtil;
 import io.github.jhipster.web.util.PaginationUtil;
 import io.github.jhipster.web.util.ResponseUtil;
+import org.apache.commons.compress.utils.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
@@ -43,7 +47,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * REST controller for managing {@link com.shield.domain.ShipPlan}.
@@ -125,6 +131,7 @@ public class ShipPlanResource {
 
     /**
      * {@code PUT  /ship-plans} : Updates an existing shipPla
+     *
      * @param shipPlanDTO the shipPlanDTO to update.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated shipPlanDTO,iprodo
      * or with status {@code 400 (Bad Request)} if the shipPlanDTO is not valid,
@@ -159,6 +166,8 @@ public class ShipPlanResource {
                                                              @RequestParam MultiValueMap<String, String> queryParams,
                                                              @RequestParam(required = true) String deliverTimeBegin,
                                                              @RequestParam(required = false) String deliverTimeEnd,
+                                                             @RequestParam(required = false) String excludeDeliverPosition,
+                                                             @RequestParam(required = false, defaultValue = "false") Boolean warningPlan,
                                                              UriComponentsBuilder uriBuilder) {
         log.debug("REST request to get ShipPlans by criteria: {}", criteria);
         if (!StringUtils.isEmpty(deliverTimeBegin)) {
@@ -177,7 +186,41 @@ public class ShipPlanResource {
             deliverPosition.setEquals(userService.getUserWithAuthorities().get().getRegion().getName());
             criteria.setDeliverPosition(deliverPosition);
         }
-        Page<ShipPlanDTO> page = shipPlanQueryService.findByCriteria(criteria, pageable);
+        if (warningPlan) {
+            IntegerFilter statusFilter = new IntegerFilter();
+            statusFilter.setEquals(3);
+            criteria.setAuditStatus(statusFilter);
+        }
+        Page<ShipPlanDTO> page;
+        // TODO: 在 controller 层简单过滤异常计划（提货之后，有任意空值的情况）
+        if (warningPlan) {
+            Pageable page2 = PageRequest.of(0, Integer.MAX_VALUE, pageable.getSort());
+            List<ShipPlanDTO> allPageContent = shipPlanQueryService.findByCriteria(criteria, page2).getContent()
+                .stream()
+                .filter(x -> {
+                    return (StringUtils.isEmpty(excludeDeliverPosition)
+                        || !Objects.equals(x.getDeliverPosition(), excludeDeliverPosition)) &&
+                        (x.getGateTime() == null
+                            || x.getLoadingStartTime() == null
+                            || x.getLoadingEndTime() == null
+                            || org.apache.commons.lang3.StringUtils.isBlank(x.getWeigherNo())
+                            || x.getNetWeight() == null);
+                }).collect(Collectors.toList());
+            int startIndex = pageable.getPageNumber() * pageable.getPageSize();
+            int endIndex = startIndex + pageable.getPageSize();
+            if (allPageContent.size() > startIndex) {
+                if (endIndex > allPageContent.size()) {
+                    endIndex = allPageContent.size();
+                }
+                page = PageUtil.createPageFromList(allPageContent.subList(startIndex, endIndex), pageable);
+            } else {
+                page = PageUtil.createPageFromList(Lists.newArrayList(), pageable);
+            }
+
+        } else {
+            page = shipPlanQueryService.findByCriteria(criteria, pageable);
+        }
+
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(uriBuilder.queryParams(queryParams), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }

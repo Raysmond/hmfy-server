@@ -1,6 +1,7 @@
 package com.shield.web.rest;
 
 import com.shield.chepaipark.service.CarWhiteListService;
+import com.shield.config.ApplicationProperties;
 import com.shield.service.AppointmentService;
 import com.shield.service.HuachanCarWhitelistService;
 import com.shield.service.UserService;
@@ -33,10 +34,24 @@ public class TestController {
     @Autowired
     private HuachanCarWhitelistService huachanCarWhitelistService;
 
-    @GetMapping("/")
+    @Autowired
+    private ApplicationProperties applicationProperties;
+
+    @GetMapping("/test-get-huachan-quota")
+    public String testGetHuaQuota() {
+        return "" + applicationProperties.getRegion().getFixedQuotaForTomorrow().get(2L);
+    }
+
+    @GetMapping("/test-huachan-outgate")
+    public String testHuachanOutgate() {
+//        huachanCarWhitelistService.registerOutApplication(null);
+        return "ok";
+    }
+
+    @GetMapping("/change-password")
     public String test() {
 //        huachanCarWhitelistService.loginAndGetSessionId();
-//        userService.changeSystemUserPassword("111");
+//        userService.changeSystemUserPassword("111111");
 
 //        huachanCarWhitelistService.syncCarInOutRecords();
         return "ok";

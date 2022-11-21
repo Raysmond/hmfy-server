@@ -1,6 +1,7 @@
 package com.shield.service.event;
 
 import com.shield.chepaipark.service.CarWhiteListService;
+import com.shield.domain.enumeration.PlanStatus;
 import com.shield.domain.enumeration.RecordType;
 import com.shield.service.*;
 import com.shield.service.dto.RegionDTO;
@@ -16,6 +17,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import java.time.format.DateTimeFormatter;
 
 import static com.shield.config.Constants.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
+import static com.shield.config.Constants.REGION_ID_HUACHAN;
 
 /**
  * 监听计划状态变更
@@ -38,6 +40,8 @@ public class PlanEventListener {
 
     private final CarWhiteListService carWhiteListService;
 
+    private final HuachanCarWhitelistService huachanCarWhitelistService;
+
 
     @Autowired
     public PlanEventListener(
@@ -47,7 +51,8 @@ public class PlanEventListener {
         WxMpMsgService wxMpMsgService,
         CarWhiteListManager carWhiteListManager,
         @Qualifier("redisLongTemplate") RedisTemplate<String, Long> redisLongTemplate,
-        CarWhiteListService carWhiteListService) {
+        CarWhiteListService carWhiteListService,
+        HuachanCarWhitelistService huachanCarWhitelistService) {
         this.appointmentService = appointmentService;
         this.regionService = regionService;
         this.shipPlanService = shipPlanService;
@@ -55,6 +60,7 @@ public class PlanEventListener {
         this.carWhiteListManager = carWhiteListManager;
         this.redisLongTemplate = redisLongTemplate;
         this.carWhiteListService = carWhiteListService;
+        this.huachanCarWhitelistService = huachanCarWhitelistService;
     }
 
     @Async
@@ -67,8 +73,14 @@ public class PlanEventListener {
         try {
             if (before != null) {
                 // 取消计划
-                if (before.getAuditStatus().equals(1) && after.getAuditStatus().equals(2)) {
+                if (before.getAuditStatus().equals(PlanStatus.WAIT_SHIP.getStatus())
+                    && after.getAuditStatus().equals(PlanStatus.CANCELED.getStatus())) {
                     afterShipPlanCanceled(before, after);
+                }
+                // 提货
+                if (before.getAuditStatus().equals(PlanStatus.WAIT_SHIP.getStatus())
+                    && after.getAuditStatus().equals(PlanStatus.SHIPPED.getStatus())) {
+                    afterShipPlanShipped(before, after);
                 }
 
                 // 离场
@@ -103,7 +115,7 @@ public class PlanEventListener {
      * 计划过期后
      */
     private void afterShipPlanExpired(ShipPlanDTO after) {
-        log.info("TRIGGER afterShipPlanExpired...");
+        log.info("TRIGGER EVENT afterShipPlanExpired...");
         RegionDTO region = regionService.findByName(after.getDeliverPosition());
         if (region != null && region.isOpen()) {
             appointmentService.updateStatusAfterCancelShipPlan(after.getApplyId());
@@ -115,7 +127,7 @@ public class PlanEventListener {
      * 上磅之后
      */
     private void afterLoadingStart(ShipPlanDTO old, ShipPlanDTO updated) {
-        log.info("TRIGGER afterLoadingStart...");
+        log.info("TRIGGER EVENT afterLoadingStart...");
         RegionDTO region = regionService.findByName(updated.getDeliverPosition());
         if (region != null && region.isOpen()) {
             if (updated.getGateTime() == null) {
@@ -134,11 +146,11 @@ public class PlanEventListener {
      * 新创建计划
      */
     private void afterShipPlanCreated(ShipPlanDTO plan) {
-        log.info("TRIGGER afterShipPlanCreated...");
+        log.info("TRIGGER EVENT afterShipPlanCreated...");
         if (plan.getAuditStatus().equals(1)) {
             RegionDTO region = regionService.findByName(plan.getDeliverPosition());
             if (region != null && region.isOpen() && region.isAutoAppointment()) {
-                log.info("[AUTO] region[name={}, autoAppointment={}], trigger register car whitelist for ShipPlan[applyId={},truckNumber={},auditStatus={}]",
+                log.info("[AUTO] region[name={}, autoAppointment={}], TRIGGER EVENT register car whitelist for ShipPlan[applyId={},truckNumber={},auditStatus={}]",
                     region.getName(), region.isAutoAppointment(), plan.getApplyId(), plan.getTruckNumber(), plan.getAuditStatus());
                 carWhiteListManager.registerCarWhiteList(plan);
             }
@@ -149,7 +161,7 @@ public class PlanEventListener {
      * 计划取消后 1 -> 2
      */
     private void afterShipPlanCanceled(ShipPlanDTO before, ShipPlanDTO after) {
-        log.info("TRIGGER afterShipPlanCanceled...");
+        log.info("TRIGGER EVENT afterShipPlanCanceled...");
         RegionDTO region = regionService.findByName(after.getDeliverPosition());
         if (region != null && region.isOpen()) {
             appointmentService.updateStatusAfterCancelShipPlan(after.getApplyId());
@@ -160,10 +172,25 @@ public class PlanEventListener {
     }
 
     /**
+     * 发货之后， 1　-> 3
+     */
+    private void afterShipPlanShipped(ShipPlanDTO before, ShipPlanDTO after) {
+        log.info("TRIGGER EVENT afterShipPlanShipped...");
+        RegionDTO region = regionService.findByName(after.getDeliverPosition());
+        if (region != null && region.isOpen() && REGION_ID_HUACHAN.equals(region.getId())) {
+            try {
+                huachanCarWhitelistService.registerOutApplication(after);
+            } catch (Exception e) {
+                log.warn("registerOutApplication failed", e);
+            }
+        }
+    }
+
+    /**
      * 离场后（拿到离场时间）
      */
     private void afterShipPlanLeave(ShipPlanDTO before, ShipPlanDTO after) {
-        log.info("TRIGGER afterShipPlanLeave...");
+        log.info("TRIGGER EVENT afterShipPlanLeave...");
         RegionDTO region = regionService.findByName(after.getDeliverPosition());
         if (region != null && region.isOpen() && region.getLeaveAlertTime() > 0) {
             if (region.isAutoAppointment()) {

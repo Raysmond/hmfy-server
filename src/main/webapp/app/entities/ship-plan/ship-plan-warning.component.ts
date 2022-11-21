@@ -14,11 +14,15 @@ import { ShipPlanService } from './ship-plan.service';
 import { IRegion } from 'app/shared/model/region.model';
 import { RegionService } from 'app/entities/region';
 
+const beginDate = new Date();
+beginDate.setDate(beginDate.getDate() - 7);
+
 @Component({
   selector: 'jhi-ship-plan',
-  templateUrl: './ship-plan.component.html'
+  templateUrl: './ship-plan-warning.component.html'
 })
-export class ShipPlanComponent implements OnInit, OnDestroy {
+
+export class ShipPlanWarningComponent implements OnInit, OnDestroy {
   currentAccount: any;
   shipPlans: IShipPlan[];
   error: any;
@@ -37,7 +41,7 @@ export class ShipPlanComponent implements OnInit, OnDestroy {
     truckNumber: null,
     auditStatus: null,
     deliverPosition: null,
-    deliverTimeBegin: this.formatDate(new Date()),
+    deliverTimeBegin: this.formatDate(beginDate),
     deliverTimeEnd: this.formatDate(new Date()),
     warningPlan: null
   });
@@ -59,7 +63,7 @@ export class ShipPlanComponent implements OnInit, OnDestroy {
     this.routeData = this.activatedRoute.data.subscribe(data => {
       this.page = data.pagingParams.page;
       this.previousPage = data.pagingParams.page;
-      this.reverse = data.pagingParams.decending;
+      this.reverse = data.pagingParams.ascending;
       this.predicate = data.pagingParams.predicate;
     });
   }
@@ -68,7 +72,9 @@ export class ShipPlanComponent implements OnInit, OnDestroy {
     let filterParams = {
       page: this.page - 1,
       size: this.itemsPerPage,
-      sort: this.sort()
+      sort: this.sort(),
+      warningPlan: true,
+      'excludeDeliverPosition': '宝龙' // 特殊要求：排查宝龙
     };
     console.log(this.searchForm);
     if (this.searchForm.get(['auditStatus']).value) {

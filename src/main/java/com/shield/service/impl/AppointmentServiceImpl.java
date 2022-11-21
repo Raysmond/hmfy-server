@@ -2,6 +2,7 @@ package com.shield.service.impl;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.shield.config.ApplicationProperties;
 import com.shield.domain.Appointment;
 import com.shield.domain.Region;
 import com.shield.domain.ShipPlan;
@@ -90,6 +91,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Autowired
     private ShipPlanRepository shipPlanRepository;
+
+    @Autowired
+    private ApplicationProperties applicationProperties;
 
 
     private static final Long INITIAL_APPOINTMENT_NUMBER = 10000L;
@@ -230,17 +234,25 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setStatus(AppointmentStatus.CREATE);
         ZonedDateTime tomorrow = DateUtils.tomorrow();
 
+        Integer totalQuota = region.getQuota();
+        if (applicationProperties.getRegion().getFixedQuotaForTomorrow().containsKey(region.getId())) {
+            totalQuota = applicationProperties.getRegion().getFixedQuotaForTomorrow().get(region.getId());
+        }
+
         // 获取明天的有效预约
-        List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(), ZonedDateTime.now().minusHours(24), ZonedDateTime.now().plusDays(1));
+        List<Appointment> appointments = appointmentRepository.findAllByRegionId(region.getId(),
+            ZonedDateTime.now().minusHours(24), ZonedDateTime.now().plusDays(1));
         appointments = appointments.stream()
             .filter(it -> it.getStartTime() != null
                 && it.getStartTime().isAfter(tomorrow)
                 && it.isValid()
-                && (it.getStatus().equals(AppointmentStatus.START) || it.getStatus().equals(AppointmentStatus.START_CHECK) || it.getStatus().equals(AppointmentStatus.ENTER)))
+                && (it.getStatus().equals(AppointmentStatus.START)
+                || it.getStatus().equals(AppointmentStatus.START_CHECK)
+                || it.getStatus().equals(AppointmentStatus.ENTER)))
             .collect(Collectors.toList());
 
-        if (appointments.size() < region.getQuota() * 2) {
-            if (appointments.size() < region.getQuota()) {
+        if (appointments.size() < totalQuota * 2) {
+            if (appointments.size() < totalQuota) {
                 // 上半夜，预设有效时间0～3点
                 appointment.setStartTime(tomorrow.plusSeconds(1));
             } else {
@@ -374,11 +386,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     private boolean tryMakeAppointment(AppointmentDTO appointment) {
         // 检查上一次预约的离场状态
         Appointment lastAppointment = appointmentRepository.findLatestByTruckNumberAndStatus(
-            appointment.getRegionId(),
-            appointment.getLicensePlateNumber(),
-            AppointmentStatus.ENTER,
-            ZonedDateTime.now().minusHours(24),
-            PageRequest.of(0, 1))
+                appointment.getRegionId(),
+                appointment.getLicensePlateNumber(),
+                AppointmentStatus.ENTER,
+                ZonedDateTime.now().minusHours(24),
+                PageRequest.of(0, 1))
             .stream().findFirst().orElse(null);
         if (lastAppointment != null && lastAppointment.isValid() && lastAppointment.getEnterTime() != null) {
             if (lastAppointment.getLeaveTime() == null

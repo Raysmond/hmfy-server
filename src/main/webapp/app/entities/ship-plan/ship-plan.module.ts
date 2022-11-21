@@ -6,6 +6,7 @@ import { JhiLanguageHelper } from 'app/core';
 import { ShieldSharedModule } from 'app/shared';
 import {
   ShipPlanComponent,
+  ShipPlanWarningComponent,
   ShipPlanDetailComponent,
   ShipPlanUpdateComponent,
   ShipPlanDeletePopupComponent,
@@ -20,12 +21,13 @@ const ENTITY_STATES = [...shipPlanRoute, ...shipPlanPopupRoute];
   imports: [ShieldSharedModule, RouterModule.forChild(ENTITY_STATES)],
   declarations: [
     ShipPlanComponent,
+    ShipPlanWarningComponent,
     ShipPlanDetailComponent,
     ShipPlanUpdateComponent,
     ShipPlanDeleteDialogComponent,
     ShipPlanDeletePopupComponent
   ],
-  entryComponents: [ShipPlanComponent, ShipPlanUpdateComponent, ShipPlanDeleteDialogComponent, ShipPlanDeletePopupComponent],
+  entryComponents: [ShipPlanComponent, ShipPlanWarningComponent, ShipPlanUpdateComponent, ShipPlanDeleteDialogComponent, ShipPlanDeletePopupComponent],
   providers: [{ provide: JhiLanguageService, useClass: JhiLanguageService }],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

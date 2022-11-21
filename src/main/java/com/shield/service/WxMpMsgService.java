@@ -103,8 +103,7 @@ public class WxMpMsgService {
             msg.setData(data);
             wxMpService.getTemplateMsgService().sendTemplateMsg(msg);
         } catch (Exception e) {
-            log.error("failed to send alert msg, userId: {}, title: {}, content: {}, remark: {}", userId, title, content, remark);
-            e.printStackTrace();
+            log.error("failed to send alert msg, userId: {}, title: {}, content: {}, remark: {}", userId, title, content, remark, e);
         }
     }
 
@@ -140,8 +139,47 @@ public class WxMpMsgService {
             msg.setData(data);
             wxMpService.getTemplateMsgService().sendTemplateMsg(msg);
         } catch (Exception e) {
-            log.error("failed to send appointment success msg, appointmentId: {}", appointment.getId());
-            e.printStackTrace();
+            log.error("failed to send appointment success msg, appointmentId: {}", appointment.getId(), e);
+        }
+    }
+
+
+    /**
+     * 出门证提交成功通知
+     */
+    @Async
+    public void sendOutgateApplicationSuccessMsg(ShipPlanDTO plan, AppointmentDTO appointment, ZonedDateTime startTime, ZonedDateTime endTime, String gateNumber) {
+        if (appointment.getUserId() == null) {
+            return;
+        }
+        try {
+            String openId = getMpUserOpenIdByUserId(appointment.getUserId());
+            if (openId == null) {
+                return;
+            }
+            WxMpTemplateMessage msg = new WxMpTemplateMessage();
+            msg.setTemplateId("Z6BntQH_HujX_wSs8hOJUccLhJnCEHdklYDLfKKs_2w");
+            msg.setToUser(openId);
+            msg.setMiniProgram(new WxMpTemplateMessage.MiniProgram(MINI_PROGRAM_APP_ID, "pages/index/index", true));
+            List<WxMpTemplateData> data = Lists.newArrayList();
+
+            String first = String.format("您已于 %s 成功预约%s的出门证。",
+                appointment.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                appointment.getRegionName());
+            data.add(new WxMpTemplateData("first", first));
+            data.add(new WxMpTemplateData("keyword1", appointment.getNumber().toString()));
+            data.add(new WxMpTemplateData("keyword2", "请从" + gateNumber + "离场"));
+            data.add(new WxMpTemplateData("keyword3", appointment.getLicensePlateNumber()));
+            data.add(new WxMpTemplateData("keyword4",
+                startTime.format(DateTimeFormatter.ofPattern("HH:mm"))
+                    + " - "
+                    + endTime.format(DateTimeFormatter.ofPattern("HH:mm"))));
+            data.add(new WxMpTemplateData("keyword5", getShipPlanProductName(appointment.getApplyId())));
+            data.add(new WxMpTemplateData("remark", "如需咨询，请与车队调度联系，谢谢！"));
+            msg.setData(data);
+            wxMpService.getTemplateMsgService().sendTemplateMsg(msg);
+        } catch (Exception e) {
+            log.error("success msg failed, sendOutgateApplicationSuccessMsg, applyId: {}, truckNumber: {}", plan.getApplyId(), plan.getTruckNumber(), e);
         }
     }
 
@@ -178,8 +216,7 @@ public class WxMpMsgService {
             msg.setData(data);
             wxMpService.getTemplateMsgService().sendTemplateMsg(msg);
         } catch (Exception e) {
-            log.error("failed to send appointment success msg, appointmentId: {}", appointment.getId());
-            e.printStackTrace();
+            log.error("failed to send appointment success msg, appointmentId: {}", appointment.getId(), e);
         }
     }
 
@@ -215,8 +252,7 @@ public class WxMpMsgService {
             msg.setData(data);
             wxMpService.getTemplateMsgService().sendTemplateMsg(msg);
         } catch (Exception e) {
-            log.error("failed to send appointment success msg, appointmentId: {}", appointment.getId());
-            e.printStackTrace();
+            log.error("failed to send appointment success msg, appointmentId: {}", appointment.getId(), e);
         }
     }
 
@@ -252,7 +288,7 @@ public class WxMpMsgService {
                 }
             }
         } catch (Exception e) {
-            log.error("failed to send alert msg sendAlertMsgToWxUser() {}", e.getMessage());
+            log.error("failed to send alert msg sendAlertMsgToWxUser()", e);
         }
     }
 
