@@ -68,7 +68,11 @@ eclipse {
 defaultTasks "bootRun"
 
 group = "com.shield"
+<<<<<<< HEAD
 version = "2.4.8-SNAPSHOT"
+=======
+version = "2.5.1-SNAPSHOT"
+>>>>>>> 3fdb71e (化产出门证延时队列支持禁行时段)
 
 description = ""
 

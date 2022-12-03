@@ -43,10 +43,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -156,16 +153,22 @@ public class HuachanCarWhitelistService {
     }
 
 
+    private boolean isForbiddenTimePeriod(ZonedDateTime now) {
+        // 2个时间段禁行： AM：7:30- 8:30 ， PM：4:30- 5:30
+        return !Sets.newHashSet(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).contains(now.getDayOfWeek())
+            && (
+            (now.getHour() == 7 && now.getMinute() >= 0)
+                || (now.getHour() == 8 && now.getMinute() <= 30)
+                || (now.getHour() == 16 && now.getMinute() >= 0)
+                || (now.getHour() == 17 && now.getMinute() <= 30));
+    }
+
+
     @Scheduled(fixedDelay = 5000)
     public void scheduleRegisterOutApplication() {
-        // 禁行时段设置
-        // 2个时间段禁行： AM：7:30- 8:30 ， PM：4:30- 5:30
+
         ZonedDateTime now = ZonedDateTime.now();
-        if (!Sets.newHashSet(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).contains(now.getDayOfWeek())
-            && (now.getHour() == 7 && now.getMinute() >= 0)
-            || (now.getHour() == 8 && now.getMinute() <= 30)
-            || (now.getHour() == 16 && now.getMinute() >= 0)
-            || (now.getHour() == 17 && now.getMinute() <= 30)) {
+        if (isForbiddenTimePeriod(now)) {
             return;
         }
         log.info("scheduleRegisterOutApplication start..");
@@ -175,31 +178,46 @@ public class HuachanCarWhitelistService {
                 return;
             }
             log.info("popRight planId: {} from OUT_APPLICATION_QUEUE", planId);
-            Long expireCheck = redisLongTemplate.opsForValue().get(OUT_APPLICATION_QUEUE + ":" + planId);
-            if (expireCheck == null) {
+            Long eventTimeInSeconds = redisLongTemplate.opsForValue().get(OUT_APPLICATION_QUEUE + ":" + planId);
+            if (eventTimeInSeconds == null) {
                 log.info("planId: {}, expired to register out application", planId);
                 return;
             }
-            shipPlanService.findOne(planId).ifPresent(this::doRegisterOutApplication);
+            ZonedDateTime eventTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(eventTimeInSeconds), ZoneId.systemDefault());
+            shipPlanService.findOne(planId).ifPresent(plan -> this.doRegisterOutApplication(plan, eventTime));
         } catch (Exception e) {
             log.error("scheduleRegisterOutApplication failed", e);
         }
     }
 
-    private void doRegisterOutApplication(ShipPlanDTO plan) {
-        log.info("registerOutApplication: {}", plan);
+
+    private void doRegisterOutApplication(ShipPlanDTO plan, ZonedDateTime eventTime) {
+        log.info("OUT_APPLY {}: registerOutApplication: {}, eventTime: {}", plan.getApplyId(), plan, eventTime);
         if (env.acceptsProfiles(Profiles.of("dev"))) {
             log.info("[DEV] ignore registerOutApplication");
             return;
         }
-        if (plan.getLeaveTime() != null) {
-            log.info("leave time is not null, ignore registerOutApplication");
+
+        // 如果在15min之内，忽略离场时间/状态带来的脏数据
+        boolean dontIgnoreLeaveNoise = eventTime.plusMinutes(30).isBefore(ZonedDateTime.now());
+        // 2个时间段禁行： AM：7:30- 8:30 ， PM：4:30- 5:30
+        ZonedDateTime now = ZonedDateTime.now();
+        if (isForbiddenTimePeriod(now.minusMinutes(5))) {
+            // 如果是刚从禁行时段出来，很多离场时间是系统自动补的，不可信。无脑开出门证
+            dontIgnoreLeaveNoise = false;
+        }
+        if (dontIgnoreLeaveNoise && plan.getLeaveTime() != null) {
+            log.info("OUT_APPLY {}: leave time is not null, ignore registerOutApplication", plan.getApplyId());
             return;
         }
 
         AppointmentDTO appointment = appointmentService.findLastByApplyId(plan.getApplyId());
         if (appointment == null) {
-            log.info("appointment is null, ignore registerOutApplication");
+            log.info("OUT_APPLY {}: appointment is null, ignore registerOutApplication", plan.getApplyId());
+            return;
+        }
+        if (dontIgnoreLeaveNoise && appointment.getStatus().equals(LEAVE)) {
+            log.info("OUT_APPLY {}: appointment status is LEAVE, ignore registerOutApplication", plan.getApplyId());
             return;
         }
         if (appointment.getStatus().equals(LEAVE)) {
@@ -215,7 +233,7 @@ public class HuachanCarWhitelistService {
         } else if (plan.getProductName().contains("S95")) {
             productNameFixed = "S95矿粉";
         } else {
-            log.warn("productName not in choices: [铁粒子、S95矿粉], 跳过提交出门证");
+            log.warn("OUT_APPLY {}: productName not in choices: [铁粒子、S95矿粉], 跳过提交出门证", plan.getApplyId());
             return;
         }
 
@@ -300,7 +318,7 @@ public class HuachanCarWhitelistService {
         headers.add("X-Requested-With", "XMLHttpRequest");
         headers.add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
 
-        log.info("Start to invoke outfactory_info api: {}, data: {}", api, body);
+        log.info("OUT_APPLY {}: Start to invoke outfactory_info api: {}, data: {}", plan.getApplyId(), api, body.replaceAll("\n", ""));
         HttpEntity<String> request = new HttpEntity<>(body, headers);
         ResponseEntity<String> result;
         try {
@@ -309,14 +327,14 @@ public class HuachanCarWhitelistService {
             loginSessionId = null;
             return;
         }
-        log.info("response, status:{}, body: {}", result.getStatusCode(), result.getBody());
+        log.info("OUT_APPLY {}: response, status:{}, body: {}", plan.getApplyId(), result.getStatusCode(), result.getBody());
         if (result.getStatusCode() == HttpStatus.OK) {
             // 返回body示例：
             // {"id":null,"state":"success","message":"保存出厂单成功","data":{"ID":"0ecb3d2c15cf474a9ff062b7318eec5b","BILL_CODE":"OEU2211050156","IS_NEED_WEIGH":false},"jsondata":null}
             JsonObject json = new JsonParser().parse(result.getBody()).getAsJsonObject();
             if (Objects.equals("success", json.get("state").getAsString())) {
                 String outApplyId = json.getAsJsonObject("data").get("ID").getAsString();
-                if (this.submitOutApplication(outApplyId)) { // 确认提交出门证
+                if (this.submitOutApplication(plan, outApplyId)) { // 确认提交出门证
                     wxMpMsgService.sendOutgateApplicationSuccessMsg(plan, appointment, startTime, endTime, customFields.get("ALLOW_OMG_LIST").get(productNameFixed));
                 }
             }
@@ -337,7 +355,7 @@ public class HuachanCarWhitelistService {
     /**
      * 确认提交出门证
      */
-    public boolean submitOutApplication(String outApplyId) {
+    public boolean submitOutApplication(ShipPlanDTO plan, String outApplyId) {
         String api = "http://10.70.16.101/MIOS.Web/mio/outfactory/outfactory_confirm?";
 
         String cookie = null;
@@ -364,7 +382,7 @@ public class HuachanCarWhitelistService {
 
         String body = String.format("[\"%s\"]", outApplyId);
 
-        log.info("invoke: submitOutApplication: {}", api);
+        log.info("OUT_APPLY {}: invoke: submitOutApplication: {}", plan.getApplyId(), api);
         HttpEntity<String> request = new HttpEntity<>(body, headers);
         ResponseEntity<String> result;
         try {
@@ -373,7 +391,7 @@ public class HuachanCarWhitelistService {
             loginSessionId = null;
             return false;
         }
-        log.info("submitOutApplication response, status:{}, body: {}", result.getStatusCode(), result.getBody());
+        log.info("OUT_APPLY {}: submitOutApplication response, status:{}, body: {}", plan.getApplyId(), result.getStatusCode(), result.getBody());
         // {
         //  "id": null,
         //  "state": "success",

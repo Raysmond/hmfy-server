@@ -78,7 +78,7 @@ public class PlanEventListener {
                     afterShipPlanCanceled(before, after);
                 }
                 // 提货
-                if (before.getAuditStatus().equals(PlanStatus.WAIT_SHIP.getStatus())
+                if (!before.getAuditStatus().equals(PlanStatus.SHIPPED.getStatus())
                     && after.getAuditStatus().equals(PlanStatus.SHIPPED.getStatus())) {
                     afterShipPlanShipped(before, after);
                 }
@@ -91,6 +91,11 @@ public class PlanEventListener {
                 // 上磅
                 if (before.getLoadingStartTime() == null && after.getLoadingStartTime() != null) {
                     afterLoadingStart(before, after);
+                }
+
+                // 下磅
+                if (before.getLoadingEndTime() == null && after.getLoadingEndTime() != null) {
+                    afterLoadingEnd(before, after);
                 }
 
                 // 过期
@@ -140,6 +145,14 @@ public class PlanEventListener {
                 carWhiteListService.updateCarInAndOutTime(region.getId(), updated.getTruckNumber(), RecordType.IN, updated.getLoadingStartTime().minusMinutes(30), null);
             }
         }
+    }
+
+    /**
+     * 下磅之后
+     */
+    private void afterLoadingEnd(ShipPlanDTO old, ShipPlanDTO updated) {
+        log.info("TRIGGER EVENT afterLoadingEnd...");
+
     }
 
     /**
