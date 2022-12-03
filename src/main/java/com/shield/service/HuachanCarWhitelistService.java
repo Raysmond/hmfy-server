@@ -6,6 +6,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -25,13 +26,16 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
@@ -39,11 +43,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.shield.config.Constants.REGION_ID_HUACHAN;
@@ -76,6 +82,9 @@ public class HuachanCarWhitelistService {
     private ShipPlanRepository shipPlanRepository;
 
     @Autowired
+    private ShipPlanService shipPlanService;
+
+    @Autowired
     private RegionRepository regionRepository;
 
     @Autowired
@@ -104,6 +113,13 @@ public class HuachanCarWhitelistService {
 
     @Autowired
     ApplicationProperties applicationProperties;
+
+
+    @Autowired
+    @Qualifier("redisLongTemplate")
+    private RedisTemplate<String, Long> redisLongTemplate;
+
+    private static final String OUT_APPLICATION_QUEUE = "OUT_APPLICATION_QUEUE";
 
     public HuachanCarWhitelistService() {
         this.restTemplate = new RestTemplate();
@@ -139,21 +155,55 @@ public class HuachanCarWhitelistService {
         return token;
     }
 
-    /**
-     * 提货之后，提交出门证申请
-     * 需要分两步：1、申请；2、提交
-     */
-    @Async
-    public void registerOutApplication(ShipPlanDTO plan) {
+
+    @Scheduled(fixedDelay = 5000)
+    public void scheduleRegisterOutApplication() {
+        // 禁行时段设置
+        // 2个时间段禁行： AM：7:30- 8:30 ， PM：4:30- 5:30
+        ZonedDateTime now = ZonedDateTime.now();
+        if (!Sets.newHashSet(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).contains(now.getDayOfWeek())
+            && (now.getHour() == 7 && now.getMinute() >= 0)
+            || (now.getHour() == 8 && now.getMinute() <= 30)
+            || (now.getHour() == 16 && now.getMinute() >= 0)
+            || (now.getHour() == 17 && now.getMinute() <= 30)) {
+            return;
+        }
+        log.info("scheduleRegisterOutApplication start..");
+        try {
+            Long planId = redisLongTemplate.opsForList().rightPop(OUT_APPLICATION_QUEUE);
+            if (planId == null) {
+                return;
+            }
+            log.info("popRight planId: {} from OUT_APPLICATION_QUEUE", planId);
+            Long expireCheck = redisLongTemplate.opsForValue().get(OUT_APPLICATION_QUEUE + ":" + planId);
+            if (expireCheck == null) {
+                log.info("planId: {}, expired to register out application", planId);
+                return;
+            }
+            shipPlanService.findOne(planId).ifPresent(this::doRegisterOutApplication);
+        } catch (Exception e) {
+            log.error("scheduleRegisterOutApplication failed", e);
+        }
+    }
+
+    private void doRegisterOutApplication(ShipPlanDTO plan) {
         log.info("registerOutApplication: {}", plan);
         if (env.acceptsProfiles(Profiles.of("dev"))) {
             log.info("[DEV] ignore registerOutApplication");
+            return;
+        }
+        if (plan.getLeaveTime() != null) {
+            log.info("leave time is not null, ignore registerOutApplication");
             return;
         }
 
         AppointmentDTO appointment = appointmentService.findLastByApplyId(plan.getApplyId());
         if (appointment == null) {
             log.info("appointment is null, ignore registerOutApplication");
+            return;
+        }
+        if (appointment.getStatus().equals(LEAVE)) {
+            log.info("appointment status is LEAVE, ignore registerOutApplication");
             return;
         }
         User user = userService.getUserWithAuthorities(appointment.getUserId()).get();
@@ -178,16 +228,6 @@ public class HuachanCarWhitelistService {
         int startTimeOffsetInMinutes = applicationProperties.getRegion().getOutApplicationConfig().getStartTimeOffsetInMinutes();
         ZonedDateTime startTime = ZonedDateTime.now().plusMinutes(startTimeOffsetInMinutes);
         ZonedDateTime endTime = ZonedDateTime.now().plusMinutes(startTimeOffsetInMinutes + validTimeInMinutes);
-
-        // 2个时间段禁行： AM：7:30- 8:30 ， PM：4:30- 5:30
-        if (startTime.getHour() == 7 && startTime.getMinute() >= 30) {
-            startTime = startTime.withHour(8).withMinute(30);
-            endTime = startTime.plusMinutes(validTimeInMinutes);
-        }
-        if (startTime.getHour() == 16 && startTime.getMinute() >= 30) {
-            startTime = startTime.withHour(17).withMinute(30);
-            endTime = startTime.plusMinutes(validTimeInMinutes);
-        }
 
         String body = "{\n" +
             "  \"ID\": \"" + customFields.get("ID").get(productNameFixed) + "\",\n" +
@@ -260,7 +300,7 @@ public class HuachanCarWhitelistService {
         headers.add("X-Requested-With", "XMLHttpRequest");
         headers.add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
 
-        log.info("Start to invoke outfactory_info api: {}", api);
+        log.info("Start to invoke outfactory_info api: {}, data: {}", api, body);
         HttpEntity<String> request = new HttpEntity<>(body, headers);
         ResponseEntity<String> result;
         try {
@@ -281,6 +321,17 @@ public class HuachanCarWhitelistService {
                 }
             }
         }
+    }
+
+    /**
+     * 提货之后，提交出门证申请
+     * 需要分两步：1、申请；2、提交
+     */
+    public void registerOutApplication(ShipPlanDTO plan) {
+        // 加入出门证申请队列
+        redisLongTemplate.opsForList().leftPush(OUT_APPLICATION_QUEUE, plan.getId());
+        redisLongTemplate.opsForValue().set(OUT_APPLICATION_QUEUE + ":" + plan.getId(), ZonedDateTime.now().toEpochSecond(), 2, TimeUnit.HOURS);
+        log.info("registerOutApplication, add to queue: {}", plan);
     }
 
     /**
