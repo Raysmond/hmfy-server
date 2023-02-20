@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.shield.domain.Appointment;
 import com.shield.domain.ShipPlan;
+import com.shield.domain.enumeration.WeightSource;
 import com.shield.repository.AppointmentRepository;
 import com.shield.repository.ShipPlanRepository;
 import com.shield.service.ShipPlanService;
@@ -14,9 +15,12 @@ import com.shield.sqlserver.domain.VipGateLog;
 import com.shield.sqlserver.repository.VehDelivPlanRepository;
 import com.shield.sqlserver.repository.VipGateLogRepository;
 import com.shield.utils.DateUtils;
+import com.shield.web.rest.api.CaitongPlanApi;
+import io.github.jhipster.config.JHipsterConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -40,6 +44,7 @@ import static com.shield.config.Constants.REDIS_KEY_SYNC_VIP_GATE_LOG_APPOINTMEN
  * 发运计划同步服务
  */
 @Service
+@Profile(JHipsterConstants.SPRING_PROFILE_PRODUCTION)
 @Slf4j
 public class VehPlanSyncScheduleService {
 
@@ -57,6 +62,8 @@ public class VehPlanSyncScheduleService {
 
     private final ShipPlanService shipPlanService;
 
+    private final CaitongPlanApi caitongPlanApi;
+
     @Autowired
     public VehPlanSyncScheduleService(
         VehDelivPlanRepository vehDelivPlanRepository,
@@ -65,7 +72,7 @@ public class VehPlanSyncScheduleService {
         @Qualifier("redisLongTemplate") RedisTemplate<String, Long> redisLongTemplate,
         AppointmentRepository appointmentRepository,
         ShipPlanMapper shipPlanMapper,
-        ShipPlanService shipPlanService) {
+        ShipPlanService shipPlanService, CaitongPlanApi caitongPlanApi) {
         this.vehDelivPlanRepository = vehDelivPlanRepository;
         this.vipGateLogRepository = vipGateLogRepository;
         this.shipPlanRepository = shipPlanRepository;
@@ -73,6 +80,7 @@ public class VehPlanSyncScheduleService {
         this.appointmentRepository = appointmentRepository;
         this.shipPlanMapper = shipPlanMapper;
         this.shipPlanService = shipPlanService;
+        this.caitongPlanApi = caitongPlanApi;
     }
 
     /**
@@ -101,7 +109,7 @@ public class VehPlanSyncScheduleService {
                 .filter(it -> it.getApplyId().equals(plan.getApplyId()))
                 .findFirst()
                 .map(it -> {
-                    if ((it.getAuditStatus().equals(1) && !it.getAuditStatus().equals(plan.getAuditStatus()))
+                    if ((it.getAuditStatus().equals(1) && !it.getAuditStatus().equals(plan.getAuditStatus()) && WeightSource.SANYI != it.getWeightSource())
                         || (it.getNetWeight() == null && plan.getNetWeight() != null)
                         || (it.getWeigherNo() == null && plan.getWeigherNo() != null)
                         || (it.getLoadingStartTime() == null && plan.getTareTime() != null)
@@ -118,6 +126,7 @@ public class VehPlanSyncScheduleService {
                         if (it.getWeigherNo() == null) {
                             it.setWeigherNo(plan.getWeigherNo());
                         }
+                        it.setWeightSource(WeightSource.CAITONG);
                         it.setAuditStatus(plan.getAuditStatus());
                         it.setUpdateTime(ZonedDateTime.now());
                         changedApplyIds.add(plan.getApplyId());
@@ -190,6 +199,13 @@ public class VehPlanSyncScheduleService {
                             } else {
                                 vehDelivPlan.setOrderNumber("");
                             }
+                            // 不能直接通过数据库同步过去
+//                            if (plan.getWeightSource() == WeightSource.SANYI && vehDelivPlan.getNetWeight() == null) {
+//                                vehDelivPlan.setNetWeight(plan.getNetWeight());
+//                                vehDelivPlan.setWeigherNo(plan.getWeigherNo());
+//                                vehDelivPlan.setWeightTime(plan.getLoadingEndTime());
+//                                vehDelivPlan.setTareTime(plan.getLoadingStartTime());
+//                            }
                         }
                         vehDelivPlanRepository.saveAll(vehDelivPlans);
                         log.info("Updated {} VehDelivPlan data with ShipPlan data, where apply_id = {} ", vehDelivPlans.size(), plan.getApplyId());
@@ -199,7 +215,6 @@ public class VehPlanSyncScheduleService {
                         shipPlanRepository.save(plan);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
                     log.error("Failed to sync ShipPlan id:{} to SQLSERVER, skip...", shipPlanId, e);
                 }
             }

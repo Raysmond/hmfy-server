@@ -68,11 +68,7 @@ eclipse {
 defaultTasks "bootRun"
 
 group = "com.shield"
-<<<<<<< HEAD
-version = "2.4.8-SNAPSHOT"
-=======
-version = "2.5.1-SNAPSHOT"
->>>>>>> 3fdb71e (化产出门证延时队列支持禁行时段)
+version = "2.6.2-SNAPSHOT"
 
 description = ""
 
@@ -269,6 +265,8 @@ dependencies {
     implementation 'org.springframework.integration:spring-integration-ip'
     implementation 'org.springframework.integration:spring-integration-stream'
     implementation 'com.ibm.db2.jcc:db2jcc4:10.1'
+    implementation 'com.google.zxing:core:3.3.0'
+    implementation 'com.google.zxing:javase:3.3.0'
 //    implementation 'com.oracle:ojdbc7'
     annotationProcessor 'org.projectlombok:lombok:1.18.8'
 

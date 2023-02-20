@@ -14,6 +14,7 @@ import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.dto.PlanDTO;
 import com.shield.service.dto.RegionDTO;
 import com.shield.service.dto.ShipPlanDTO;
+import com.shield.utils.QrCodeUtils;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -188,6 +189,14 @@ public class WxAppointmentApi {
             }
             Pageable page = PageRequest.of(0, 1, Sort.Direction.DESC, "deliverTime");
             Page<PlanDTO> result = shipPlanService.getAllByTruckNumber(page, user.getTruckNumber(), shipPlanDTOS.get(0).getId());
+            result.getContent()
+                .forEach(planDTO -> {
+                    if (planDTO.getPlan().getAppointmentNumber() != null) {
+                        planDTO.getPlan().genereteUniqueQrcodeNumber();
+                        planDTO.getPlan().setQrcodeImage(QrCodeUtils.generateQrCodeImage(planDTO.getPlan().getUniqueQrcodeNumber()));
+                    }
+
+                });
             return ResponseEntity.ok(result.getContent());
         }
         return ResponseEntity.ok(Lists.newArrayList());

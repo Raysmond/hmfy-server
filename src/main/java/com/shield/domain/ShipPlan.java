@@ -1,5 +1,7 @@
 package com.shield.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.shield.domain.enumeration.AppointmentStatus;
+import com.shield.domain.enumeration.WeightSource;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -49,6 +51,10 @@ public class ShipPlan implements Serializable {
     @Column(name = "deliver_position", nullable = false)
     private String deliverPosition;
 
+
+    @Column(name = "destination_address", nullable = false)
+    private String destinationAddress;
+
     @NotNull
     @Column(name = "valid", nullable = false)
     private Boolean valid;
@@ -90,8 +96,17 @@ public class ShipPlan implements Serializable {
     @Column(name = "leave_alert", nullable = false)
     private Boolean leaveAlert = false;
 
+    /**
+     * 净重
+     */
     @Column(name = "net_weight")
     private Double netWeight;
+
+    /**
+     * 皮重
+     */
+    @Column(name = "tare_weight")
+    private Double tareWeight;
 
     @Column(name = "weigher_no")
     private String weigherNo;
@@ -106,6 +121,27 @@ public class ShipPlan implements Serializable {
 
     @Column(name = "appointment_number")
     private String appointmentNumber;
+
+    /**
+     * 磅单编号
+     */
+    @Column(name = "weight_code")
+    private String weightCode;
+    /**
+     * 出库仓库代码
+     */
+    @Column(name = "warehouse_code")
+    private String truckOn;
+    /**
+     * 出库仓库名称
+     */
+    @Column(name = "warehouse_name")
+    private String truckOnCname;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "weight_source")
+    private WeightSource weightSource;
+
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -192,6 +228,14 @@ public class ShipPlan implements Serializable {
 
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+    public String getDestinationAddress() {
+        return destinationAddress;
+    }
+
+    public void setDestinationAddress(String destinationAddress) {
+        this.destinationAddress = destinationAddress;
     }
 
     public String getDeliverPosition() {
@@ -363,6 +407,15 @@ public class ShipPlan implements Serializable {
         this.leaveAlert = leaveAlert;
     }
 
+
+    public Double getTareWeight() {
+        return tareWeight;
+    }
+
+    public void setTareWeight(Double tareWeight) {
+        this.tareWeight = tareWeight;
+    }
+
     public Double getNetWeight() {
         return netWeight;
     }
@@ -409,6 +462,39 @@ public class ShipPlan implements Serializable {
 
     public void setAppointmentNumber(String appointmentNumber) {
         this.appointmentNumber = appointmentNumber;
+    }
+
+
+    public String getWeightCode() {
+        return weightCode;
+    }
+
+    public void setWeightCode(String weightCode) {
+        this.weightCode = weightCode;
+    }
+
+    public String getTruckOn() {
+        return truckOn;
+    }
+
+    public void setTruckOn(String truckOn) {
+        this.truckOn = truckOn;
+    }
+
+    public String getTruckOnCname() {
+        return truckOnCname;
+    }
+
+    public void setTruckOnCname(String truckOnCname) {
+        this.truckOnCname = truckOnCname;
+    }
+
+    public WeightSource getWeightSource() {
+        return weightSource;
+    }
+
+    public void setWeightSource(WeightSource weightSource) {
+        this.weightSource = weightSource;
     }
 
     public User getUser() {

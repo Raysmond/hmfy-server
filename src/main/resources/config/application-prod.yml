@@ -59,7 +59,8 @@ spring:
       useServerPrepStmts: true
   sqlserver-datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    jdbc-url: jdbc:sqlserver://10.41.76.253:1433;databaseName=GateManage
+#    jdbc-url: jdbc:sqlserver://10.41.76.253:1433;databaseName=GateManage
+    jdbc-url: jdbc:sqlserver://10.57.148.250:1433;databaseName=GateManage
     username: Wechat
     password: QQ@@12345
     driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
@@ -94,7 +95,8 @@ spring:
       hibernate.jdbc.time_zone: Asia/Shanghai
   chepaipark-sqlserver-datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    jdbc-url: jdbc:sqlserver://10.41.65.247:1433;databaseName=ChePaiPark
+#    jdbc-url: jdbc:sqlserver://10.41.65.247:1433;databaseName=ChePaiPark
+    jdbc-url: jdbc:sqlserver://10.57.139.241:1433;databaseName=ChePaiPark
     username: sa
     password: 123
     driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver

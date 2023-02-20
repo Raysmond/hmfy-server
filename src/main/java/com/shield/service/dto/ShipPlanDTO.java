@@ -1,4 +1,9 @@
 package com.shield.service.dto;
+
+import com.shield.domain.enumeration.WeightSource;
+import org.springframework.util.DigestUtils;
+
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import javax.validation.constraints.*;
 import java.io.Serializable;
@@ -29,6 +34,8 @@ public class ShipPlanDTO implements Serializable {
 
     //    @NotNull
     private String deliverPosition;
+
+    private String destinationAddress;
 
     //    @NotNull
     private Boolean valid;
@@ -74,9 +81,34 @@ public class ShipPlanDTO implements Serializable {
 
     private Double netWeight;
 
+    private Double tareWeight;
+
     private String weigherNo;
 
+    /**
+     * 磅单编号
+     */
+//    @NotNull(message = "磅单编号 weightCode 不能为空")
+    private String weightCode;
+    /**
+     * 出库仓库代码
+     */
+//    @NotNull(message = "出库仓库代码 truckOn 不能为空")
+    private String truckOn;
+    /**
+     * 出库仓库名称
+     */
+//    @NotNull(message = "出库仓库名称 truckOnCname 不能为空")
+    private String truckOnCname;
+
+    private WeightSource weightSource;
+
     private String appointmentNumber;
+
+    private String uniqueQrcodeNumber;
+
+    private String qrcodeImage;
+
 
     public Long getId() {
         return id;
@@ -132,6 +164,14 @@ public class ShipPlanDTO implements Serializable {
 
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+    public String getDestinationAddress() {
+        return destinationAddress;
+    }
+
+    public void setDestinationAddress(String destinationAddress) {
+        this.destinationAddress = destinationAddress;
     }
 
     public String getDeliverPosition() {
@@ -246,6 +286,14 @@ public class ShipPlanDTO implements Serializable {
         this.netWeight = netWeight;
     }
 
+    public Double getTareWeight() {
+        return tareWeight;
+    }
+
+    public void setTareWeight(Double tareWeight) {
+        this.tareWeight = tareWeight;
+    }
+
     public String getWeigherNo() {
         return weigherNo;
     }
@@ -284,6 +332,63 @@ public class ShipPlanDTO implements Serializable {
 
     public void setAppointmentNumber(String appointmentNumber) {
         this.appointmentNumber = appointmentNumber;
+    }
+
+    public String getWeightCode() {
+        return weightCode;
+    }
+
+    public void setWeightCode(String weightCode) {
+        this.weightCode = weightCode;
+    }
+
+    public String getTruckOn() {
+        return truckOn;
+    }
+
+    public void setTruckOn(String truckOn) {
+        this.truckOn = truckOn;
+    }
+
+    public String getTruckOnCname() {
+        return truckOnCname;
+    }
+
+    public void setTruckOnCname(String truckOnCname) {
+        this.truckOnCname = truckOnCname;
+    }
+
+    public String getUniqueQrcodeNumber() {
+        if (uniqueQrcodeNumber == null) {
+            this.genereteUniqueQrcodeNumber();
+        }
+        return uniqueQrcodeNumber;
+    }
+
+    public void genereteUniqueQrcodeNumber() {
+        if (this.applyId != null && this.appointmentNumber != null) {
+            this.uniqueQrcodeNumber = DigestUtils.md5DigestAsHex(String.format("%s_%s", this.getApplyId(), this.getAppointmentNumber()).getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    public void setUniqueQrcodeNumber(String uniqueQrcodeNumber) {
+        this.uniqueQrcodeNumber = uniqueQrcodeNumber;
+    }
+
+    public String getQrcodeImage() {
+        return qrcodeImage;
+    }
+
+    public void setQrcodeImage(String qrcodeImage) {
+        this.qrcodeImage = qrcodeImage;
+    }
+
+    public WeightSource getWeightSource() {
+        return weightSource;
+    }
+
+    public void setWeightSource(WeightSource weightSource) {
+        this.weightSource = weightSource;
     }
 
     @Override
@@ -338,4 +443,6 @@ public class ShipPlanDTO implements Serializable {
             ", user='" + getUserLogin() + "'" +
             "}";
     }
+
+
 }
