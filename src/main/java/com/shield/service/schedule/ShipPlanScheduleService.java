@@ -97,13 +97,13 @@ public class ShipPlanScheduleService {
     /**
      * 每天凌晨00:01:00，将前一天待提货的计划改成过期
      */
-    @Scheduled(cron = "0 1 0 * * *")
+    @Scheduled(cron = "0 1 2 * * *")
     public void autoExpireShipPlan() {
         Map<String, Region> regions = regionRepository.findAll().stream().collect(Collectors.toMap(Region::getName, it -> it));
         ZonedDateTime today = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
         List<ShipPlanDTO> shipPlans = shipPlanRepository.findAllNeedToExpire(today).stream().map(shipPlanMapper::toDto).collect(Collectors.toList());
         if (!shipPlans.isEmpty()) {
-            log.info("Find {} ShipPlan in status 1, should be expired");
+            log.info("Find {} ShipPlan in status 1, should be expired", shipPlans.size());
             for (ShipPlanDTO plan : shipPlans) {
                 if (regions.containsKey(plan.getDeliverPosition())) {
                     Region region = regions.get(plan.getDeliverPosition());
