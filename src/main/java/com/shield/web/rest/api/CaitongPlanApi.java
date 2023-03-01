@@ -119,9 +119,6 @@ public class CaitongPlanApi {
         request.setCustomerName(shipPlanDTO.getCompany());
         request.setGoodsName(shipPlanDTO.getProductName());
         request.setPoundNo(shipPlanDTO.getWeightCode());
-
-//        request.setPoundNo(String.format("%s%s2001", shipPlanDTO.getWeigherNo(),
-//            ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")).substring(2)));
         request.setTareTime(shipPlanDTO.getLoadingStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         request.setCompleteTime(shipPlanDTO.getLoadingEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
@@ -134,10 +131,8 @@ public class CaitongPlanApi {
             log.info("endOfShipment api: {}, request: {}", END_SHIPPING_API, payload);
             ResponseEntity<String> response = restTemplate.exchange(END_SHIPPING_API, HttpMethod.POST, requestHttpEntity, String.class);
             log.info("endOfShipment response: {}", response);
-//            CTResponse<LockPlanResponse> ctResponse = objectMapper.readValue(response, new TypeReference<CTResponse<LockPlanResponse>>() {
-//            });
         } catch (Exception e) {
-            log.error("endOfShipment failed", e);
+            log.error("endOfShipment failed applyId: {} ", shipPlanDTO.getApplyId(), e);
         }
     }
 

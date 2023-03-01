@@ -15,4 +15,6 @@ public interface VehDelivPlanRepository extends JpaRepository<VehDelivPlan, Long
 
     @Query("select p from VehDelivPlan p where p.applyId = ?1 and p.deliverTime >= ?2 and p.deliverTime < ?3 order by p.createTime asc")
     List<VehDelivPlan> findAllByApplyId(Long applyId, ZonedDateTime today, ZonedDateTime now);
+
+    List<VehDelivPlan> findAllByApplyIdIn(List<Long> applyIds);
 }
