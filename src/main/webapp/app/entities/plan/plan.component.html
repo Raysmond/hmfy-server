@@ -1,0 +1,89 @@
+<div>
+    <h2 id="page-heading">
+        <span jhiTranslate="shieldApp.plan.home.title">Plans</span>
+        <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-plan" [routerLink]="['/plan/new']">
+            <fa-icon [icon]="'plus'"></fa-icon>
+            <span  jhiTranslate="shieldApp.plan.home.createLabel">
+            Create new Plan
+            </span>
+        </button>
+    </h2>
+    <jhi-alert></jhi-alert>
+    <br/>
+    <div class="alert alert-warning" *ngIf="plans?.length === 0">
+        <span jhiTranslate="shieldApp.plan.home.notFound">No plans found</span>
+    </div>
+    <div class="table-responsive" *ngIf="plans?.length > 0">
+        <table class="table table-striped">
+            <thead>
+            <tr jhiSort [(predicate)]="predicate" [(ascending)]="reverse" [callback]="transition.bind(this)">
+            <th jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="planNumber"><span jhiTranslate="shieldApp.plan.planNumber">Plan Number</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="location"><span jhiTranslate="shieldApp.plan.location">Location</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="workDay"><span jhiTranslate="shieldApp.plan.workDay">Work Day</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="stockName"><span jhiTranslate="shieldApp.plan.stockName">Stock Name</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="loadingStartTime"><span jhiTranslate="shieldApp.plan.loadingStartTime">Loading Start Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="loadingEndTime"><span jhiTranslate="shieldApp.plan.loadingEndTime">Loading End Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="weightSum"><span jhiTranslate="shieldApp.plan.weightSum">Weight Sum</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="operator"><span jhiTranslate="shieldApp.plan.operator">Operator</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="operation"><span jhiTranslate="shieldApp.plan.operation">Operation</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="opPosition"><span jhiTranslate="shieldApp.plan.opPosition">Op Position</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+            <th jhiSortBy="channel"><span jhiTranslate="shieldApp.plan.channel">Channel</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+<!--            <th jhiSortBy="comment"><span jhiTranslate="shieldApp.plan.comment">Comment</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+            <th jhiSortBy="createTime"><span jhiTranslate="shieldApp.plan.createTime">Create Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>
+<!--            <th jhiSortBy="updateTime"><span jhiTranslate="shieldApp.plan.updateTime">Update Time</span> <fa-icon [icon]="'sort'"></fa-icon></th>-->
+            <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let plan of plans ;trackBy: trackId">
+                <td><a [routerLink]="['/plan', plan.id, 'view' ]">{{plan.id}}</a></td>
+                <td>{{plan.planNumber}}</td>
+                <td>{{plan.location}}</td>
+                <td>{{plan.workDay | date:'yyyy-MM-dd'}}</td>
+                <td>{{plan.stockName}}</td>
+                <td>{{plan.loadingStartTime | date:'yyyy-MM-dd'}}</td>
+                <td>{{plan.loadingEndTime | date:'yyyy-MM-dd'}}</td>
+                <td>{{plan.weightSum}}</td>
+                <td>{{plan.operator}}</td>
+                <td>{{plan.operation}}</td>
+                <td>{{plan.opPosition}}</td>
+                <td>{{plan.channel}}</td>
+<!--                <td>{{plan.comment}}</td>-->
+                <td>{{plan.createTime | date:'yyyy-MM-dd HH:mm'}}</td>
+<!--                <td>{{plan.updateTime | date:'medium'}}</td>-->
+                <td class="text-right">
+                    <div class="btn-group">
+                        <button type="submit"
+                                [routerLink]="['/plan', plan.id, 'view' ]"
+                                class="btn btn-info btn-sm">
+                            <fa-icon [icon]="'eye'"></fa-icon>
+                        </button>
+                        <button type="submit"
+                                [routerLink]="['/plan', plan.id, 'edit']"
+                                class="btn btn-primary btn-sm">
+                            <fa-icon [icon]="'pencil-alt'"></fa-icon>
+                        </button>
+<!--                        <button type="submit"-->
+<!--                                [routerLink]="['/', 'plan', { outlets: { popup: plan.id + '/delete'} }]"-->
+<!--                                replaceUrl="true"-->
+<!--                                queryParamsHandling="merge"-->
+<!--                                class="btn btn-danger btn-sm">-->
+<!--                            <fa-icon [icon]="'times'"></fa-icon>-->
+<!--                            <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>-->
+<!--                        </button>-->
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div [hidden]="plans?.length === 0">
+        <div class="row justify-content-center">
+            <jhi-item-count [page]="page" [total]="totalItems" [maxSize]="5" [itemsPerPage]="itemsPerPage"></jhi-item-count>
+        </div>
+        <div class="row justify-content-center">
+            <ngb-pagination [collectionSize]="totalItems" [(page)]="page" [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" [boundaryLinks]="true" (pageChange)="loadPage(page)"></ngb-pagination>
+        </div>
+    </div>
+</div>

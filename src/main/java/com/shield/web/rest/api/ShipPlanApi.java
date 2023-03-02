@@ -8,6 +8,10 @@ import com.shield.service.ShipPlanService;
 import com.shield.service.UserService;
 import com.shield.service.dto.ShipPlanCriteria;
 import com.shield.service.dto.ShipPlanDTO;
+<<<<<<< HEAD
+=======
+import com.shield.utils.JsonUtils;
+>>>>>>> origin/master
 import com.shield.web.rest.errors.BadRequestAlertException;
 import com.shield.web.rest.vm.ApiResponse;
 import com.shield.web.rest.vm.ShipPlanVo;
@@ -34,6 +38,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+<<<<<<< HEAD
+=======
+import static com.shield.config.Constants.REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN;
+import static com.shield.web.rest.api.CaitongPlanApi.LockPlanResponse.SUCCESS_STATUS;
+>>>>>>> origin/master
 
 /**
  * 对外（沉重系统）的发运计划接口
@@ -57,6 +66,12 @@ public class ShipPlanApi {
     @Qualifier("redisLongTemplate")
     RedisTemplate<String, Long> redisLongTemplate;
 
+<<<<<<< HEAD
+=======
+    @Autowired
+    CaitongPlanApi caitongPlanApi;
+
+>>>>>>> origin/master
     private static final int MAX_RETURN_RECORDS = 20;
 
     private static final String ENTITY_NAME = "shipPlan";
@@ -90,7 +105,22 @@ public class ShipPlanApi {
             if (planDto.getAuditStatus().equals(1)
                 && StringUtils.isBlank(planDto.getDestinationAddress())
                 && StringUtils.isNotBlank(planDto.getUniqueQrcodeNumber())) {
+<<<<<<< HEAD
                 // TODO
+=======
+                try {
+                    // 只要查询到有效的计划，那么就开始锁定
+                    CaitongPlanApi.LockPlanResponse response = caitongPlanApi.lockPlan(planDto.getApplyNumber(), planDto.getTruckNumber());
+                    if (Objects.equals(response.getStatus(), SUCCESS_STATUS)) {
+                        if (StringUtils.isNotBlank(response.getDestAddress())) {
+                            planDto.setDestinationAddress(response.getDestAddress());
+                            shipPlanService.save(planDto);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("fail", e);
+                }
+>>>>>>> origin/master
             }
 
         }
@@ -154,8 +184,18 @@ public class ShipPlanApi {
                 "车牌号 %s 和计划上的不一致，无法锁定",
                 request.truckNumber), ENTITY_NAME, "");
         }
+<<<<<<< HEAD
         //TODO
 //
+=======
+        CaitongPlanApi.LockPlanResponse response = caitongPlanApi.lockPlan(planDto.getApplyNumber(), planDto.getTruckNumber());
+        if (Objects.equals(response.getStatus(), SUCCESS_STATUS)) {
+            if (StringUtils.isNotBlank(response.getDestAddress())) {
+                planDto.setDestinationAddress(response.getDestAddress());
+                shipPlanService.save(planDto);
+            }
+        }
+>>>>>>> origin/master
         return ResponseEntity.ok()
             .body(ApiResponse.<ShipPlanVo>builder().status(HttpStatus.SC_OK).data(new ShipPlanVo(planDto)).build());
     }
@@ -211,8 +251,12 @@ public class ShipPlanApi {
         // 同步计划到 SQL_SERVER
 //        redisLongTemplate.opsForSet().add(REDIS_KEY_SYNC_SHIP_PLAN_TO_VEH_PLAN, planDto.getId());
         try {
+<<<<<<< HEAD
             // TODO
 //            caitongPlanApi.endOfShipment(updated);
+=======
+            caitongPlanApi.endOfShipment(updated);
+>>>>>>> origin/master
         } catch (Exception e) {
             log.error("updatePlanDelivery fail", e);
         }
@@ -251,4 +295,32 @@ public class ShipPlanApi {
     }
 
 
+<<<<<<< HEAD
+=======
+    // HACK ------------------------------
+
+
+    @PostMapping("/hack/lockPlan")
+    public CaitongPlanApi.LockPlanResponse hackLockPlan(@RequestParam Long applyId) {
+        ShipPlanDTO planDto = shipPlanService.findOne(applyId)
+            .orElseThrow(() -> new BadRequestAlertException("未找到计划 " + applyId, ENTITY_NAME, ""));
+        return caitongPlanApi.lockPlan(planDto.getApplyNumber(), planDto.getTruckNumber());
+    }
+
+    @PostMapping("/hack/unlockPlan")
+    public CaitongPlanApi.LockPlanResponse hackUnLockPlan(@RequestParam Long applyId) {
+        ShipPlanDTO planDto = shipPlanService.findOne(applyId)
+            .orElseThrow(() -> new BadRequestAlertException("未找到计划 " + applyId, ENTITY_NAME, ""));
+        return caitongPlanApi.unlockPlan(planDto.getApplyNumber(), planDto.getTruckNumber());
+    }
+
+    @PostMapping("/hack/endOfShipment")
+    public String hackEndOfShipment(@RequestParam Long applyId) {
+        ShipPlanDTO planDto = shipPlanService.findOne(applyId)
+            .orElseThrow(() -> new BadRequestAlertException("未找到计划 " + applyId, ENTITY_NAME, ""));
+        caitongPlanApi.endOfShipment(planDto);
+        return "ok";
+    }
+
+>>>>>>> origin/master
 }

@@ -1,0 +1,79 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div *ngIf="plan">
+            <h2><span jhiTranslate="shieldApp.plan.detail.title">Plan</span> {{plan.id}}</h2>
+            <hr>
+            <jhi-alert-error></jhi-alert-error>
+            <dl class="row-md jh-entity-details">
+                <dt><span jhiTranslate="shieldApp.plan.planNumber">Plan Number</span></dt>
+                <dd>
+                    <span>{{plan.planNumber}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.plan.location">Location</span></dt>
+                <dd>
+                    <span>{{plan.location}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.plan.workDay">Work Day</span></dt>
+                <dd>
+                    <span>{{plan.workDay}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.plan.stockName">Stock Name</span></dt>
+                <dd>
+                    <span>{{plan.stockName}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.plan.loadingStartTime">Loading Start Time</span></dt>
+                <dd>
+                    <span>{{plan.loadingStartTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.plan.loadingEndTime">Loading End Time</span></dt>
+                <dd>
+                    <span>{{plan.loadingEndTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.plan.weightSum">Weight Sum</span></dt>
+                <dd>
+                    <span>{{plan.weightSum}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.plan.operator">Operator</span></dt>
+                <dd>
+                    <span>{{plan.operator}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.plan.operation">Operation</span></dt>
+                <dd>
+                    <span>{{plan.operation}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.plan.opPosition">Op Position</span></dt>
+                <dd>
+                    <span>{{plan.opPosition}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.plan.channel">Channel</span></dt>
+                <dd>
+                    <span>{{plan.channel}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.plan.comment">Comment</span></dt>
+                <dd>
+                    <span>{{plan.comment}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.plan.createTime">Create Time</span></dt>
+                <dd>
+                    <span>{{plan.createTime}}</span>
+                </dd>
+                <dt><span jhiTranslate="shieldApp.plan.updateTime">Update Time</span></dt>
+                <dd>
+                    <span>{{plan.updateTime}}</span>
+                </dd>
+            </dl>
+
+            <button type="submit"
+                    (click)="previousState()"
+                    class="btn btn-info">
+                <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.back"> Back</span>
+            </button>
+
+            <button type="button"
+                    [routerLink]="['/plan', plan.id, 'edit']"
+                    class="btn btn-primary">
+                <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.edit"> Edit</span>
+            </button>
+        </div>
+    </div>
+</div>

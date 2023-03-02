@@ -1,0 +1,124 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <form name="editForm" role="form" novalidate (ngSubmit)="save()" [formGroup]="editForm">
+            <h2 id="jhi-plan-heading" jhiTranslate="shieldApp.plan.home.createOrEditLabel">Create or edit a Plan</h2>
+            <div>
+                <jhi-alert-error></jhi-alert-error>
+                <div class="form-group" [hidden]="!editForm.get('id').value">
+                    <label for="id" jhiTranslate="global.field.id">ID</label>
+                    <input type="text" class="form-control" id="id" name="id" formControlName="id"
+                        readonly />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.plan.planNumber" for="field_planNumber">Plan Number</label>
+                    <input type="text" class="form-control" name="planNumber" id="field_planNumber"
+                           formControlName="planNumber"/>
+                    <div *ngIf="editForm.get('planNumber').invalid && (editForm.get('planNumber').dirty || editForm.get('planNumber').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('planNumber').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.plan.location" for="field_location">Location</label>
+                    <input type="text" class="form-control" name="location" id="field_location"
+                           formControlName="location"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.plan.workDay" for="field_workDay">Work Day</label>
+                    <div class="input-group">
+                        <input id="field_workDay" type="text" class="form-control" name="workDay" ngbDatepicker  #workDayDp="ngbDatepicker" formControlName="workDay"/>
+                        <span class="input-group-append">
+                            <button type="button" class="btn btn-secondary" (click)="workDayDp.toggle()"><fa-icon [icon]="'calendar-alt'"></fa-icon></button>
+                        </span>
+                    </div>
+                    <div *ngIf="editForm.get('workDay').invalid && (editForm.get('workDay').dirty || editForm.get('workDay').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('workDay').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.plan.stockName" for="field_stockName">Stock Name</label>
+                    <input type="text" class="form-control" name="stockName" id="field_stockName"
+                           formControlName="stockName"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.plan.loadingStartTime" for="field_loadingStartTime">Loading Start Time</label>
+                    <div class="d-flex">
+                        <input id="field_loadingStartTime" type="datetime-local" class="form-control" name="loadingStartTime" formControlName="loadingStartTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.plan.loadingEndTime" for="field_loadingEndTime">Loading End Time</label>
+                    <div class="d-flex">
+                        <input id="field_loadingEndTime" type="datetime-local" class="form-control" name="loadingEndTime" formControlName="loadingEndTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.plan.weightSum" for="field_weightSum">Weight Sum</label>
+                    <input type="number" class="form-control" name="weightSum" id="field_weightSum"
+                           formControlName="weightSum"/>
+                    <div *ngIf="editForm.get('weightSum').invalid && (editForm.get('weightSum').dirty || editForm.get('weightSum').touched)">
+                        <small class="form-text text-danger"
+                               *ngIf="editForm.get('weightSum').errors.required" jhiTranslate="entity.validation.required">
+                        This field is required.
+                        </small>
+                        <small class="form-text text-danger"
+                            [hidden]="!editForm.get('weightSum')?.errors?.number" jhiTranslate="entity.validation.number">
+                            This field should be a number.
+                        </small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.plan.operator" for="field_operator">Operator</label>
+                    <input type="text" class="form-control" name="operator" id="field_operator"
+                           formControlName="operator"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.plan.operation" for="field_operation">Operation</label>
+                    <input type="text" class="form-control" name="operation" id="field_operation"
+                           formControlName="operation"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.plan.opPosition" for="field_opPosition">Op Position</label>
+                    <input type="text" class="form-control" name="opPosition" id="field_opPosition"
+                           formControlName="opPosition"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.plan.channel" for="field_channel">Channel</label>
+                    <input type="text" class="form-control" name="channel" id="field_channel"
+                           formControlName="channel"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.plan.comment" for="field_comment">Comment</label>
+                    <input type="text" class="form-control" name="comment" id="field_comment"
+                           formControlName="comment"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.plan.createTime" for="field_createTime">Create Time</label>
+                    <div class="d-flex">
+                        <input id="field_createTime" type="datetime-local" class="form-control" name="createTime" formControlName="createTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" jhiTranslate="shieldApp.plan.updateTime" for="field_updateTime">Update Time</label>
+                    <div class="d-flex">
+                        <input id="field_updateTime" type="datetime-local" class="form-control" name="updateTime" formControlName="updateTime" placeholder="YYYY-MM-DD HH:mm"/>
+                    </div>
+                </div>
+
+            </div>
+            <div>
+                <button type="button" id="cancel-save" class="btn btn-secondary"  (click)="previousState()">
+                    <fa-icon [icon]="'ban'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
+                </button>
+                <button type="submit" id="save-entity" [disabled]="editForm.invalid || isSaving" class="btn btn-primary">
+                    <fa-icon [icon]="'save'"></fa-icon>&nbsp;<span jhiTranslate="entity.action.save">Save</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
