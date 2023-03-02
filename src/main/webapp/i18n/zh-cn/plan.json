@@ -1,0 +1,35 @@
+{
+  "shieldApp": {
+    "plan": {
+      "home": {
+        "title": "工单查询",
+        "createLabel": "创建新 工单",
+        "createOrEditLabel": "创建或编辑 工单",
+        "notFound": "无数据"
+      },
+      "created": "工单 {{ param }} 创建成功",
+      "updated": "工单 {{ param }} 更新成功",
+      "deleted": "工单 {{ param }} 删除成功",
+      "delete": {
+        "question": "你确定要删除 工单 {{ id }} 吗？"
+      },
+      "detail": {
+        "title": "工单"
+      },
+      "planNumber": "工单号",
+      "location": "提货地址",
+      "workDay": "作业日期",
+      "stockName": "货名",
+      "loadingStartTime": "有效期开始时间",
+      "loadingEndTime": "有效期结束时间",
+      "weightSum": "装卸总量",
+      "operator": "操作过程",
+      "operation": "作业方式",
+      "opPosition": "操作场地",
+      "channel": "泊位",
+      "comment": "备注",
+      "createTime": "创建时间",
+      "updateTime": "更新时间"
+    }
+  }
+}

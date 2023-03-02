@@ -1,0 +1,35 @@
+{
+  "hmfyServerApp": {
+    "plan": {
+      "home": {
+        "title": "Plans",
+        "createLabel": "Create a new Plan",
+        "createOrEditLabel": "Create or edit a Plan",
+        "notFound": "No Plan found"
+      },
+      "created": "A new Plan is created with identifier {{ param }}",
+      "updated": "A Plan is updated with identifier {{ param }}",
+      "deleted": "A Plan is deleted with identifier {{ param }}",
+      "delete": {
+        "question": "Are you sure you want to delete Plan {{ id }}?"
+      },
+      "detail": {
+        "title": "Plan"
+      },
+      "planNumber": "Plan Number",
+      "location": "Location",
+      "workDay": "Work Day",
+      "stockName": "Stock Name",
+      "loadingStartTime": "Loading Start Time",
+      "loadingEndTime": "Loading End Time",
+      "weightSum": "Weight Sum",
+      "operator": "Operator",
+      "operation": "Operation",
+      "opPosition": "Op Position",
+      "channel": "Channel",
+      "comment": "Comment",
+      "createTime": "Create Time",
+      "updateTime": "Update Time"
+    }
+  }
+}

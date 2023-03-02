@@ -79,8 +79,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .antMatchers("/api/wx/*/public/**", "/api/wx/*/user/login").permitAll()
             .antMatchers("/api/admin-dashboard/**").permitAll()
             .antMatchers("/api/test/**", "/api/zj/**").permitAll()
+<<<<<<< HEAD
 //            .antMatchers("/api/v1/plan/**").hasAuthority(AuthoritiesConstants.ROLE_WEIGHT_USER)
             .antMatchers("/api/v1/plan/**").authenticated()
+=======
+            .antMatchers("/api/v1/plan/**").hasAuthority(AuthoritiesConstants.ROLE_WEIGHT_USER)
+>>>>>>> origin/master
             .antMatchers("/api/wx/**").authenticated()
             .antMatchers("/api/register").denyAll()
             .antMatchers("/api/account", "/account/change-password").authenticated()

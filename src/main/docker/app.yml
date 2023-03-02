@@ -1,5 +1,6 @@
 version: '2'
 services:
+<<<<<<< HEAD
     shield-app:
         image: shield
         environment:
@@ -37,3 +38,41 @@ services:
             - 80:80
         networks:
             - hmfynetwork
+=======
+  shield-app:
+    image: shield
+    environment:
+      - _JAVA_OPTIONS=-Xmx512m -Xms256m
+      - SPRING_PROFILES_ACTIVE=prod,swagger
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true
+      # - SPRING_DATASOURCE_URL=jdbc:mysql://shield-mysql:3306/shield?useUnicode=true&characterEncoding=utf8&useSSL=false
+      - SPRING_REDIS_HOST=shield-redis
+      - JHIPSTER_SLEEP=10 # gives time for the database to boot before the application
+      - TZ=Asia/Shanghai
+    ports:
+      - 8080:8080
+      - 9981:9981
+    volumes:
+      - ./shield.jar:/app/shield.jar
+  shield-mysql:
+    extends:
+      file: mysql.yml
+      service: shield-mysql
+  shield-redis:
+    extends:
+      file: redis.yml
+      service: shield-redis
+  shield-sqlserver:
+    extends:
+      file: sqlserver.yml
+      service: shield-sqlserver
+  nginx:
+    image: nginx:latest
+    container_name: production_nginx
+    volumes:
+      - ./conf.d/:/etc/nginx/conf.d/
+      - ./certificates:/etc/letsencrypt/
+    ports:
+      - 443:443
+      - 80:80
+>>>>>>> origin/master

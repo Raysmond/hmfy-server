@@ -156,6 +156,12 @@ public class ShipPlanServiceImpl implements ShipPlanService {
 
         ZonedDateTime begin = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
         ZonedDateTime end = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).plusDays(1);
+
+        if (begin.getHour() < 3) {
+            // 3点前支持查看到前一天的计划，避免前一天还有未完成的计划
+            begin = begin.minusDays(1);
+        }
+
         if (regionId.equals(REGION_ID_HUACHAN) && ZonedDateTime.now().getHour() >= 22) {
             end = end.plusHours(1);
         }

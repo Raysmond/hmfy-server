@@ -57,6 +57,34 @@ spring:
       prepStmtCacheSize: 250
       prepStmtCacheSqlLimit: 2048
       useServerPrepStmts: true
+<<<<<<< HEAD
+=======
+  sqlserver-datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+#    jdbc-url: jdbc:sqlserver://10.41.76.253:1433;databaseName=GateManage
+    jdbc-url: jdbc:sqlserver://10.57.148.250:1433;databaseName=GateManage
+    username: Wechat
+    password: QQ@@12345
+    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    poolName: Hikari
+    auto-commit: false
+    data-source-properties:
+      cachePrepStmts: true
+      prepStmtCacheSize: 250
+      prepStmtCacheSqlLimit: 2048
+      useServerPrepStmts: true
+  sqlserver-jpa:
+    database-platform: org.hibernate.dialect.SQLServer2012Dialect
+    database: SQL_SERVER
+    show-sql: false
+    properties:
+      hibernate.id.new_generator_mappings: true
+      hibernate.connection.provider_disables_autocommit: true
+      hibernate.cache.use_second_level_cache: false
+      hibernate.cache.use_query_cache: false
+      hibernate.generate_statistics: false
+      hibernate.jdbc.time_zone: Asia/Shanghai
+>>>>>>> origin/master
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     database: MYSQL
@@ -68,6 +96,34 @@ spring:
       hibernate.cache.use_query_cache: false
       hibernate.generate_statistics: false
       hibernate.jdbc.time_zone: Asia/Shanghai
+<<<<<<< HEAD
+=======
+  chepaipark-sqlserver-datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+#    jdbc-url: jdbc:sqlserver://10.41.65.247:1433;databaseName=ChePaiPark
+    jdbc-url: jdbc:sqlserver://10.57.139.241:1433;databaseName=ChePaiPark
+    username: sa
+    password: 123
+    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    poolName: Hikari
+    auto-commit: false
+    data-source-properties:
+      cachePrepStmts: true
+      prepStmtCacheSize: 250
+      prepStmtCacheSqlLimit: 2048
+      useServerPrepStmts: true
+  chepaipark-sqlserver-jpa:
+    database-platform: org.hibernate.dialect.SQLServer2012Dialect
+    database: SQL_SERVER
+    show-sql: false
+    properties:
+      hibernate.id.new_generator_mappings: true
+      hibernate.connection.provider_disables_autocommit: true
+      hibernate.cache.use_second_level_cache: false
+      hibernate.cache.use_query_cache: false
+      hibernate.generate_statistics: false
+      hibernate.jdbc.time_zone: Asia/Shanghai
+>>>>>>> origin/master
   # Replace by 'prod, faker' to add the faker context and have sample data loaded in production
   liquibase:
     contexts: prod
