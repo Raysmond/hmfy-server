@@ -1,6 +1,6 @@
 package com.shield.service.schedule;
 
-import com.shield.chepaipark.service.CarWhiteListService;
+import com.shield.service.gate.CarWhiteListService;
 import com.shield.domain.Region;
 import com.shield.domain.ShipPlan;
 import com.shield.domain.enumeration.ParkingConnectMethod;
@@ -88,7 +88,7 @@ public class ShipPlanScheduleService {
             for (ShipPlanDTO plan : shipPlanDTOs) {
                 log.info("[AUTO] set ShipPlan [applyId={},truckNumber={}, loadingEndTime: {}], set leaveTime to now {} after {} minutes",
                     plan.getApplyId(), plan.getTruckNumber(), plan.getLoadingEndTime(), ZonedDateTime.now(), defaultLeaveTime);
-                carWhiteListService.updateCarInAndOutTime(region.getId(), plan.getTruckNumber(), RecordType.OUT, null, ZonedDateTime.now());
+//                carWhiteListService.updateCarInAndOutTime(region.getId(), plan.getTruckNumber(), RecordType.OUT, null, ZonedDateTime.now());
             }
         }
     }

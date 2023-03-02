@@ -1,10 +1,8 @@
 package com.shield.service.impl;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.shield.domain.Appointment;
-import com.shield.domain.Region;
 import com.shield.domain.enumeration.AppointmentStatus;
 import com.shield.repository.AppointmentRepository;
 import com.shield.repository.RegionRepository;
@@ -26,7 +24,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -176,19 +173,19 @@ public class ShipPlanServiceImpl implements ShipPlanService {
     }
 
     @Override
-    public Page<PlanDTO> getAllByTruckNumber(Pageable pageable, String truckNumber, Long shipPlanId) {
+    public Page<PlanAppointmentDTO> getAllByTruckNumber(Pageable pageable, String truckNumber, Long shipPlanId) {
         ZonedDateTime begin = LocalDate.now().atStartOfDay(ZoneId.systemDefault());
         ZonedDateTime end = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).plusDays(1);
 
-        Page<PlanDTO> result = Page.empty(pageable);
+        Page<PlanAppointmentDTO> result = Page.empty(pageable);
 
         if (shipPlanId == null) {
             Page<ShipPlanDTO> shipPlanDTOPage = shipPlanRepository.findAllByTruckNumber(truckNumber, Boolean.TRUE, pageable).map(shipPlanMapper::toDto);
-            result = shipPlanDTOPage.map(PlanDTO::new);
+            result = shipPlanDTOPage.map(PlanAppointmentDTO::new);
         } else {
             ShipPlanDTO shipPlanDTO = shipPlanRepository.findById(shipPlanId).map(shipPlanMapper::toDto).orElse(null);
             if (shipPlanDTO != null) {
-                result = PageUtil.createPageFromList(Lists.newArrayList(new PlanDTO(shipPlanDTO)), pageable);
+                result = PageUtil.createPageFromList(Lists.newArrayList(new PlanAppointmentDTO(shipPlanDTO)), pageable);
             }
         }
 
@@ -199,7 +196,7 @@ public class ShipPlanServiceImpl implements ShipPlanService {
         List<Long> applyIds = result.getContent().stream().map(it -> it.getPlan().getApplyId()).collect(Collectors.toList());
         Map<Long, AppointmentDTO> appointmentDTOS = appointmentService.findLastByApplyIdIn(applyIds);
 
-        for (PlanDTO item : result) {
+        for (PlanAppointmentDTO item : result) {
             if (appointmentDTOS.containsKey(item.getPlan().getApplyId())) {
                 item.setAppointment(appointmentDTOS.get(item.getPlan().getApplyId()));
             }

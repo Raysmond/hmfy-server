@@ -1,13 +1,11 @@
-package com.shield.service;
+package com.shield.service.gate;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.shield.chepaipark.service.CarWhiteListService;
-import com.shield.domain.enumeration.AppointmentStatus;
+import com.shield.service.RegionService;
+import com.shield.service.gate.CarWhiteListService;
 import com.shield.service.dto.AppointmentDTO;
 import com.shield.service.dto.RegionDTO;
 import com.shield.service.dto.ShipPlanDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
 
-import static com.shield.service.ParkingHandlerService.*;
 
 @Service
 @Slf4j
@@ -24,8 +21,6 @@ public class CarWhiteListManager {
 
     private final CarWhiteListService carWhiteListService;
 
-    private final HuachanCarWhitelistService huachanCarWhitelistService;
-
     private final RedisTemplate<String, Long> redisLongTemplate;
 
 
@@ -33,11 +28,9 @@ public class CarWhiteListManager {
     public CarWhiteListManager(
         RegionService regionService,
         CarWhiteListService carWhiteListService,
-        HuachanCarWhitelistService huachanCarWhitelistService,
         @Qualifier("redisLongTemplate") RedisTemplate<String, Long> redisLongTemplate) {
         this.regionService = regionService;
         this.carWhiteListService = carWhiteListService;
-        this.huachanCarWhitelistService = huachanCarWhitelistService;
         this.redisLongTemplate = redisLongTemplate;
     }
 
@@ -60,8 +53,6 @@ public class CarWhiteListManager {
 //                    }
                     break;
                 case TCP:
-                    redisLongTemplate.opsForSet().remove(REDIS_KEY_DELETE_CAR_WHITELIST, appointmentDTO.getId());
-                    redisLongTemplate.opsForSet().add(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointmentDTO.getId());
                     break;
                 case DATABASE:
                     carWhiteListService.registerCarWhiteListByAppointmentId(appointmentDTO.getId());
@@ -78,8 +69,6 @@ public class CarWhiteListManager {
                     // pass
                     break;
                 case TCP:
-                    redisLongTemplate.opsForSet().remove(REDIS_KEY_UPLOAD_CAR_WHITELIST, appointmentDTO.getId());
-                    redisLongTemplate.opsForSet().add(REDIS_KEY_DELETE_CAR_WHITELIST, appointmentDTO.getId());
                     break;
                 case DATABASE:
                     carWhiteListService.deleteCarWhiteList(appointmentDTO.getLicensePlateNumber());
@@ -96,9 +85,6 @@ public class CarWhiteListManager {
                     // pass
                     break;
                 case TCP:
-                    redisLongTemplate.opsForSet().remove(AUTO_REGISTERED_PLAN_IDS, planDTO.getId());
-                    redisLongTemplate.opsForSet().remove(AUTO_DELETE_PLAN_ID_QUEUE, planDTO.getId());
-                    redisLongTemplate.opsForSet().add(AUTO_REGISTER_PLAN_ID_QUEUE, planDTO.getId());
                     break;
                 case DATABASE:
                     carWhiteListService.registerCarWhiteList(
@@ -120,8 +106,6 @@ public class CarWhiteListManager {
                     // pass
                     break;
                 case TCP:
-                    redisLongTemplate.opsForSet().remove(AUTO_REGISTER_PLAN_ID_QUEUE, planDTO.getId());
-                    redisLongTemplate.opsForSet().add(AUTO_DELETE_PLAN_ID_QUEUE, planDTO.getId());
                     break;
                 case DATABASE:
                     carWhiteListService.deleteCarWhiteList(planDTO.getTruckNumber());

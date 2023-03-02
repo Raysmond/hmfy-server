@@ -1,5 +1,5 @@
 {
-  "name": "shield",
+  "name": "hmfy_server",
   "version": "0.0.0",
   "description": "Description for shield",
   "private": true,
@@ -21,6 +21,7 @@
     "@ng-bootstrap/ng-bootstrap": "4.1.1",
     "@ngx-translate/core": "11.0.1",
     "@ngx-translate/http-loader": "4.0.0",
+    "@types/babel__traverse": "7.0.4",
     "bootstrap": "4.3.1",
     "core-js": "2.6.5",
     "echarts": "4.4.0",

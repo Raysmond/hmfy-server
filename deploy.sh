@@ -17,8 +17,6 @@ version=$(cat build.gradle |  grep "version = \"[0-9\.]")
 tmp=${version#*\"}
 version=${tmp%\-*}
 
-APP_NAME="nb_receiver"
-
 # Automatically increment application version
 # For example: 0.1.6 -> 0.1.7
 increment_version ()
@@ -42,8 +40,5 @@ sed -i -e "s/^version\ =\ .*/version\ =\ \"$version\-SNAPSHOT\"/g" build.gradle
 
 ./gradlew  -Dorg.gradle.jvmargs=-Xmx10240m -Pprod clean bootJar
 
-# test
-# scp -P 2233 build/libs/shield-0.0.1-SNAPSHOT.jar zou@116.247.114.12:/home/zou/shield/docker/
-
 # prod
-scp -P 2266 build/libs/shield-*.jar rays@116.247.114.12:/opt/shield/releases
+scp -P 2789 build/libs/*.jar kaidun@223.108.21.108:/opt/deploy/hmfy/releases/

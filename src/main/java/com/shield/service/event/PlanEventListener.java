@@ -1,8 +1,8 @@
 package com.shield.service.event;
 
-import com.shield.chepaipark.service.CarWhiteListService;
+import com.shield.service.gate.CarWhiteListManager;
+import com.shield.service.gate.CarWhiteListService;
 import com.shield.domain.enumeration.PlanStatus;
-import com.shield.domain.enumeration.RecordType;
 import com.shield.service.*;
 import com.shield.service.dto.RegionDTO;
 import com.shield.service.dto.ShipPlanDTO;
@@ -40,8 +40,6 @@ public class PlanEventListener {
 
     private final CarWhiteListService carWhiteListService;
 
-    private final HuachanCarWhitelistService huachanCarWhitelistService;
-
 
     @Autowired
     public PlanEventListener(
@@ -51,8 +49,7 @@ public class PlanEventListener {
         WxMpMsgService wxMpMsgService,
         CarWhiteListManager carWhiteListManager,
         @Qualifier("redisLongTemplate") RedisTemplate<String, Long> redisLongTemplate,
-        CarWhiteListService carWhiteListService,
-        HuachanCarWhitelistService huachanCarWhitelistService) {
+        CarWhiteListService carWhiteListService) {
         this.appointmentService = appointmentService;
         this.regionService = regionService;
         this.shipPlanService = shipPlanService;
@@ -60,7 +57,6 @@ public class PlanEventListener {
         this.carWhiteListManager = carWhiteListManager;
         this.redisLongTemplate = redisLongTemplate;
         this.carWhiteListService = carWhiteListService;
-        this.huachanCarWhitelistService = huachanCarWhitelistService;
     }
 
     @Async
@@ -142,7 +138,7 @@ public class PlanEventListener {
                     updated.getLoadingStartTime().format(DateTimeFormatter.ofPattern("yyyyMMddHHMMSS")),
                     updated.getLoadingStartTime().minusMinutes(30).format(DateTimeFormatter.ofPattern("yyyyMMddHHMMSS"))
                 );
-                carWhiteListService.updateCarInAndOutTime(region.getId(), updated.getTruckNumber(), RecordType.IN, updated.getLoadingStartTime().minusMinutes(30), null);
+//                carWhiteListService.updateCarInAndOutTime(region.getId(), updated.getTruckNumber(), RecordType.IN, updated.getLoadingStartTime().minusMinutes(30), null);
             }
         }
     }
@@ -192,7 +188,6 @@ public class PlanEventListener {
         RegionDTO region = regionService.findByName(after.getDeliverPosition());
         if (region != null && region.isOpen() && REGION_ID_HUACHAN.equals(region.getId())) {
             try {
-                huachanCarWhitelistService.registerOutApplication(after);
             } catch (Exception e) {
                 log.warn("registerOutApplication failed", e);
             }

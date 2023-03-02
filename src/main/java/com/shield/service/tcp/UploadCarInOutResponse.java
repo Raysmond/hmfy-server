@@ -1,9 +1,11 @@
 package com.shield.service.tcp;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
+@EqualsAndHashCode(callSuper=false)
 @NoArgsConstructor
 public class UploadCarInOutResponse extends ServiceResponse {
     private String order_id;

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlanDTO {
+public class PlanAppointmentDTO {
     private ShipPlanDTO plan;
     private AppointmentDTO appointment;
     private String status = "";
@@ -17,7 +17,7 @@ public class PlanDTO {
     private String maxAllowInTime;
 
 
-    public PlanDTO(ShipPlanDTO plan) {
+    public PlanAppointmentDTO(ShipPlanDTO plan) {
         this.plan = plan;
     }
 }

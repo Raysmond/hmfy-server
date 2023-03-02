@@ -29,7 +29,7 @@ public class SyncWxMpUsersScheduleService {
         this.wxMpService = wxMpService;
     }
 
-    @Scheduled(fixedRate = 6 * 3600 * 1000)
+//    @Scheduled(fixedRate = 6 * 3600 * 1000)
     public void syncMpUsers() {
         try {
             int count = 0;

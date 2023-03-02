@@ -1,26 +1,18 @@
 package com.shield.web.rest;
 
-import com.shield.chepaipark.service.CarWhiteListService;
+import com.shield.service.gate.CarWhiteListService;
 import com.shield.config.ApplicationProperties;
 import com.shield.service.AppointmentService;
-import com.shield.service.HuachanCarWhitelistService;
 import com.shield.service.UserService;
-import com.shield.sqlserver.repository.VehDelivPlanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.IOException;
-import java.net.URI;
-import java.time.ZonedDateTime;
 
 @RestController
 @RequestMapping("/api/test")
 public class TestController {
-    @Autowired
-    private VehDelivPlanRepository vehDelivPlanRepository;
+
 
     @Autowired
     private UserService userService;
@@ -31,8 +23,6 @@ public class TestController {
     @Autowired
     private AppointmentService appointmentService;
 
-    @Autowired
-    private HuachanCarWhitelistService huachanCarWhitelistService;
 
     @Autowired
     private ApplicationProperties applicationProperties;
@@ -51,7 +41,7 @@ public class TestController {
     @GetMapping("/change-password")
     public String test() {
 //        huachanCarWhitelistService.loginAndGetSessionId();
-//        userService.changeSystemUserPassword("111111");
+        userService.changeSystemUserPassword("111111");
 
 //        huachanCarWhitelistService.syncCarInOutRecords();
         return "ok";

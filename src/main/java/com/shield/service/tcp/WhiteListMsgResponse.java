@@ -2,6 +2,7 @@ package com.shield.service.tcp;
 
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 注册/修改/删除固定车白名单 客户端返回结果
@@ -14,6 +15,7 @@ import lombok.Data;
  * }
  */
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class WhiteListMsgResponse extends ServiceResponse {
     private String car_number;
     private String card_id;

@@ -73,8 +73,8 @@ public class ValidTransferCheck {
         try {
             String methodName = "get" + property.substring(0, 1).toUpperCase() + property.substring(1, property.length());
             Class clazz = obj.getClass();
-            Method method = clazz.getMethod(methodName, null);
-            returnValue = method.invoke(obj, null);
+            Method method = clazz.getMethod(methodName);
+            returnValue = method.invoke(obj);
         } catch (Exception e) {
             // Do nothing, we'll return the default value
         }

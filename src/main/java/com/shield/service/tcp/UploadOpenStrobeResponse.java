@@ -1,6 +1,7 @@
 package com.shield.service.tcp;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 手动开闸记录上传
@@ -12,6 +13,7 @@ import lombok.Data;
  * }
  */
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class UploadOpenStrobeResponse extends ServiceResponse {
     private String recordid;
 

@@ -29,7 +29,7 @@ export class HomeComponent implements OnInit {
   modalRef: NgbModalRef;
   appointments: IAppointment[];
   allRegions: any[];
-  currentRegion = '宝田';
+  currentRegion = '1号泊位';
   allDates: any[] = ['今日', '昨日', '最近七天'];
   currentDate = '今日';
 

@@ -11,9 +11,10 @@ import com.shield.security.AuthoritiesConstants;
 import com.shield.security.SecurityUtils;
 import com.shield.service.*;
 import com.shield.service.dto.AppointmentDTO;
-import com.shield.service.dto.PlanDTO;
+import com.shield.service.dto.PlanAppointmentDTO;
 import com.shield.service.dto.RegionDTO;
 import com.shield.service.dto.ShipPlanDTO;
+import com.shield.utils.QrCodeUtils;
 import com.shield.web.rest.errors.BadRequestAlertException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -65,7 +66,7 @@ public class WxAppointmentApi {
      * 预约排队接口
      */
     @PostMapping("/ship_plans/{id}/make_appointment")
-    public synchronized ResponseEntity<PlanDTO> makeAppointment(@PathVariable String appid, @PathVariable Long id) {
+    public synchronized ResponseEntity<PlanAppointmentDTO> makeAppointment(@PathVariable String appid, @PathVariable Long id) {
         log.debug("REST request to make appointment with ship plan id : {}", id);
         User user = userService.getUserWithAuthorities().get();
         if (!SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.APPOINTMENT) || StringUtils.isBlank(user.getTruckNumber())) {
@@ -85,12 +86,12 @@ public class WxAppointmentApi {
         }
 
         Pageable page = PageRequest.of(0, 1, Sort.Direction.DESC, "deliverTime");
-        Page<PlanDTO> result = shipPlanService.getAllByTruckNumber(page, user.getTruckNumber(), id);
+        Page<PlanAppointmentDTO> result = shipPlanService.getAllByTruckNumber(page, user.getTruckNumber(), id);
         if (result.getContent().isEmpty()) {
             throw new BadRequestAlertException("未找到发运计划", ENTITY_NAME, "");
         }
 
-        PlanDTO plan = result.getContent().get(0);
+        PlanAppointmentDTO plan = result.getContent().get(0);
         RegionDTO region = regionService.findByName(plan.getPlan().getDeliverPosition());
 
         if (region == null || !regionService.isRegionOpen(region.getId())) {
@@ -136,7 +137,7 @@ public class WxAppointmentApi {
     }
 
     @PostMapping("/ship_plans/{id}/cancel_appointment")
-    public ResponseEntity<PlanDTO> cancelAppointment(@PathVariable String appid, @PathVariable Long id) {
+    public ResponseEntity<PlanAppointmentDTO> cancelAppointment(@PathVariable String appid, @PathVariable Long id) {
         log.debug("REST request to cancel appointment with ship plan id : {}", id);
         final WxMaService wxService = WxMiniAppConfiguration.getMaService(appid);
 
@@ -146,12 +147,12 @@ public class WxAppointmentApi {
         }
 
         Pageable page = PageRequest.of(0, 1, Sort.Direction.DESC, "deliverTime");
-        Page<PlanDTO> result = shipPlanService.getAllByTruckNumber(page, user.getTruckNumber(), id);
+        Page<PlanAppointmentDTO> result = shipPlanService.getAllByTruckNumber(page, user.getTruckNumber(), id);
         if (result.getContent().isEmpty()) {
             throw new BadRequestAlertException("未找到发运计划", ENTITY_NAME, "");
         }
 
-        PlanDTO plan = result.getContent().get(0);
+        PlanAppointmentDTO plan = result.getContent().get(0);
         RegionDTO region = regionService.findByName(plan.getPlan().getDeliverPosition());
 
         if (ParkingConnectMethod.HUA_CHAN_API.equals(region.getParkingConnectMethod())
@@ -175,7 +176,7 @@ public class WxAppointmentApi {
 
 
     @GetMapping("/ship_plans/available")
-    public ResponseEntity<List<PlanDTO>> getUserShipPlans(@PathVariable String appid, @RequestParam String regionName, @RequestParam(required = false) Long regionId) {
+    public ResponseEntity<List<PlanAppointmentDTO>> getUserShipPlans(@PathVariable String appid, @RequestParam String regionName, @RequestParam(required = false) Long regionId) {
         RegionDTO regionDTO = regionId != null ? regionService.findOne(regionId).orElse(null) : regionService.findByName(regionName);
         if (regionDTO == null) {
             return ResponseEntity.notFound().build();
@@ -187,29 +188,37 @@ public class WxAppointmentApi {
                 return ResponseEntity.ok(Lists.newArrayList());
             }
             Pageable page = PageRequest.of(0, 1, Sort.Direction.DESC, "deliverTime");
-            Page<PlanDTO> result = shipPlanService.getAllByTruckNumber(page, user.getTruckNumber(), shipPlanDTOS.get(0).getId());
+            Page<PlanAppointmentDTO> result = shipPlanService.getAllByTruckNumber(page, user.getTruckNumber(), shipPlanDTOS.get(0).getId());
+            result.getContent()
+                .forEach(planDTO -> {
+                    if (planDTO.getPlan().getAppointmentNumber() != null) {
+                        planDTO.getPlan().genereteUniqueQrcodeNumber();
+                        planDTO.getPlan().setQrcodeImage(QrCodeUtils.generateQrCodeImage(planDTO.getPlan().getUniqueQrcodeNumber()));
+                    }
+
+                });
             return ResponseEntity.ok(result.getContent());
         }
         return ResponseEntity.ok(Lists.newArrayList());
     }
 
     @GetMapping("/ship_plans/latest")
-    public ResponseEntity<Page<PlanDTO>> getUserLatestShipPlans(@PathVariable String appid, Pageable pageable) {
+    public ResponseEntity<Page<PlanAppointmentDTO>> getUserLatestShipPlans(@PathVariable String appid, Pageable pageable) {
         User user = userService.getUserWithAuthorities().get();
         if (StringUtils.isNotBlank(user.getTruckNumber()) && SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.APPOINTMENT)) {
             Pageable page = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.Direction.DESC, "deliverTime");
-            Page<PlanDTO> result = shipPlanService.getAllByTruckNumber(page, user.getTruckNumber(), null);
+            Page<PlanAppointmentDTO> result = shipPlanService.getAllByTruckNumber(page, user.getTruckNumber(), null);
             return ResponseEntity.ok(result);
         }
         return ResponseEntity.ok(Page.empty(pageable));
     }
 
     @GetMapping("/ship_plans/{id}")
-    public ResponseEntity<PlanDTO> getPlan(@PathVariable String appid, @PathVariable Long id) {
+    public ResponseEntity<PlanAppointmentDTO> getPlan(@PathVariable String appid, @PathVariable Long id) {
         User user = userService.getUserWithAuthorities().get();
         if (StringUtils.isNotBlank(user.getTruckNumber()) && SecurityUtils.isCurrentUserInRole(AuthoritiesConstants.APPOINTMENT)) {
             Pageable page = PageRequest.of(0, 1, Sort.Direction.DESC, "deliverTime");
-            Page<PlanDTO> result = shipPlanService.getAllByTruckNumber(page, user.getTruckNumber(), id);
+            Page<PlanAppointmentDTO> result = shipPlanService.getAllByTruckNumber(page, user.getTruckNumber(), id);
             if (result.getContent().isEmpty()) {
                 return ResponseEntity.notFound().build();
             }

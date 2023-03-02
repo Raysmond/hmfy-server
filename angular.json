@@ -10,7 +10,7 @@
       "architect": {}
     }
   },
-  "defaultProject": "shield",
+  "defaultProject": "hmfy_server",
   "cli": {
     "packageManager": "npm"
   },

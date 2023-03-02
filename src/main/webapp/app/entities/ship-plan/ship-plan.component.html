@@ -104,25 +104,25 @@
                             jhiTranslate="shieldApp.shipPlan.auditStatus">Audit Status</span>
                         </th>
                         <th><span jhiTranslate="shieldApp.shipPlan.productName">Product Name</span></th>
-                        <th><span jhiTranslate="shieldApp.shipPlan.netWeight">Net Weight</span></th>
+<!--                        <th><span jhiTranslate="shieldApp.shipPlan.netWeight">Net Weight</span></th>-->
                         <th style="min-width: 45px;"><span jhiTranslate="shieldApp.shipPlan.deliverPosition">Deliver Position</span></th>
                         <th jhiSortBy="gateTime">
                             <span jhiTranslate="shieldApp.shipPlan.gateTime">Gate Time</span>
                             <fa-icon [icon]="'sort'"></fa-icon>
                         </th>
 
-                        <th jhiSortBy="loadingStartTime">
-                            <span jhiTranslate="shieldApp.shipPlan.loadingStartTime">loadingStartTime</span>
-                            <fa-icon [icon]="'sort'"></fa-icon>
-                        </th>
-                        <th><span jhiTranslate="shieldApp.shipPlan.weigherNo">Weigher No</span></th>
-                        <th style="max-width: 65px;">
-                            <span>上磅告警</span>
-                        </th>
-                        <th jhiSortBy="loadingEndTime">
-                            <span jhiTranslate="shieldApp.shipPlan.loadingEndTime">loadingEndTime</span>
-                            <fa-icon [icon]="'sort'"></fa-icon>
-                        </th>
+<!--                        <th jhiSortBy="loadingStartTime">-->
+<!--                            <span jhiTranslate="shieldApp.shipPlan.loadingStartTime">loadingStartTime</span>-->
+<!--                            <fa-icon [icon]="'sort'"></fa-icon>-->
+<!--                        </th>-->
+<!--                        <th><span jhiTranslate="shieldApp.shipPlan.weigherNo">Weigher No</span></th>-->
+<!--                        <th style="max-width: 65px;">-->
+<!--                            <span>上磅告警</span>-->
+<!--                        </th>-->
+<!--                        <th jhiSortBy="loadingEndTime">-->
+<!--                            <span jhiTranslate="shieldApp.shipPlan.loadingEndTime">loadingEndTime</span>-->
+<!--                            <fa-icon [icon]="'sort'"></fa-icon>-->
+<!--                        </th>-->
                         <th jhiSortBy="leaveTime">
                             <span jhiTranslate="shieldApp.shipPlan.leaveTime">Leave Time</span>
                             <fa-icon [icon]="'sort'"></fa-icon>
@@ -162,23 +162,23 @@
                             <span class="badge badge-danger" *ngIf="shipPlan.auditStatus==4">已过期</span>
                         </td>
                         <td>{{shipPlan.productName}}</td>
-                        <td>
-                            <span *ngIf="shipPlan.netWeight">{{shipPlan.netWeight}}吨</span>
-                        </td>
+<!--                        <td>-->
+<!--                            <span *ngIf="shipPlan.netWeight">{{shipPlan.netWeight}}吨</span>-->
+<!--                        </td>-->
                         <td>{{shipPlan.deliverPosition}}</td>
                         <td>{{shipPlan.gateTime | date:'yyyy-MM-dd HH:mm'}}</td>
-                        <td>
-                            <span *ngIf="shipPlan.tareAlert" style="color:red;">{{shipPlan.loadingStartTime | date:'yyyy-MM-dd HH:mm'}}</span>
-                            <span *ngIf="!shipPlan.tareAlert" >{{shipPlan.loadingStartTime | date:'yyyy-MM-dd HH:mm'}}</span>
-                            <!--{{shipPlan.loadingStartTime | date:'yyyy-MM-dd HH:mm'}}-->
-                        </td>
+<!--                        <td>-->
+<!--                            <span *ngIf="shipPlan.tareAlert" style="color:red;">{{shipPlan.loadingStartTime | date:'yyyy-MM-dd HH:mm'}}</span>-->
+<!--                            <span *ngIf="!shipPlan.tareAlert" >{{shipPlan.loadingStartTime | date:'yyyy-MM-dd HH:mm'}}</span>-->
+<!--                            &lt;!&ndash;{{shipPlan.loadingStartTime | date:'yyyy-MM-dd HH:mm'}}&ndash;&gt;-->
+<!--                        </td>-->
 
-                        <td>{{shipPlan.weigherNo}}</td>
-                        <td>
-                            <span class="badge badge-danger" *ngIf="shipPlan.tareAlert">超时</span>
-                            <span class="badge badge-success" *ngIf="shipPlan.loadingStartTime && !shipPlan.tareAlert">正常</span>
-                        </td>
-                        <td>{{shipPlan.loadingEndTime | date:'yyyy-MM-dd HH:mm'}}</td>
+<!--                        <td>{{shipPlan.weigherNo}}</td>-->
+<!--                        <td>-->
+<!--                            <span class="badge badge-danger" *ngIf="shipPlan.tareAlert">超时</span>-->
+<!--                            <span class="badge badge-success" *ngIf="shipPlan.loadingStartTime && !shipPlan.tareAlert">正常</span>-->
+<!--                        </td>-->
+<!--                        <td>{{shipPlan.loadingEndTime | date:'yyyy-MM-dd HH:mm'}}</td>-->
                         <td>
                             <span *ngIf="shipPlan.leaveAlert" style="color:red;">{{shipPlan.leaveTime | date:'yyyy-MM-dd HH:mm'}}</span>
                             <span *ngIf="!shipPlan.leaveAlert" >{{shipPlan.leaveTime | date:'yyyy-MM-dd HH:mm'}}</span>

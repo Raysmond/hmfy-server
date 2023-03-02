@@ -1,11 +1,10 @@
 package com.shield.service.schedule;
 
-import com.shield.chepaipark.service.CarWhiteListService;
+import com.shield.service.gate.CarWhiteListService;
 import io.github.jhipster.config.JHipsterConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,8 +18,8 @@ public class ParkingScheduleService {
         this.carWhiteListService = carWhiteListService;
     }
 
-    @Scheduled(fixedRate = 5 * 1000)
+//    @Scheduled(fixedRate = 5 * 1000)
     public void syncCarGateIOEvents() {
-        carWhiteListService.syncCarGateIOEvents();
+//        carWhiteListService.syncCarGateIOEvents();
     }
 }
