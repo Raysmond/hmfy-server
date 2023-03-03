@@ -189,7 +189,6 @@ public class WxAppointmentApi {
             }
             Pageable page = PageRequest.of(0, 1, Sort.Direction.DESC, "deliverTime");
             Page<PlanAppointmentDTO> result = shipPlanService.getAllByTruckNumber(page, user.getTruckNumber(), shipPlanDTOS.get(0).getId());
-//            Page<PlanDTO> result = shipPlanService.getAllByTruckNumber(page, user.getTruckNumber(), shipPlanDTOS.get(0).getId());
             result.getContent()
                 .forEach(planDTO -> {
                     if (planDTO.getPlan().getAppointmentNumber() != null) {
